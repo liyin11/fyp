@@ -1,0 +1,210 @@
+File and Directory Management¶
+文件和目录管理¶
+
+Module providing easy API for working with remote files and folders.
+提供远程文件和文件夹操作 API 的简单模块
+
+Append string (or list of strings) text to filename.
+添加字符串（列表） text 至 filename 
+
+When a list is given, each string inside is handled independently (but in the order given.)
+如果提供的是一个 list，其中的每一个字符串都将将会（按顺序）独立处理
+
+If text is already found in filename, the append is not run, and None is returned immediately.
+如果 filename 中已存在 text，将不会执行添加并立刻返回 None，反之则将给定 text 添加到 filename 的末尾，比如 echo '$text' >> $filename
+
+The test for whether text already exists defaults to a full line match, e.g.
+用于测试 text 是否已经存在，默认是整行匹配，例如： ^$
+
+^$, as this seems to be the most sensible approach for the “append lines to a file” use case.
+因为在“向文件的结尾增添一行”的使用情况下，这是最合适的选择
+
+You may override this and force partial searching (e.g.
+你可以指定 partial=True 来覆盖它，并强制部分搜索（比如 ^）
+
+Because text is single-quoted, single quotes will be transparently backslash-escaped.
+由于 text 是包裹在单引号中的，因此会自动将其中的单引号使用反斜线转译，可以使用 escape=False 关闭该选项
+
+If use_sudo is True, will use sudo instead of run.
+如果 use_sudo 设置为 True，则使用 sudo 而不是 run
+
+The shell argument will be eventually passed to run/sudo.
+shell 参数最终会传递给 run/sudo ，具体描述和 ~fabric.contrib.sed 一样，请查看它的文档详细了解
+
+Changed in version 0.9.1: Added the partial keyword argument.
+在 0.9.1 版更改: 新增关键字参数 partial
+
+Changed in version 1.0: Swapped the order of the filename and text arguments to be consistent with other functions in this module.
+在 1.0 版更改: 修改了 filename 和 text 参数的顺序与模块中的其它函数保持一致
+
+Changed in version 1.0: Changed default value of partial kwarg to be False.
+在 1.0 版更改: 修改关键字参数 partial 的默认值为 False
+
+Changed in version 1.4: Updated the regular expression related escaping to try and solve various corner cases.
+在 1.4 版更改: 更新了转译相关的正则表达式以修复众多边界情况下的问题
+
+New in version 1.6: Added the shell keyword argument.
+1.6 新版功能: 新增关键字参数 shell
+
+Attempt to comment out all lines in filename matching regex.
+将 filename 文件中所有匹配 regex 的行全部注释掉
+
+The default commenting character is # and may be overridden by the char argument.
+默认的注释字符是 # ，可以使用 char 参数覆盖这项设置
+
+This function uses the sed function, and will accept the same use_sudo, shell and backup keyword arguments that sed does.
+这个函数调用了 sed 函数，因此和 sed 一样接受 use_sudo、shell 和 backup 等关键字参数
+
+comment will prepend the comment character to the beginning of the line, so that lines end up looking like so:
+comment 会在行首添加注释符号，函数的结果大概会是这个样子的：
+
+In other words, comment characters will not “follow” indentation as they sometimes do when inserted by hand.
+换句话说，注释操作并不“遵循”手写代码时的缩进规范，注释符后面也不会跟上空白，除非手动指定，比如： char='# '
+
+Note
+注解
+
+In order to preserve the line being commented out, this function will wrap your regex argument in parentheses, so you don’t need to.
+为了保护被注释的代码，这个函数会将 regex 参数包裹在园括号中，并不需要你手动处理
+
+It will ensure that any preceding/trailing ^ or $ characters are correctly moved outside the parentheses.
+同时会确保开始的 ^ 以及结尾的 $ 字符会被移除在括号之外
+
+For example, calling comment(filename, r'^foo$') will result in a sed call with the “before” regex of r'^(foo)$' (and the “after” regex, naturally, of r'#\1'.)
+例如：调用 comment(filename, r'^foo$') 会产生一个 “before” 参数为 r'^(foo)$'``（"after" 参数为 ``r'#\1'）的 sed 调用
+
+New in version 1.5: Added the shell keyword argument.
+1.5 新版功能: 新增关键字参数 shell
+
+Return True if filename contains text (which may be a regex.)
+如果 filename 文件中包含 text （可能是正则表达式）则返回 True
+
+By default, this function will consider a partial line match (i.e.
+默认情况下，这个函数会对代码行进行部分匹配（例如 text 只包含在某一行文字中的情况），指定 exact=True 可以确保只有某一行完全匹配 text 才会返回 True
+
+This function leverages egrep on the remote end (so it may not follow Python regular expression syntax perfectly), and skips env.shell wrapper by default.
+这个函数会影响远程 egrep 的行为（可能无法弯曲符合 Python 正则表达式语法），默认情况下还会忽略 env.shell 的封装
+
+If use_sudo is True, will use sudo instead of run.
+如果 use_sudo 设置为 True，则使用 sudo 而不是 run
+
+If escape is False, no extra regular expression related escaping is performed (this includes overriding exact so that no ^/$ is added.)
+如果 escape 设置为 False，则不会进行任何正则表达式相关的转译（会覆盖 exact 自动添加 ^/$ 的行为）
+
+The shell argument will be eventually passed to run/sudo.
+shell 参数最终会传递给 run/sudo ，具体描述和 ~fabric.contrib.sed 一样，请查看它的文档详细了解
+
+If case_sensitive is False, the -i flag will be passed to egrep.
+在 1.0 版更改: 修改了 filename 和 text 参数的顺序与模块中的其它函数保持一致
+
+Changed in version 1.0: Swapped the order of the filename and text arguments to be consistent with other functions in this module.
+在 1.4 版更改: 更新了转译相关的正则表达式以修复众多边界情况下的问题
+
+Changed in version 1.4: Updated the regular expression related escaping to try and solve various corner cases.
+在 1.4 版更改: 新增关键字参数 escape
+
+Changed in version 1.4: Added escape keyword argument.
+1.6 新版功能: 新增关键字参数 shell
+
+New in version 1.6: Added the shell keyword argument.
+如果当前远程主机中存在给定的目录则返回 True
+
+New in version 1.11: Added the case_sensitive keyword argument.
+如果 use_sudo 设置为 True，则使用 sudo 而不是 run
+
+Return True if given path exists on the current remote host.
+默认情况下， exists 会隐藏所有输出（包括 run 那一行、stdout、stderr 以及文件不存在引起的的任何警告）以避免混乱的输出
+
+If use_sudo is True, will use sudo instead of run.
+返回给定路径中第一个找到文件的那个，如果都找不到则返回 None
+
+exists will, by default, hide all output (including the run line, stdout, stderr and any warning resulting from the file not existing) in order to avoid cluttering output.
+如果当前远程主机中给定路径是一个软链接则返回 True
+
+Given one or more file paths, returns first one found, or None if none exist.
+如果 use_sudo 值为真则使用 sudo 而非 run
+
+Return True if the given path is a symlink on the current remote host.
+默认情况下，is_link 会隐藏所有输出，设置 verbose=True 可以修改该设置
+
+If use_sudo is True, will use sudo instead of run.
+使用给定正则表达式对 filename 做搜索及替换操作
+
+is_link will, by default, hide all output.
+和 sed -i -r -e "// s///g"  等价
+
+Give verbose=True to change this.
+设置 backup 为空字符串可以阻止备份文件的生成
+
+Run a search-and-replace on filename with given regex patterns.
+方便起见，before 和 after 将会自动转译斜线、单引号和圆括号，这样你就可以不必把 http://foo\.com 写成 http:\/\/foo\.com
+
+Equivalent to sed -i -r -e "// s///g" .
+如果 use_sudo 设置为 True，则使用 sudo 而不是 run
+
+For convenience, before and after will automatically escape forward slashes, single quotes and parentheses for you, so you don’t need to specify e.g.
+shell 参数最终会传递给 run/sudo
+
+http:\/\/foo\.com, instead just using http://foo\.com is fine.
+其默认值为 False，这样就不会造成很多引号和反斜线相互嵌套的问题
+
+If use_sudo is True, will use sudo instead of run.
+其它选项可能是出于兼容 sed 标记的目的 – 例如：设置 flags="i" 可以插入式地搜索和替换
+
+The shell argument will be eventually passed to run/sudo.
+1.1 新版功能: flags 参数
+
+Other options may be specified with sed-compatible regex flags – for example, to make the search and replace case insensitive, specify flags="i".
+1.6 新版功能: 新增关键字参数 shell
+
+New in version 1.1: The flags parameter.
+将文件 filename 中匹配 regex 的所有行取消注释
+
+New in version 1.6: Added the shell keyword argument.
+默认注释界定符是 #，可以使用 char 参数覆盖该设置
+
+Attempt to uncomment all lines in filename matching regex.
+这个函数调用了 sed 函数，因此和 sed 一样接受 use_sudo、shell 和 backup 等关键字参数
+
+The default comment delimiter is # and may be overridden by the char argument.
+uncomment 会删除紧跟在注释字符后面的空格，如果存在的话，并不会影响其之前的空格，例如： # foo 会变成 foo （空格被一起删去了），不过 `` # foo`` 会变成 `` foo`` （只删除了注释字符后的空格，前面的 4 个空格并没有）
+
+This function uses the sed function, and will accept the same use_sudo, shell and backup keyword arguments that sed does.
+在 1.6 版更改: 新增关键字参数 shell
+
+uncomment will remove a single whitespace character following the comment character, if it exists, but will preserve all preceding whitespace.
+渲染一个模版文本文件，并将结果上传至远程主机
+
+Changed in version 1.6: Added the shell keyword argument.
+返回内部 put 调用的结果，详细信息请访问其文档
+
+Render and upload a template text file to a remote host.
+filename 应当是一个文本文件的地址，可以包含 Python 插入格式 ，并结合上下文字典 context 来渲染（如果存在的话）
+
+Returns the result of the inner call to put – see its documentation for details.
+如果 use_jinja 被设置为 True，同时你已经安装了 Jinja2 模板库，将会使用 Jinja 来渲染该模板
+
+filename should be the path to a text file, which may contain Python string interpolation formatting and will be rendered with the given context dictionary context (if given.)
+生成的文件将会上传至远程路径 destination
+
+Alternately, if use_jinja is set to True and you have the Jinja2 templating library available, Jinja will be used to render the template instead.
+默认情况下，将会以登录用户身份复制到 destination 目录，指定 use_sudo=True 可以强制使用 sudo 复制
+
+The resulting rendered file will be uploaded to the remote file path destination.
+关键字参数 mirror_local_mode 和 mode 直接用于内部 put 的调用，详细操作请参阅其文档
+
+By default, the file will be copied to destination as the logged-in user;
+关键字参数 pty 将会被应用到所有 run/sudo 内部调用，例如用于文件路径测试、设置备份等等
+
+The mirror_local_mode, mode, and temp_dir kwargs are passed directly to an internal put call;
+在 1.1 版更改: 新增关键字参数 backup、mirror_local_mode 以及 mode
+
+The pty kwarg will be passed verbatim to any internal run/sudo calls, such as those used for testing directory-ness, making backups, etc.
+在 1.9 版更改: 新增 pty 关键字参数
+
+Changed in version 1.9: Added the pty kwarg.
+Pythonic remote execution
+
+Changed in version 1.11: Added the keep_trailing_newline kwarg.
+输入相关的术语，模块，类或者函数名称进行搜索
+

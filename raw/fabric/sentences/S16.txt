@@ -1,0 +1,84 @@
+Tasks¶
+任务¶
+
+Abstract base class for objects wishing to be picked up as Fabric tasks.
+Fabric 任务对象的抽象基类
+
+Instances of subclasses will be treated as valid tasks when present in fabfiles loaded by the fab tool.
+执行 fab 命令时，会将 fabfile 中其所有子类的实例当作合法任务
+
+For details on how to implement and use Task subclasses, please see the usage documentation on new-style tasks.
+其具体实现以及 Task 子类的使用参见 新式任务 的文档
+
+New in version 1.1.
+1.1 新版功能.
+
+list of weak references to the object (if defined)
+该对象弱引用的列表（如果有定义的话）
+
+Return a tuple containing the host list the given task should be using and the roles being used.
+返回一个包含了当前任务将于使用到的主机列表以及将要使用到的角色的远祖
+
+See How host lists are constructed for detailed documentation on how host lists are set.
+如何设置主机列表的详细文档参见 How host lists are constructed 
+
+Changed in version 1.9.
+在 1.9 版更改.
+
+Wraps a given callable transparently, while marking it as a valid Task.
+透明地封装一个 callable 对象为合法任务
+
+Generally used via task and not directly.
+通常通过 task 调用而不直接使用
+
+New in version 1.1.
+1.1 新版功能.
+
+See also
+参见
+
+unwrap_tasks, task
+unwrap_tasks ， task
+
+Execute task (callable or name), honoring host/role decorators, etc.
+执行 task （可调用对象或其名字），与 host/role 装饰器保持一致
+
+task may be an actual callable object, or it may be a registered task name, which is used to look up a callable just as if the name had been given on the command line (including namespaced tasks, e.g.
+task 可以是一个可调用对象，或者是一个注册任务的名字，只要命令行中提供了该名字（包括 命名任务 ，例如 "deploy.migrate" ），就会自动寻找对应的 callable 对象
+
+The task will then be executed once per host in its host list, which is (again) assembled in the same manner as CLI-specified tasks: drawing from -H, env.hosts, the hosts or roles decorators, and so forth.
+主机列表中的每一个主机上都会执行一次任务，其执行方式（也）和 CLI 任务一样：优先顺序是 -H、env.hosts、hosts 到 roles 装饰器，依此类推
+
+host, hosts, role, roles and exclude_hosts kwargs will be stripped out of the final call, and used to set the task’s host list, as if they had been specified on the command line like e.g.
+关键字参数 host、hosts、role、roles 以及 exclude_hosts 会在最后调用前整理清楚，用于生成任务真正的主机列表, 最终像是在命令行执行：fab taskname:host=hostname 一样
+
+Any other arguments or keyword arguments will be passed verbatim into task (the function itself – not the @task decorator wrapping your function!) when it is called, so execute(mytask, 'arg1', kwarg1='value') will (once per host) invoke mytask('arg1', kwarg1='value').
+其它参数或者关键字参数将会一字不差地传递给 task``（函数，而非封装在你的函数周围的 ``@task 装饰器），execute(mytask, 'arg1', kwarg1='value') 会（在每台主机上）这样都调用 mytask('arg1', kwarg1='value')
+
+In situations where a task execution fails for a given host but overall progress does not abort (such as when env.skip_bad_hosts is True) the return value for that host will be the error object or message.
+参见
+
+See also
+execute 使用文档 中提供了更详细的解释和示例
+
+The execute usage docs, for an expanded explanation and some examples.
+1.3 新版功能.
+
+New in version 1.3.
+在 1.4 版更改: 新增了返回值映射，之前的版本中没有返回值
+
+Changed in version 1.4: Added the return value mapping;
+如果 task 需要在并行模式下运行则返回 True 
+
+Returns True if given task should be run in parallel mode.
+具体来说：
+
+Specifically:
+显式地添加了 @parallel 装饰器，或者：
+
+Pythonic remote execution
+Pythonic remote execution
+
+Enter search terms or a module, class or function name.
+输入相关的术语，模块，类或者函数名称进行搜索
+

@@ -1,0 +1,834 @@
+You are here: Home ‣ Dive Into Python 3 ‣
+您在这里: 主页 ‣ 深入Python 3 ‣
+
+Difficulty level: ♦♦♦♦♢
+难度等级: ♦♦♦♦♢
+
+Serializing Python Objects
+序列化Python对象
+
+❝ Every Saturday since we’ve lived in this apartment, I have awakened at 6:15, poured myself a bowl of cereal, added a quarter-cup of 2% milk, sat on this end of this couch, turned on BBC America, and watched Doctor Who.
+❝ Every Saturday since we’ve lived in this apartment, I have awakened at 6:15, poured myself a bowl of cereal, added a quarter-cup of 2% milk, sat on this end of this couch, turned on BBC America, and watched Doctor Who. ❞ — Sheldon, The Big Bang Theory
+
+Diving In
+深入
+
+On the surface, the concept of serialization is simple.
+序列化的概念很简单
+
+You have a data structure in memory that you want to save, reuse, or send to someone else.
+内存里面有一个数据结构，你希望将它保存下来，重用，或者发送给其他人
+
+How would you do that?
+你会怎么做
+
+Well, that depends on how you want to save it, how you want to reuse it, and to whom you want to send it.
+嗯, 这取决于你想要怎么保存，怎么重用，发送给谁
+
+Many games allow you to save your progress when you quit the game and pick up where you left off when you relaunch the game.
+很多游戏允许你在退出的时候保存进度，然后你再次启动的时候回到上次退出的地方
+
+(Actually, many non-gaming applications do this as well.) In this case, a data structure that captures “your progress so far” needs to be stored on disk when you quit, then loaded from disk when you relaunch.
+(实际上, 很多非游戏程序也会这么干
+
+The data is only meant to be used by the same program that created it, never sent over a network, and never read by anything other than the program that created it.
+) 在这个情况下, 一个捕获了当前进度的数据结构需要在你退出的时候保存到磁盘上，接着在你重新启动的时候从磁盘上加载进来
+
+Therefore, the interoperability issues are limited to ensuring that later versions of the program can read data written by earlier versions.
+这个数据只会被创建它的程序使用，不会发送到网络上，也不会被其它程序读取
+
+For cases like this, the pickle module is ideal.
+在这种情况下，pickle 模块是理想的
+
+It’s part of the Python standard library, so it’s always available.
+它是Python标准库的一部分, 所以它总是可用的
+
+It’s fast;
+它很快; 它的大部分同Python解释器本身一样是用C写的
+
+the bulk of it is written in C, like the Python interpreter itself.
+ 它可以存储任意复杂的Python数据结构
+
+What can the pickle module store?
+什么东西能用pickle模块存储?
+
+All the native datatypes that Python supports: booleans, integers, floating point numbers, complex numbers, strings, bytes objects, byte arrays, and None.
+所有Python支持的 原生类型 : 布尔, 整数, 浮点数, 复数, 字符串, bytes(字节串)对象, 字节数组, 以及 None.
+
+Lists, tuples, dictionaries, and sets containing any combination of native datatypes.
+由任何原生类型组成的列表，元组，字典和集合
+
+Lists, tuples, dictionaries, and sets containing any combination of lists, tuples, dictionaries, and sets containing any combination of native datatypes (and so on, to the maximum nesting level that Python supports).
+由任何原生类型组成的列表，元组，字典和集合组成的列表，元组，字典和集合(可以一直嵌套下去，直至Python支持的最大递归层数).
+
+Functions, classes, and instances of classes (with caveats).
+函数，类，和类的实例(带警告)
+
+If this isn’t enough for you, the pickle module is also extensible.
+如果这还不够用，pickle模块也是可扩展的
+
+If you’re interested in extensibility, check out the links in the Further Reading section at the end of the chapter.
+如果你对可扩展性有兴趣，请查看本章最后的进一步阅读小节中的链接
+
+A Quick Note About The Examples in This Chapter
+本章例子的快速笔记
+
+This chapter tells a tale with two Python Shells.
+本章会使用两个Python Shell来讲故事
+
+All of the examples in this chapter are part of a single story arc.
+本章的例子都是一个单独的故事的一部分
+
+You will be asked to switch back and forth between the two Python Shells as I demonstrate the pickle and json modules.
+当我演示pickle 和 json 模块时，你会被要求在两个Python Shell中来回切换
+
+To help keep things straight, open the Python Shell and define the following variable:
+为了让事情简单一点，打开Python Shell 并定义下面的变量:
+
+Keep that window open.
+保持该窗口打开
+
+Now open another Python Shell and define the following variable:
+ 现在打开另一个Python Shell 并定义下面下面的变量:
+
+Throughout this chapter, I will use the shell variable to indicate which Python Shell is being used in each example.
+贯穿整个章节, 在每个例子中我会使用shell变量来标识使用的是哪个Python Shell
+
+Saving Data to a Pickle File
+保存数据到 Pickle 文件
+
+The pickle module works with data structures.
+pickle模块的工作对象是数据结构
+
+Let’s build one.
+让我们来创建一个：
+
+Follow along in Python Shell #1.
+在Python Shell #1 里面
+
+The idea here is to build a Python dictionary that could represent something useful, like an entry in an Atom feed.
+想法是建立一个Python字典来表示一些有用的东西，比如一个Atom 供稿的entry
+
+But I also want to ensure that it contains several different types of data, to show off the pickle module.
+但是为了炫耀一下pickle模块我也想保证里面包含了多种不同的数据类型
+
+Don’t read too much into these values.
+不需要太关心这些值
+
+The time module contains a data structure (struct_time) to represent a point in time (accurate to one millisecond) and functions to manipulate time structs.
+time 模块包含一个表示时间点(精确到1毫秒)的数据结构(time_struct)以及操作时间结构的函数
+
+The strptime() function takes a formatted string an converts it to a struct_time.
+strptime()函数接受一个格式化过的字符串并将其转化成一个time_struct
+
+This string is in the default format, but you can control that with format codes.
+这个字符串使用的是默认格式，但你可以通过格式化代码来控制它
+
+See the time module for more details.
+查看time模块来获得更多细节
+
+That’s a handsome-looking Python dictionary.
+这是一个很帅的Python 字典
+
+Let’s save it to a file.
+让我们把它保存到文件
+
+This is still in Python Shell #1.
+仍然在Python Shell #1 中
+
+Use the open() function to open a file.
+使用open() 函数来打开一个文件
+
+Set the file mode to 'wb' to open the file for writing in binary mode.
+设置文件模式为'wb'来以二进制写模式打开文件
+
+Wrap it in a with statement to ensure the file is closed automatically when you’re done with it.
+把它放入with 语句中来保证在你完成的时候文件自动被关闭
+
+The dump() function in the pickle module takes a serializable Python data structure, serializes it into a binary, Python-specific format using the latest version of the pickle protocol, and saves it to an open file.
+pickle模块中的dump()函数接受一个可序列化的Python 数据结构, 使用最新版本的pickle协议将其序列化为一个二进制的，Python特定的格式， 并且保存到一个打开的文件里
+
+That last sentence was pretty important.
+最后一句话很重要
+
+The pickle module takes a Python data structure and saves it to a file.
+pickle模块接受一个Python数据结构并将其保存的一个文件
+
+To do this, it serializes the data structure using a data format called “the pickle protocol.”
+要做到这样，它使用一个被称为“pickle协议”的东西序列化该数据结构
+
+The pickle protocol is Python-specific;
+pickle 协议是Python特定的，没有任何跨语言兼容的保证
+
+there is no guarantee of cross-language compatibility.
+你很可能不能使用Perl, PHP, Java, 或者其他语言来对你刚刚创建的entry.pickle文件做任何有用的事情
+
+Not every Python data structure can be serialized by the pickle module.
+并非所有的Python数据结构都可以通过pickle模块序列化
+
+The pickle protocol has changed several times as new data types have been added to the Python language, but there are still limitations.
+随着新的数据类型被加入到Python语言中，pickle协议已经被修改过很多次了，但是它还是有一些限制
+
+As a result of these changes, there is no guarantee of compatibility between different versions of Python itself.
+由于这些变化，不同版本的Python的兼容性也没有保证
+
+Newer versions of Python support the older serialization formats, but older versions of Python do not support newer formats (since they don’t support the newer data types).
+新的版本的Python支持旧的序列化格式，但是旧版本的Python不支持新的格式(因为它们不支持新的数据类型)
+
+Unless you specify otherwise, the functions in the pickle module will use the latest version of the pickle protocol.
+除非你指定，pickle模块中的函数将使用最新版本的pickle协议
+
+This ensures that you have maximum flexibility in the types of data you can serialize, but it also means that the resulting file will not be readable by older versions of Python that do not support the latest version of the pickle protocol.
+这保证了你对可以被序列化的数据类型有最大的灵活度，但这也意味着生成的文件不能被不支持新版pickle协议的旧版本的Python读取
+
+The latest version of the pickle protocol is a binary format.
+最新版本的pickle协议是二进制格式的
+
+Be sure to open your pickle files in binary mode, or the data will get corrupted during writing.
+请确认使用二进制模式来打开你的pickle文件,否则当你写入的时候数据会被损坏
+
+Loading Data from a Pickle File
+从Pickle文件读取数据
+
+Now switch to your second Python Shell — i.e.
+现在切换到你的第二个Python Shell — 即不是你创建entry字典的那个
+
+This is Python Shell #2.
+这是Python Shell #2.
+
+There is no entry variable defined here.
+这里没有entry 变量被定义过
+
+You defined an entry variable in Python Shell #1, but that’s a completely different environment with its own state.
+你在Python Shell #1 中定义了entry变量, 但是那是另一个拥有自己状态的完全不同的环境
+
+Open the entry.pickle file you created in Python Shell #1.
+打开你在Python Shell #1中创建的entry.pickle文件
+
+The pickle module uses a binary data format, so you should always open pickle files in binary mode.
+pickle模块使用二进制数据格式，所以你总是应该使用二进制模式打开pickle文件
+
+The pickle.load() function takes a stream object, reads the serialized data from the stream, creates a new Python object, recreates the serialized data in the new Python object, and returns the new Python object.
+pickle.load()函数接受一个流对象, 从流中读取序列化后的数据，创建一个新的Python对象，在新的Python对象中重建被序列化的数据，然后返回新建的Python对象
+
+Now the entry variable is a dictionary with familiar-looking keys and values.
+现在entry变量是一个键和值看起来都很熟悉的字典
+
+The pickle.dump() / pickle.load() cycle results in a new data structure that is equal to the original data structure.
+pickle.dump() / pickle.load()循环的结果是一个和原始数据结构等同的新的数据结构
+
+Switch back to Python Shell #1.
+切换回Python Shell #1
+
+Open the entry.pickle file.
+打开entry.pickle文件
+
+Load the serialized data into a new variable, entry2.
+将序列化后的数据装载到一个新的变量, entry2
+
+Python confirms that the two dictionaries, entry and entry2, are equal.
+Python 确认两个字典, entry 和 entry2 是相等的
+
+In this shell, you built entry from the ground up, starting with an empty dictionary and manually assigning values to specific keys.
+在这个shell里, 你从零开始构造了entry, 从一个空字典开始然后手工给各个键赋值
+
+You serialized this dictionary and stored it in the entry.pickle file.
+你序列化了这个字典并将其保存在entry.pickle文件中
+
+Now you’ve read the serialized data from that file and created a perfect replica of the original data structure.
+现在你从文件中读取序列化后的数据并创建了原始数据结构的一个完美复制品
+
+Equality is not the same as identity.
+相等和相同是不一样的
+
+I said you’ve created a perfect replica of the original data structure, which is true.
+我说的是你创建了原始数据结构的一个完美复制品, 这没错
+
+But it’s still a copy.
+但它仅仅是一个复制品
+
+For reasons that will become clear later in this chapter, I want to point out that the value of the 'tags' key is a tuple, and the value of the 'internal_id' key is a bytes object.
+我要指出'tags'键对应的值是一个元组，而'internal_id'键对应的值是一个bytes对象
+
+Pickling Without a File
+不使用文件来进行序列化
+
+The examples in the previous section showed how to serialize a Python object directly to a file on disk.
+前一节中的例子展示了如果将一个Python对象序列化到磁盘文件
+
+But what if you don’t want or need a file?
+但如果你不想或不需要文件呢
+
+You can also serialize to a bytes object in memory.
+你也可以序列化到一个内存中的bytes对象
+
+The pickle.dumps() function (note the 's' at the end of the function name) performs the same serialization as the pickle.dump() function.
+pickle.dumps()函数(注意函数名最后的's')执行和pickle.dump()函数相同的序列化
+
+Instead of taking a stream object and writing the serialized data to a file on disk, it simply returns the serialized data.
+取代接受流对象并将序列化后的数据保存到磁盘文件，这个函数简单的返回序列化的数据
+
+Since the pickle protocol uses a binary data format, the pickle.dumps() function returns a bytes object.
+由于pickle协议使用一个二进制数据格式，所以pickle.dumps()函数返回bytes对象
+
+The pickle.loads() function (again, note the 's' at the end of the function name) performs the same deserialization as the pickle.load() function.
+pickle.loads()函数(再一次, 注意函数名最后的's') 执行和pickle.load()函数一样的反序列化
+
+Instead of taking a stream object and reading the serialized data from a file, it takes a bytes object containing serialized data, such as the one returned by the pickle.dumps() function.
+取代接受一个流对象并去文件读取序列化后的数据，它接受包含序列化后的数据的bytes对象, 比如pickle.dumps()函数返回的对象
+
+The end result is the same: a perfect replica of the original dictionary.
+最终结果是一样的: 原始字典的完美复制
+
+Bytes and Strings Rear Their Ugly Heads Again
+字节串和字符串又一次抬起了它们丑陋的头
+
+The pickle protocol has been around for many years, and it has matured as Python itself has matured.
+pickle协议已经存在好多年了，它随着Python本身的成熟也不断成熟
+
+There are now four different versions of the pickle protocol.
+现在存在四个不同版本 的pickle协议
+
+Python 1.x had two pickle protocols, a text-based format (“version 0”) and a binary format (“version 1”).
+Python 1.x 有两个pickle协议，一个基于文本的格式(“版本 0”) 以及一个二进制格式(“版本 1”).
+
+Python 2.3 introduced a new pickle protocol (“version 2”) to handle new functionality in Python class objects.
+Python 2.3 引入了一个新的pickle协议(“版本 2”) 来处理Python 类对象的新功能
+
+It is a binary format.
+它是一个二进制格式
+
+Python 3.0 introduced another pickle protocol (“version 3”) with explicit support for bytes objects and byte arrays.
+Python 3.0 引入了另一个pickle 协议 (“版本 3”) ，显式的支持bytes 对象和字节数组
+
+It is a binary format.
+它是一个二进制格式
+
+Oh look, the difference between bytes and strings rears its ugly head again.
+你看, 字节串和字符串的区别又一次抬起了它们丑陋的头
+
+(If you’re surprised, you haven’t been paying attention.) What this means in practice is that, while Python 3 can read data pickled with protocol version 2, Python 2 can not read data pickled with protocol version 3.
+ (如果你觉得惊奇，你肯定开小差了
+
+Debugging Pickle Files
+调试Pickle 文件
+
+What does the pickle protocol look like?
+pickle 协议是长什么样的呢
+
+Let’s jump out of the Python Shell for a moment and take a look at that entry.pickle file we created.
+让我们离开Python Shell一会会，来看一下我们创建的entry.pickle文件
+
+That wasn’t terribly helpful.
+这不是很有用
+
+You can see the strings, but other datatypes end up as unprintable (or at least unreadable) characters.
+你可以看见字符串，但是其他数据类型显示为不可打印的(或者至少是不可读的)字符
+
+Fields are not obviously delimited by tabs or spaces.
+域之间没有明显的分隔符(比如跳格符或空格)
+
+This is not a format you would want to debug by yourself.
+你肯定不希望来调试这样一个格式
+
+The most interesting piece of information in that disassembly is on the last line, because it includes the version of the pickle protocol with which this file was saved.
+这个反汇编中最有趣的信息是最后一行, 因为它包含了文件保存时使用的pickle协议的版本号
+
+There is no explicit version marker in the pickle protocol.
+在pickle协议里面没有明确的版本标志
+
+To determine which protocol version was used to store a pickle file, you need to look at the markers (“opcodes”) within the pickled data and use hard-coded knowledge of which opcodes were introduced with each version of the pickle protocol.
+为了确定保存pickle文件时使用的协议版本，你需要查看序列化后的数据的标记(“opcodes”)并且使用硬编码的哪个版本的协议引入了哪些标记的知识(来确定版本号)
+
+The pickletools.dis() function does exactly that, and it prints the result in the last line of the disassembly output.
+pickle.dis()函数正是这么干的，并且它在反汇编的输出的最后一行打印出结果
+
+Here is a function that returns just the version number, without printing anything:
+下面是一个不打印，仅仅返回版本号的函数:
+
+[download pickleversion.py]
+[下载 pickleversion.py]
+
+And here it is in action:
+实际使用它:
+
+Serializing Python Objects to be Read by Other Languages
+序列化Python对象以供其它语言读取
+
+The data format used by the pickle module is Python-specific.
+pickle模块使用的数据格式是Python特定的
+
+It makes no attempt to be compatible with other programming languages.
+它没有做任何兼容其它编程语言的努力
+
+If cross-language compatibility is one of your requirements, you need to look at other serialization formats.
+如果跨语言兼容是你的需求之一，你得去寻找其它的序列化格式
+
+One such format is JSON.
+一个这样的格式是JSON
+
+“JSON” stands for “JavaScript Object Notation,” but don’t let the name fool you — JSON is explicitly designed to be usable across multiple programming languages.
+ “JSON” 代表 “JavaScript Object Notation,” 但是不要让名字糊弄你
+
+Python 3 includes a json module in the standard library.
+Python 3 在标准库中包含了一个 json模块
+
+Like the pickle module, the json module has functions for serializing data structures, storing the serialized data on disk, loading serialized data from disk, and unserializing the data back into a new Python object.
+同 pickle模块类似, json模块包含一些函数，可以序列化数据结构，保存序列化后的数据至磁盘，从磁盘上读取序列化后的数据，将数据反序列化成新的Pythone对象
+
+But there are some important differences, too.
+但两者也有一些很重要的区别
+
+First of all, the JSON data format is text-based, not binary.
+ 首先, JSON数据格式是基于文本的, 不是二进制的
+
+RFC 4627 defines the JSON format and how different types of data must be encoded as text.
+RFC 4627 定义了JSON格式以及怎样将各种类型的数据编码成文本
+
+For example, a boolean value is stored as either the five-character string 'false' or the four-character string 'true'.
+比如，一个布尔值要么存储为5个字符的字符串'false'，要么存储为4个字符的字符串 'true'
+
+All JSON values are case-sensitive.
+ 所有的JSON值都是大小写敏感的
+
+Second, as with any text-based format, there is the issue of whitespace.
+第二，由于是文本格式, 存在空白(whitespaces)的问题
+
+JSON allows arbitrary amounts of whitespace (spaces, tabs, carriage returns, and line feeds) between values.
+ JSON 允许在值之间有任意数目的空白(空格, 跳格, 回车，换行)
+
+This whitespace is “insignificant,” which means that JSON encoders can add as much or as little whitespace as they like, and JSON decoders are required to ignore the whitespace between values.
+空白是“无关紧要的”，这意味着JSON编码器可以按它们的喜好添加任意多或任意少的空白, 而JSON解码器被要求忽略值之间的任意空白
+
+This allows you to “pretty-print” your JSON data, nicely nesting values within values at different indentation levels so you can read it in a standard browser or text editor.
+这允许你“美观的打印（pretty-print）” 你的 JSON 数据, 通过不同的缩进层次嵌套值，这样你就可以在标准浏览器或文本编辑器中阅读它
+
+Python’s json module has options for pretty-printing during encoding.
+Python 的 json 模块有在编码时执行美观打印（pretty-printing）的选项
+
+Third, there’s the perennial problem of character encoding.
+第三, 字符编码的问题是长期存在的
+
+JSON encodes values as plain text, but as you know, there ain’t no such thing as “plain text.” JSON must be stored in a Unicode encoding (UTF-32, UTF-16, or the default, UTF-8), and section 3 of RFC 4627 defines how to tell which encoding is being used.
+JSON 用纯文本编码数据, 但是你知道, “不存在纯文本这种东西
+
+Saving Data to a JSON File
+将数据保存至 JSON 文件
+
+JSON looks remarkably like a data structure you might define manually in JavaScript.
+JSON 看起来非常像你在Javascript中手工定义的数据结构
+
+This is no accident;
+这不是意外; 实际上你可以使用JavaScript 的eval()函数来“解码” JSON序列化过的数据
+
+you can actually use the JavaScript eval() function to “decode” JSON-serialized data.
+(通常的对非信任输入的警告 也适用, 但关键点是JSON 是 合法的JavaScript
+
+(The usual caveats about untrusted input apply, but the point is that JSON is valid JavaScript.) As such, JSON may already look familiar to you.
+) 因此, 你可能已经熟悉JSON了
+
+We’re going to create a new data structure instead of re-using the existing entry data structure.
+我们将创建一个新的数据结构，而不是重用现存的entry数据结构
+
+Later in this chapter, we’ll see what happens when we try to encode the more complex data structure in JSON.
+在这章的后面, 我们将会看见当我们试图用JSON编码更复杂的数据结构的时候会发生什么
+
+JSON is a text-based format, which means you need to open this file in text mode and specify a character encoding.
+JSON 是一个基于文本的格式， 这意味你可以以文本模式打开文件，并给定一个字符编码
+
+You can never go wrong with UTF-8.
+用UTF-8总是没错的
+
+Like the pickle module, the json module defines a dump() function which takes a Python data structure and a writeable stream object.
+同pickle模块一样, json 模块定义了dump()函数，它接受一个Python 数据结构和一个可写的流对象
+
+The dump() function serializes the Python data structure and writes it to the stream object.
+dump() 函数将Python数据结构序列化并写入到流对象中
+
+Doing this inside a with statement will ensure that the file is closed properly when we’re done.
+在with语句内工作保证当我们完成的时候正确的关闭文件
+
+So what does the resulting JSON serialization look like?
+那么生成的JSON序列化数据是什么样的呢
+
+That’s certainly more readable than a pickle file.
+这肯定比pickle 文件更可读
+
+But JSON can contain arbitrary whitespace between values, and the json module provides an easy way to take advantage of this to create even more readable JSON files.
+然而 JSON 的值之间可以包含任意数目的空把, 并且json模块提供了一个方便的途径来利用这一点生成更可读的JSON文件
+
+If you pass an indent parameter to the json.dump() function, it will make the resulting JSON file more readable, at the expense of larger file size.
+如果你给json.dump()函数传入indent参数, 它以文件变大为代价使生成的JSON文件更可读
+
+The indent parameter is an integer.
+indent 参数是一个整数
+
+ means “put each value on its own line.” A number greater than 0 means “put each value on its own line, and use this number of spaces to indent nested data structures.”
+0 意味着“每个值单独一行
+
+And this is the result:
+这是结果:
+
+Mapping of Python Datatypes to JSON
+将Python数据类型映射到JSON
+
+Since JSON is not Python-specific, there are some mismatches in its coverage of Python datatypes.
+由于JSON 不是Python特定的，对应到Python的数据类型的时候有很多不匹配
+
+Some of them are simply naming differences, but there is two important Python datatypes that are completely missing.
+有一些仅仅是名字不同，但是有两个Python数据类型完全缺少
+
+See if you can spot them:
+看看你能能把它们指出来:
+
+object
+object
+
+dictionary
+dictionary
+
+array
+array
+
+list
+list
+
+string
+string
+
+string
+string
+
+integer
+integer
+
+integer
+integer
+
+real number
+real number
+
+float
+float
+
+true
+true
+
+True
+True
+
+false
+false
+
+False
+False
+
+null
+null
+
+None
+None
+
+* All JSON values are case-sensitive.
+* 所有的 JSON 值都是大小写敏感的
+
+Did you notice what was missing?
+注意到什么被遗漏了吗
+
+Tuples & bytes!
+元组和 & 字节串（bytes）! JSON 有数组类型, json 模块将其映射到Python的列表, 但是它没有一个单独的类型对应 “冻结数组(frozen arrays)” (元组)
+
+JSON has an array type, which the json module maps to a Python list, but it does not have a separate type for “frozen arrays” (tuples).
+而且尽管 JSON 非常好的支持字符串，但是它没有对bytes 对象或字节数组的支持
+
+Serializing Datatypes Unsupported by JSON
+序列化JSON不支持的数据类型
+
+Even if JSON has no built-in support for bytes, that doesn’t mean you can’t serialize bytes objects.
+即使JSON没有内建的字节流支持, 并不意味着你不能序列化bytes对象
+
+The json module provides extensibility hooks for encoding and decoding unknown datatypes.
+json模块提供了编解码未知数据类型的扩展接口
+
+(By “unknown,” I mean “not defined in JSON.” Obviously the json module knows about byte arrays, but it’s constrained by the limitations of the JSON specification.) If you want to encode bytes or other datatypes that JSON doesn’t support natively, you need to provide custom encoders and decoders for those types.
+(“未知”的意思是≴JSON没有定义”
+
+OK, it’s time to revisit the entry data structure.
+好的, 是时间再看看entry 数据结构了
+
+This has it all: a boolean value, a None value, a string, a tuple of strings, a bytes object, and a time structure.
+它包含了所有的东西: 布尔值，None值，字符串，字符串元组, bytes对象, 以及time结构体
+
+I know I’ve said it before, but it’s worth repeating: JSON is a text-based format.
+我知道我已经说过了，但是这值得再重复一次：JSON 是一个基于文本的格式
+
+Always open JSON files in text mode with a UTF-8 character encoding.
+总是应使用UTF-8字符编码以文本模式打开JSON文件
+
+Well that’s not good.
+嗯，这可不好
+
+What happened?
+发生什么了
+
+Here’s what happened: the json.dump() function tried to serialize the bytes object b'\xDE\xD5\xB4\xF8', but it failed, because JSON has no support for bytes objects.
+情况是这样的: json.dump() 函数试图序列化bytes对象 b'\xDE\xD5\xB4\xF8'，但是它失败了，原因是JSON 不支持bytes对象
+
+However, if storing bytes is important to you, you can define your own “mini-serialization format.”
+然而, 如果保存字节串对你来说很重要，你可以定义自己的“迷你序列化格式
+
+[download customserializer.py]
+[download customserializer.py]
+
+To define your own “mini-serialization format” for a datatype that JSON doesn’t support natively, just define a function that takes a Python object as a parameter.
+为了给一个JSON没有原生支持的数据类型定义你自己的“迷你序列化格式”, 只要定义一个接受一个Python对象为参数的函数
+
+This Python object will be the actual object that the json.dump() function is unable to serialize by itself — in this case, the bytes object b'\xDE\xD5\xB4\xF8'.
+这个对象将会是json.dump()函数无法自己序列化的实际对象 — 这个例子里是bytes 对象 b'\xDE\xD5\xB4\xF8'
+
+Your custom serialization function should check the type of the Python object that the json.dump() function passed to it.
+你的自定义序列化函数应该检查json.dump()函数传给它的对象的类型
+
+This is not strictly necessary if your function only serializes one datatype, but it makes it crystal clear what case your function is covering, and it makes it easier to extend if you need to add serializations for more datatypes later.
+当你的函数只序列化一个类型的时候这不是必须的，但是它使你的函数的覆盖的内容清楚明白，并且在你需要序列化更多类型的时候更容易扩展
+
+In this case, I’ve chosen to convert a bytes object into a dictionary.
+在这个例子里面, 我将bytes 对象转换成字典
+
+The __class__ key will hold the original datatype (as a string, 'bytes'), and the __value__ key will hold the actual value.
+__class__ 键持有原始的数据类型(以字符串的形式, 'bytes'), 而 __value__ 键持有实际的数据
+
+Of course this can’t be a bytes object;
+当然它不能是bytes对象; 大体的想法是将其转换成某些可以被JSON序列化的东西! bytes对象就是一个范围在0–255的整数的序列
+
+the entire point is to convert it into something that can be serialized in JSON!
+ 我们可以使用list() 函数将bytes对象转换成整数列表
+
+A bytes object is just a sequence of integers;
+所以b'\xDE\xD5\xB4\xF8' 变成 [222, 213, 180, 248]. (算一下! 这是对的! 16进制的字节 \xDE 是十进制的 222, \xD5 是 213, 以此类推
+
+each integer is somewhere in the range 0–255.
+)
+
+This line is important.
+这一行很重要
+
+The data structure you’re serializing may contain types that neither the built-in JSON serializer nor your custom serializer can handle.
+你序列化的数据结构可能包含JSON内建的可序列化类型和你的定制序列化器支持的类型之外的东西
+
+In this case, your custom serializer must raise a TypeError so that the json.dump() function knows that your custom serializer did not recognize the type.
+在这种情况下，你的定制序列化器抛出一个TypeError，那样json.dump() 函数就可以知道你的定制序列化函数不认识该类型
+
+That’s it;
+就这么多
+
+you don’t need to do anything else.
+你不需要其它的东西
+
+In particular, this custom serialization function returns a Python dictionary, not a string.
+特别是, 这个定制序列化函数返回Python字典，不是字符串
+
+You’re not doing the entire serializing-to-JSON yourself;
+你不是自己做所有序列化到JSON的工作; 你仅仅在做转换成被支持的类型那部分工作
+
+you’re only doing the converting-to-a-supported-datatype part.
+json.dump() 函数做剩下的事情
+
+The customserializer module is where you just defined the to_json() function in the previous example.
+customserializer 模块是你在前一个例子中定义to_json()函数的地方
+
+Text mode, UTF-8 encoding, yadda yadda.
+文本模式, UTF-8 编码, yadda yadda
+
+(You’ll forget!
+(你很可能会忘记这一点! 我就忘记过好几次! 事情一切正常直到它失败的时刻, 而它的失败很令人瞩目
+
+I forget sometimes!
+)
+
+This is the important bit: to hook your custom conversion function into the json.dump() function, pass your function into the json.dump() function in the default parameter.
+这是重点: 为了将定制转换函数钩子嵌入json.dump()函数, 只要将你的函数以default参数传入json.dump()函数
+
+(Hooray, everything in Python is an object!)
+(万岁, Python里一切皆对象!)
+
+OK, so it didn’t actually work.
+好吧, 实际上还是不能工作
+
+But take a look at the exception.
+但是看一下异常
+
+The json.dump() function is no longer complaining about being unable to serialize the bytes object.
+json.dump() 函数不再抱怨无法序列化bytes对象了
+
+Now it’s complaining about a completely different object: the time.struct_time object.
+现在它在抱怨另一个完全不同的对象: time.struct_time 对象
+
+While getting a different exception might not seem like progress, it really is!
+尽管得到另一个不同的异常看起来不是什么进步, 但它确实是个进步! 再调整一下就可以解决这个问题
+
+Adding to our existing customserializer.to_json() function, we need to check whether the Python object (that the json.dump() function is having trouble with) is a time.struct_time.
+在现存的customserializer.to_json()函数里面, 我们加入了Python 对象 (json.dump() 处理不了的那些) 是不是 time.struct_time的判断
+
+If so, we’ll do something similar to the conversion we did with the bytes object: convert the time.struct_time object to a dictionary that only contains JSON-serializable values.
+如果是的，我们做一些同处理bytes对象时类似的事情来转换: 将time.struct_time 结构转化成一个只包含JSON可序列化值的字典
+
+In this case, the easiest way to convert a datetime into a JSON-serializable value is to convert it to a string with the time.asctime() function.
+在这个例子里, 最简单的将日期时间转换成JSON可序列化值的方法是使用time.asctime()函数将其转换成字符串
+
+The time.asctime() function will convert that nasty-looking time.struct_time into the string 'Fri Mar 27 22:20:42 2009'.
+time.asctime() 函数将难看的time.struct_time 转换成字符串 'Fri Mar 27 22:20:42 2009'
+
+With these two custom conversions, the entire entry data structure should serialize to JSON without any further problems.
+有了两个定制的转换, 整个entry 数据结构序列化到JSON应该没有进一步的问题了
+
+Loading Data from a JSON File
+从JSON文件加载数据
+
+Like the pickle module, the json module has a load() function which takes a stream object, reads JSON-encoded data from it, and creates a new Python object that mirrors the JSON data structure.
+类似pickle 模块，json模块有一个load()函数接受一个流对象，从中读取 JSON编码过的数据, 并且创建该JSON数据结构的Python对象的镜像
+
+For demonstration purposes, switch to Python Shell #2 and delete the entry data structure that you created earlier in this chapter with the pickle module.
+为了演示目的，切换到Python Shell #2 并且删除在这一章前面使用pickle模块创建的entry数据结构
+
+In the simplest case, the json.load() function works the same as the pickle.load() function.
+最简单的情况下，json.load()函数同pickle.load()函数的结果一模一样
+
+You pass in a stream object and it returns a new Python object.
+你传入一个流对象，它返回一个新的Python对象
+
+I have good news and bad news.
+有好消息也有坏消息
+
+Good news first: the json.load() function successfully read the entry.json file you created in Python Shell #1 and created a new Python object that contained the data.
+好消息先来: json.load() 函数成功的读取了你在Python Shell #1中创建的entry.json文件并且生成了一个包含那些数据的新的Python对象
+
+Now the bad news: it didn’t recreate the original entry data structure.
+接着是坏消息: 它没有重建原始的 entry 数据结构
+
+The two values 'internal_id' and 'published_date' were recreated as dictionaries — specifically, the dictionaries with JSON-compatible values that you created in the to_json() conversion function.
+'internal_id' 和 'published_date' 这两个值被重建为字典 — 具体来说, 你在to_json()转换函数中使用JSON兼容的值创建的字典
+
+json.load() doesn’t know anything about any conversion function you may have passed to json.dump().
+json.load() 并不知道你可能传给json.dump()的任何转换函数的任何信息
+
+What you need is the opposite of the to_json() function — a function that will take a custom-converted JSON object and convert it back to the original Python datatype.
+你需要的是to_json()函数的逆函数 — 一个接受定制转换出的JSON 对象并将其转换回原始的Python数据类型
+
+This conversion function also takes one parameter and returns one value.
+这函数也同样接受一个参数返回一个值
+
+But the parameter it takes is not a string, it’s a Python object — the result of deserializing a JSON-encoded string into Python.
+但是参数不是字符串，而是一个Python对象 — 反序列化一个JSON编码的字符串为Python的结果
+
+All you need to do is check whether this object contains the '__class__' key that the to_json() function created.
+你只需要检查这个对象是否包含to_json()函数创建的'__class__'键
+
+If so, the value of the '__class__' key will tell you how to decode the value back into the original Python datatype.
+如果是的，'__class__'键对应的值将告诉你如何将值解码成原来的Python数据类型
+
+To decode the time string returned by the time.asctime() function, you use the time.strptime() function.
+为了解码由time.asctime()函数返回的字符串，你要使用time.strptime()函数
+
+This function takes a formatted datetime string (in a customizable format, but it defaults to the same format that time.asctime() defaults to) and returns a time.struct_time.
+这个函数接受一个格式化过的时间字符串(格式可以自定义，但默认值同time.asctime()函数的默认值相同) 并且返回time.struct_time.
+
+To convert a list of integers back into a bytes object, you can use the bytes() function.
+为了将整数列表转换回bytes 对象, 你可以使用 bytes() 函数
+
+That was it;
+就是这样; to_json()函数处理了两种数据类型，现在这两个数据类型也在from_json()函数里面处理了
+
+there were only two datatypes handled in the to_json() function, and now those two datatypes are handled in the from_json() function.
+下面是结果:
+
+To hook the from_json() function into the deserialization process, pass it as the object_hook parameter to the json.load() function.
+为了将from_json()函数嵌入到反序列化过程中，把它作为object_hook 参数传入到json.load()函数中
+
+Functions that take functions;
+接受函数作为参数的函数; 真方便!
+
+The entry data structure now contains an 'internal_id' key whose value is a bytes object.
+entry 数据结构现在有一个值为bytes对象的'internal_id'键
+
+It also contains a 'published_date' key whose value is a time.struct_time object.
+它也包含一个'published_date'键，其值为time.struct_time对象
+
+There is one final glitch, though.
+然而，还有最后一个缺陷
+
+Even after hooking the to_json() function into the serialization, and hooking the from_json() function into the deserialization, we still haven’t recreated a perfect replica of the original data structure.
+即使在序列化过程中加入了to_json()钩子函数, 也在反序列化过程中加入from_json()钩子函数, 我们仍然没有重新创建原始数据结构的完美复制品
+
+Why not?
+为什么没有
+
+In the original entry data structure, the value of the 'tags' key was a tuple of three strings.
+在原始的entry 数据结构中, 'tags'键的值为一个三个字符串组成的元组
+
+But in the round-tripped entry2 data structure, the value of the 'tags' key is a list of three strings.
+但是重现创建的entry2 数据结构中, 'tags' 键的值是一个三个字符串组成的列表
+
+JSON doesn’t distinguish between tuples and lists;
+JSON 并不区分元组和列表
+
+it only has a single list-like datatype, the array, and the json module silently converts both tuples and lists into JSON arrays during serialization.
+它只有一个类似列表的数据类型，数组，并且json模块在序列化过程中会安静的将元组和列表两个都转换成JSON 数组
+
+For most uses, you can ignore the difference between tuples and lists, but it’s something to keep in mind as you work with the json module.
+大多数情况下，你可以忽略元组和列表的区别，但是在使用json 模块时应记得有这么一回使
+
+Further Reading
+进一步阅读
+
+☞Many articles about the pickle module make references to cPickle.
+☞很多关于pickle模块的文章提到了cPickle
+
+In Python 2, there were two implementations of the pickle module, one written in pure Python and another written in C (but still callable from Python).
+在Python 2中, pickle 模块有两个实现, 一个由纯Python写的而另一个用C写的(但仍然可以在Python中调用)
+
+In Python 3, these two modules have been consolidated, so you should always just import pickle.
+在Python 3中, 这两个模块已经合并, 所以你总是简单的import pickle就可以
+
+You may find these articles useful, but you should ignore the now-obsolete information about cPickle.
+你可能会发现这些文章很有用，但是你应该忽略已过时的关于的cPickle的信息.
+
+On pickling with the pickle module:
+使用pickle模块打包:
+
+pickle module
+pickle module
+
+pickle and cPickle — Python object serialization
+pickle and cPickle — Python object serialization
+
+Using pickle
+Using pickle
+
+Python persistence management
+Python persistence management
+
+On JSON and the json module:
+使用JSON 和 json 模块:
+
+json — JavaScript Object Notation Serializer
+json — JavaScript Object Notation Serializer
+
+JSON encoding and ecoding with custom objects in Python
+JSON encoding and ecoding with custom objects in Python
+
+On pickle extensibility:
+扩展打包:
+
+Pickling class instances
+Pickling class instances
+
+Persistence of external objects
+Persistence of external objects
+
+Handling stateful objects
+Handling stateful objects
+
+© 2001–11 Mark Pilgrim
+© 2001–9 Mark Pilgrim
+

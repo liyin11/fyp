@@ -1,0 +1,777 @@
+You are here: Home ‣ Dive Into Python 3 ‣
+您在这里：首页 ‣ 深入 Python 3 ‣
+
+Difficulty level: ♦♢♢♢♢
+难易程度：♦♢♢♢♢
+
+Your First Python Program
+你的第一个 Python 程序
+
+❝ Don’t bury your burden in saintly silence.
+❝ Don’t bury your burden in saintly silence. You have a problem? Great. Rejoice, dive in, and investigate. ❞ — Ven. Henepola Gunaratana
+
+Diving In
+Diving In
+
+Convention dictates that I should bore you with the fundamental building blocks of programming, so we can slowly work up to building something useful.
+通常程序设计的书籍都会以一堆关于基础知识的章节开始，最终逐步的构建一些有用的东西
+
+Let’s skip all that.
+让我们跳过所有的那些东西，来看一个完整的、可以直接运行的 Python 程序
+
+Here is a complete, working Python program.
+可能刚开始你根本看不懂，但不要担心，因为你会去一行一行的仔细研究
+
+It probably makes absolutely no sense to you.
+但是首先还是要通读一遍，看看里面什么东西（如果有的话）是你可以看懂的
+
+[download humansize.py]
+[download humansize.py]
+
+Now let’s run this program on the command line.
+现在让我们从命令行来运行这个程序
+
+On Windows, it will look something like this:
+在 Windows 上，类似这样：
+
+On Mac OS X or Linux, it would look something like this:
+在 Mac OS X 或者 Linux 上，类似这样：
+
+What just happened?
+刚刚发生了什么
+
+You executed your first Python program.
+你执行了你的第一个 Python 程序
+
+You called the Python interpreter on the command line, and you passed the name of the script you wanted Python to execute.
+你从命令行调用了 Python 解释器，并且传递了一个你想 Python 去执行的脚本的名称
+
+The script defines a single function, the approximate_size() function, which takes an exact file size in bytes and calculates a “pretty” (but approximate) size.
+这个脚本定义了一个单一的函数，这个 approximate_size() 函数把一个精确到字节的文件大小计算成一个有漂亮格式（大约计算的）的大小
+
+(You’ve probably seen this in Windows Explorer, or the Mac OS X Finder, or Nautilus or Dolphin or Thunar on Linux.
+（你可能已经在 Windows Explorer，或者 Mac OS X Finder，或者 Linux 上的 Nautilus 或 Dolphin 或 Thunar 看到过这个
+
+If you display a folder of documents as a multi-column list, it will display a table with the document icon, the document name, the size, type, last-modified date, and so on.
+如果你按照多列的列表来显示一个文件夹的文档，它就会显示一个包含文档图标、文档名称、大小、类型、最后修改日期等等信息的表格
+
+If the folder contains a 1093-byte file named TODO, your file manager won’t display TODO 1093 bytes;
+如果这个文件夹包含一个 1093 字节大小名叫 TODO 的文件，你的文件管理器将不会显示成 TODO 1093 bytes，而用 TODO 1 KB 的显示格式代替
+
+it’ll say something like TODO 1 KB instead.
+那就是 approximate_size() 函数所做的事情
+
+That’s what the approximate_size() function does.)
+）
+
+Look at the bottom of the script, and you’ll see two calls to print(approximate_size(arguments)).
+看看这个脚本的底部，你会看到对 print(approximate_size(arguments)) 的两次调用
+
+These are function calls — first calling the approximate_size() function and passing a number of arguments, then taking the return value and passing it straight on to the print() function.
+这些叫做函数调用 —— 第一个调用了 approximate_size() 函数并传递了一些参数，接着直接把返回值传递给了 print() 函数
+
+The print() function is built-in;
+这个 print() 函数是内置的，你将从不会看到它的一个显式的声明
+
+you’ll never see an explicit declaration of it.
+你只管在需要的任何时候任何地方使用它就行
+
+You can just use it, anytime, anywhere.
+（有很多内置函数，更多的函数独立于各个 modules （模块）里面
+
+(There are lots of built-in functions, and lots more functions that are separated into modules.
+保持耐心，你会逐步熟悉它们的
+
+Patience, grasshopper.)
+）
+
+So why does running the script on the command line give you the same output every time?
+那么为什么每次在命令行运行脚本都会给你同样的输出结果呢
+
+We’ll get to that.
+我们将讲解这个
+
+First, let’s look at that approximate_size() function.
+首先，让我们来看一下 approximate_size() 函数
+
+Declaring Functions
+声明函数
+
+Python has functions like most other languages, but it does not have separate header files like C++ or interface/implementation sections like Pascal.
+像多数其他语言一样， Python 也有函数， 但是它没有像 C++ 一样的单独头文件，也没有像 Pascal 一样 interface/implementation （接口／实现）部分
+
+When you need a function, just declare it, like this:
+当你需要一个函数的时候，就像这样声明它就行：
+
+The keyword def starts the function declaration, followed by the function name, followed by the arguments in parentheses.
+函数声明以关键字 def 开头，紧跟着函数的名称，然后是用括号括起来的参数
+
+Multiple arguments are separated with commas.
+多个参数以逗号分割
+
+Also note that the function doesn’t define a return datatype.
+同时注意，函数不定义一个返回数据类型
+
+Python functions do not specify the datatype of their return value;
+ Python 函数不指定它们的返回值的类型，甚至不指定它们是否返回一个值
+
+they don’t even specify whether or not they return a value.
+（事实上，每个 Python 函数都返回一个值，如果这个函数曾经执行了 return 语句，它将返回那个值，否则它将返回 Python 里面的空值 None
+
+(In fact, every Python function returns a value;
+）
+
+☞In some languages, functions (that return a value) start with function, and subroutines (that do not return a value) start with sub.
+☞在某些语言里面，函数（返回一个值）以 function 开头，同时子程序（不返回值的）以 sub 开头
+
+There are no subroutines in Python.
+ Python 里面没有子程序
+
+Everything is a function, all functions return a value (even if it’s None), and all functions start with def.
+所有的东西都是一个函数，所有的函数都返回一个值（即使它是 None 值），并且所有的函数都以 def 开头
+
+The approximate_size() function takes the two arguments — size and a_kilobyte_is_1024_bytes — but neither argument specifies a datatype.
+approximate_size() 函数有两个参数 — size 和 a_kilobyte_is_1024_bytes — 但都没有指定数据类型
+
+In Python, variables are never explicitly typed.
+在 Python 里面，变量从来不会显式的指定类型
+
+Python figures out what type a variable is and keeps track of it internally.
+Python 会在内部算出一个变量的类型并进行跟踪
+
+☞In Java and other statically-typed languages, you must specify the datatype of the function return value and each function argument.
+☞在 Java 和其他静态类型的语言里面，你必须给函数返回值和每个函数参数指定数据类性
+
+In Python, you never explicitly specify the datatype of anything.
+而在 Python 里面，你从来不需要给任何东西指定显式的数据类型
+
+Based on what value you assign, Python keeps track of the datatype internally.
+根据你赋的值，Python 会在内部对数据类型进行跟踪
+
+Optional and Named Arguments
+可选的和命名的参数
+
+Python allows function arguments to have default values;
+Python 允许函数函数有默认值
+
+if the function is called without the argument, the argument gets its default value.
+如果函数被调用的时候没有指定参数，那么参数将使用默认值
+
+Furthermore, arguments can be specified in any order by using named arguments.
+不仅如此，通过使用命名参数还可以按照任何顺序指定参数
+
+Let’s take another look at that approximate_size() function declaration:
+让我们再看一下 approximate_size() 函数的声明：
+
+The second argument, a_kilobyte_is_1024_bytes, specifies a default value of True.
+第二个参数 a_kilobyte_is_1024_bytes 指定了一个默认值 True
+
+This means the argument is optional;
+ 意思是这个参数是 optional （可选的），你可以在调用的时候不指定它，Python 将看成你调用的时候使用了 True 作为第二个参数
+
+Now look at the bottom of the script:
+现在看一下这个脚本的底部：
+
+This calls the approximate_size() function with two arguments.
+这个对 approximate_size() 函数的调用指定了两个参数
+
+Within the approximate_size() function, a_kilobyte_is_1024_bytes will be False, since you explicitly passed False as the second argument.
+在 approximate_size() 函数里面，a_kilobyte_is_1024_bytes 的值将为 False，因为你显式的传入了 False 作为第二个参数
+
+This calls the approximate_size() function with only one argument.
+这个对 approximate_size() 函数的调用只指定了一个参数
+
+But that’s OK, because the second argument is optional!
+但这是可以的，因为第二个参数是可选的
+
+Since the caller doesn’t specify, the second argument defaults to True, as defined by the function declaration.
+由于调用者没有指定，第二个参数就会使用在函数声明的时候定义的默认值 True
+
+You can also pass values into a function by name.
+你也可以通过名称将值传入一个函数
+
+This calls the approximate_size() function with 4000 for the first argument (size) and False for the argument named a_kilobyte_is_1024_bytes.
+这个对 approximate_size() 函数的调用给第一个参数（(size）指定了值 4000，并且给名为 a_kilobyte_is_1024_bytes 的参数指定了值 False
+
+(That happens to be the second argument, but doesn’t matter, as you’ll see in a minute.)
+（那碰巧是第二个参数，但这没有关系，马上你就会了解到
+
+This calls the approximate_size() function with 4000 for the argument named size and False for the argument named a_kilobyte_is_1024_bytes.
+这个对 approximate_size() 函数的调用给名为 size 参数指定了值 4000，并为名为 a_kilobyte_is_1024_bytes 的参数指定了值 False
+
+(These named arguments happen to be in the same order as the arguments are listed in the function declaration, but that doesn’t matter either.)
+（这些命名参数碰巧和函数声明时列出的参数顺序一样，但同样不要紧
+
+This calls the approximate_size() function with False for the argument named a_kilobyte_is_1024_bytes and 4000 for the argument named size.
+这个对 approximate_size() 函数的调用给名为 a_kilobyte_is_1024_bytes 的参数指定了值 False，然后给名为 size 的参数指定了值 4000
+
+(See?
+（看到了没
+
+I told you the order didn’t matter.)
+我告诉过你顺序没有关系
+
+This call fails, because you have a named argument followed by an unnamed (positional) argument, and that never works.
+这个调用会失败，因为你在命名参数后面紧跟了一个非命名（位置的）的参数，这个一定不会工作
+
+Reading the argument list from left to right, once you have a single named argument, the rest of the arguments must also be named.
+从左到右的读取参数列表，一旦你有一个命名的参数，剩下的参数也必须是命名的
+
+This call fails too, for the same reason as the previous call.
+这个调用也会失败，和前面一个调用同样的原因
+
+Is that surprising?
+ 是不是很惊讶
+
+After all, you passed 4000 for the argument named size, then “obviously” that False value was meant for the a_kilobyte_is_1024_bytes argument.
+别忘了，你给名为 size 的参数传入了值 4000，那么“显然的” False 这个值意味着对应了 a_kilobyte_is_1024_bytes 参数
+
+But Python doesn’t work that way.
+但是 Python 不按照这种方式工作
+
+As soon as you have a named argument, all arguments to the right of that need to be named arguments, too.
+只要你有一个命名参数，它右边的所有参数也都需要是命名参数
+
+Writing Readable Code
+编写易读的代码
+
+I won’t bore you with a long finger-wagging speech about the importance of documenting your code.
+我不会长期指手划脚的来烦你，解释给你的代码添加文档注释的重要性
+
+Just know that code is written once but read many times, and the most important audience for your code is yourself, six months after writing it (i.e.
+只要知道代码被编写一次但是会被阅读很多次，而且你的代码最要的读者就是你自己，在编写它的六个月以后（例如，当你忘记了所有的东西但是又需要去修正一些东西的时候）
+
+after you’ve forgotten everything but need to fix something).
+ Python 使得编写易读的代码非常容易，因此要利用好这个优势
+
+Python makes it easy to write readable code, so take advantage of it.
+六个月以后你将会感谢我
+
+Documentation Strings
+文档字符串
+
+You can document a Python function by giving it a documentation string (docstring for short).
+你可以通过使用一个文档字符串（简称 docstring ）的方式给 Python 添加文档注释
+
+In this program, the approximate_size() function has a docstring:
+在这个程序中，这个 approximate_size() 函数有一个 docstring：
+
+Triple quotes signify a multi-line string.
+三重引号表示一个多行的字符串
+
+Everything between the start and end quotes is part of a single string, including carriage returns, leading white space, and other quote characters.
+在开始引号和结束引号之间的所有东西都属于一个单独的字符串的一部分，包括回车、前导空格、和其他引号字符
+
+You can use them anywhere, but you’ll see them most often used when defining a docstring.
+你可以在任何地方使用它们，但是你会发现大部分时候它们在定义 docstring （文档注释）的时候使用
+
+☞Triple quotes are also an easy way to define a string with both single and double quotes, like qq/.../ in Perl 5.
+☞三重引号也是一种容易的方法，用来定义一个同时包含单引号和双引号的字符串，就像 Perl 5 里面的 qq/.../ 一样
+
+Everything between the triple quotes is the function’s docstring, which documents what the function does.
+三重引号之间的所有东西都是这个函数的 docstring （文档字符串），用来用文档描述这个函数是做什么的
+
+A docstring, if it exists, must be the first thing defined in a function (that is, on the next line after the function declaration).
+一个 docstring （文档字符串），如果有的话，必须是一个函数里面定义的第一个东西（也就是说，紧跟着函数声明的下一行）
+
+You don’t technically need to give your function a docstring, but you always should.
+ 你不需要严格的给你的每个函数提供一个 docstring （文档字符串），但大部分时候你总是应该提供
+
+I know you’ve heard this in every programming class you’ve ever taken, but Python gives you an added incentive: the docstring is available at runtime as an attribute of the function.
+我知道你在曾经使用过的每一种程序语言里面听说过这个，但是 Python 给你提供了额外的诱因：这个 docstring （文档字符串）就像这个函数的一个属性一样在运行时有效
+
+☞Many Python IDEs use the docstring to provide context-sensitive documentation, so that when you type a function name, its docstring appears as a tooltip.
+☞很多 Python 的集成开发环境（IDE）使用 docstring （文档字符串）来提供上下文敏感的文档，以便于当你输入一个函数名称的时候，它的 docstring 会以一个提示文本的方式显式出来
+
+This can be incredibly helpful, but it’s only as good as the docstrings you write.
+这可能会极其有用，但它只有在你写出好的 docstring （文档字符串）的时候才有用
+
+The import Search Path
+import 的搜索路径
+
+Before this goes any further, I want to briefly mention the library search path.
+在进一步讲解之前，我想简要的说一下库的搜索路径
+
+Python looks in several places when you try to import a module.
+当你试图导入（import）一个模块的时候，Python 会寻找几个地方
+
+Specifically, it looks in all the directories defined in sys.path.
+具体来说，它会搜寻在 sys.path 里面定义的所有目录
+
+This is just a list, and you can easily view it or modify it with standard list methods.
+这只是一个列表，你可以容易地查看它或者使用标准的列表方法去修改它
+
+(You’ll learn more about lists in Native Datatypes.)
+（在内置数据类型你会了解更多关于列表的信息
+
+Importing the sys module makes all of its functions and attributes available.
+导入 sys 模块，使它的所有函数和属性可以被使用
+
+sys.path is a list of directory names that constitute the current search path.
+sys.path 是一个目录名称的列表，它构成了当前的搜索路径
+
+(Yours will look different, depending on your operating system, what version of Python you’re running, and where it was originally installed.) Python will look through these directories (in this order) for a .py file whose name matches what you’re trying to import.
+（你会看到不一样的结果，这取决于你的操作系统，你正在运行的 Python 的版本，以及它原来被安装的位置
+
+Actually, I lied;
+其实，我说谎了
+
+the truth is more complicated than that, because not all modules are stored as .py files.
+真实情况比那个更加复杂，因为不是所有的模块都按照 .py 文件来存储
+
+Some are built-in modules;
+有些，比如 sys 模块，属于内置模块（built-in modules）， 他们事实上被置入到 Python 本身里面了
+
+they are actually baked right into Python itself.
+ 内置模块使用起来和常规模块一样，但是无法取得它们的 Python 源代码，因为它们不是用 Python 写的
+
+Built-in modules behave just like regular modules, but their Python source code is not available, because they are not written in Python!
+（ sys 模块是用 C 语言写的
+
+(Like Python itself, these built-in modules are written in C.)
+）
+
+You can add a new directory to Python’s search path at runtime by adding the directory name to sys.path, and then Python will look in that directory as well, whenever you try to import a module.
+通过添加一个目录名称到 sys.path 里，你可以在运行时添加一个新的目录到 Python 的搜索路径中，然后无论任何时候你想导入一个模块，Python 都会同样的去查找那个目录
+
+The effect lasts as long as Python is running.
+只要 Python 在运行，都会一直有效
+
+By using sys.path.insert(0, new_path), you inserted a new directory as the first item of the sys.path list, and therefore at the beginning of Python’s search path.
+通过使用 sys.path.insert(0, new_path)，你可以插入一个新的目录到 sys.path 列表的第一项，从而使其出现在 Python 搜索路径的开头
+
+This is almost always what you want.
+这几乎总是你想要的
+
+In case of naming conflicts (for example, if Python ships with version 2 of a particular library but you want to use version 3), this ensures that your modules will be found and used instead of the modules that came with Python.
+万一出现名字冲突（例如，Python 自带了版本 2 的一个特定的库，但是你想使用版本 3），这个方法就能确保你的模块能够被发现和使用，替代 Python 自带的版本
+
+Everything Is An Object
+一切都是对象
+
+In case you missed it, I just said that Python functions have attributes, and that those attributes are available at runtime.
+假如你还不了解，我重复一下，我刚刚说过 Python 函数有属性，并且那些属性在运行时是可用的
+
+A function, like everything else in Python, is an object.
+一个函数，就像 Python 里面所有其他东西一样，是一个对象
+
+Run the interactive Python shell and follow along:
+运行交互式的 Python Shell，按照下面的执行：
+
+The first line imports the humansize program as a module — a chunk of code that you can use interactively, or from a larger Python program.
+第一行导入了作为一个模块的 humansize 程序 — 我们可以交互式的使用的一大块代码，或者来自于一个更大的 Python 程序
+
+Once you import a module, you can reference any of its public functions, classes, or attributes.
+一旦你导入了一个模块，你就可以引用它的任何公有的函数、类、或者属性
+
+Modules can do this to access functionality in other modules, and you can do it in the Python interactive shell too.
+模块可以通过这种方式访问其他模块的功能，同样的你也可以在 Python 交互式的 Shell 里面做这样的事情
+
+This is an important concept, and you’ll see a lot more of it throughout this book.
+这是一个重要的概念，贯穿这本书，你会看到更多的关于它的内容
+
+When you want to use functions defined in imported modules, you need to include the module name.
+当你想使用在导入的模块中定义的函数的时候，你需要包含模块的名称
+
+So you can’t just say approximate_size;
+因此你不能仅仅指明 approximate_size，它必须是 humansize.approximate_size 才行
+
+it must be humansize.approximate_size.
+如果你曾经使用过 Java 里面的类，你就会依稀的感觉到这种方式比较熟悉
+
+Instead of calling the function as you would expect to, you asked for one of the function’s attributes, __doc__.
+除了按照你期望的方式调用这个函数，你查看了这个函数的其中一个属性： __doc__
+
+☞import in Python is like require in Perl.
+☞Python 里面的 import 就像 Perl 里面的 require
+
+Once you import a Python module, you access its functions with module.function;
+一旦你导入（import）了一个 Python 模块，你就可以通过 module.function 的方式访问它的函数
+
+once you require a Perl module, you access its functions with module::function.
+一旦你要求（require）了一个 Perl 模块，你就可以通过 module::function 的方式访问它的函数
+
+What’s An Object?
+什么是一个对象
+
+Everything in Python is an object, and everything can have attributes and methods.
+Python 里面的所有东西都是对象，所有东西都可以有属性和方法
+
+All functions have a built-in attribute __doc__, which returns the docstring defined in the function’s source code.
+所有函数都有一个内置的属性 __doc__，用来返回这个函数的源代码里面定义的文档字符串（docstring）
+
+The sys module is an object which has (among other things) an attribute called path.
+ sys 模块是一个对象，它有（除了别的以外）一个名叫 path 的属性，等等
+
+Still, this doesn’t answer the more fundamental question: what is an object?
+不过，这还是没有回答这个更基础的问题：什么是一个对象
+
+Different programming languages define “object” in different ways.
+不同的程序语言用不同的方式定义了“对象”
+
+In some, it means that all objects must have attributes and methods;
+在有些地方，它意味着所有的对象必须要有属性和方法
+
+in others, it means that all objects are subclassable.
+在另一些地方，它意味着所有的对象都是可衍生（可以创建子类）的
+
+In Python, the definition is looser.
+在 Python 里面，定义更加宽松
+
+Some objects have neither attributes nor methods, but they could.
+有些对象既没有属性也没有方法，然而它可以有
+
+Not all objects are subclassable.
+不是所有的对象都是可衍生的
+
+But everything is an object in the sense that it can be assigned to a variable or passed as an argument to a function.
+但是，所有的东西都是对象，从这个意义上说，它能够被赋值到一个变量或者作为一个参数传入一个函数
+
+You may have heard the term “first-class object” in other programming contexts.
+你可能从其他程序语言环境中听说过 “first-class object” 的说法
+
+In Python, functions are first-class objects.
+在 Python 中，函数是 first-class objects，你可以将一个函数作为一个参数传递给另外一个函数
+
+You can pass a function as an argument to another function.
+模块是 first-class objects，你可以把整个模块作为一个参数传递给一个函数
+
+Modules are first-class objects.
+类是 first-class objects，而且类的单独的实例也是 first-class objects
+
+This is important, so I’m going to repeat it in case you missed it the first few times: everything in Python is an object.
+这个很重要，因此刚开始我会重复几次以防你忘记了：在 Python 里面所有东西都是对象
+
+Strings are objects.
+字符串是对象，列表是对象，函数是对象，类是对象，类的实例是对象，甚至模块也是对象
+
+Indenting Code
+代码縮进
+
+Python functions have no explicit begin or end, and no curly braces to mark where the function code starts and stops.
+Python 函数没有明确的开始（begin）或者结束（end），也没有用大括号来标记函数从哪里开始从哪里停止
+
+The only delimiter is a colon (:) and the indentation of the code itself.
+唯一的定界符就是一个冒号（:）和代码自身的缩进
+
+Code blocks are defined by their indentation.
+代码块是通过它们的缩进来定义的
+
+By “code block,” I mean functions, if statements, for loops, while loops, and so forth.
+我说的“代码块”，意思是指函数，if 语句、 for 循环、 while 循环，等等
+
+Indenting starts a block and unindenting ends it.
+ 缩进表示一个代码块的开始，非缩进表示一个代码的结束
+
+There are no explicit braces, brackets, or keywords.
+没有明确的大括号、中括号、或者关键字
+
+This means that whitespace is significant, and must be consistent.
+这意味着空白很重要，而且必须要是一致的
+
+In this example, the function code is indented four spaces.
+在这个例子中，这个函数按照四个空格缩进
+
+It doesn’t need to be four spaces, it just needs to be consistent.
+它不需要一定是四个空格，只是需要保持一致
+
+The first line that is not indented marks the end of the function.
+第一个没有缩进的行标记了这个函数的结束
+
+In Python, an if statement is followed by a code block.
+在 Python 中，一个 if 语句后面紧跟了一个代码块
+
+If the if expression evaluates to true, the indented block is executed, otherwise it falls to the else block (if any).
+如果 if 表达式的值为 true 则缩进的代码会被执行，否则它会跳到 else 代码块（如果有的话）
+
+Note the lack of parentheses around the expression.
+注意表达式的周围没有括号
+
+This line is inside the if code block.
+这一行在 if 代码块里面
+
+This raise statement will raise an exception (of type ValueError), but only if size < 0.
+这个 raise 语句将抛出一个异常（类型是 ValueError ），但只有在 size < 0 的时候才抛出
+
+This is not the end of the function.
+这不是函数的结尾
+
+Completely blank lines don’t count.
+完全空白的行不算
+
+They can make the code more readable, but they don’t count as code block delimiters.
+它们使代码更加易读，但它们不算作代码块的定界符
+
+The function continues on the next line.
+这个函数在下一行继续
+
+The for loop also marks the start of a code block.
+这个 for 循环也标记了一个代码块的开始
+
+Code blocks can contain multiple lines, as long as they are all indented the same amount.
+代码块可以包含多行，只要它们都按照同样的数额缩进
+
+This for loop has three lines of code in it.
+这个 for 循环里面有三行
+
+There is no other special syntax for multi-line code blocks.
+对于多行的代码块，也没有其他特殊的语法，只要缩进就可以了
+
+After some initial protests and several snide analogies to Fortran, you will make peace with this and start seeing its benefits.
+在刚开始的一些反对声和一些类比到 Fortran 的嘲笑之后，你将会平和的看待这个并开始领会到它的好处
+
+One major benefit is that all Python programs look similar, since indentation is a language requirement and not a matter of style.
+一个主要的好处是所有的 Python 程序看起来都类似，因为缩进是一个语言的要求，不是一个风格的问题
+
+This makes it easier to read and understand other people’s Python code.
+这使得阅读和理解其他人的 Python 代码更加容易
+
+☞Python uses carriage returns to separate statements and a colon and indentation to separate code blocks.
+☞Python 使用回车符来分割语句，使用一个冒号和缩进来分割代码块
+
+C++ and Java use semicolons to separate statements and curly braces to separate code blocks.
+ C++ 和 Java 使用分号来分割语句，使用大括号来分割代码块
+
+Exceptions
+异常
+
+Exceptions are everywhere in Python.
+异常在 Python 中无处不在
+
+Virtually every module in the standard Python library uses them, and Python itself will raise them in a lot of different circumstances.
+事实上在标准 Python 库里面的每个模块都使用它们，而且在很多不同情形下， Python 自身也会抛出异常
+
+You’ll see them repeatedly throughout this book.
+贯穿这本书，你会反复的看到它们
+
+What is an exception?
+什么是一个异常
+
+Usually it’s an error, an indication that something went wrong.
+通常情况下，它是一个错误，提示某个东西出问题了
+
+(Not all exceptions are errors, but never mind that for now.) Some programming languages encourage the use of error return codes, which you check.
+（不是所有的异常都是错误，但目前来说别担心那个） 某些程序语言鼓励对错误返回代码的使用，你可以对它进行检查
+
+Python encourages the use of exceptions, which you handle.
+ Python 鼓励对异常的使用，你可以对它进行处理
+
+When an error occurs in the Python Shell, it prints out some details about the exception and how it happened, and that’s that.
+当一个错误发生在 Python Shell 里面的时候，它会打印一些关于这个异常以及它如何发生的详细信息，就此而已
+
+This is called an unhandled exception.
+这个被称之为一个 未被处理 的异常
+
+When the exception was raised, there was no code to explicitly notice it and deal with it, so it bubbled its way back up to the top level of the Python Shell, which spits out some debugging information and calls it a day.
+在这个异常被抛出的时候，没有代码注意到并处理它，因此它把它的路径冒出来，返回到 Python Shell 的最顶层，输出一些调试信息，然后圆满结束
+
+In the shell, that's no big deal, but if that happened while your actual Python program was running, the entire program would come to a screeching halt if nothing handles the exception.
+在这个 Shell 中，这没什么大不了的，但是如果在你的实际 Python 程序正在运行的时候发生，并且对这个异常没有做任何处理的话，整个程序就会嘎的一声停下来
+
+Maybe that’s what you want, maybe it isn’t.
+可能那正是你想要的，也可能不是
+
+☞Unlike Java, Python functions don’t declare which exceptions they might raise.
+☞不像 Java， Python 函数不声明它们可能会抛出哪些异常
+
+It’s up to you to determine what possible exceptions you need to catch.
+它取决于你去判断哪些可能的异常是你需要去捕获的
+
+An exception doesn’t need to result in a complete program crash, though.
+一个异常不会造成整个程序崩溃
+
+Exceptions can be handled.
+不过，异常是可以被处理的
+
+Sometimes an exception is really because you have a bug in your code (like accessing a variable that doesn’t exist), but sometimes an exception is something you can anticipate.
+有时候一个异常是真正地由于你代码里面的一个 bug 所引起的（比如访问一个不存在的变量），但有时候一个 异常是你可以预料到的东西
+
+If you’re opening a file, it might not exist.
+如果你在打开一个文件，它有可能不存在
+
+If you’re importing a module, it might not be installed.
+如果你在导入一个模块，它可能没有被安装
+
+If you’re connecting to a database, it might be unavailable, or you might not have the correct security credentials to access it.
+如果你在连接到一个数据库，它有可能是无效的，或者你可能没有访问它需要的安全认证信息
+
+If you know a line of code may raise an exception, you should handle the exception using a try...except block.
+如果你知道某行代码可能抛出一个异常，你应该使用 try...except 块来处理这个异常
+
+☞Python uses try...except blocks to handle exceptions, and the raise statement to generate them.
+☞Python 使用 try...except 块来处理异常，使用 raise 语句来抛出异常
+
+Java and C++ use try...catch blocks to handle exceptions, and the throw statement to generate them.
+ Java 和 C++ 使用 try...catch 块来处理异常，使用 throw 语句来抛出异常
+
+The approximate_size() function raises exceptions in two different cases: if the given size is larger than the function is designed to handle, or if it’s less than zero.
+这个 approximate_size() 函数在两个不同的情况下抛出异常：如果给定的 size 的值大于这个函数打算处理的值，或者如果它小于零
+
+The syntax for raising an exception is simple enough.
+抛出一个异常的语法足够简单
+
+Use the raise statement, followed by the exception name, and an optional human-readable string for debugging purposes.
+使用 raise 语句，紧跟着异常的名称，和一个人们可以读取的字符串用来调试
+
+The syntax is reminiscent of calling a function.
+这个语法让人想起调用的函数
+
+(In reality, exceptions are implemented as classes, and this raise statement is actually creating an instance of the ValueError class and passing the string 'number must be non-negative' to its initialization method.
+（实际上，异常是用类来实现的，这个 raise 语句事实上正在创建一个 ValueError 类的实例并传递一个字符串 'number must be non-negative' 到它的初始化方法里面
+
+But we’re getting ahead of ourselves!)
+但是，我们已经有些超前了
+
+☞You don’t need to handle an exception in the function that raises it.
+☞你不需要在抛出异常的函数里面去处理它
+
+If one function doesn’t handle it, the exception is passed to the calling function, then that function’s calling function, and so on “up the stack.” If the exception is never handled, your program will crash, Python will print a “traceback” to standard error, and that’s the end of that.
+如果一个函数没有处理它，这个异常会被传递到它的调用函数，然后那个函数的调用函数，等等“在这个堆栈上面
+
+Again, maybe that’s what you want;
+” 如果这个异常从来没有被处理，你的程序将会崩溃， Python 将会打印一个 “traceback” 的标准错误信息，并以此结束
+
+it depends on what your program does.
+这也可能正是你想要的，它取决于你的程序具体做什么
+
+Catching Import Errors
+捕获导入错误
+
+One of Python’s built-in exceptions is ImportError, which is raised when you try to import a module and fail.
+其中一个 Python 的内置异常是 ImportError，它会在你试图导入一个模块并且失败的时候抛出
+
+This can happen for a variety of reasons, but the simplest case is when the module doesn’t exist in your import search path.
+这有可能由于多种原因引起，但是最简单的情况是当在你的 import 搜索路径里面找不到这个模块的时候会发生
+
+You can use this to include optional features in your program.
+你可以用这个来包含可选的特性到你的程序中
+
+For example, the chardet library provides character encoding auto-detection.
+例如， 这个 chardet 库 提供字符编码自动检测
+
+Perhaps your program wants to use this library if it exists, but continue gracefully if the user hasn’t installed it.
+也许你的程序想在这个库存在的时候使用它，但是如果用户没有安装，也会优雅地继续执行
+
+You can do this with a try..except block.
+你可以使用 try..except 块来做这样的事情
+
+Later, you can check for the presence of the chardet module with a simple if statement:
+然后，你可以用一个简单的 if 语句来检查 chardet 模块是否存在：
+
+Another common use of the ImportError exception is when two modules implement a common API, but one is more desirable than the other.
+另一个对 ImportError 异常的通常使用是当两个模块实现了一个公共的 API，但我们更想要其中一个的时候
+
+(Maybe it’s faster, or it uses less memory.) You can try to import one module but fall back to a different module if the first import fails.
+（可能它速度更快，或者使用了更少的内存
+
+For example, the XML chapter talks about two modules that implement a common API, called the ElementTree API.
+） 你可以试着导入其中一个模块，并且在这个模块导入失败的时候退回到另一个不同的模块
+
+The first, lxml, is a third-party module that you need to download and install yourself.
+例如， XML 的章节谈论了两个模块实现一个公共的 API，叫做 ElementTree API
+
+The second, xml.etree.ElementTree, is slower but is part of the Python 3 standard library.
+ 第一个，lxml 是一个第三方的模块，你需要自己下载和安装
+
+By the end of this try..except block, you have imported some module and named it etree.
+在这个 try..except 块的结尾，你导入了某个模块并取名为 etree
+
+Since both modules implement a common API, the rest of your code doesn’t need to keep checking which module got imported.
+由于两个模块实现了一个公共的 API，你剩下的代码不需要一直去检查哪个模块被导入了
+
+And since the module that did get imported is always called etree, the rest of your code doesn’t need to be littered with if statements to call differently-named modules.
+而且由于这个一定会被导入的模块总是叫做 etree，你余下的代码就不会被调用不同名称模块的 if 语句所打乱
+
+Unbound Variables
+Unbound 变量
+
+Take another look at this line of code from the approximate_size() function:
+再看看 approximate_size() 函数里面的这行代码：
+
+You never declare the variable multiple, you just assign a value to it.
+你从不声明这个 multiple 变量，你只是给它赋值了
+
+That’s OK, because Python lets you do that.
+这样就可以了，因为 Python 让你那样做
+
+What Python will not let you do is reference a variable that has never been assigned a value.
+ Python 将不会让你做的是，引用了一个变量，但从不给它赋值
+
+Trying to do so will raise a NameError exception.
+这样的尝试将会抛出一个 NameError 的异常
+
+You will thank Python for this one day.
+将来有一天，你会因为这个而感谢 Python 
+
+Everything is Case-Sensitive
+所有的东西都是区分大小写的
+
+All names in Python are case-sensitive: variable names, function names, class names, module names, exception names.
+Python 里面所有的名称都是区分大小写的：变量名、函数名、类名、模块名称、异常名称
+
+If you can get it, set it, call it, construct it, import it, or raise it, it’s case-sensitive.
+如果你可以获取它、设置它、调用它、构建它、导入它、或者抛出它，那么它就是区分大小写的
+
+And so on.
+等等
+
+Running Scripts
+运行脚本
+
+Python modules are objects and have several useful attributes.
+Python 模块是对象，并且有几个有用的属性
+
+You can use this to easily test your modules as you write them, by including a special block of code that executes when you run the Python file on the command line.
+在你编写它们的时候，通过包含一个特殊的仅在你从命令行运行 Python 文件的时候执行的代码块，你可以使用这些属性容易地测试你的模块
+
+Take the last few lines of humansize.py:
+看看 humansize.py 的最后几行代码：
+
+☞Like C, Python uses == for comparison and = for assignment.
+☞像 C 语言一样， Python 使用 == 来做比较，用 = 来赋值
+
+Unlike C, Python does not support in-line assignment, so there’s no chance of accidentally assigning the value you thought you were comparing.
+不同于 C 语言的是， Python 不支持内嵌的赋值，所以没有机会出现你本以为在做比较而且意外的写成赋值的情况
+
+So what makes this if statement special?
+那么是什么使得这个 if 语句特别的呢
+
+Well, modules are objects, and all modules have a built-in attribute __name__.
+ 好吧，模块是对象，并且所有模块都有一个内置的属性 __name__
+
+A module’s __name__ depends on how you’re using the module.
+一个模块的 __name__ 属性取决于你怎么来使用这个模块
+
+If you import the module, then __name__ is the module’s filename, without a directory path or file extension.
+如果你 import 这个模块，那么 __name__ 就是这个模块的文件名，不包含目录的路径或者文件的扩展名
+
+But you can also run the module directly as a standalone program, in which case __name__ will be a special default value, __main__.
+但是你也可以当作一个独立的程序直接运行这个模块，那样的话 __name__ 将是一个特殊的默认值 __main__
+
+Python will evaluate this if statement, find a true expression, and execute the if code block.
+ Python 将会评估这个 if 语句，寻找一个值为 true 的表达式，然后执行这个 if 代码块
+
+In this case, to print two values.
+在这个例子中，打印两个值
+
+And that’s your first Python program!
+这就是你的第一个 Python 程序
+
+Further Reading
+深入阅读
+
+PEP 257: Docstring Conventions explains what distinguishes a good docstring from a great docstring.
+PEP 257: Docstring 约定解释了用什么来从大量的 docstring 中分辨出一个好的 docstring
+
+Python Tutorial: Documentation Strings also touches on the subject.
+Python 教程：文档字符串也略微提到了这个主题
+
+PEP 8: Style Guide for Python Code discusses good indentation style.
+PEP 8: Python 代码的风格指南讨论了好的缩进风格
+
+Python Reference Manual explains what it means to say that everything in Python is an object, because some people are pedants and like to discuss that sort of thing at great length.
+Python 参考手册解释了为什么说 Python 里面所有东西都是对象，因为有些人是书呆子，喜欢详细地讨论一些东西
+
+© 2001–11 Mark Pilgrim
+© 2001–9 Mark Pilgrim
+

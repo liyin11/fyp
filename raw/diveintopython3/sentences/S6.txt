@@ -1,0 +1,1113 @@
+You are here: Home ‣ Dive Into Python 3 ‣
+当前位置:首页 ‣ 深入Python 3 ‣
+
+Difficulty level: ♦♦♦♢♢
+Updated October 7, 2009 • Difficulty level: ♦♦♦♢♢
+
+Regular Expressions
+正则表达式
+
+❝ Some people, when confronted with a problem, think “I know, I’ll use regular expressions.” Now they have two problems.
+❝ Some people, when confronted with a problem, think “I know, I’ll use regular expressions.” Now they have two problems. ❞ — Jamie Zawinski
+
+Diving In
+深入
+
+Getting a small bit of text out of a large block of text is a challenge.
+所有的现代编程语言都有内建字符串处理函数
+
+In Python, strings have methods for searching and replacing: index(), find(), split(), count(), replace(), &c.
+在python里查找，替换字符串的方法是：index()、 find()、split()、 count()、 replace()等
+
+But these methods are limited to the simplest of cases.
+但这些方法都只是最简单的字符串处理
+
+For example, the index() method looks for a single, hard-coded substring, and the search is always case-sensitive.
+比如：用index()方法查找单个子字符串，而且查找总是区分大小写的
+
+To do case-insensitive searches of a string s, you must call s.lower() or s.upper() and make sure your search strings are the appropriate case to match.
+为了使用不区分大小写的查找，可以使用s.lower()或者s.upper()，但要确认你查找的字符串的大小写是匹配的
+
+The replace() and split() methods have the same limitations.
+replace() 和split() 方法有相同的限制
+
+If your goal can be accomplished with string methods, you should use them.
+如果使用string的方法就可以达到你的目的，那么你就使用它们
+
+They’re fast and simple and easy to read, and there’s a lot to be said for fast, simple, readable code.
+它们速度快又简单，并且很容易阅读
+
+But if you find yourself using a lot of different string functions with if statements to handle special cases, or if you’re chaining calls to split() and join() to slice-and-dice your strings, you may need to move up to regular expressions.
+但是如果你发现自己要使用大量的if语句，以及很多字符串函数来处理一些特例，或者说你需要组合调用split() 和 join() 来切片、合并你的字符串，你就应该使用正则表达式
+
+Regular expressions are a powerful and (mostly) standardized way of searching, replacing, and parsing text with complex patterns of characters.
+正则表达式有强大并且标准化的方法来处理字符串查找、替换以及用复杂模式来解析文本
+
+Although the regular expression syntax is tight and unlike normal code, the result can end up being more readable than a hand-rolled solution that uses a long chain of string functions.
+正则表达式的语法比我们的程序代码更紧凑，格式更严格，比用组合调用字符串处理函数的方法更具有可读性
+
+There are even ways of embedding comments within regular expressions, so you can include fine-grained documentation within them.
+甚至你可以在正则表达式中嵌入注释信息，这样就可以使它有自文档化的功能
+
+☞If you’ve used regular expressions in other languages (like Perl, JavaScript, or PHP), Python’s syntax will be very familiar.
+☞如果你在其他语言中使用过正则表达式（比如perl，javascript或者php），python的正则表达式语法和它们的很像
+
+Read the summary of the re module to get an overview of the available functions and their arguments.
+阅读re模块的摘要信息可以了解到一些处理函数以及它们参数的一些概况
+
+Case Study: Street Addresses
+案例研究: 街道地址
+
+This series of examples was inspired by a real-life problem I had in my day job several years ago, when I needed to scrub and standardize street addresses exported from a legacy system before importing them into a newer system.
+下面一系列的示例的灵感来自于现实生活中我几年前每天的工作
+
+(See, I don’t just make this stuff up;
+我需要把一些街道地址导入一个新的系统，在这之前我要从一个遗留的老系统中清理和标准化这些街道地址
+
+it’s actually useful.) This example shows how I approached the problem.
+下面这个例子展示我怎么解决这个问题
+
+My goal is to standardize a street address so that 'ROAD' is always abbreviated as 'RD.'.
+我的目的是要标准化街道的格式
+
+At first glance, I thought this was simple enough that I could just use the string method replace().
+而‘ROAD’总是在.RD的前面
+
+After all, all the data was already uppercase, so case mismatches would not be a problem.
+刚开始我以为只需要简单的使用string的replace()方法就可以
+
+And the search string, 'ROAD', was a constant.
+所有的数据都是大写的，因此不会出现大小写不匹配的问题
+
+And in this deceptively simple example, s.replace() does indeed work.
+而查找的字符串‘ROAD’也是一个常量
+
+Life, unfortunately, is full of counterexamples, and I quickly discovered this one.
+事实上，不幸的是，我很快发现一个问题，在一些地址中‘ROAD’出现了两次，一个是前面的街道名里带了‘ROAD’，一个是‘ROAD’本身
+
+The problem here is that 'ROAD' appears twice in the address, once as part of the street name 'BROAD' and once as its own word.
+repalce()发现了两个就把他们都给替换掉了
+
+The replace() method sees these two occurrences and blindly replaces both of them;
+这意味着，我的地址错了
+
+To solve the problem of addresses with more than one 'ROAD' substring, you could resort to something like this: only search and replace 'ROAD' in the last four characters of the address (s[-4:]), and leave the string alone (s[:-4]).
+为了解决地址中出现超过一个‘ROAD’子字符串的问题，你可能会这么考虑：只在地址的最后四个字符中查找和替换‘‘ROAD’（s[-4:]）
+
+But you can see that this is already getting unwieldy.
+然后把剩下的字符串独立开来处理（s[:-4]）
+
+For example, the pattern is dependent on the length of the string you’re replacing.
+这个方法很笨拙
+
+(If you were replacing 'STREET' with 'ST.', you would need to use s[:-6] and s[-6:].replace(...).) Would you like to come back in six months and debug this?
+比如，这个方法会依赖于你要替换的字符串长度（如果你用‘.ST’来替换‘STREET’，就需要在s[-6:]中查找‘STREET’，然后再取s[:-6]
+
+I know I wouldn’t.
+你难道还想半年后回来继续修改BUG
+
+It’s time to move up to regular expressions.
+是时候转换到正则表达式了
+
+In Python, all functionality related to regular expressions is contained in the re module.
+在python中，所有的正则表达式相关功能都包含在re模块中
+
+Take a look at the first parameter: 'ROAD$'.
+注意第一个参数‘ROAD$’，这是一个匹配‘ROAD’仅仅出现在字符串结尾的正则表达式
+
+This is a simple regular expression that matches 'ROAD' only when it occurs at the end of a string.
+$ 表示“字符串结尾”
+
+The $ means “end of the string.” (There is a corresponding character, the caret ^, which means “beginning of the string.”) Using the re.sub() function, you search the string s for the regular expression 'ROAD$' and replace it with 'RD.'.
+（还有一个相应的表示“字符串开头”的字符 ^ ）
+
+This matches the ROAD at the end of the string s, but does not match the ROAD that’s part of the word BROAD, because that’s in the middle of s.
+正则表达式模块的re.sub()函数可以做字符串替换，它在字符串s中用正则表达式‘ROAD$’来搜索并替换成‘RD.’
+
+Continuing with my story of scrubbing addresses, I soon discovered that the previous example, matching 'ROAD' at the end of the address, was not good enough, because not all addresses included a street designation at all.
+继续我的处理街道地址的故事
+
+Some addresses simply ended with the street name.
+我很快发现，在之前的例子中，匹配地址结尾的‘ROAD’不够好
+
+I got away with it most of the time, but if the street name was 'BROAD', then the regular expression would match 'ROAD' at the end of the string as part of the word 'BROAD', which is not what I wanted.
+因为并不是所有的地址结尾都有它
+
+What I really wanted was to match 'ROAD' when it was at the end of the string and it was its own word (and not a part of some larger word).
+我真正想要的‘ROAD’，必须是匹配到字符串结尾，并且是独立的词（他不能是某个比较长的词的一部分）
+
+To express this in a regular expression, you use \b, which means “a word boundary must occur right here.” In Python, this is complicated by the fact that the '\' character in a string must itself be escaped.
+为了在正则表达式中表达这个独立的词，你可以使用‘\b’
+
+This is sometimes referred to as the backslash plague, and it is one reason why regular expressions are easier in Perl than in Python.
+它的意思是“在右边必须有一个分隔符”
+
+On the down side, Perl mixes regular expressions with other syntax, so if you have a bug, it may be hard to tell whether it’s a bug in syntax or a bug in your regular expression.
+在python中，比较复杂的是‘\’字符必须被转义，这有的时候会导致‘\’字符传染（想想可能还要对\字符做转义的情况）
+
+To work around the backslash plague, you can use what is called a raw string, by prefixing the string with the letter r.
+为了解决‘\’字符传染的问题，可以使用原始字符串
+
+This tells Python that nothing in this string should be escaped;
+这只需要在字符串的前面添加一个字符‘r’
+
+'\t' is a tab character, but r'\t' is really the backslash character \ followed by the letter t.
+它告诉python，字符串中没有任何字符需要转义
+
+I recommend always using raw strings when dealing with regular expressions;
+‘\t’是一个制表符，但r‘\t’只是一个字符‘\’紧跟着一个字符t
+
+otherwise, things get too confusing too quickly (and regular expressions are confusing enough already).
+我建议在处理正则表达式的时候总是使用原始字符串
+
+*sigh* Unfortunately, I soon found more cases that contradicted my logic.
+哎，不幸的是，我发现了更多的地方与我的逻辑背道而驰
+
+In this case, the street address contained the word 'ROAD' as a whole word by itself, but it wasn’t at the end, because the address had an apartment number after the street designation.
+街道地址包含了独立的单词‘ROAD’，但并不是在字符串尾，因为街道后面还有个单元号
+
+Because 'ROAD' isn’t at the very end of the string, it doesn’t match, so the entire call to re.sub() ends up replacing nothing at all, and you get the original string back, which is not what you want.
+因为'ROAD'并不是最靠后，就不能匹配，因此re.sub()最后没有做任何的替换，只是返回了一个原始的字符串，这并不是你想要的
+
+To solve this problem, I removed the $ character and added another \b.
+为了解决这个问题，我删除了正则表达式尾部的$，然后添加了一个\b
+
+Now the regular expression reads “match 'ROAD' when it’s a whole word by itself anywhere in the string,” whether at the end, the beginning, or somewhere in the middle.
+现在这个正则表达式的意思是“在字符串的任意位置匹配独立的‘ROAD’单词”不管是在字符串的结束还是开始，或者中间的任意一个位置
+
+Case Study: Roman Numerals
+案例研究: 罗马数字
+
+You’ve most likely seen Roman numerals, even if you didn’t recognize them.
+你肯定见过罗马数字，即使你不认识他们
+
+You may have seen them in copyrights of old movies and television shows (“Copyright MCMXLVI” instead of “Copyright 1946”), or on the dedication walls of libraries or universities (“established MDCCCLXXXVIII” instead of “established 1888”).
+你可能在版权信息、老电影、电视、大学或者图书馆的题词墙看到（用Copyright MCMXLVI” 表示版权信息，而不是用 “Copyright 1946”），你也可能在大纲或者目录参考中看到他们
+
+You may also have seen them in outlines and bibliographical references.
+这种系统的数字表达方式可以追溯到罗马帝国（因此而得名）
+
+In Roman numerals, there are seven characters that are repeated and combined in various ways to represent numbers.
+在罗马数字中，有七个不同的数字可以以不同的方式结合起来表示其他数字
+
+I = 1
+I = 1
+
+V = 5
+V = 5
+
+X = 10
+X = 10
+
+L = 50
+L = 50
+
+C = 100
+C = 100
+
+D = 500
+D = 500
+
+M = 1000
+M = 1000
+
+The following are some general rules for constructing Roman numerals:
+下面是几个通常的规则来构成罗马数字：
+
+Sometimes characters are additive.
+大部分时候用字符相叠加来表示数字
+
+I is 1, II is 2, and III is 3.
+I是1， II是2， III是3
+
+VI is 6 (literally, “5 and 1”), VII is 7, and VIII is 8.
+VI是6（挨个看来，是“5 和 1”的组合），VII是7，VIII是8
+
+The tens characters (I, X, C, and M) can be repeated up to three times.
+含有10的字符（I，X，C和M）最多可以重复出现三个
+
+At 4, you need to subtract from the next highest fives character.
+为了表示4，必须用同一位数的下一个更大的数字5来减去一
+
+You can't represent 4 as IIII;
+不能用IIII来表示4，而应该是IV（意思是比5小1）
+
+instead, it is represented as IV (“1 less than 5”).
+40写做XL（比50小10），41写做XLI，42写做XLII，43写做XLIII，44写做XLIV（比50小10并且比5小1）
+
+Sometimes characters are… the opposite of additive.
+有些时候表示方法恰恰相反
+
+By putting certain characters before others, you subtract from the final value.
+为了表示一个中间的数字，需要从一个最终的值来减
+
+For example, at 9, you need to subtract from the next highest tens character: 8 is VIII, but 9 is IX (“1 less than 10”), not VIIII (since the I character can not be repeated four times).
+比如：9需要从10来减：8是VIII，但9确是IX（比10小1），并不是VIII（I字符不能重复4次）
+
+ is XC, 900 is CM.
+90是XC，900是CM
+
+The fives characters can not be repeated.
+表示5的字符不能在一个数字中重复出现
+
+ is always represented as X, never as VV.
+10只能用X表示，不能用VV表示
+
+ is always C, never LL.
+100只能用C表示，而不是LL
+
+Roman numerals are read left to right, so the order of characters matters very much.
+罗马数字是从左到右来计算，因此字符的顺序非常重要
+
+DC is 600;
+DC表示600，而CD完全是另一个数字400（比500小100）
+
+CD is a completely different number (400, “100 less than 500”).
+CI是101，IC不是一个罗马数字（因为你不能从100减1，你只能写成XCIX，表示比100小10，且比10小1）
+
+Checking For Thousands
+检查千位数
+
+What would it take to validate that an arbitrary string is a valid Roman numeral?
+怎么验证一个字符串是否是一个合法的罗马数字呢
+
+Let’s take it one digit at a time.
+我们可以每次取一个字符来处理
+
+Since Roman numerals are always written highest to lowest, let’s start with the highest: the thousands place.
+因为罗马数字总是从高位到低位来书写
+
+For numbers 1000 and higher, the thousands are represented by a series of M characters.
+我们从最高位的千位开始
+
+This pattern has three parts.
+这个模式有三部分
+
+^ matches what follows only at the beginning of the string.
+^表示必须从字符串开头匹配
+
+If this were not specified, the pattern would match no matter where the M characters were, which is not what you want.
+如果没有指定^，这个模式将在任意位置匹配M，这个可能并不是你想要的
+
+You want to make sure that the M characters, if they’re there, are at the beginning of the string.
+你需要确认是否要匹配字符串开始的M，还是匹配单个M字符
+
+M?
+因为它重复了三次，你要在一行中的任意位置匹配0到3次的M字符
+
+optionally matches a single M character.
+$匹配字符串结束
+
+Since this is repeated three times, you’re matching anywhere from zero to three M characters in a row.
+当它和匹配字符串开始的^一起使用，表示匹配整个字符串
+
+And $ matches the end of the string.
+没有任何一个字符可在M的前面或者后面
+
+The essence of the re module is the search() function, that takes a regular expression (pattern) and a string ('M') to try to match against the regular expression.
+re模块最基本的方法是search()函数
+
+If a match is found, search() returns an object which has various methods to describe the match;
+它使用正则表达式来匹配字符串（M）
+
+if no match is found, search() returns None, the Python null value.
+如果成功匹配，search()返回一个匹配对象
+
+All you care about at the moment is whether the pattern matches, which you can tell by just looking at the return value of search().
+匹配对象中有很多的方法来描述这个匹配结果信息
+
+'M' matches this regular expression, because the first optional M matches and the second and third optional M characters are ignored.
+如果没有匹配到，search()返回None
+
+'MM' matches because the first and second optional M characters match and the third M is ignored.
+‘MM’匹配成功
+
+'MMM' matches because all three M characters match.
+‘MMM’匹配成功
+
+'MMMM' does not match.
+‘MMMM’匹配失败
+
+All three M characters match, but then the regular expression insists on the string ending (because of the $ character), and the string doesn’t end yet (because of the fourth M).
+正则表达式中所有三个M都匹配到，接着正则表达式试图匹配字符串结束，这个时候失败了
+
+So search() returns None.
+因此search()函数返回None
+
+Interestingly, an empty string also matches this regular expression, since all the M characters are optional.
+有趣的是，空字符串也能匹配成功，因为正则表达式中的所有M都是可选的
+
+Checking For Hundreds
+检查百位数
+
+The hundreds place is more difficult than the thousands, because there are several mutually exclusive ways it could be expressed, depending on its value.
+百位的匹配比千位复杂
+
+100 = C
+100 = C
+
+200 = CC
+200 = CC
+
+300 = CCC
+300 = CCC
+
+400 = CD
+400 = CD
+
+500 = D
+500 = D
+
+600 = DC
+600 = DC
+
+700 = DCC
+700 = DCC
+
+800 = DCCC
+800 = DCCC
+
+900 = CM
+900 = CM
+
+So there are four possible patterns:
+因此会有四种可能的匹配模式：
+
+CM
+CM
+
+CD
+CD
+
+Zero to three C characters (zero if the hundreds place is 0)
+可能有0到3个字符C（0个表示千位为0）
+
+D, followed by zero to three C characters
+D紧跟在0到3个字符C的后面
+
+The last two patterns can be combined:
+这两个模式还可以组合起来表示：
+
+an optional D, followed by zero to three C characters
+一个可选的D，后面跟着0到3个字符C
+
+This example shows how to validate the hundreds place of a Roman numeral.
+下面的例子展示了怎样在罗马数字中验证百位
+
+This pattern starts out the same as the previous one, checking for the beginning of the string (^), then the thousands place (M?M?M?).
+这个正则表达式的写法从上面千位的匹配方法接着往后写
+
+Then it has the new part, in parentheses, which defines a set of three mutually exclusive patterns, separated by vertical bars: CM, CD, and D?C?C?C?
+检查字符串开始（^），然后是千位，后面才是新的部分
+
+(which is an optional D followed by zero to three optional C characters).
+这里用圆括号定义了三个不同的匹配模式，他们是用竖线分隔的：CM，CD和D?C?C?C?（这表示是一个可选的D，以及紧跟的0到3个可选的字符C）
+
+The regular expression parser checks for each of these patterns in order (from left to right), takes the first one that matches, and ignores the rest.
+正则表达式按从左到右的顺序依次匹配，如果第一个CM匹配成功，用竖线分隔这几个中的后面其他的都会被忽略
+
+'MCM' matches because the first M matches, the second and third M characters are ignored, and the CM matches (so the CD and D?C?C?C?
+‘MCM’匹配成功
+
+patterns are never even considered).
+因为第一个M匹配到，第二个和第三个M被忽略
+
+MCM is the Roman numeral representation of 1900.
+后面的CM匹配到（因此后面的CD和D?C?C?C?根本就不被考虑匹配了）
+
+'MD' matches because the first M matches, the second and third M characters are ignored, and the D?C?C?C?
+‘MD’匹配成功
+
+pattern matches D (each of the three C characters are optional and are ignored).
+因为第一个M匹配到，第二个和第三个M被忽略
+
+MD is the Roman numeral representation of 1500.
+然后D?C?C?C?匹配到D（后面的三个C都是可选匹配的，都被忽略掉）
+
+'MMMCCC' matches because all three M characters match, and the D?C?C?C?
+‘MMMCCC’匹配成功
+
+pattern matches CCC (the D is optional and is ignored).
+因为前面三个M都匹配到
+
+MMMCCC is the Roman numeral representation of 3300.
+后面的D?C?C?C?匹配CCC（D是可选的，它被忽略了）
+
+'MCMC' does not match.
+‘MCMC’匹配失败
+
+The first M matches, the second and third M characters are ignored, and the CM matches, but then the $ does not match because you’re not at the end of the string yet (you still have an unmatched C character).
+第一个M被匹配，第二个和第三个M被忽略，然后CM匹配成功
+
+The C does not match as part of the D?C?C?C?
+紧接着$试图匹配字符串结束，但后面是C，匹配失败
+
+pattern, because the mutually exclusive CM pattern has already matched.
+C也不能被D?C?C?C?匹配到，因为CM和它只能匹配其中一个，而CM已经匹配过了
+
+Interestingly, an empty string still matches this pattern, because all the M characters are optional and ignored, and the empty string matches the D?C?C?C?
+有趣的是，空字符串仍然可以匹配成功
+
+pattern where all the characters are optional and ignored.
+因为所有的M都是可选的，都可以被忽略
+
+Whew!
+哈哈，看看正则表达式如此快速的处理了这些令人厌恶的东西
+
+See how quickly regular expressions can get nasty?
+你已经可以找到千位数和百位数了
+
+And you’ve only covered the thousands and hundreds places of Roman numerals.
+后面的十位和个位的处理和千位、百位的处理是一样的
+
+But if you followed all that, the tens and ones places are easy, because they’re exactly the same pattern.
+但我们可以看看怎么用另一种方式来写这个正则表达式
+
+Using The {n,m} Syntax
+使用语法{n,m}
+
+In the previous section, you were dealing with a pattern where the same character could be repeated up to three times.
+在上一节中，你处理过同样的字符可以重复0到3次的情况
+
+There is another way to express this in regular expressions, which some people find more readable.
+实际上，还有另一种正则表达式的书写方式可以表达同样的意思，而且这种表达方式更具有可读性
+
+First look at the method we already used in the previous example.
+首先看看我们在前面例子中使用的方法
+
+This matches the start of the string, and then the first optional M, but not the second and third M (but that’s okay because they’re optional), and then the end of the string.
+正则表达式匹配字符串开始，然后是第一个可选的字符M，但没有第二个和第三个M（没问题
+
+This matches the start of the string, and then the first and second optional M, but not the third M (but that’s okay because it’s optional), and then the end of the string.
+正则表达式匹配字符串开始，然后是第一个和第二个M，第三个被忽略（因为它是可选的），最后匹配字符串结尾
+
+This matches the start of the string, and then all three optional M, and then the end of the string.
+正则表达式匹配字符串开始，然后是三个M，接着是字符串结尾
+
+This matches the start of the string, and then all three optional M, but then does not match the end of the string (because there is still one unmatched M), so the pattern does not match and returns None.
+正则表达式匹配字符串开始，然后是三个M，但匹配字符串结尾失败（因为后面还有个M）
+
+This pattern says: “Match the start of the string, then anywhere from zero to three M characters, then the end of the string.” The 0 and 3 can be any numbers;
+这个正则表达式的意思是“匹配字符串开始，然后是任意的0到3个M字符，再是字符串结尾”
+
+if you want to match at least one but no more than three M characters, you could say M{1,3}.
+0和3的位置可以写任意的数字
+
+This matches the start of the string, then one M out of a possible three, then the end of the string.
+匹配字符串开始，然后匹配了1次M，这在0到3的范围内，接着是字符串结尾
+
+This matches the start of the string, then two M out of a possible three, then the end of the string.
+匹配字符串开始，然后匹配了2次M，这在0到3的范围内，接着是字符串结尾
+
+This matches the start of the string, then three M out of a possible three, then the end of the string.
+匹配字符串开始，然后匹配了3次M，这在0到3的范围内，接着是字符串结尾
+
+This matches the start of the string, then three M out of a possible three, but then does not match the end of the string.
+匹配字符串开始，然后匹配了3次M，这在0到3的范围内，但无法匹配后面的字符串结尾
+
+The regular expression allows for up to only three M characters before the end of the string, but you have four, so the pattern does not match and returns None.
+正则表达式在字符串结尾之前最多允许匹配3次M，但这里有4个
+
+Checking For Tens And Ones
+检查十位和个位
+
+Now let’s expand the Roman numeral regular expression to cover the tens and ones place.
+现在，我们继续解释正则表达式匹配罗马数字中的十位和个位
+
+This example shows the check for tens.
+下面的例子是检查十位
+
+This matches the start of the string, then the first optional M, then CM, then XL, then the end of the string.
+匹配字符串开始，然后是第一个可选的M，接着是CM，XL，以及字符串结尾
+
+Remember, the (A|B|C) syntax means “match exactly one of A, B, or C”.
+记住：（A|B|C）的意思是“只匹配A，B或者C中的一个”
+
+You match XL, so you ignore the XC and L?X?X?X?
+你匹配了XL，因此XC和L?X?X?X?被忽略，紧接着将检查字符串结尾
+
+choices, and then move on to the end of the string.
+MCMXL在罗马数字中表示1940
+
+This matches the start of the string, then the first optional M, then CM, then L?X?X?X?.
+匹配字符串开始，然后是第一个可选的M，接着是CM
+
+Of the L?X?X?X?, it matches the L and skips all three optional X characters.
+后面的L被L?X?X?X?匹配，这里忽略掉L后面所有的X
+
+Then you move to the end of the string.
+然后检查字符串结尾
+
+MCML is the Roman numeral representation of 1950.
+MCML在罗马数字中表示1950
+
+This matches the start of the string, then the first optional M, then CM, then the optional L and the first optional X, skips the second and third optional X, then the end of the string.
+匹配字符串开始，然后是第一个可选的M，接着是CM，还有可选的L以及第一个X，跳过后面的第二个和第三个X
+
+MCMLX is the Roman numeral representation of 1960.
+然后检查字符串结尾
+
+This matches the start of the string, then the first optional M, then CM, then the optional L and all three optional X characters, then the end of the string.
+匹配字符串开始，然后是第一个可选的M，接着是CM，还有可选的L以及所有的三个X
+
+MCMLXXX is the Roman numeral representation of 1980.
+然后是字符串结尾
+
+This matches the start of the string, then the first optional M, then CM, then the optional L and all three optional X characters, then fails to match the end of the string because there is still one more X unaccounted for.
+匹配字符串开始，然后是第一个可选的M，接着是CM，还有可选的L以及所有的三个X
+
+So the entire pattern fails to match, and returns None.
+但匹配字符串结尾失败
+
+MCMLXXXX is not a valid Roman numeral.
+因为后面还有一个X
+
+The expression for the ones place follows the same pattern.
+个位数的匹配是同样的模式，我会告诉你细节以及最终结果
+
+So what does that look like using this alternate {n,m} syntax?
+使用{n,m}的语法来替代上面的写法会是什么样子呢
+
+This example shows the new syntax.
+下面的例子展示了这种新的语法
+
+This matches the start of the string, then one of a possible three M characters, then D?C{0,3}.
+^匹配字符串开始，然后表达式M{0,3}可以匹配0到3个的M
+
+Of that, it matches the optional D and zero of three possible C characters.
+这里只能匹配一个M，也是可以的
+
+Moving on, it matches L?X{0,3} by matching the optional L and zero of three possible X characters.
+接着，D?C{0,3}可以匹配一个可选的D，以及0到3个可能的C
+
+Then it matches V?I{0,3} by matching the optional V and zero of three possible I characters, and finally the end of the string.
+这里我们实际只有一个D可以匹配到，正则表达式中的C全部忽略
+
+MDLV is the Roman numeral representation of 1555.
+往后，L?X{0,3}只能匹配到一个可选的L，没有X
+
+This matches the start of the string, then two of a possible three M characters, then the D?C{0,3} with a D and one of three possible C characters;
+^匹配字符串开始，然后匹配到2个M，D?C{0,3}匹配到可选的D，以及1个可能的C
+
+then L?X{0,3} with an L and one of three possible X characters;
+往后，L?X{0,3}匹配到可选的L和1个X
+
+then V?I{0,3} with a V and one of three possible I characters;
+接着V?I{0,3}匹配可选的V以及1个可选的I字符
+
+then the end of the string.
+最后匹配字符串结束
+
+MMDCLXVI is the Roman numeral representation of 2666.
+MMDCLXVI表示2666
+
+This matches the start of the string, then three out of three M characters, then D?C{0,3} with a D and three out of three C characters;
+^匹配字符串开始，然后是3个M，D?C{0,3}匹配到可选的D，以及3个C
+
+then L?X{0,3} with an L and three out of three X characters;
+往后，L?X{0,3}匹配可选的L和3个X
+
+then V?I{0,3} with a V and three out of three I characters;
+接着V?I{0,3}匹配可选的V以及3个I
+
+then the end of the string.
+最后匹配字符串结束
+
+MMMDCCCLXXXVIII is the Roman numeral representation of 3888, and it’s the longest Roman numeral you can write without extended syntax.
+MMMDCCCLXXXVIII表示3888
+
+Watch closely.
+靠近一点，（我就像一个魔术师：“靠近一点，孩子们
+
+(I feel like a magician.
+我要从帽子里拿出一只兔子
+
+“Watch closely, kids, I’m going to pull a rabbit out of my hat.”) This matches the start of the string, then zero out of three M, then matches D?C{0,3} by skipping the optional D and matching zero out of three C, then matches L?X{0,3} by skipping the optional L and matching zero out of three X, then matches V?I{0,3} by skipping the optional V and matching one out of three I.
+”）^匹配字符串开始，然后M可以不被匹配（因为是匹配0到3次），接着匹配D?C{0,3}，这里跳过了可选的D，并且也没有匹配到C，下面L?X{0,3}也一样，跳过了L，没有匹配X
+
+Then the end of the string.
+V?I{0,3}也跳过了V，匹配了1个I
+
+Whoa.
+然后匹配字符串结尾
+
+If you followed all that and understood it on the first try, you’re doing better than I did.
+如果你一次性就理解了上面所有的例子，那你会做的比我还好
+
+Now imagine trying to understand someone else’s regular expressions, in the middle of a critical function of a large program.
+现在想象一下以前的做法，在一个大程序用条件判断和函数来处理现在正则表达式处理的内容，或者想象一下前面写的正则表达式
+
+Or even imagine coming back to your own regular expressions a few months later.
+我们发现，那些做法一点也不漂亮
+
+Now let’s explore an alternate syntax that can help keep your expressions maintainable.
+现在我们来研究一下怎么让你的正则表达式更具有维护性，但表达的意思却是相同的
+
+Verbose Regular Expressions
+松散正则表达式
+
+So far you’ve just been dealing with what I’ll call “compact” regular expressions.
+到目前为止，你只是处理了一些小型的正则表达式
+
+As you’ve seen, they are difficult to read, and even if you figure out what one does, that’s no guarantee that you’ll be able to understand it six months later.
+就像你所看到的，他们难以阅读，甚至你不能保证半年后，你还能理解这些东西，并指出他们是干什么的
+
+What you really need is inline documentation.
+所以你需要在正则表达式内部添加一些说明信息
+
+Python allows you to do this with something called verbose regular expressions.
+python允许你使用松散正字表达式来达到目的
+
+A verbose regular expression is different from a compact regular expression in two ways:
+松散正字表达式和普通紧凑的正则表达式有两点不同：
+
+Whitespace is ignored.
+空白符被忽略
+
+Spaces, tabs, and carriage returns are not matched as spaces, tabs, and carriage returns.
+空格、制表符和回车在正则表达式中并不会匹配空格、制表符、回车
+
+They’re not matched at all.
+如果你想在正则表达式中匹配他们，可以在前面加一个\来转义
+
+Comments are ignored.
+注释信息被忽略
+
+A comment in a verbose regular expression is just like a comment in Python code: it starts with a # character and goes until the end of the line.
+松散正字表达式中的注释和python代码中的一样，都是以#开头直到行尾
+
+In this case it’s a comment within a multi-line string instead of within your source code, but it works the same way.
+它可以在多行正则表达式中增加注释信息，这就避免了在python代码中的多行注释
+
+This will be more clear with an example.
+下面是一个更加清楚的例子
+
+Let’s revisit the compact regular expression you’ve been working with, and make it a verbose regular expression.
+我们再来看看把上面的紧凑正则表达式改写成松散正字表达式后的样子
+
+The most important thing to remember when using verbose regular expressions is that you need to pass an extra argument when working with them: re.VERBOSE is a constant defined in the re module that signals that the pattern should be treated as a verbose regular expression.
+注意，如果要使用松散正则表达式，需要传递一个叫re.VERBOSE的参数
+
+As you can see, this pattern has quite a bit of whitespace (all of which is ignored), and several comments (all of which are ignored).
+就像你看到的那样，正则表达式中有很多空白符，他们都被忽略掉了
+
+Once you ignore the whitespace and the comments, this is exactly the same regular expression as you saw in the previous section, but it’s a lot more readable.
+还有一些注释信息，当然也被正则表达式忽略掉
+
+This matches the start of the string, then one of a possible three M, then CM, then L and three of a possible three X, then IX, then the end of the string.
+匹配字符串开始，然后是1个M，接着是CM，还有一个L和三个X，后面是IX，最后匹配字符串结尾
+
+This matches the start of the string, then three of a possible three M, then D and three of a possible three C, then L and three of a possible three X, then V and three of a possible three I, then the end of the string.
+匹配字符串开始，然后是3个M，接着是D和三个C，以及三个X，一个V，三个I，最后匹配字符串结尾
+
+This does not match.
+这个不能匹配成功
+
+Why?
+为什么呢
+
+Because it doesn’t have the re.VERBOSE flag, so the re.search function is treating the pattern as a compact regular expression, with significant whitespace and literal hash marks.
+因为他没有re.VERBOSE标记
+
+Python can’t auto-detect whether a regular expression is verbose or not.
+因此search()会把他们整个当成一个紧凑的正则表达式，包括里面的空白符
+
+Python assumes every regular expression is compact unless you explicitly state that it is verbose.
+python不会自动检测一个正则表达式是否是松散正则表达式，而需要明确的指定
+
+Case study: Parsing Phone Numbers
+案例研究: 解析电话号码
+
+So far you’ve concentrated on matching whole patterns.
+到目前为止，我们主要关注于整个表达式是否能匹配到，要么整个匹配，要么整个都不匹配
+
+Either the pattern matches, or it doesn’t.
+但正则表达式还有更加强大的功能
+
+But regular expressions are much more powerful than that.
+如果正则表达式成功匹配，你可以找到正则表达式中某一部分匹配到什么
+
+This example came from another real-world problem I encountered, again from a previous day job.
+这个例子来自于我在真实世界中遇到的另一个问题
+
+The problem: parsing an American phone number.
+这个问题是：解析一个美国电话号码
+
+The client wanted to be able to enter the number free-form (in a single field), but then wanted to store the area code, trunk, number, and optionally an extension separately in the company’s database.
+客户想用自由的格式来输入电话号码（在单个输入框），这需要存储区域码，交换码以及后四码（美国的电话分为区域码、交换码和后四码）
+
+I scoured the Web and found many examples of regular expressions that purported to do this, but none of them were permissive enough.
+我在网上搜索，发现了很多解决这个问题的正则表达式，但是它们都能不完全满足我的要求
+
+Here are the phone numbers I needed to be able to accept:
+下面是我要接受的电话号码格式：
+
+800-555-1212
+800-555-1212
+
+800 555 1212
+800 555 1212
+
+800.555.1212
+800.555.1212
+
+(800) 555-1212
+(800) 555-1212
+
+1-800-555-1212
+1-800-555-1212
+
+800-555-1212-1234
+800-555-1212-1234
+
+800-555-1212x1234
+800-555-1212x1234
+
+800-555-1212 ext.
+800-555-1212 ext. 1234
+
+work 1-(800) 555.1212 #1234
+work 1-(800) 555.1212 #1234
+
+Quite a variety!
+样式够多的
+
+In each of these cases, I need to know that the area code was 800, the trunk was 555, and the rest of the phone number was 1212.
+在上面的例子中，我知道区域码是800，交换码是555，以及最后的后四码是1212
+
+For those with an extension, I need to know that the extension was 1234.
+如果还有分机号，那就是1234
+
+Let’s work through developing a solution for phone number parsing.
+我们来解决这个电话号码解析问题
+
+This example shows the first step.
+下面的例子是第一步
+
+Always read regular expressions from left to right.
+我们通常从左到右的阅读正则表达式
+
+This one matches the beginning of the string, and then (\d{3}).
+首先是匹配字符串开始位置，然后是(\d{3})
+
+What’s \d{3}?
+\d{3}表示什么意思
+
+Well, \d means “any numeric digit” (0 through 9).
+\d表示任意的数字（0到9），{3}表示一定要匹配3个数字
+
+The {3} means “match exactly three numeric digits”;
+这个是你前面看到的{n,m}表示方法
+
+it’s a variation on the {n,m} syntax you saw earlier.
+把他们放在圆括号中，表示必须匹配3个数字，并且把他们记做一个组
+
+Putting it all in parentheses means “match exactly three numeric digits, and then remember them as a group that I can ask for later”.
+分组的概念我们后面会说到
+
+Then match a literal hyphen.
+然后匹配一个连字符，接着匹配另外的3个数字，他们也同样作为一个组
+
+Then match another group of exactly three digits.
+然后又是一个连字符，后面还要准确匹配4个数字，他们也作为一位分组
+
+Then another literal hyphen.
+最后匹配字符串结尾
+
+To get access to the groups that the regular expression parser remembered along the way, use the groups() method on the object that the search() method returns.
+为了使用正则表达式匹配到的这些分组，需要对search()函数的返回值调用groups()方法
+
+It will return a tuple of however many groups were defined in the regular expression.
+它会返回一个这个正则表达式中定义的所有分组结果组成的元组
+
+In this case, you defined three groups, one with three digits, one with three digits, and one with four digits.
+在这里，我们定义了三个分组，一个三个数字，另一个是三个数字，以及一个四个数字
+
+This regular expression is not the final answer, because it doesn’t handle a phone number with an extension on the end.
+这个正则表达式并不是最终答案
+
+For that, you’ll need to expand the regular expression.
+因为它还没有处理有分机号的情况
+
+And this is why you should never “chain” the search() and groups() methods in production code.
+这是为什么你不能在产品代码中链式调用search()和groups()的原因
+
+If the search() method returns no matches, it returns None, not a regular expression match object.
+如果search()方法匹配不成功，也就是返回None，这就不是返回的一个正则表达式匹配对象
+
+Calling None.groups() raises a perfectly obvious exception: None doesn’t have a groups() method.
+它没有groups()方法，所以调用None.groups()将会抛出一个异常
+
+(Of course, it’s slightly less obvious when you get this exception from deep within your code.
+（当然，在你的代码中，这个异常很明显
+
+Yes, I speak from experience here.)
+在这里我说了我的一些经验
+
+This regular expression is almost identical to the previous one.
+这个正则表达式和前面的一样
+
+Just as before, you match the beginning of the string, then a remembered group of three digits, then a hyphen, then a remembered group of three digits, then a hyphen, then a remembered group of four digits.
+匹配了字符串开始位置，然后是一个三个数字的分组，接着一个连字符，又是一个三个数字的分组，又是一个连字符，然后一个四个数字的分组
+
+What’s new is that you then match another hyphen, and a remembered group of one or more digits, then the end of the string.
+这三个分组匹配的内容都会被记忆下来
+
+The groups() method now returns a tuple of four elements, since the regular expression now defines four groups to remember.
+现在groups()方法返回有四个元素的元组
+
+Unfortunately, this regular expression is not the final answer either, because it assumes that the different parts of the phone number are separated by hyphens.
+不幸的是，这个正则表达式仍然不是最终答案
+
+What if they’re separated by spaces, or commas, or dots?
+因为它假设这些数字是有连字符分隔的
+
+You need a more general solution to match several different types of separators.
+实际上还有用空格，逗号和点分隔的情况
+
+Oops!
+噢，这个正则表达式不但不能做到你想要的，而且还不如上一个了
+
+Not only does this regular expression not do everything you want, it’s actually a step backwards, because now you can’t parse phone numbers without an extension.
+因为我们现在不能匹配没有分机号的电话号码
+
+That’s not what you wanted at all;
+这绝对不是你想要的
+
+if the extension is there, you want to know what it is, but if it’s not there, you still want to know what the different parts of the main number are.
+如果有分机号，你希望取到，但如果没有，你同样也希望匹配到电话号码其他的部分
+
+The next example shows the regular expression to handle separators between the different parts of the phone number.
+下面的例子展示了正则表达式中怎么处理电话号码中各个部分之间使用了不同分隔符的情况
+
+Hang on to your hat.
+注意了
+
+You’re matching the beginning of the string, then a group of three digits, then \D+.
+你匹配了字符串开始，然后是3个数字的分组，接着是\D+，这是什么
+
+What the heck is that?
+好吧，\D匹配除了数字以外的任意字符，+的意思是一个或多个
+
+Well, \D matches any character except a numeric digit, and + means “1 or more”.
+因此\D+匹配一个或一个以上的非数字字符
+
+So \D+ matches one or more characters that are not digits.
+这就是你用来替换连字符的东西，它用来匹配不同的分隔符
+
+Using \D+ instead of - means you can now match phone numbers where the parts are separated by spaces instead of hyphens.
+用\D+替换-，意味着你可以匹配分隔符为空格的情况
+
+Of course, phone numbers separated by hyphens still work too.
+当然，分隔符为连字符一样可以正确工作
+
+Unfortunately, this is still not the final answer, because it assumes that there is a separator at all.
+不幸的是，这仍然不是最终答案
+
+What if the phone number is entered without any spaces or hyphens at all?
+因为这里我们假设有分隔符的存在，如果是根本就没有空格或者是连字符呢?
+
+Oops!
+天啊，它仍然没有解决分机号的问题
+
+This still hasn’t fixed the problem of requiring extensions.
+现在你有两个问题没有解决，但是我们可以用相同的技术来解决他们
+
+The next example shows the regular expression for handling phone numbers without separators.
+下面的例子展示用正则表达式处理电话号码没有分隔符的情况
+
+The only change you’ve made since that last step is changing all the + to *.
+这里和上面唯一不同的地方是，把所有的+换成了*
+
+Instead of \D+ between the parts of the phone number, you now match on \D*.
+号码之间的分隔符不再用\D+来匹配，而是使用\D*
+
+Remember that + means “1 or more”?
+还记得+表示一个或更多吧
+
+Well, * means “zero or more”.
+好，现在可以解析号码之间没有分隔符的情况了
+
+Lo and behold, it actually works.
+你看，它真的可以工作
+
+Why?
+为什么呢
+
+You matched the beginning of the string, then a remembered group of three digits (800), then zero non-numeric characters, then a remembered group of three digits (555), then zero non-numeric characters, then a remembered group of four digits (1212), then zero non-numeric characters, then a remembered group of an arbitrary number of digits (1234), then the end of the string.
+首先匹配字符串开始，然后是3个数字的分组（800），分组匹配的内容会被记忆下来
+
+Other variations work now too: dots instead of hyphens, and both a space and an x before the extension.
+其他字符作为分隔符一样可以工作
+
+Finally, you’ve solved the other long-standing problem: extensions are optional again.
+最后我们解决了这个长久以来的问题：分机号是可选的
+
+If no extension is found, the groups() method still returns a tuple of four elements, but the fourth element is just an empty string.
+如果分机号不存在，groups()仍然可以返回一个4元素的元组，只是第四个元素为空字符串
+
+I hate to be the bearer of bad news, but you’re not finished yet.
+我讨厌坏消息
+
+What’s the problem here?
+这还没有结束
+
+There’s an extra character before the area code, but the regular expression assumes that the area code is the first thing at the beginning of the string.
+还有什么问题呢
+
+No problem, you can use the same technique of “zero or more non-numeric characters” to skip over the leading characters before the area code.
+在区域码前面还可能有其他字符
+
+The next example shows how to handle leading characters in phone numbers.
+下面的例子展示怎么处理电话号码前面还有其他字符的情况
+
+This is the same as in the previous example, except now you’re matching \D*, zero or more non-numeric characters, before the first remembered group (the area code).
+现在除了在第一个分组之前要用\d*匹配0个或更多非数字字符外，这和前面的例子是相同的
+
+Notice that you’re not remembering these non-numeric characters (they’re not in parentheses).
+注意你不会对这些非数字字符分组，因为他们不在圆括号内，也就是说不是一个组
+
+If you find them, you’ll just skip over them and then start remembering the area code whenever you get to it.
+如果发现有这些字符，这里只是跳过他们，然后开始对后面的区域码匹配、分组
+
+You can successfully parse the phone number, even with the leading left parenthesis before the area code.
+即使区位码之前有圆括号，你也可以成功的解析电话号码了
+
+(The right parenthesis after the area code is already handled;
+（右边的圆括号已经处理，它被\D*匹配成一个非数字字符
+
+it’s treated as a non-numeric separator and matched by the \D* after the first remembered group.)
+）
+
+Just a sanity check to make sure you haven’t broken anything that used to work.
+这只是一个全面的检查，来确认以前能正确工作的现在仍然可以正确工作
+
+Since the leading characters are entirely optional, this matches the beginning of the string, then zero non-numeric characters, then a remembered group of three digits (800), then one non-numeric character (the hyphen), then a remembered group of three digits (555), then one non-numeric character (the hyphen), then a remembered group of four digits (1212), then zero non-numeric characters, then a remembered group of zero digits, then the end of the string.
+因为首字符是可选的，因此首先匹配字符串开始，0个非数字字符，然后是三个数字并分组，接着是一个非数字字符，后面是三个数字并且分组，然后又是一个非数字分隔符，又是一个4个数字且分组，还有0个非数字字符，以及0个数字并且分组
+
+This is where regular expressions make me want to gouge my eyes out with a blunt object.
+还有问题
+
+Why doesn’t this phone number match?
+为什么不能匹配这个电话号码
+
+Because there’s a 1 before the area code, but you assumed that all the leading characters before the area code were non-numeric characters (\D*).
+因为在区域码前面还有一个1，但你假设的是区位码前面的第一个字符是非数字字符（\d*）
+
+Let’s back up for a second.
+我们回过头看看
+
+So far the regular expressions have all matched from the beginning of the string.
+到目前为止，所有的正则表达式都匹配了字符串开始位置
+
+But now you see that there may be an indeterminate amount of stuff at the beginning of the string that you want to ignore.
+但现在在字符串的开头可能有一些你想忽略掉的不确定的字符
+
+Rather than trying to match it all just so you can skip over it, let’s take a different approach: don’t explicitly match the beginning of the string at all.
+为了匹配到想要的数据，你需要跳过他们
+
+This approach is shown in the next example.
+我们来看看不明确匹配字符串开始的方法
+
+Note the lack of ^ in this regular expression.
+注意正则表达式没有^
+
+You are not matching the beginning of the string anymore.
+不会再匹配字符串开始位置了
+
+There’s nothing that says you need to match the entire input with your regular expression.
+正则表达式不会匹配整个字符串，而是试图找到一个字符串开始匹配的位置，然后从这个位置开始匹配
+
+Now you can successfully parse a phone number that includes leading characters and a leading digit, plus any number of any kind of separators around each part of the phone number.
+现在，你可以正确的解析出字符串开头有不需要的字符、数字或者其他分隔符的情况了
+
+Sanity check.
+全面性检查，同样正常工作了
+
+That still works too.
+这里也仍然可以工作
+
+See how quickly a regular expression can get out of control?
+看看正则表达式失控有多快
+
+Take a quick glance at any of the previous iterations.
+快速回顾一下之前的例子
+
+Can you tell the difference between one and the next?
+你能说出他们的区别吗
+
+While you still understand the final answer (and it is the final answer;
+你看到了最终的答案（这就是最终答案
+
+if you’ve discovered a case it doesn’t handle, I don’t want to know about it), let’s write it out as a verbose regular expression, before you forget why you made the choices you made.
+如果你发现还有它不能正确处理的情况，我也不想知道了 ）
+
+Other than being spread out over multiple lines, this is exactly the same regular expression as the last step, so it’s no surprise that it parses the same inputs.
+除了这里是用多行表示的以外，它和上面最后的那个是完全一样的
+
+Final sanity check.
+最后我们的全面检查也通过
+
+Yes, this still works.
+很好，你终于完成了
+
+Summary
+小结
+
+This is just the tiniest tip of the iceberg of what regular expressions can do.
+这只是正则表达式能完成的工作中的冰山一角
+
+In other words, even though you’re completely overwhelmed by them now, believe me, you ain’t seen nothing yet.
+换句话说，尽管你可能很受打击，相信我，你已经不是什么都不知道了
+
+You should now be familiar with the following techniques:
+现在，你应该已经熟悉了下面的技巧：
+
+^ matches the beginning of a string.
+^ 匹配字符串开始位置
+
+$ matches the end of a string.
+$ 匹配字符串结束位置
+
+\b matches a word boundary.
+\b 匹配一个单词边界
+
+\d matches any numeric digit.
+\d 匹配一个数字
+
+\D matches any non-numeric character.
+\D 匹配一个任意的非数字字符
+
+x?
+x? 匹配可选的x字符
+
+matches an optional x character (in other words, it matches an x zero or one times).
+换句话说，就是0个或者1个x字符
+
+x* matches x zero or more times.
+x* 匹配0个或更多的x
+
+x+ matches x one or more times.
+x+ 匹配1个或者更多x
+
+x{n,m} matches an x character at least n times, but not more than m times.
+x{n,m} 匹配n到m个x，至少n个，不能超过m个
+
+(a|b|c) matches exactly one of a, b or c.
+(a|b|c) 匹配单独的任意一个a或者b或者c
+
+(x) in general is a remembered group.
+(x) 这是一个组，它会记忆它匹配到的字符串
+
+You can get the value of what matched by using the groups() method of the object returned by re.search.
+你可以用re.search返回的匹配对象的groups()函数来获取到匹配的值
+
+Regular expressions are extremely powerful, but they are not the correct solution for every problem.
+正则表达式非常强大，但它也并不是解决每一个问题的正确答案
+
+You should learn enough about them to know when they are appropriate, when they will solve your problems, and when they will cause more problems than they solve.
+你需要更多的了解来判断哪些情况适合使用正则表达式
+
+© 2001–11 Mark Pilgrim
+© 2001–9 Mark Pilgrim
+

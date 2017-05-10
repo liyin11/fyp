@@ -1,0 +1,30 @@
+Console Output Utilities¶
+终端输出工具¶
+
+Console/terminal user interface functionality.
+终端用户接口实用功能
+
+Ask user a yes/no question and return their response as True or False.
+询问用户 yes/no 的问题，并将用户输入转换为 True 或 False
+
+question should be a simple, grammatically complete question such as “Do you wish to continue?”, and will have a string similar to ” [Y/n] ” appended automatically.
+question 参数应当简单但合乎语法，比如“是否继续
+
+This function will not append a question mark for you.
+”，问题的结尾应当接上类似“[Y/n]”这样的字符串，函数本身 并不 会帮你做这种事
+
+By default, when the user presses Enter without typing anything, “yes” is assumed.
+默认情况下，用户不输入任何值直接敲击回车相当于输入 “yes”
+
+This can be changed by specifying default=False.
+可以通过指定 default=False 来修改其默认值
+
+Fabric
+Fabric
+
+Pythonic remote execution
+Pythonic remote execution
+
+Enter search terms or a module, class or function name.
+输入相关的术语，模块，类或者函数名称进行搜索
+

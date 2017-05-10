@@ -1,0 +1,963 @@
+You are here: Home ‣ Dive Into Python 3 ‣
+你的位置: Home ‣ Dive Into Python 3 ‣
+
+Difficulty level: ♦♦♦♢♢
+难度等级: ♦♦♦♢♢
+
+Files
+文件
+
+❝ A nine mile walk is no joke, especially in the rain.
+❝ A nine mile walk is no joke, especially in the rain. ❞ — Harry Kemelman, The Nine Mile Walk
+
+Diving In
+概要
+
+My Windows laptop had 38,493 files before I installed a single application.
+在没有安装任何一个应用程序之前，我的笔记本上Windows系统有38,493个文件
+
+Installing Python 3 added almost 3,000 files to that total.
+安装Python 3后，大约增加了3,000个文件
+
+Files are the primary storage paradigm of every major operating system;
+文件是每一个主流操作系统的主要存储模型
+
+the concept is so ingrained that most people would have trouble imagining an alternative.
+这种观念如此根深蒂固以至于难以想出一种替代物
+
+Your computer is, metaphorically speaking, drowning in files.
+打个比方，你的电脑实际上就是泡在文件里了
+
+Reading From Text Files
+读取文本文件
+
+Before you can read from a file, you need to open it.
+在读取文件之前，你需要先打开它
+
+Opening a file in Python couldn’t be easier:
+在Python里打开一个文件很简单：
+
+Python has a built-in open() function, which takes a filename as an argument.
+Python有一个内置函数 open()，它使用一个文件名作为其参数
+
+Here the filename is 'examples/chinese.txt'.
+在以上代码中，文件名是 'examples/chinese.txt'
+
+There are five interesting things about this filename:
+关于这个文件名，有五件值得一讲的事情：
+
+It’s not just the name of a file;
+它不仅是一个文件的名字
+
+it’s a combination of a directory path and a filename.
+实际上，它是文件路径和文件名的组合
+
+A hypothetical file-opening function could have taken two arguments — a directory path and a filename — but the open() function only takes one.
+一般来说，文件打开函数应该有两个参数 — 路径和文件名 — 但是函数open()只使用一个参数
+
+In Python, whenever you need a “filename,” you can include some or all of a directory path as well.
+在Python里，当你使用“filename,”作为参数的时候，你可以将部分或者全部的路径也包括进去
+
+The directory path uses a forward slash, but I didn’t say what operating system I was using.
+在这个例子中，目录路径中使用的是斜杠(forward slash)，但是我并没有说明我正在使用的操作系统
+
+Windows uses backward slashes to denote subdirectories, while Mac OS X and Linux use forward slashes.
+Windows使用反斜杠来表示子目录，但是Mac OS X和Linux使用斜杠
+
+But in Python, forward slashes always Just Work, even on Windows.
+但是，在Python中，斜杠永远都是正确的，即使是在Windows环境下
+
+The directory path does not begin with a slash or a drive letter, so it is called a relative path.
+不使用斜杠或者反斜杠的路径被称作相对路径(relative path)
+
+Relative to what, you might ask?
+你也许会问，相对于什么呢
+
+Patience, grasshopper.
+耐心一些，伙计
+
+It’s a string.
+“filename,”参数是一个字符串
+
+All modern operating systems (even Windows!) use Unicode to store the names of files and directories.
+所有现代的操作系统（甚至Windows
+
+Python 3 fully supports non-ASCII pathnames.
+）使用Unicode编码方式来存储文件名和目录名
+
+It doesn’t need to be on your local disk.
+文件不一定需要在本地磁盘上
+
+You might have a network drive mounted.
+也许你挂载了一个网络驱动器
+
+That “file” might be a figment of an entirely virtual filesystem.
+它也可以是一个完全虚拟的文件系统(an entirely virtual filesystem)上的文件
+
+If your computer considers it a file and can access it as a file, Python can open it.
+只要你的操作系统认为它是一个文件，并且能够以文件的方式访问，那么，Python就能打开它
+
+But that call to the open() function didn’t stop at the filename.
+但是对open()函数的调用不局限于filename
+
+There’s another argument, called encoding.
+还有另外一个叫做encoding参数
+
+Oh dear, that sounds dreadfully familiar.
+天哪，似乎非常耳熟的样子
+
+Character Encoding Rears Its Ugly Head
+字符编码抬起了它腌臜的头…
+
+Bytes are bytes;
+字节即字节
+
+characters are an abstraction.
+字符是一种抽象
+
+A string is a sequence of Unicode characters.
+字符串由使用Unicode编码的字符序列构成
+
+But a file on disk is not a sequence of Unicode characters;
+但是磁盘上的文件不是Unicode编码的字符序列
+
+a file on disk is a sequence of bytes.
+文件是字节序列
+
+So if you read a “text file” from disk, how does Python convert that sequence of bytes into a sequence of characters?
+所以你可能会想，如果从磁盘上读取一个“文本文件”，Python是怎样把那个字节序列转化为字符序列的呢
+
+It decodes the bytes according to a specific character encoding algorithm and returns a sequence of Unicode characters (otherwise known as a string).
+实际上，它是根据特定的字符解码算法来解释这些字节序列，然后返回一串使用Unicode编码的字符（或者也称为字符串）
+
+What just happened?
+刚才发生了什么
+
+You didn’t specify a character encoding, so Python is forced to use the default encoding.
+由于你没有指定字符编码的方式，所以Python被迫使用默认的编码
+
+What’s the default encoding?
+那么默认的编码方式是什么呢
+
+If you look closely at the traceback, you can see that it’s dying in cp1252.py, meaning that Python is using CP-1252 as the default encoding here.
+如果你仔细看了跟踪信息(traceback)，错误出现在cp1252.py，这意味着Python此时正在使用CP-1252作为默认的编码方式
+
+(CP-1252 is a common encoding on computers running Microsoft Windows.) The CP-1252 character set doesn’t support the characters that are in this file, so the read fails with an ugly UnicodeDecodeError.
+（在运行微软视窗操作系统的机器上，CP-1252是一种常用的编码方式
+
+But wait, it’s worse than that!
+但是，还有更糟糕的
+
+The default encoding is platform-dependent, so this code might work on your computer (if your default encoding is UTF-8), but then it will fail when you distribute it to someone else (whose default encoding is different, like CP-1252).
+因为默认的编码方式是平台相关的(platform-dependent)，所以，当前的代码也许能够在你的电脑上运行（如果你的机器的默认编码方式是UTF-8），但是当你把这份代码分发给其他人的时候可能就会失败（因为他们的默认编码方式可能跟你的不一样，比如说CP-1252）
+
+☞If you need to get the default character encoding, import the locale module and call locale.getpreferredencoding().
+☞如果你需要获得默认编码的信息，则导入locale模块，然后调用locale.getpreferredencoding()
+
+On my Windows laptop, it returns 'cp1252', but on my Linux box upstairs, it returns 'UTF8'.
+在我安装了Windows的笔记本上，它的返回值是'cp1252'，但是在我楼上安装了Linux的台式机上边，它返回'UTF8'
+
+I can’t even maintain consistency in my own house!
+你看，即使在我自己家里我都不能保证一致性(consistency)
+
+Your results may be different (even on Windows) depending on which version of your operating system you have installed and how your regional/language settings are configured.
+你的运行结果也许不一样（即使在Windows平台上），这依赖于操作系统的版本和区域/语言选项的设置
+
+This is why it’s so important to specify the encoding every time you open a file.
+这就是为什么每次打开一个文件的时候指定编码方式是如此重要了
+
+Stream Objects
+流对象
+
+So far, all we know is that Python has a built-in function called open().
+到目前为止，我们都知道Python有一个内置的函数叫做open()
+
+The open() function returns a stream object, which has methods and attributes for getting information about and manipulating a stream of characters.
+open()函数返回一个流对象（stream object），它拥有一些用来获取信息和操作字符流的方法和属性
+
+The name attribute reflects the name you passed in to the open() function when you opened the file.
+name属性反映的是当你打开文件时传递给open()函数的文件名
+
+It is not normalized to an absolute pathname.
+它没有被标准化(normalize)成绝对路径
+
+Likewise, encoding attribute reflects the encoding you passed in to the open() function.
+同样的，encoding属性反映的是在你调用open()函数时指定的编码方式
+
+If you didn’t specify the encoding when you opened the file (bad developer!) then the encoding attribute will reflect locale.getpreferredencoding().
+如果你在打开文件的时候没有指定编码方式（不好的开发人员
+
+The mode attribute tells you in which mode the file was opened.
+mode属性会告诉你被打开文件的访问模式
+
+You can pass an optional mode parameter to the open() function.
+你可以传递一个可选的mode参数给open()函数
+
+You didn’t specify a mode when you opened this file, so Python defaults to 'r', which means “open for reading only, in text mode.” As you’ll see later in this chapter, the file mode serves several purposes;
+如果在打开文件的时候没有指定访问模式，Python默认设置模式为'r'，意思是“在文本模式下以只读的方式打开
+
+different modes let you write to a file, append to a file, or open a file in binary mode (in which you deal with bytes instead of strings).
+”在这章的后面你会看到，文件的访问模式有各种用途
+
+☞The documentation for the open() function lists all the possible file modes.
+☞open()函数的文档列出了所有可用的文件访问模式
+
+Reading Data From A Text File
+从文本文件读取数据
+
+After you open a file for reading, you’ll probably want to read from it at some point.
+在打开文件以后，你可能想要从某处开始读取它
+
+Once you open a file (with the correct encoding), reading from it is just a matter of calling the stream object’s read() method.
+只要成功打开了一个文件（并且指定了正确的编码方式），你只需要调用流对象的read()方法即可以读取它
+
+The result is a string.
+返回的结果是文件的一个字符串表示
+
+Perhaps somewhat surprisingly, reading the file again does not raise an exception.
+也许你会感到意外，再次读取文件不会产生一个异常
+
+Python does not consider reading past end-of-file to be an error;
+Python不认为到达了文件末尾(end-of-file)还继续执行读取操作是一个错误
+
+it simply returns an empty string.
+这种情况下，它只是简单地返回一个空字符串
+
+What if you want to re-read a file?
+如果想要重新读取文件呢
+
+Since you’re still at the end of the file, further calls to the stream object’s read() method simply return an empty string.
+由于你依旧在文件的末尾，继续调用read()方法只会返回一个空字符串
+
+The seek() method moves to a specific byte position in a file.
+seek()方法使定位到文件中的特定字节
+
+The read() method can take an optional parameter, the number of characters to read.
+read()方法可以使用一个可选的参数，即所要读取的字符个数
+
+If you like, you can even read one character at a time.
+只要愿意，你甚至可以一次读取一个字符
+
+16 + 1 + 1 = … 20?
+16 + 1 + 1 = … 20?
+
+Let’s try that again.
+我们再来做一遍
+
+Move to the 17th byte.
+移动到第17th个字节位置
+
+Read one character.
+读取一个字符
+
+Now you’re on the 20th byte.
+当前在第20个字节位置处
+
+Do you see it yet?
+你是否已经注意到了
+
+The seek() and tell() methods always count bytes, but since you opened this file as text, the read() method counts characters.
+seek()和tell()方法总是以字节的方式计数，但是，由于你是以文本文件的方式打开的，read()方法以字符的个数计数
+
+Chinese characters require multiple bytes to encode in UTF-8.
+中文字符的UTF-8编码需要多个字节
+
+The English characters in the file only require one byte each, so you might be misled into thinking that the seek() and read() methods are counting the same thing.
+而文件里的英文字符每一个只需要一个字节来存储，所以你可能会产生这样的误解：seek()和read()方法对相同的目标计数
+
+But that’s only true for some characters.
+而实际上，只有对部分字符的情况是这样的
+
+But wait, it gets worse!
+但是，还有更糟的
+
+Move to the 18th byte and try to read one character.
+定位到第18th个字节，然后试图读取一个字符
+
+Why does this fail?
+为什么这里会失败
+
+Because there isn’t a character at the 18th byte.
+因为在第18个字节处不存在字符
+
+The nearest character starts at the 17th byte (and goes for three bytes).
+距离此处最近的字符从第17个字节开始（长度为三个字节）
+
+Trying to read a character from the middle will fail with a UnicodeDecodeError.
+试图从一个字符的中间位置读取会导致程序以UnicodeDecodeError错误失败
+
+Closing Files
+关闭文件
+
+Open files consume system resources, and depending on the file mode, other programs may not be able to access them.
+打开文件会占用系统资源，根据文件的打开模式不同，其他的程序也许不能够访问它们
+
+It’s important to close files as soon as you’re finished with them.
+当已经完成了对文件的操作后就立即关闭它们，这很重要
+
+Well that was anticlimactic.
+然而，这还不够(anticlimactic)
+
+The stream object a_file still exists;
+流对象a_file仍然存在
+
+calling its close() method doesn’t destroy the object itself.
+调用close()方法并没有把对象本身销毁
+
+But it’s not terribly useful.
+所以这并不是非常有效
+
+You can’t read from a closed file;
+不能读取已经关闭了的文件
+
+that raises an IOError exception.
+那样会引发一个IOError异常
+
+You can’t seek in a closed file either.
+也不能对一个已经关闭了的文件执行定位操作
+
+There’s no current position in a closed file, so the tell() method also fails.
+由于文件已经关闭了，所以也就不存在所谓当前的位置了，所以tell()也会失败
+
+Perhaps surprisingly, calling the close() method on a stream object whose file has been closed does not raise an exception.
+也许你会有些意外，文件已经关闭，调用原来流对象的close()方法并没有引发异常
+
+It’s just a no-op.
+其实那只是一个空操作(no-op)而已
+
+Closed stream objects do have one useful attribute: the closed attribute will confirm that the file is closed.
+已经关闭了的流对象确实还有一个有用的属性：closed用来确认文件是否已经被关闭了
+
+Closing Files Automatically
+自动关闭文件
+
+Stream objects have an explicit close() method, but what happens if your code has a bug and crashes before you call close()?
+流对象有一个显式的close()方法，但是如果代码有缺陷，在调用close()方法以前就崩溃了呢
+
+That file could theoretically stay open for much longer than necessary.
+理论上，那个文件会在相当长的一段时间内一直打开着，这是没有必要地
+
+While you’re debugging on your local computer, that’s not a big deal.
+当你在自己的机器上调试的时候，这不算什么大问题
+
+On a production server, maybe it is.
+但是当这种代码被移植到服务器上运行，也许就得三思了
+
+Python 2 had a solution for this: the try..finally block.
+对于这种情况，Python 2有一种解决办法：try..finally块
+
+That still works in Python 3, and you may see it in other people’s code or in older code that was ported to Python 3.
+这种方法在Python 3里仍然有效，也许你可以在其他人的代码，或者从比较老的被移植到Python 3的代码中看到它
+
+But Python 2.6 introduced a cleaner solution, which is now the preferred solution in Python 3: the with statement.
+但是Python 2.5引入了一种更加简洁的解决方案，并且Python 3将它作为首选方案：with语句
+
+This code calls open(), but it never calls a_file.close().
+这段代码调用了open()函数，但是它却一直没有调用a_file.close()
+
+The with statement starts a code block, like an if statement or a for loop.
+with语句引出一个代码块，就像if语句或者for循环一样
+
+Inside this code block, you can use the variable a_file as the stream object returned from the call to open().
+在这个代码块里，你可以使用变量a_file作为open()函数返回的流对象的引用
+
+All the regular stream object methods are available — seek(), read(), whatever you need.
+所以流对象的常规方法都是可用的 — seek()，read()，无论你想要调用什么
+
+When the with block ends, Python calls a_file.close() automatically.
+当with块结束时，Python自动调用a_file.close()
+
+Here’s the kicker: no matter how or when you exit the with block, Python will close that file… even if you “exit” it via an unhandled exception.
+这就是它与众不同的地方：无论你以何种方式跳出with块，Python会自动关闭那个文件…即使是因为未处理的异常而“exit”
+
+That’s right, even if your code raises an exception and your entire program comes to a screeching halt, that file will get closed.
+是的，即使代码中引发了一个异常，整个程序突然中止了，Python也能够保证那个文件能被关闭掉
+
+☞In technical terms, the with statement creates a runtime context.
+☞从技术上说，with语句创建了一个运行时环境(runtime context)
+
+In these examples, the stream object acts as a context manager.
+在这几个样例中，流对象的行为就像一个上下文管理器(context manager)
+
+Python creates the stream object a_file and tells it that it is entering a runtime context.
+Python创建了a_file，并且告诉它正进入一个运行时环境
+
+When the with code block is completed, Python tells the stream object that it is exiting the runtime context, and the stream object calls its own close() method.
+当with块结束的时候，Python告诉流对象它正在退出这个运行时环境，然后流对象就会调用它的close()方法
+
+See Appendix B, “Classes That Can Be Used in a with Block” for details.
+请阅读 附录B，“能够在with块中使用的类”以获取更多细节
+
+There’s nothing file-specific about the with statement;
+with语句不只是针对文件而言的
+
+it’s just a generic framework for creating runtime contexts and telling objects that they’re entering and exiting a runtime context.
+它是一个用来创建运行时环境的通用框架(generic framework)，告诉对象它们正在进入和离开一个运行时环境
+
+If the object in question is a stream object, then it does useful file-like things (like closing the file automatically).
+如果该对象是流对象，那么它就会做一些类似文件对象一样有用的动作（就像自动关闭文件
+
+But that behavior is defined in the stream object, not in the with statement.
+）
+
+There are lots of other ways to use context managers that have nothing to do with files.
+但是那个行为是被流对象自身定义的，而不是在with语句中
+
+You can even create your own, as you’ll see later in this chapter.
+还有许多跟文件无关的使用上下文管理器(context manager)的方法
+
+Reading Data One Line At A Time
+一次读取一行数据
+
+A “line” of a text file is just what you think it is — you type a few words and press ENTER, and now you’re on a new line.
+正如你所想的，一行数据就是这样 — 输入一些单词，按ENTER键，然后就在新的一行了
+
+A line of text is a sequence of characters delimited by… what exactly?
+一行文本就是一串被某种东西分隔的字符，到底是被什么分隔的呢
+
+Well, it’s complicated, because text files can use several different characters to mark the end of a line.
+好吧，这有些复杂，因为文本文件可以使用几个不同的字符来标记行末(end of a line)
+
+Every operating system has its own convention.
+每种操作系统都有自己的规矩
+
+Some use a carriage return character, others use a line feed character, and some use both characters at the end of every line.
+有一些使用回车符(carriage return)，另外一些使用换行符(line feed)，还有一些在行末同时使用这两个字符来标记
+
+Now breathe a sigh of relief, because Python handles line endings automatically by default.
+其实你可以舒口气了，因为Python默认会自动处理行的结束符
+
+If you say, “I want to read this text file one line at a time,” Python will figure out which kind of line ending the text file uses and and it will all Just Work.
+如果你告诉它，“我想从这个文本文件一次读取一行，”Python自己会弄明白这个文本文件到底使用哪种方式标记新行，然后正确工作
+
+☞If you need fine-grained control over what’s considered a line ending, you can pass the optional newline parameter to the open() function.
+☞如果想要细粒度地控制(fine-grained control)使用哪种新行标记符，你可以传递一个可选的参数newline给open()函数
+
+See the open() function documentation for all the gory details.
+请阅读open()函数的文档以获取更多细节
+
+So, how do you actually do it?
+那么，实际中你会怎样做呢
+
+Read a file one line at a time, that is.
+我是指一次读取文件的一行
+
+It’s so simple, it’s beautiful.
+它如此简单优美…
+
+[download oneline.py]
+[download oneline.py]
+
+Using the with pattern, you safely open the file and let Python close it for you.
+使用with语句，安全地打开这个文件，然后让Python为你关闭它
+
+To read a file one line at a time, use a for loop.
+为了一次读取文件的一行，使用for循环
+
+That’s it.
+是的，除了像read()这样显式的方法，流对象也是一个迭代器(iterator)，它能在你每次请求一个值时分离出单独的一行
+
+Using the format() string method, you can print out the line number and the line itself.
+使用字符串的format()方法，你可以打印出行号和行自身
+
+The format specifier {:>4} means “print this argument right-justified within 4 spaces.” The a_line variable contains the complete line, carriage returns and all.
+格式说明符{:>4}的意思是“使用最多四个空格使之右对齐，然后打印此参数
+
+The rstrip() string method removes the trailing whitespace, including the carriage return characters.
+”变量a_line是包括回车符等在内的完整的一行
+
+Did you get this error?
+是否遇到了这个错误
+
+If so, you’re probably using Python 3.0.
+如果结果是这样，也许你正在使用Python 3.0
+
+You should really upgrade to Python 3.1.
+你真的应该升级到Python 3.1
+
+Python 3.0 supported string formatting, but only with explicitly numbered format specifiers.
+Python 3.0支持字符串格式化，但是只支持显式编号了的格式说明符
+
+Python 3.1 allows you to omit the argument indexes in your format specifiers.
+Python 3.1允许你在格式说明符里省略参数索引号
+
+Here is the Python 3.0-compatible version for comparison:
+作为比照，下面是一个Python 3.0兼容的版本
+
+Writing to Text Files
+写入文本文件
+
+You can write to files in much the same way that you read from them.
+写入文件的方式和从它们那儿读取很相似
+
+First you open a file and get a stream object, then you use methods on the stream object to write data to the file, then you close the file.
+首先打开一个文件，获取流对象，然后你调用一些方法作用在流对象上来写入数据到文件，最后关闭文件
+
+To open a file for writing, use the open() function and specify the write mode.
+为了写入而打开一个文件，可以使用open()函数，并且指定写入模式
+
+There are two file modes for writing:
+有两种文件模式用于写入：
+
+“Write” mode will overwrite the file.
+“写”模式会重写文件
+
+Pass mode='w' to the open() function.
+传递mode='w'参数给open()函数
+
+“Append” mode will add data to the end of the file.
+“追加”模式会在文件末尾添加数据
+
+Pass mode='a' to the open() function.
+传递mode='a'参数给open()函数
+
+Either mode will create the file automatically if it doesn’t already exist, so there’s never a need for any sort of fiddly “if the file doesn’t exist yet, create a new empty file just so you can open it for the first time” function.
+如果文件不存在，两种模式下都会自动创建新文件，所以就不需要“如果文件还不存在，创建一个新的空白文件以能够打开它”这种琐碎的过程了
+
+Just open a file and start writing.
+所以，只需要打开一个文件，然后开始写入即可
+
+You should always close a file as soon as you’re done writing to it, to release the file handle and ensure that the data is actually written to disk.
+在完成写入后你应该马上关闭文件，释放文件句柄(file handle)，并且保证数据被完整地写入到了磁盘
+
+As with reading data from a file, you can call the stream object’s close() method, or you can use the with statement and let Python close the file for you.
+跟读取文件一样，可以调用流对象的close()方法，或者你也可以使用with语句让Python为你关闭文件
+
+I bet you can guess which technique I recommend.
+我敢打赌，你肯定能猜到我推荐哪种方案
+
+You start boldly by creating the new file test.log (or overwriting the existing file), and opening the file for writing.
+大胆地创建新文件test.log（或者重写已经存在的文件），然后以写入方式打开文件
+
+The mode='w' parameter means open the file for writing.
+参数mode='w'的意思是文件以写入的模式打开
+
+Yes, that’s all as dangerous as it sounds.
+是的，这听起来似乎比较危险
+
+I hope you didn’t care about the previous contents of that file (if any), because that data is gone now.
+我希望你确定不再关心那个文件以前的内容（如果有的话），因为那份数据已经没了
+
+You can add data to the newly opened file with the write() method of the stream object returned by the open() function.
+你可以通过open()函数返回的流对象的write()方法来给新打开的文件添加数据
+
+After the with block ends, Python automatically closes the file.
+当with块结束的时候，Python自动关闭文件
+
+That was so fun, let’s do it again.
+多么有趣，我们再试一次
+
+But this time, with mode='a' to append to the file instead of overwriting it.
+这一次，使用with='a'参数来添加数据到文件末尾，而不是重写它
+
+Appending will never harm the existing contents of the file.
+追加模式绝不会破坏现有文件的内容
+
+Both the original line you wrote and the second line you appended are now in the file test.log.
+原来写入的行，还有追加上去的第二行现在都在文件test.log里了
+
+Also note that neither carriage returns nor line feeds are included.
+同时请注意，回车符没有被包括进去
+
+Since you didn’t write them explicitly to the file either time, the file doesn’t include them.
+你可以通过'\n'写入一个回车符
+
+You can write a carriage return with the '\r' character, and/or a line feed with the '\n' character.
+由于一开始没有这样做，所有写入到文件的数据现在都在同一行
+
+Character Encoding Again
+再次讨论字符编码
+
+Did you notice the encoding parameter that got passed in to the open() function while you were opening a file for writing?
+你是否注意到当你在打开文件用于写入数据的时候传递给open()函数的encoding参数
+
+It’s important;
+它“非常重要”，不要忽略了
+
+don’t ever leave it out!
+就如你在这章开头看到的，文件中并不存在字符串，它们由字节组成
+
+As you saw in the beginning of this chapter, files don’t contain strings, they contain bytes.
+只有当你告诉Python使用何种编码方式把字节流转换为字符串，从文件读取“字符串”才成为可能
+
+Reading a “string” from a text file only works because you told Python what encoding to use to read a stream of bytes and convert it to a string.
+相反地，写入文本到文件面临同样的问题
+
+Writing text to a file presents the same problem in reverse.
+实际上你不能直接把字符写入到文件
+
+You can’t write characters to a file;
+字符只是一种抽象
+
+characters are an abstraction.
+为了写入字符到文件，Python需要知道如何将字符串转换为字节序列
+
+In order to write to the file, Python needs to know how to convert your string into a sequence of bytes.
+唯一能保证正确地执行转换的方法就是当你为写入而打开一个文件的时候，指定encoding参数
+
+Binary Files
+二进制文件
+
+Not all files contain text.
+不是所有的文件都包含文本内容
+
+Some of them contain pictures of my dog.
+有一些还包含了我可爱的狗的照片
+
+Opening a file in binary mode is simple but subtle.
+用二进制模式打开文件很简单，但是很精细
+
+The only difference from opening it in text mode is that the mode parameter contains a 'b' character.
+与文本模式唯一不同的是mode参数包含一个字符'b'
+
+The stream object you get from opening a file in binary mode has many of the same attributes, including mode, which reflects the mode parameter you passed into the open() function.
+以二进制模式打开文件得到的流对象与之前的有很多相同的属性，包括mode属性，它记录了你调用open()函数时指定的mode参数的值
+
+Binary stream objects also have a name attribute, just like text stream objects.
+二进制文件的流对象也有name属性，就如文本文件的流对象一样
+
+Here’s one difference, though: a binary stream object has no encoding attribute.
+然而，确实有不同之处：二进制的流对象没有encoding属性
+
+That makes sense, right?
+你能明白其中的道理的，对吧
+
+You’re reading (or writing) bytes, not strings, so there’s no conversion for Python to do.
+现在你读写的是字节，而不是字符串，所以Python不需要做转换工作
+
+What you get out of a binary file is exactly what you put into it, no conversion necessary.
+从二进制文件里读出的跟你所写入的是完全一样的，所以没有执行转换的必要
+
+Did I mention you’re reading bytes?
+我是否提到当前正在读取字节
+
+Oh yes you are.
+噢，的确如此
+
+Like text files, you can read binary files a little bit at a time.
+跟读取文本文件一样，你也可以从二进制文件一次读一点儿
+
+But there’s a crucial difference…
+但是它们之间有一个重大的不同之处&#hellip;
+
+…you’re reading bytes, not strings.
+&#hellip;你正在读取字节，而不是字符串
+
+Since you opened the file in binary mode, the read() method takes the number of bytes to read, not the number of characters.
+由于你以二进制模式打开文件，read()方法每次读取指定的字节数，而非字符数
+
+That means that there’s never an unexpected mismatch between the number you passed into the read() method and the position index you get out of the tell() method.
+这就意味着，你传递给read()方法的数目和你从tell()方法得到的位置序号不会出现意料之外的不匹配(unexpected mismatch)
+
+Stream Objects From Non-File Sources
+非文件来源的流对象
+
+Imagine you’re writing a library, and one of your library functions is going to read some data from a file.
+想象一下你正在编写一个库(library)，其中有一库函数用来从文件读取数据
+
+The function could simply take a filename as a string, go open the file for reading, read it, and close it before exiting.
+它使用文件名作为参数，以只读的方式打开文件，读取数据，关闭文件，返回
+
+But you shouldn’t do that.
+但是你不应该只做到这个程度
+
+Instead, your API should take an arbitrary stream object.
+你的API应该能够接纳任意的类型的流对象
+
+In the simplest case, a stream object is anything with a read() method which takes an optional size parameter and returns a string.
+最简单的情况，只要对象包含read()方法，这个方法使用一个可选参数size并且返回值为一个串，它就是是流对象
+
+When called with no size parameter, the read() method should read everything there is to read from the input source and return all the data as a single value.
+不使用size参数调用read()的时候，这个方法应该从输入源读取所有可读的信息然后以单独的一个值返回所有数据
+
+When called with a size parameter, it reads that much from the input source and returns that much data.
+当使用size参数调用read()时，它从输入源读取并返回指定量的数据
+
+When called again, it picks up where it left off and returns the next chunk of data.
+当再一次被调用时，它从上一次离开的地方开始读取并返回下一个数据块
+
+That sounds exactly like the stream object you get from opening a real file.
+这听起来跟你从打开一个真实文件得到的流对象一样
+
+The difference is that you’re not limiting yourself to real files.
+不同之处在于你不再受限于真实的文件
+
+The input source that’s being “read” could be anything: a web page, a string in memory, even the output of another program.
+能够“读取”的输入源可以是任何东西：网页，内存中的字符串，甚至是另外一个程序的输出
+
+As long as your functions take a stream object and simply call the object’s read() method, you can handle any input source that acts like a file, without specific code to handle each kind of input.
+只要你的函数使用的是流对象，调用对象的read()方法，你可以处理任何行为与文件类似的输入源，而不需要为每种类型的输入指定特别的代码
+
+The io module defines the StringIO class that you can use to treat a string in memory as a file.
+io模块定义了StringIO类，你可以使用它来把内存中的字符串当作文件来处理
+
+To create a stream object out of a string, create an instance of the io.StringIO() class and pass it the string you want to use as your “file” data.
+为了从字符串创建一个流对象，可以把想要作为“文件”使用的字符串传递给io.StringIO()来创建一个StringIO的实例
+
+Calling the read() method “reads” the entire “file,” which in the case of a StringIO object simply returns the original string.
+调用read()方法“读取”整个“文件”，以StringIO对象为例即返回原字符串
+
+Just like a real file, calling the read() method again returns an empty string.
+就像一个真实的文件一样，再次调用read()方法返回一个空串
+
+You can explicitly seek to the beginning of the string, just like seeking through a real file, by using the seek() method of the StringIO object.
+通过使用StringIO对象的seek()方法，你可以显式地定位到字符串的开头，就像在一个真实的文件中定位一样
+
+You can also read the string in chunks, by passing a size parameter to the read() method.
+通过传递size参数给read()方法，你也可以以数据块的形式读取字符串
+
+☞io.StringIO lets you treat a string as a text file.
+☞io.StringIO让你能够将一个字符串作为文本文件来看待
+
+There’s also a io.BytesIO class, which lets you treat a byte array as a binary file.
+另外还有一个io.ByteIO类，它允许你将字节数组当做二进制文件来处理
+
+Handling Compressed Files
+处理压缩文件
+
+The Python standard library contains modules that support reading and writing compressed files.
+Python标准库包含支持读写压缩文件的模块
+
+There are a number of different compression schemes;
+有许多种不同的压缩方案
+
+the two most popular on non-Windows systems are gzip and bzip2.
+其中，gzip和bzip2是非Windows操作系统下最流行的两种压缩方式
+
+The gzip module lets you create a stream object for reading or writing a gzip-compressed file.
+gzip模块允许你创建用来读写gzip压缩文件的流对象
+
+The stream object it gives you supports the read() method (if you opened it for reading) or the write() method (if you opened it for writing).
+该流对象支持read()方法（如果你以读取模式打开）或者write()方法（如果你以写入模式打开）
+
+That means you can use the methods you’ve already learned for regular files to directly read or write a gzip-compressed file, without creating a temporary file to store the decompressed data.
+这就意味着，你可以使用从普通文件那儿学到的技术来直接读写gzip压缩文件，而不需要创建临时文件来保存解压缩了的数据
+
+As an added bonus, it supports the with statement too, so you can let Python automatically close your gzip-compressed file when you’re done with it.
+作为额外的功能，它也支持with语句，所以当你完成了对gzip压缩文件的操作，Python可以为你自动关闭它
+
+You should always open gzipped files in binary mode.
+你应该问题以二进制模式打开gzip压缩文件
+
+(Note the 'b' character in the mode argument.)
+（注意mode参数里的'b'字符
+
+I constructed this example on Linux.
+我在Linux系统上完成的这个例子
+
+If you’re not familiar with the command line, this command is showing the “long listing” of the gzip-compressed file you just created in the Python Shell.
+如果你对命令行不熟悉，这条命令用来显示刚才你在Python shell创建的gzip压缩文件的“长清单(long listings)”，你可以看到，它有79个字节长
+
+This listing shows that the file exists (good), and that it is 79 bytes long.
+而实际上这个值比一开始的字符串还要长
+
+That’s actually larger than the string you started with!
+由于gzip文件包括了一个固定长度的文件头来存放一些关于文件的元数据(metadata)，所以它对于极小的文件来说效率不高
+
+The gunzip command (pronounced “gee-unzip”) decompresses the file and stores the contents in a new file named the same as the compressed file but without the .gz file extension.
+gunzip命令（发音：“gee-unzip”）解压缩文件然后保存其内容到一个与原来压缩文件同名的新文件中，并去掉其.gz扩展名
+
+The cat command displays the contents of a file.
+cat命令显示文件的内容
+
+This file contains the string you originally wrote directly to the compressed file out.log.gz from within the Python Shell.
+当前文件包含了原来你从Python shell直接写入到压缩文件out.log.gz的那个字符串
+
+Python 3.0 had a gzip module, but it did not support using a gzipped-file object as a context manager.
+命令行高手已经对标准输入，标准输出和标准错误的概念相当熟悉了
+
+Python 3.1 added the ability to use gzipped-file objects in a with statement.
+这部分内容是对另一部分还不熟悉的人员准备的
+
+stdout is defined in the sys module, and it is a stream object.
+stdout被定义在sys模块里，它是一个流对象(stream object)
+
+Calling its write() function will print out whatever string you give it, then return the length of the output.
+使用任意字符串调用其write()函数会按原样输出
+
+In fact, this is what the print function really does;
+事实上，这就是print()函数实际在做的事情
+
+it adds a carriage return to the end of the string you’re printing, and calls sys.stdout.write.
+它在串的结尾添加一个回车符，然后调用sys.stdout.write
+
+In the simplest case, sys.stdout and sys.stderr send their output to the same place: the Python IDE (if you’re in one), or the terminal (if you’re running Python from the command line).
+最简单的情况下，sys.stdout和sys.stderr把他们的输出发送到同一个位置：Python IDE（如果你在那里执行操作），或者终端（如果你从命令行执行Python指令）
+
+Like standard output, standard error does not add carriage returns for you.
+跟标准输出一样，标准错误也不会自动为你添加回车符
+
+If you want carriage returns, you’ll need to write carriage return characters.
+如果你需要回车符，你需要手工写入回车符到标准错误
+
+sys.stdout and sys.stderr are stream objects, but they are write-only.
+sys.stdout和sys.stderr都是流对象，但是他们都只支持写入
+
+Attempting to call their read() method will always raise an IOError.
+试图调用他们的read()方法会引发IOError异常
+
+Redirecting Standard Output
+标准输出重定向
+
+sys.stdout and sys.stderr are stream objects, albeit ones that only support writing.
+sys.stdout和sys.stderr都是流对象，尽管他们只支持写入
+
+But they’re not constants;
+但是他们是变量而不是常量
+
+they’re variables.
+这就意味着你可以给它们赋上新值 — 任意其他流对象 — 来重定向他们的输出
+
+[download stdout.py]
+[download stdout.py]
+
+Check this out:
+验证一下：
+
+Did you get this error?
+你是否遇到了以下错误
+
+If so, you’re probably using Python 3.0.
+如果是这样，你可能正在使用Python 3.0
+
+You should really upgrade to Python 3.1.
+应该升级到Python 3.1
+
+Python 3.0 supported the with statement, but each statement can only use one context manager.
+Python 3.0支持with语句，但是每个语句只能使用一个上下文管理器
+
+Python 3.1 allows you to chain multiple context managers in a single with statement.
+Python 3.1允许你在一条with语句中链接多个上下文件管理器
+
+Let’s take the last part first.
+我们先来处理最后那一部分
+
+That’s a complicated with statement.
+这是一个复杂的with语句
+
+Let me rewrite it as something more recognizable.
+让我改写它使之更有可读性
+
+As the rewrite shows, you actually have two with statements, one nested within the scope of the other.
+正如改动后的代码所展示的，实际上你使用了两个with语句，其中一个嵌套在另外一个的作用域(scope)里
+
+The “outer” with statement should be familiar by now: it opens a UTF-8-encoded text file named out.log for writing and assigns the stream object to a variable named a_file.
+“外层的”with语句你应该已经熟悉了：它打开一个使用UTF-8编码的叫做out.log的文本文件用来写入，然后把返回的流对象赋给一个叫做a_file的变量
+
+But that’s not the only thing odd here.
+但是，在此处，它并不是唯一显得古怪的事情
+
+Where’s the as clause?
+as子句(clause)到哪里去了
+
+The with statement doesn’t actually require one.
+其实with语句并不一定需要as子句
+
+Just like you can call a function and ignore its return value, you can have a with statement that doesn’t assign the with context to a variable.
+就像你调用一个函数然后忽略其返回值一样，你也可以不把with语句的上下文环境赋给一个变量
+
+In this case, you’re only interested in the side effects of the RedirectStdoutTo context.
+在这种情况下，我们只关心RedirectStdoutTo上下文环境的边际效应(side effect)
+
+What are those side effects?
+那么，这些边际效应都是些什么呢
+
+Take a look inside the RedirectStdoutTo class.
+我们来看一看RedirectStdoutTo类的内部结构
+
+This class is a custom context manager.
+这是一个用户自定义的上下文管理器(context manager)
+
+Any class can be a context manager by defining two special methods: __enter__() and __exit__().
+任何类只要定义了两个特殊方法：code>__enter__()和__exit__()就可以变成上下文管理器
+
+The __init__() method is called immediately after an instance is created.
+在实例被创建后__init__()方法马上被调用
+
+It takes one parameter, the stream object that you want to use as standard output for the life of the context.
+它使用一个参数，即在上下文环境的生命周期内你想用做标准输出的流对象
+
+This method just saves the stream object in an instance variable so other methods can use it later.
+这个方法只是把该流对象保存在一个实例变量里(instance variable)以使其他方法在后边能够使用到它
+
+The __enter__() method is a special class method;
+__enter__()方法是一个特殊的类方法(special class method)
+
+Python calls it when entering a context (i.e.
+在进入一个上下文环境时Python会调用它（即，在with语句的开始处）
+
+at the beginning of the with statement).
+该方法把当前sys.stdout的值保存在self.out_old内，然后通过把self.out_new赋给sys.stdout来重定向标准输出
+
+The __exit__() method is another special class method;
+__exit__()是另外一个特殊类方法
+
+Python calls it when exiting the context (i.e.
+当离开一个上下文环境时（即，在with语句的末尾）Python会调用它
+
+at the end of the with statement).
+这个方法通过把保存的self.out_old的值赋给sys.stdout来恢复标准输出到原来的状态
+
+Putting it all together:
+放到一起：
+
+This will print to the IDE “Interactive Window” (or the terminal, if running the script from the command line).
+这条代码会输出到IDE的“交互式窗口(Interactive Window)”（或者终端，如果你从命令行运行这段脚本）
+
+This with statement takes a comma-separated list of contexts.
+这条with语句使用逗号分隔的上下文环境列表
+
+The comma-separated list acts like a series of nested with blocks.
+这个列表就像一系列相互嵌套的with块
+
+The first context listed is the “outer” block;
+先列出的是“外层”的块
+
+the last one listed is the “inner” block.
+后列出的是“内层”的块
+
+The first context opens a file;
+第一个上下文环境打开一个文件
+
+the second context redirects sys.stdout to the stream object that was created in the first context.
+第二个重定向sys.stdout到由第一个上下环境创建的流对象
+
+Because this print() function is executed with the context created by the with statement, it will not print to the screen;
+由于这个print()函数在with语句创建的上下文环境里执行，所以它不会输出到屏幕
+
+it will write to the file out.log.
+它会写入到文件out.log
+
+The with code block is over.
+with语句块结束了
+
+Python has told each context manager to do whatever it is they do upon exiting a context.
+Python告诉每一个上下文管理器完成他们应该在离开上下文环境时应该做的事
+
+The context managers form a last-in-first-out stack.
+这些上下文环境形成一个后进先出的栈
+
+Upon exiting, the second context changed sys.stdout back to its original value, then the first context closed the file named out.log.
+当离开一个上下文环境的时候，第二个上下文环境将sys.stdout的值恢复到它的原来状态，然后第一个上下文环境关闭那个叫做out.log的文件
+
+Since standard output has been restored to its original value, calling the print() function will once again print to the screen.
+由于标准输出已经被恢复到原来的状态，再次调用print()函数会马上输出到屏幕上
+
+Redirecting standard error works exactly the same way, using sys.stderr instead of sys.stdout.
+重定向标准错误的原理跟这个完全一样，将sys.stdout替换为sys.stderr即可
+
+Further Reading
+进一步阅读
+
+Reading and writing files in the Python.org tutorial
+读写文件 Python.org 上的教程
+
+io module
+io 模块
+
+Stream objects
+流对象
+
+Context manager types
+上下文管理器类型
+

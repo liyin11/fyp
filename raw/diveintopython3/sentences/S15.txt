@@ -1,0 +1,1374 @@
+You are here: Home ‣ Dive Into Python 3 ‣
+您在这里: 主页 ‣ 深入Python 3 ‣
+
+Difficulty level: ♦♦♦♦♢
+难度等级: ♦♦♦♦♢
+
+HTTP Web Services
+HTTP Web 服务
+
+❝ A ruffled mind makes a restless pillow.
+❝ A ruffled mind makes a restless pillow. ❞ — Charlotte Brontë
+
+Diving In
+深入
+
+Philosophically, I can describe HTTP web services in 12 words: exchanging data with remote servers using nothing but the operations of HTTP.
+简单地讲，HTTP web 服务是指以编程的方式直接使用 HTTP 操作从远程服务器发送和接收数据
+
+If you want to get data from the server, use HTTP GET.
+如果你要从服务器获取数据，使用HTTP GET
+
+If you want to send new data to the server, use HTTP POST.
+如果你要向服务器发送新数据，使用HTTP POST. 一些更高级的HTTP Web 服务 API也允许使用HTTP PUT 和 HTTP DELETE来创建、修改和删除数据
+
+Some more advanced HTTP web service APIs also allow creating, modifying, and deleting data, using HTTP PUT and HTTP DELETE.
+ 换句话说，HTTP 协议中的“verbs (动作)” (GET, POST, PUT 和 DELETE) 可以直接对应到应用层的操作：获取，创建，修改，删除数据
+
+The main advantage of this approach is simplicity, and its simplicity has proven popular.
+这个方法主要的优点是简单, 它的简单证明是受欢迎的
+
+Data — usually XML or JSON — can be built and stored statically, or generated dynamically by a server-side script, and all major programming languages (including Python, of course!) include an HTTP library for downloading it.
+数据 — 通常是XML或JSON — 可以事先创建好并静态的存储下来 ，或者由服务器端脚本动态生成, 并且所有主要的编程语言(当然包括 Python)都包含HTTP 库用于下载数据
+
+Debugging is also easier;
+调试也很方便; 由于HTTP web 服务中每一个资源都有一个唯一的地址(以URL的形式存在), 你可以在浏览器中加载它并且立即看到原始的数据.
+
+Examples of HTTP web services:
+HTTP web 服务示例:
+
+Google Data APIs allow you to interact with a wide variety of Google services, including Blogger and YouTube.
+Google Data API 允许你同很多类型的Google 服务交互, 包括 Blogger 和 YouTube
+
+Flickr Services allow you to upload and download photos from Flickr.
+Flickr Services 允许你向Flickr下载和上传图片
+
+Twitter API allows you to publish status updates on Twitter.
+Twitter API 允许你在Twitter发布状态更新
+
+…and many more
+…以及更多
+
+Python 3 comes with two different libraries for interacting with HTTP web services:
+Python 3 带有两个库用于和HTTP web 服务交互:
+
+http.client is a low-level library that implements RFC 2616, the HTTP protocol.
+http.client 是实现了RFC 2616, HTTP 协议的底层库.
+
+urllib.request is an abstraction layer built on top of http.client.
+urllib.request 建立在http.client之上一个抽象层
+
+It provides a standard API for accessing both HTTP and FTP servers, automatically follows HTTP redirects, and handles some common forms of HTTP authentication.
+ 它为访问HTTP 和 FTP 服务器提供了一个标准的API，可以自动跟随HTTP 重定向， 并且处理了一些常见形式的HTTP 认证
+
+So which one should you use?
+那么，你应该用哪个呢
+
+Neither of them.
+两个都不用
+
+Instead, you should use httplib2, an open source third-party library that implements HTTP more fully than http.client but provides a better abstraction than urllib.request.
+取而代之, 你应该使用 httplib2,一个第三方的开源库,它比http.client更完整的实现了HTTP协议，同时比urllib.request提供了更好的抽象
+
+To understand why httplib2 is the right choice, you first need to understand HTTP.
+要理解为什么httplib2是正确的选择，你必须先了解HTTP
+
+Features of HTTP
+HTTP的特性
+
+There are five important features which all HTTP clients should support.
+有五个重要的特性所有的HTTP客户端都应该支持
+
+Caching
+缓存
+
+The most important thing to understand about any type of web service is that network access is incredibly expensive.
+关于web服务最需要了解的一点是网络访问是极端昂贵的
+
+I don’t mean “dollars and cents” expensive (although bandwidth ain’t free).
+我并不是指“美元”和“美分”的昂贵(虽然带宽确实不是免费的)
+
+I mean that it takes an extraordinary long time to open a connection, send a request, and retrieve a response from a remote server.
+我的意思是需要一个非常长的时间来打开一个连接，发送请求，并从远程服务器响应
+
+Even on the fastest broadband connection, latency (the time it takes to send a request and start retrieving data in a response) can still be higher than you anticipated.
+ 即使在最快的宽带连接上，延迟（从发送一个请求到开始在响应中获得数据所花费的时间）仍然高于您的预期
+
+A router misbehaves, a packet is dropped, an intermediate proxy is under attack — there’s never a dull moment on the public internet, and there may be nothing you can do about it.
+路由器的行为不端，被丢弃的数据包，中间代理服务器被攻击 — 在公共互联网上没有沉闷的时刻(never a dull moment)，并且你对此无能为力
+
+HTTP is designed with caching in mind.
+HTTP在设计时就考虑到了缓存
+
+There is an entire class of devices (called “caching proxies”) whose only job is to sit between you and the rest of the world and minimize network access.
+有这样一类的设备(叫做 “缓存代理服务器”) ，它们的唯一的任务是就是呆在你和世界的其他部分之间来最小化网络请求
+
+Your company or ISP almost certainly maintains caching proxies, even if you’re unaware of them.
+你的公司或ISP 几乎肯定维护着这样的缓存代理服务器, 只不过你没有意识到而已
+
+They work because caching is built into the HTTP protocol.
+ 它们的能够起到作用是因为缓存是内建在HTTP协议中的
+
+Here’s a concrete example of how caching works.
+这里有一个缓存如何工作的具体例子
+
+You visit diveintomark.org in your browser.
+ 你通过浏览器访问diveintomark.org
+
+That page includes a background image, wearehugh.com/m.jpg.
+该网页包含一个背景图片， wearehugh.com/m.jpg
+
+When your browser downloads that image, the server includes the following HTTP headers:
+当你的浏览器下载那张图片时,服务器的返回包含了下面的HTTP 头:
+
+The Cache-Control and Expires headers tell your browser (and any caching proxies between you and the server) that this image can be cached for up to a year.
+Cache-Control 和 Expires 头告诉浏览器(以及任何处于你和服务器之间的缓存代理服务器) 这张图片可以缓存长达一年
+
+A year!
+ 一年! 如果在明年，你访问另外一个也包含这张图片的页面，你的浏览器会从缓存中加载这样图片而不会产生任何网络活动.
+
+But wait, it gets better.
+等一下，情况实际上更好
+
+Let’s say your browser purges the image from your local cache for some reason.
+比方说，你的浏览器由于某些原因将图片从本地缓存中移除了
+
+Maybe it ran out of disk space;
+可能是因为没有磁盘空间了或者是你清空了缓存，不管是什么理由
+
+maybe you manually cleared the cache.
+然而HTTP 头告诉说这个数据可以被公共缓存代理服务器缓存(Cache-Control头中public关键字说明这一点)
+
+Whatever.
+缓存代理服务器有非常庞大的存储空间，很可能比你本地浏览器所分配的大的多
+
+If your company or ISP maintain a caching proxy, the proxy may still have the image cached.
+如果你的公司或者ISP维护着这样一个缓存代理服务器，它很可能仍然有这张图片的缓存
+
+When you visit diveintomark.org again, your browser will look in its local cache for the image, but it won’t find it, so it will make a network request to try to download it from the remote server.
+ 当你再次访问diveintomark.org 时, 你的浏览器会在本地缓存中查找这张图片, 它没有找到, 所以它发出一个网络请求试图从远程服务器下载这张图片
+
+But if the caching proxy still has a copy of the image, it will intercept that request and serve the image from its cache.
+但是由于缓存代理服务器仍然有这张图片的一个副本，它将截取这个请求并从它的缓存中返回这张图片
+
+That means that your request will never reach the remote server;
+ 这意味这你的请求不会到达远程服务器; 实际上, 它根本没有离开你公司的网络
+
+in fact, it will never leave your company’s network.
+这意味着更快的下载(网络跃点变少了) 和节省你公司的花费(从外部下载的数据变少了)
+
+HTTP caching only works when everybody does their part.
+只有当每一个角色都做按协议来做时，HTTP缓存才能发挥作用
+
+On one side, servers need to send the correct headers in their response.
+一方面，服务器需要在响应中发送正确的头
+
+On the other side, clients need to understand and respect those headers before they request the same data twice.
+另一方面，客户端需要在第二次请求同样的数据前理解并尊重这些响应头
+
+The proxies in the middle are not a panacea;
+ 代理服务器不是灵丹妙药，它们只会在客户端和服务器允许的情况下尽可能的聪明
+
+Python’s HTTP libraries do not support caching, but httplib2 does.
+Python的HTTP库不支持缓存，而httplib2支持
+
+Last-Modified Checking
+最后修改时间的检查
+
+Some data never changes, while other data changes all the time.
+有一些数据从不改变，而另外一些则总是在变化
+
+In between, there is a vast field of data that might have changed, but hasn’t.
+介于两者之间，在很多情况下数据还没变化但是将来可能会变化
+
+CNN.com’s feed is updated every few minutes, but my weblog’s feed may not change for days or weeks at a time.
+ CNN.com 的供稿每隔几分钟就会更新，但我的博客的供稿可能几天或者几星期才会更新一次
+
+In the latter case, I don’t want to tell clients to cache my feed for weeks at a time, because then when I do actually post something, people may not read it for weeks (because they’re respecting my cache headers which said “don’t bother checking this feed for weeks”).
+在后面一种情况的时候，我不希望告诉客户端缓存我的供稿几星期，因为当我真的发表了点东西的时候，人们可能会几个星期后才能阅读到(由于他们遵循我的cache 头—"几个星期内都不用检查这个供稿")
+
+On the other hand, I don’t want clients downloading my entire feed once an hour if it hasn’t changed!
+另一方面，如果供稿没有改变我也不希望客户端每隔1小时就来检查一下!
+
+HTTP has a solution to this, too.
+HTTP 对于这个问题也有一个解决方案
+
+When you request data for the first time, the server can send back a Last-Modified header.
+当你第一次请求数据时，服务器返回一个Last-Modified头
+
+This is exactly what it sounds like: the date that the data was changed.
+ 顾名思义：数据最后修改的时间
+
+That background image referenced from diveintomark.org included a Last-Modified header.
+diveintomark.org引用的这张背景图片包含一个Last-Modified头
+
+When you request the same data a second (or third or fourth) time, you can send an If-Modified-Since header with your request, with the date you got back from the server last time.
+如果第二(第三，第四）次请求同样一个资源，你可以在你的请求中发送一个If-Modified-Since头，其值为你上次从服务器返回的时间
+
+If the data has changed since then, then the server gives you the new data with a 200 status code.
+如果从那时开始，数据已经发成过变化，服务器会忽略If-Modified-Since头并返回新数据和200状态码给你
+
+But if the data hasn’t changed since then, the server sends back a special HTTP 304 status code, which means “this data hasn’t changed since the last time you asked for it.” You can test this on the command line, using curl:
+否则的话，服务器将发回一个特殊的HTTP 304 状态码, 它的含义是“从上次请求到现在数据没有发生过变化.” 你可以在命令行上使用curl来测试:
+
+Why is this an improvement?
+为什么这是一个进步
+
+Because when the server sends a 304, it doesn’t re-send the data.
+因为服务器发送304时, 它没有重新发送数据
+
+All you get is the status code.
+你得到的仅仅是状态码
+
+Even after your cached copy has expired, last-modified checking ensures that you won’t download the same data twice if it hasn’t changed.
+即使你的缓存副本已经过期，最后修改时间检查保证你不会在数据没有变化的情况下重新下载它
+
+(As an extra bonus, this 304 response also includes caching headers.
+ (额外的好处是，这个304 响应同样也包含了缓存头
+
+Proxies will keep a copy of data even after it officially “expires,” in the hopes that the data hasn’t really changed and the next request responds with a 304 status code and updated cache information.)
+代理服务器会在数据已经“过期”的情况下仍然保留数据的副本; 希望数据实际上还没有改变，并且下一个请求以304状态码返回，并更新缓存信息
+
+Python’s HTTP libraries do not support last-modified date checking, but httplib2 does.
+Python的HTTP 库不支持最后修改时间检查，而httplib2 支持
+
+ETag Checking
+ETags
+
+ETags are an alternate way to accomplish the same thing as the last-modified checking.
+ETag 是另一个和最后修改时间检查达到同样目的的方法
+
+With Etags, the server sends a hash code in an ETag header along with the data you requested.
+使用ETag时，服务器在返回数据的同时在ETag头里返回一个哈希码(如何生成哈希码完全取决于服务器，唯一的要求是数据改变时哈希码也要改变) diveintomark.org引用的背景图片包含有ETag 头.
+
+The second time you request the same data, you include the ETag hash in an If-None-Match header of your request.
+当你再次请求同样的数据时，你在If-None-Match头里放入ETag值
+
+If the data hasn’t changed, the server will send you back a 304 status code.
+如果数据没有发生改变，服务器将会返回304状态码
+
+As with the last-modified date checking, the server sends back only the 304 status code;
+同最后修改时间检查一样，服务器发回的只有304 状态码，不会再一次给你发送同样的数据
+
+it doesn’t send you the same data a second time.
+通过在请求中包含ETag 哈希码，你告诉服务器如果哈希值匹配就不需要重新发送同样的数据了，因为你仍然保留着上次收到的数据.
+
+Again with the curl:
+再一次使用curl:
+
+ETags are commonly enclosed in quotation marks, but the quotation marks are part of the value.
+ETag 一般使用引号包围, 但是引号是值的一部分
+
+That means you need to send the quotation marks back to the server in the If-None-Match header.
+它们不是分隔符
+
+Python’s HTTP libraries do not support ETags, but httplib2 does.
+Python HTTP库不支持ETag，而httplib2支持.
+
+Compression
+压缩
+
+When you talk about HTTP web services, you’re almost always talking about moving text-based data back and forth over the wire.
+当我们谈论HTTP web 服务的时候, 你总是会讨论到在线路上来回运送文本数据
+
+Maybe it’s XML, maybe it’s JSON, maybe it’s just plain text.
+可能是XML，也可能是JSON，抑或仅仅是纯文本
+
+Regardless of the format, text compresses well.
+不管是什么格式，文本的压缩性能很好
+
+The example feed in the XML chapter is 3070 bytes uncompressed, but would be 941 bytes after gzip compression.
+XML 章节中的示例供稿在没压缩的情况下是3070 字节，然而在gzip 压缩后只有941 字节
+
+That’s just 30% of the original size!
+仅仅是原始大小的30%!
+
+HTTP supports several compression algorithms.
+HTTP支持若干种压缩算法
+
+The two most common types are gzip and deflate.
+最常见的两种是gzip 和 deflate
+
+When you request a resource over HTTP, you can ask the server to send it in compressed format.
+当你通过HTTP请求资源时，你可以要求服务器以压缩格式返回资源
+
+You include an Accept-encoding header in your request that lists which compression algorithms you support.
+你在请求中包含一个Accept-encoding头，里面列出了你支持的压缩算法
+
+If the server supports any of the same algorithms, it will send you back compressed data (with a Content-encoding header that tells you which algorithm it used).
+如果服务器也支持其中的某一种算法，它就会返回给你压缩后的数据(同时通过Content-encoding头标识它使用的算法)
+
+Then it’s up to you to decompress the data.
+接下来的事情就是由你去解压数据了
+
+☞Important tip for server-side developers: make sure that the compressed version of a resource has a different Etag than the uncompressed version.
+Python的 HTTP库不支持压缩，但httplib2支持
+
+Cool URIs don’t change, but many URIs are seriously uncool.
+好的 URI不会变化，但是有很多URI并没有那么好
+
+Web sites get reorganized, pages move to new addresses.
+网站可能会重新组织，页面移动到新位置
+
+Even web services can reorganize.
+即使是web 服务也可能重新安排
+
+A syndicated feed at http://example.com/index.xml might be moved to http://example.com/xml/atom.xml.
+一个联合供稿http://example.com/index.xml 可能会移动到http://example.com/xml/atom.xml
+
+Or an entire domain might move, as an organization expands and reorganizes;
+或者当一个机构扩张和重组的时候，整个域名都可能移动; http://www.example.com/index.xml 变成 http://server-farm-1.example.com/index.xml.
+
+Every time you request any kind of resource from an HTTP server, the server includes a status code in its response.
+每一次你向HTTP服务器请求资源的时候, 服务器都会在响应中包含一个状态码
+
+Status code 200 means “everything’s normal, here’s the page you asked for”.
+ 状态码200的意思是一切正常，这就是你请求的页面; 状态码404的意思是找不到页面; (你很可能在浏览网页的时候碰到过404)
+
+Status code 404 means “page not found”.
+300 系列的状态码意味着某种形式的重定向
+
+HTTP has several different ways of signifying that a resource has moved.
+HTTP 有多种方法表示一个资源已经被移动
+
+The two most common techiques are status codes 302 and 301.
+最常见两个技术是状态码302 和 301
+
+Status code 302 is a temporary redirect;
+ 状态码 302 是一个 临时重定向; 它意味着, 资源被被临时从这里移动走了; (并且临时地址在Location 头里面给出)
+
+it means “oops, that got moved over here temporarily” (and then gives the temporary address in a Location header).
+状态码301是永久重定向; 它意味着，资源被永久的移动了; (并且在Location头里面给出了新的地址)
+
+Status code 301 is a permanent redirect;
+如果你得到302状态码和一个新地址, HTTP规范要求你访问新地址来获得你要的资源，但是下次你要访问同样的资源的时候你应该重新尝试旧的地址
+
+it means “oops, that got moved permanently” (and then gives the new address in a Location header).
+但是如果你得到301状态码和新地址, 你从今以后都应该使用新的地址
+
+The urllib.request module automatically “follow” redirects when it receives the appropriate status code from the HTTP server, but it doesn’t tell you that it did so.
+urllib.request模块在从HTTP服务器收到对应的状态码的时候会自动“跟随”重定向, 但它不会告诉你它这么干了
+
+You’ll end up getting data you asked for, but you’ll never know that the underlying library “helpfully” followed a redirect for you.
+你最后得到了你请求的数据，但是你永远也不会知道下层的库友好的帮助你跟随了重定向
+
+So you’ll continue pounding away at the old address, and each time you’ll get redirected to the new address, and each time the urllib.request module will “helpfully” follow the redirect.
+结果是，你继续访问旧的地址，每一次你都会得到新地址的重定向，每一次urllib.request模块都会友好的帮你跟随重定向
+
+In other words, it treats permanent redirects the same as temporary redirects.
+换句话说，它将永久重定向当成临时重定向来处理
+
+That means two round trips instead of one, which is bad for the server and bad for you.
+这意味着两个来回而不是一个，这对你和服务器都不好
+
+httplib2 handles permanent redirects for you.
+httplib2 帮你处理了永久重定向
+
+Not only will it tell you that a permanent redirect occurred, it will keep track of them locally and automatically rewrite redirected URLs before requesting them.
+它不仅会告诉你发生了永久重定向，而且它会在本地记录这些重定向，并且在发送请求前自动重写为重定向后的URL
+
+How Not To Fetch Data Over HTTP
+避免通过 HTTP 重复地获取数据
+
+Let’s say you want to download a resource over HTTP, such as an Atom feed.
+我们来举个例子，你想要通过HTTP下载一个资源, 比如说一个Atom 供稿
+
+Being a feed, you’re not just going to download it once;
+作为一个供稿, 你不会只下载一次，你会一次又一次的下载它
+
+you’re going to download it over and over again.
+ (大部分的供稿阅读器会美一小时检查一次更新
+
+(Most feed readers will check for changes once an hour.) Let’s do it the quick-and-dirty way first, and then see how you can do better.
+) 让我们先用最粗糙和最快的方法来实现它，接着再来看看怎样改进
+
+Downloading anything over HTTP is incredibly easy in Python;
+在Python中通过HTTP下载东西是非常简单的; 实际上，只需要一行代码
+
+in fact, it’s a one-liner.
+urllib.request模块有一个方便的函数urlopen() ，它接受你所要获取的页面地址，然后返回一个类文件对象，您只要调用它的read()方法就可以获得网页的全部内容
+
+The urllib.request module has a handy urlopen() function that takes the address of the page you want, and returns a file-like object that you can just read() from to get the full contents of the page.
+没有比这更简单的了
+
+The urlopen().read() method always returns a bytes object, not a string.
+urlopen().read()方法总是返回bytes对象,而不是字符串
+
+Remember, bytes are bytes;
+记住字节仅仅是字节，字符只是一种抽象
+
+characters are an abstraction.
+ HTTP 服务器不关心抽象的东西
+
+HTTP servers don’t deal in abstractions.
+如果你请求一个资源，你得到字节
+
+If you request a resource, you get bytes.
+ 如果你需要一个字符串，你需要确定字符编码,并显式的将其转化成字符串
+
+So what’s wrong with this?
+那么，有什么问题呢
+
+For a quick one-off during testing or development, there’s nothing wrong with it.
+作为开发或测试中的快速试验，没有什么不妥的地方
+
+I do it all the time.
+我总是这么干
+
+I wanted the contents of the feed, and I got the contents of the feed.
+我需要供稿的内容，然后我拿到了它
+
+The same technique works for any web page.
+相同的技术对任何网页都有效
+
+But once you start thinking in terms of a web service that you want to access on a regular basis (e.g.
+但一旦你考虑到你需要定期访问Web服务的时候，(例如 每隔1小时请求一下这个供稿), 这样的做法就显得很低效和粗暴了
+
+What’s On The Wire?
+线路上是什么
+
+To see why this is inefficient and rude, let’s turn on the debugging features of Python’s HTTP library and see what’s being sent “on the wire” (i.e.
+为了说明为什么这是低效和粗暴的，我们来打开Python的HTTP库的调试功能，看看什么东西被发送到了线路上(即网络上).
+
+As I mentioned at the beginning of the chapter, urllib.request relies on another standard Python library, http.client.
+正如我在这章开头提到的，urllib.request 依赖另一个标准Python库, http.client
+
+Normally you don’t need to touch http.client directly.
+正常情况下你不需要直接接触http.client
+
+(The urllib.request module imports it automatically.) But we import it here so we can toggle the debugging flag on the HTTPConnection class that urllib.request uses to connect to the HTTP server.
+ (urllib.request 模块会自动导入它
+
+Now that the debugging flag is set, information on the HTTP request and response is printed out in real time.
+调式开关已经打开，有关HTTP请求和响应的信息会实时的打印出来
+
+As you can see, when you request the Atom feed, the urllib.request module sends five lines to the server.
+正如你所看见的，当你请求Atom 供稿时, urllib.request模块向服务器发送了5行数据
+
+The first line specifies the HTTP verb you’re using, and the path of the resource (minus the domain name).
+第一行指定了你使用的HTTP方法和你访问的资源的路径(不包含域名)
+
+The second line specifies the domain name from which we’re requesting this feed.
+第二行指定了你请求的供稿所在的域名
+
+The third line specifies the compression algorithms that the client supports.
+第三行指定客户端支持的压缩算法
+
+As I mentioned earlier, urllib.request does not support compression by default.
+我之前提到过，urllib.request 默认不支持压缩
+
+The fourth line specifies the name of the library that is making the request.
+第四行说明了发送请求的库的名字
+
+By default, this is Python-urllib plus a version number.
+默认情况下是Python-urllib加上版本号
+
+Both urllib.request and httplib2 support changing the user agent, simply by adding a User-Agent header to the request (which will override the default value).
+urllib.request和httplib2都支持更改用户代理, 直接向请求里面加一个User-Agent头就可以了(默认值会被覆盖).
+
+Now let’s look at what the server sent back in its response.
+现在让我们来看看服务器返回了什么
+
+The response returned from the urllib.request.urlopen() function contains all the HTTP headers the server sent back.
+urllib.request.urlopen()函数返回的response对象包含了服务器返回的所有HTTP头
+
+It also contains methods to download the actual data;
+它也提供了下载实际数据的方法，这个我们等一下讲
+
+The server tells you when it handled your request.
+服务器提供了它处理你的请求时的时间
+
+This response includes a Last-Modified header.
+这个响应包含了Last-Modified头
+
+This response includes an ETag header.
+这个响应包含了ETag头
+
+The data is 3070 bytes long.
+数据的长度是3070字节
+
+Notice what isn’t here: a Content-encoding header.
+请注意什么东西没有出现在这里: Content-encoding头
+
+Your request stated that you only accept uncompressed data (Accept-encoding: identity), and sure enough, this response contains uncompressed data.
+你的请求表示你只接受未压缩的数据，(Accept-encoding: identity), 然后当然，响应确实包含未压缩的数据
+
+This response includes caching headers that state that this feed can be cached for up to 24 hours (86400 seconds).
+这个响应包含缓存头，表明这个供稿可以缓存长达24小时
+
+And finally, download the actual data by calling response.read().
+最后，通过调用response.read()下载实际的数据. 你从len()函数可以看出，一下子就把整个3070个字节下载下来了
+
+As you can see, this code is already inefficient: it asked for (and received) uncompressed data.
+正如你所看见的，这个代码已经是低效的了
+
+I know for a fact that this server supports gzip compression, but HTTP compression is opt-in.
+它请求(并接收)了未压缩的数据
+
+We didn’t ask for it, so we didn’t get it.
+我知道服务器实际上是支持gzip 压缩的, 但HTTP 压缩是一个可选项
+
+That means we’re fetching 3070 bytes when we could have fetched 941.
+我们不主动要求，服务器不会执行
+
+Bad dog, no biscuit.
+这意味这在可以只下载941字节的情况下我们下载了3070个字节
+
+But wait, it gets worse!
+别急，还有更糟糕的
+
+To see just how inefficient this code is, let’s request the same feed a second time.
+为了说明这段代码有多么的低效，让我再次请求一下同一个供稿
+
+Notice anything peculiar about this request?
+注意到这个请求有什么特别之处吗
+
+It hasn’t changed!
+它没有变化
+
+It’s exactly the same as the first request.
+它同第一个请求完全一样
+
+No sign of If-Modified-Since headers.
+没有If-Modified-Since头. 没有If-None-Match头. 没有尊重缓存头，也仍然没有压缩
+
+And what happens when you do the same thing twice?
+然后，当你发送同样的请求的时候会发生什么呢
+
+You get the same response.
+你又一次得到同样的响应
+
+The server is still sending the same array of “smart” headers: Cache-Control and Expires to allow caching, Last-Modified and ETag to enable “not-modified” tracking.
+服务器仍然在发送同样的聪明的头: Cache-Control 和 Expires 用于允许缓存, Last-Modified 和 ETag用于“是否变化”的跟踪
+
+Even the Vary: Accept-Encoding header hints that the server would support compression, if only you would ask for it.
+甚至是Vary: Accept-Encoding头暗示只要你请求，服务器就能支持压缩
+
+But you didn’t.
+但是你没有
+
+Once again, this request fetches the whole 3070 bytes…
+再一次，获取这个数据下载了一共3070个字节…
+
+…the exact same 3070 bytes you got last time.
+…和你上一次下载的3070字节完全一致
+
+HTTP is designed to work better than this.
+HTTP 设计的能比这样工作的更好
+
+urllib speaks HTTP like I speak Spanish — enough to get by in a jam, but not enough to hold a conversation.
+ urllib使用HTTP就像我说西班牙语一样 — 可以表达基本的意思，但是不足以保持一个对话
+
+HTTP is a conversation.
+HTTP 是一个对话
+
+It’s time to upgrade to a library that speaks HTTP fluently.
+是时候更新到一个可以流利的讲HTTP的库了
+
+Introducing httplib2
+介绍 httplib2
+
+Before you can use httplib2, you’ll need to install it.
+在你使用httplib2前, 你需要先安装它
+
+Visit code.google.com/p/httplib2/ and download the latest version.
+ 访问code.google.com/p/httplib2/ 并下载最新版本
+
+httplib2 is available for Python 2.x and Python 3.x;
+httplib2对于Python 2.x 和 Python 3.x都有对应的版本; 请确保你下载的是Python 3 的版本, 名字类似httplib2-python3-0.5.0.zip
+
+Unzip the archive, open a terminal window, and go to the newly created httplib2 directory.
+解压该档案，打开一个终端窗口, 然后切换到刚生成的httplib2目录
+
+On Windows, open the Start menu, select Run..., type cmd.exe and press ENTER.
+在Windows 上，请打开开始菜单, 选择运行, 输入cmd.exe 最后按回车(ENTER).
+
+On Mac OS X, run the Terminal.app application in your /Applications/Utilities/ folder.
+在Mac OS X上, 运行位于/Applications/Utilities/目录下的Terminal.app程序
+
+On Linux, run the Terminal application, which is usually in your Applications menu under Accessories or System.
+在Linux上，运行终端(Terminal)程序, 该程序一般位于你的应用程序菜单，在Accessories 或者 系统(System)下面
+
+To use httplib2, create an instance of the httplib2.Http class.
+要使用httplib2, 请创建一个httplib2.Http 类的实例
+
+The primary interface to httplib2 is the Http object.
+httplib2的主要接口是Http对象
+
+For reasons you’ll see in the next section, you should always pass a directory name when you create an Http object.
+你创建Http对象时总是应该传入一个目录名，具体原因你会在下一节看见
+
+The directory does not need to exist;
+目录不需要事先存在，httplib2会在必要的时候创建它
+
+Once you have an Http object, retrieving data is as simple as calling the request() method with the address of the data you want.
+一旦你有了Http对象, 获取数据非常简单，以你要的数据的地址作为参数调用request()方法就可以了
+
+This will issue an HTTP GET request for that URL.
+这会对该URL执行一个HTTP GET请求. (这一章下面你会看见怎样执行其他HTTP 请求, 比如 POST
+
+(Later in this chapter, you’ll see how to issue other HTTP requests, like POST.)
+)
+
+The request() method returns two values.
+request() 方法返回两个值
+
+The first is an httplib2.Response object, which contains all the HTTP headers the server returned.
+第一个是一个httplib2.Response对象，其中包含了服务器返回的所有HTTP头
+
+For example, a status code of 200 indicates that the request was successful.
+比如, status为200 表示请求成功
+
+The content variable contains the actual data that was returned by the HTTP server.
+content 变量包含了HTTP服务器返回的实际数据
+
+The data is returned as a bytes object, not a string.
+数据以bytes对象返回，不是字符串
+
+If you want it as a string, you’ll need to determine the character encoding and convert it yourself.
+ 如果你需要一个字符串，你需要确定字符编码并自己进行转换
+
+☞You probably only need one httplib2.Http object.
+☞你很可能只需要一个httplib2.Http对象
+
+There are valid reasons for creating more than one, but you should only do so if you know why you need them.
+当然存在足够的理由来创建多个，但是只有当你清楚创建多个的原因的时候才应该这样做
+
+“I need to request data from two different URLs” is not a valid reason.
+从不同的URL获取数据不是一个充分的理由，重用Http对象并调用request()方法两次就可以了
+
+A Short Digression To Explain Why httplib2 Returns Bytes Instead of Strings
+关于httplib2返回字节串而不是字符串的简短解释
+
+Bytes.
+字节串
+
+Strings.
+字符串
+
+What a pain.
+真麻烦啊
+
+Why can’t httplib2 “just” do the conversion for you?
+为什么httplib2不能替你把转换做了呢
+
+Well, it’s complicated, because the rules for determining the character encoding are specific to what kind of resource you’re requesting.
+由于决定字符编码的规则依赖于你请求的资源的类型，导致自动转化很复杂
+
+How could httplib2 know what kind of resource you’re requesting?
+httplib2怎么知道你要请求的资源的类型呢
+
+It’s usually listed in the Content-Type HTTP header, but that’s an optional feature of HTTP and not all HTTP servers include it.
+通常类型会在Content-Type HTTP 头里面列出,但是这是HTTP的可选特性，并且并非所有的HTTP服务器都支持
+
+If that header is not included in the HTTP response, it’s left up to the client to guess.
+如果HTTP响应没有包含这个头，那就留给客户端去猜了
+
+(This is commonly called “content sniffing,” and it’s never perfect.)
+(这通常被称为“内容嗅探(content sniffing)” ，但它从来就不是完美的
+
+If you know what sort of resource you’re expecting (an XML document in this case), perhaps you could “just” pass the returned bytes object to the xml.etree.ElementTree.parse() function.
+如果你知道你期待的资源是什么类型的(这个例子中是XML文档), 也许你应该直接将返回的字节串(bytes)对象传给xml.etree.ElementTree.parse() 函数
+
+That’ll work as long as the XML document includes information on its own character encoding (as this one does), but that’s an optional feature and not all XML documents do that.
+只要(像这个文档一样)XML 文档自己包含字符编码信息，这是可以工作的
+
+If an XML document doesn’t include encoding information, the client is supposed to look at the enclosing transport — i.e.
+但是字符编码信息是一个可选特性并非所有XML文档包含这样的信息
+
+the Content-Type HTTP header, which can include a charset parameter.
+如果一个XML文档不包含编码信息，客户端应该去查看Content-Type HTTP 头, 里面应该包含一个charset参数
+
+But it’s worse than that.
+但问题更糟糕
+
+Now character encoding information can be in two places: within the XML document itself, and within the Content-Type HTTP header.
+现在字符编码信息可能在两个地方：在XML文档自己内部，在Content-Type HTTP 头里面
+
+If the information is in both places, which one wins?
+如果信息在两个地方都出现了，哪个优先呢
+
+According to RFC 3023 (I swear I am not making this up), if the media type given in the Content-Type HTTP header is application/xml, application/xml-dtd, application/xml-external-parsed-entity, or any one of the subtypes of application/xml such as application/atom+xml or application/rss+xml or even application/rdf+xml, then the encoding is
+根据RFC 3023 (我发誓，这不是我编的), 如果在Content-Type HTTP头里面给出的媒体类型(media type)是application/xml, application/xml-dtd, application/xml-external-parsed-entity, 或者是任何application/xml的子类型，比如application/atom+xml 或者 application/rss+xml 亦或是 application/rdf+xml, 那么编码是
+
+the encoding given in the charset parameter of the Content-Type HTTP header, or
+Content-Type HTTP头的charset参数给出的编码, 或者
+
+the encoding given in the encoding attribute of the XML declaration within the document, or
+文档内的XML声明的encoding属性给出的编码, 或者
+
+UTF-8
+UTF-8
+
+On the other hand, if the media type given in the Content-Type HTTP header is text/xml, text/xml-external-parsed-entity, or a subtype like text/AnythingAtAll+xml, then the encoding attribute of the XML declaration within the document is ignored completely, and the encoding is
+相反，如果在Content-Type HTTP头里面给出的媒体类型(media type)是text/xml, text/xml-external-parsed-entity, 或者任何text/AnythingAtAll+xml这样的子类型, 那么文档内的XML声明的encoding属性完全被忽略，编码是
+
+the encoding given in the charset parameter of the Content-Type HTTP header, or
+Content-Type HTTP头的charset参数给出的编码, 或者
+
+us-ascii
+us-ascii
+
+And that’s just for XML documents.
+而且这还只是针对XML文档的规则
+
+For HTML documents, web browsers have constructed such byzantine rules for content-sniffing [PDF] that we’re still trying to figure them all out.
+对于HTML文档，网页浏览器创造了用于内容嗅探的复杂规则(byzantine rules for content-sniffing) [PDF], 我们正试图搞清楚它们
+
+“Patches welcome.”
+“欢迎提交补丁.”
+
+How httplib2 Handles Caching
+httplib2怎样处理缓存
+
+Remember in the previous section when I said you should always create an httplib2.Http object with a directory name?
+还记的在前一节我说过你总是应该在创建httplib2.Http对象是提供一个目录名吗? 缓存就是这样做的目的
+
+This shouldn’t be terribly surprising.
+没什么惊奇的东西
+
+It’s the same thing you did last time, except you’re putting the result into two new variables.
+跟上次一样，只不过你把结果放入两个新的变量
+
+The HTTP status is once again 200, just like last time.
+HTTP 状态(status)码同上次一样还是200
+
+The downloaded content is the same as last time, too.
+下载的内容也一样
+
+So… who cares?
+谁关心这些东西啊
+
+Quit your Python interactive shell and relaunch it with a new session, and I’ll show you.
+退出你的Python交互shell 然后打开一个新的会话，我来给你演示
+
+Let’s turn on debugging and see what’s on the wire.
+让我们打开调试开关来看看线路上是什么
+
+This is the httplib2 equivalent of turning on debugging in http.client.
+这是使用httplib2打开http.client调试开关的方法. httplib2会打印出发给服务器的所有数据以及一些返回的关键信息
+
+Create an httplib2.Http object with the same directory name as before.
+使用同之前一样的目录创建httplib2.Http对象
+
+Request the same URL as before.
+请求同之前一样的URL
+
+Nothing appears to happen.
+ 什么也没有发生
+
+More precisely, nothing gets sent to the server, and nothing gets returned from the server.
+ 更准确的说，没有东西发送到服务器，没有东西从服务器返回
+
+There is absolutely no network activity whatsoever.
+没有任何形式的网络活动
+
+Yet we did “receive” some data — in fact, we received all of it.
+但我们还是接收到了数据，实际上是所有的数据
+
+We also “received” an HTTP status code indicating that the “request” was successful.
+我们也接收到表示请求成功的HTTP状态码
+
+Here’s the rub: this “response” was generated from httplib2’s local cache.
+这里是奥秘所在: 响应是从httplib2的本地缓存构造出来的
+
+That directory name you passed in when you created the httplib2.Http object — that directory holds httplib2’s cache of all the operations it’s ever performed.
+你创建httplib2.Http对象是传入的目录里面保存了所有httplib2执行过的操作的缓存
+
+☞If you want to turn on httplib2 debugging, you need to set a module-level constant (httplib2.debuglevel), then create a new httplib2.Http object.
+☞如果你想要打开httplib2的调试开关，你需要设置一个模块级的常量(httplib2.debuglevel), 然后再创建httplib2.Http对象
+
+If you want to turn off debugging, you need to change the same module-level constant, then create a new httplib2.Http object.
+如果你希望关闭调试，你需要改变同一个模块级常量, 接着创建一个新的httplib2.Http对象
+
+You previously requested the data at this URL.
+你刚刚请求过这个URL的数据
+
+That request was successful (status: 200).
+那个请求是成功的(状态码: 200)
+
+That response included not only the feed data, but also a set of caching headers that told anyone who was listening that they could cache this resource for up to 24 hours (Cache-Control: max-age=86400, which is 24 hours measured in seconds).
+该响应不仅包含feed数据，也包含一系列缓存头，告诉那些关注着的人这个资源可以缓存长达24小时(Cache-Control: max-age=86400, 24小时所对应的秒数)
+
+httplib2 understand and respects those caching headers, and it stored the previous response in the .cache directory (which you passed in when you create the Http object).
+ httplib2 理解并尊重那些缓存头，并且它会在.cache目录(你在创建Http对象时提供的)保存之前的响应
+
+That cache hasn’t expired yet, so the second time you request the data at this URL, httplib2 simply returns the cached result without ever hitting the network.
+缓存还没有过期，所以你第二次请求该URL的数据时, httplib2不会去访问网络，直接返回缓存着的数据
+
+I say “simply,” but obviously there is a lot of complexity hidden behind that simplicity.
+我说的很简单，但是很显然在这简单后面隐藏了很多复杂的东西
+
+httplib2 handles HTTP caching automatically and by default.
+httplib2会自动处理HTTP缓存，并且这是默认的行为. 如果由于某些原因你需要知道响应是否来自缓存，你可以检查 response.fromcache. 否则的话，它工作的很好
+
+Now, suppose you have data cached, but you want to bypass the cache and re-request it from the remote server.
+现在，假设你有数据缓存着，但是你希望跳过缓存并且重新请求远程服务器
+
+Browsers sometimes do this if the user specifically requests it.
+浏览器有时候会应用户的要求这么做
+
+For example, pressing F5 refreshes the current page, but pressing Ctrl+F5 bypasses the cache and re-requests the current page from the remote server.
+比如说，按F5刷新当前页面，但是按Ctrl+F5会跳过缓存并向远程服务器重新请求当前页面
+
+You might think “oh, I’ll just delete the data from my local cache, then request it again.” You could do that, but remember that there may be more parties involved than just you and the remote server.
+你可能会想“嗯，我只要从本地缓存删除数据，然后再次请求就可以了
+
+What about those intermediate proxy servers?
+” 你可以这么干，但是请记住, 不只是你和远程服务器会牵扯其中
+
+They’re completely beyond your control, and they may still have that data cached, and will happily return it to you because (as far as they are concerned) their cache is still valid.
+那些中继代理服务器呢
+
+Instead of manipulating your local cache and hoping for the best, you should use the features of HTTP to ensure that your request actually reaches the remote server.
+你应该使用HTTP的特性来保证你的请求最终到达远程服务器，而不是修改本地缓存然后听天由命
+
+httplib2 allows you to add arbitrary HTTP headers to any outgoing request.
+httplib2 允许你添加任意的HTTP头部到发出的请求里
+
+In order to bypass all caches (not just your local disk cache, but also any caching proxies between you and the remote server), add a no-cache header in the headers dictionary.
+为了跳过所有缓存(不仅仅是你本地的磁盘缓存，也包括任何处于你和远程服务器之间的缓存代理服务器), 在headers字典里面加入no-cache头就可以了
+
+Now you see httplib2 initiating a network request.
+现在你可以看见httplib2初始化了一个网络请求
+
+httplib2 understands and respects caching headers in both directions — as part of the incoming response and as part of the outgoing request.
+httplib2 理解并尊重两个方向的缓存头，  — 作为接受的响应的一部分以及作为发出的请求的一部分. 它注意到你加入了一个no-cache头，所以它完全跳过了本地的缓存，然后不得不去访问网络来请求数据
+
+This response was not generated from your local cache.
+这个响应不是从本地缓存生成的
+
+You knew that, of course, because you saw the debugging information on the outgoing request.
+你当然知道这一点，因为你看见了发出的请求的调试信息
+
+But it’s nice to have that programmatically verified.
+但是从程序上再验证一下也不错
+
+The request succeeded;
+请求成功
+
+you downloaded the entire feed again from the remote server.
+你再次从远程服务器下载了整个供稿
+
+Of course, the server also sent back a full complement of HTTP headers along with the feed data.
+当然，服务器同供稿数据一起也返回了完整的HTTP头
+
+That includes caching headers, which httplib2 uses to update its local cache, in the hopes of avoiding network access the next time you request this feed.
+这里面也包含缓存头, httplib2会使用它来更新它的本地缓存，希望你下次请求该供稿时能够避免网络请求
+
+Everything about HTTP caching is designed to maximize cache hits and minimize network access.
+HTTP缓存被设计为尽量最大化缓存命中率和最小化网络访问
+
+Even though you bypassed the cache this time, the remote server would really appreciate it if you would cache the result for next time.
+即使你这一次跳过了缓存，服务器仍非常乐意你能缓存结果以备下一次请求
+
+How httplib2 Handles Last-Modified and ETag Headers
+httplib2怎么处理Last-Modified和ETag头
+
+The Cache-Control and Expires caching headers are called freshness indicators.
+Cache-Control和Expires 缓存头 被称为新鲜度指标(freshness indicators)
+
+They tell caches in no uncertain terms that you can completely avoid all network access until the cache expires.
+他们毫不含糊告诉缓存，你可以完全避免所有网络访问，直到缓存过期
+
+And that’s exactly the behavior you saw in the previous section: given a freshness indicator, httplib2 does not generate a single byte of network activity to serve up cached data (unless you explicitly bypass the cache, of course).
+而这正是你在前一节所看到的: 给出一个新鲜度指标, httplib2 不会产生哪怕是一个字节的网络活动 就可以提供缓存了的数据(当然除非你显式的要求跳过缓存).
+
+But what about the case where the data might have changed, but hasn’t?
+那如果数据可能已经改变了, 但实际没有呢? HTTP 为这种目的定义了Last-Modified和Etag头
+
+HTTP defines Last-Modified and Etag headers for this purpose.
+ 这些头被称为验证器(validators)
+
+These headers are called validators.
+如果本地缓存已经不是新鲜的，客户端可以在下一个请求的时候发送验证器来检查数据实际上有没有改变
+
+If the local cache is no longer fresh, a client can send the validators with the next request to see if the data has actually changed.
+如果数据没有改变，服务器返回304状态码，但不返回数据
+
+If the data hasn’t changed, the server sends back a 304 status code and no data.
+ 所以虽然还会在网络上有一个来回，但是你最终可以少下载一点字节
+
+Instead of the feed, this time we’re going to download the site’s home page, which is HTML.
+取代供稿，我们这一次要下载的是网站的主页，是HTML格式的
+
+Since this is the first time you’ve ever requested this page, httplib2 has little to work with, and it sends out a minimum of headers with the request.
+这是你第一次请求这个页面，httplib2没什么能做的，它在请求中发出最少量的头
+
+The response contains a multitude of HTTP headers… but no caching information.
+响应包含了多个HTTP头… 但是没有缓存信息
+
+However, it does include both an ETag and Last-Modified header.
+然而，它包含了ETag 和 Last-Modified头
+
+At the time I constructed this example, this page was 6657 bytes.
+在我写这个例子的时候，这个页面有6657字节
+
+It’s probably changed since then, but don’t worry about it.
+在那之后，它很可能已经变了, 但是不用担心这一点
+
+You request the same page again, with the same Http object (and the same local cache).
+你再次请求同一个页面，使用同一个Http对象(以及同一个本地缓存)
+
+httplib2 sends the ETag validator back to the server in the If-None-Match header.
+httplib2 将ETag validator 通过If-None-Match头发送回服务器
+
+httplib2 also sends the Last-Modified validator back to the server in the If-Modified-Since header.
+httplib2 也将Last-Modified validator 通过If-Modified-Since头发送回服务器
+
+The server looked at these validators, looked at the page you requested, and determined that the page has not changed since you last requested it, so it sends back a 304 status code and no data.
+服务器查看这些验证器(validators), 查看你请求的页面，然后判读得出页面在上次请求之后没有改变过, 所以它发回了304 状态码不带数据.
+
+Back on the client, httplib2 notices the 304 status code and loads the content of the page from its cache.
+回到客户端，httplib2 注意到304状态码并从它的缓存加载页面的内容
+
+This might be a bit confusing.
+这可能会让人有些困惑
+
+There are really two status codes — 304 (returned from the server this time, which caused httplib2 to look in its cache), and 200 (returned from the server last time, and stored in httplib2’s cache along with the page data).
+这里实际上有两个 状态码 — 304 (服务器这次返回的, 导致httplib2查看它的缓存), 和 200 (服务器上次返回的, 并和页面数据一起保存在httplib2的缓存里)
+
+response.status returns the status from the cache.
+response.status返回缓存里的那个
+
+If you want the raw status code returned from the server, you can get that by looking in response.dict, which is a dictionary of the actual headers returned from the server.
+如果你需要服务器返回的原始的状态码，你可以从response.dict里面找到, 它是包含服务器返回的真实头部的字典.
+
+However, you still get the data in the content variable.
+然而，数据还是保存在了content变量里
+
+Generally, you don’t need to know why a response was served from the cache.
+一般来说，你不需要关心为什么响应是从缓存里面来的
+
+(You may not even care that it was served from the cache at all, and that’s fine too.
+(你甚至不需要知道它是从缓存里来的， 这是一件好事
+
+httplib2 is smart enough to let you act dumb.) By the time the request() method returns to the caller, httplib2 has already updated its cache and returned the data to you.
+ httplib2 足够聪明，允许你傻瓜一点
+
+How http2lib Handles Compression
+http2lib怎么处理压缩
+
+HTTP supports several types of compression;
+HTTP支持两种类型的压缩
+
+the two most common types are gzip and deflate.
+httplib2都支持
+
+Every time httplib2 sends a request, it includes an Accept-Encoding header to tell the server that it can handle either deflate or gzip compression.
+每一次httplib2 发送请求，它包含了Accept-Encoding头来告诉服务器它能够处理deflate 或者 gzip压缩
+
+In this case, the server has responded with a gzip-compressed payload.
+这个例子中，服务器返回了gzip压缩过的负载，当request()方法返回的时候，httplib2就已经解压缩了响应的体(body)并将其放在 content变量里
+
+By the time the request() method returns, httplib2 has already decompressed the body of the response and placed it in the content variable.
+如果你想知道响应是否压缩过, 你可以检查response['-content-encoding']; 否则，不用担心了.
+
+How httplib2 Handles Redirects
+httplib2怎样处理重定向
+
+HTTP defines two kinds of redirects: temporary and permanent.
+HTTP 定义了 两种类型的重定向: 临时的和永久的
+
+There’s nothing special to do with temporary redirects except follow them, which httplib2 does automatically.
+对于临时重定向，除了跟随它们其他没有什么特别要做的, httplib2 会自动处理跟随
+
+There is no feed at this URL.
+这个URL上没有供稿
+
+I’ve set up my server to issue a temporary redirect to the correct address.
+我设置了服务器让其发出一个到正确地址的临时重定向
+
+There’s the request.
+这是请求
+
+And there’s the response: 302 Found.
+这是响应: 302 Found
+
+Not shown here, this response also includes a Location header that points to the real URL.
+这里没有显示出来，这个响应也包含由一个Location头给出实际的URL.
+
+httplib2 immediately turns around and “follows” the redirect by issuing another request for the URL given in the Location header: http://diveintopython3.org/examples/feed.xml
+httplib2 马上转身并跟随重定向，发出另一个到在Location头里面给出的URL: http://diveintopython3.org/examples/feed.xml 的请求
+
+“Following” a redirect is nothing more than this example shows.
+“跟随” 一个重定向就是这个例子展示的那么多
+
+httplib2 sends a request for the URL you asked for.
+httplib2 发送一个请求到你要求的URL
+
+The server comes back with a response that says “No no, look over there instead.” httplib2 sends another request for the new URL.
+服务器返回一个响应说“不，不, 看那边.” httplib2 给新的URL发送另一个请求.
+
+The response you get back from this single call to the request() method is the response from the final URL.
+你调用request()方法返回的response是最终URL的响应
+
+httplib2 adds the final URL to the response dictionary, as content-location.
+httplib2 会将最终的 URL以 content-location加入到 response字典中
+
+This is not a header that came from the server;
+这不是服务器返回的头，它特定于httplib2
+
+Apropos of nothing, this feed is compressed.
+没什么特别的理由, 这个供稿是压缩过的.
+
+And cacheable.
+并且是可缓存的. (等一下你会看到，这很重要
+
+(This is important, as you’ll see in a minute.)
+)
+
+The response you get back gives you information about the final URL.
+你得到的response给了你最终 URL的相关信息
+
+What if you want more information about the intermediate URLs, the ones that eventually redirected to the final URL?
+如果你希望那些最后重定向到最终URL的中间URL的信息呢
+
+httplib2 lets you do that, too.
+httplib2 也能帮你
+
+The response.previous attribute holds a reference to the previous response object that httplib2 followed to get to the current response object.
+response.previous属性持有前一个响应对象的引用，httplib2跟随那个响应获得了当前的响应对象
+
+Both response and response.previous are httplib2.Response objects.
+response 和 response.previous 都是 httplib2.Response 对象
+
+That means you can check response.previous.previous to follow the redirect chain backwards even further.
+这意味着你可以通过response.previous.previous 来反向跟踪重定向链到更前的请求
+
+(Scenario: one URL redirects to a second URL which redirects to a third URL.
+(场景: 一个URL 重定向到第二个URL，它又重定向到第三个URL
+
+It could happen!) In this case, we’ve already reached the beginning of the redirect chain, so the attribute is None.
+这可能发生!) 在这例子里，我们已经到达了重定向链的开头，所有这个属性是None.
+
+What happens if you request the same URL again?
+如果我们再次请求同一个URL会发生什么?
+
+Same URL, same httplib2.Http object (and therefore the same cache).
+同一个URL, 同一个 httplib2.Http 对象 (所以也是同一个缓存)
+
+The 302 response was not cached, so httplib2 sends another request for the same URL.
+302 响应没有缓存，所以httplib2 对同一个 URL发送了另一个请求
+
+Once again, the server responds with a 302.
+再一次，服务器以302响应
+
+But notice what didn’t happen: there wasn’t ever a second request for the final URL, http://diveintopython3.org/examples/feed.xml.
+但是请注意什么没有 发生: 没有第二个到最终URL, http://diveintopython3.org/examples/feed.xml 的请求
+
+That response was cached (remember the Cache-Control header that you saw in the previous example).
+原因是缓存 (还记的你在前一个例子中看到的Cache-Control头吗
+
+Once httplib2 received the 302 Found code, it checked its cache before issuing another request.
+)
+
+The cache contained a fresh copy of http://diveintopython3.org/examples/feed.xml, so there was no need to re-request it.
+ 一旦 httplib2 收到302 Found 状态码, 它在发出新的请求前检查它的缓存. 缓存中有http://diveintopython3.org/examples/feed.xml的一份新鲜副本, 所以不需要重新请求它了
+
+By the time the request() method returns, it has read the feed data from the cache and returned it.
+当 request()方法返回的时候，它已经从缓存中读取了feed数据并返回了它
+
+Of course, it’s the same as the data you received last time.
+当然，它和你上次收到的数据是一样的
+
+In other words, you don’t have to do anything special for temporary redirects.
+换句话说，对于临时重定向你不需要做什么特别的处理
+
+httplib2 will follow them automatically, and the fact that one URL redirects to another has no bearing on httplib2’s support for compression, caching, ETags, or any of the other features of HTTP.
+httplib2 会自动跟随它们，而一个URL重定向到另一个这个事实上不会影响httplib2对压缩，缓存, ETags, 或者任何其他HTTP特性的支持
+
+Permanent redirects are just as simple.
+永久重定向同样也很简单
+
+Once again, this URL doesn’t really exist.
+又一次，这个URL实际上并不存在
+
+I’ve set up my server to issue a permanent redirect to http://diveintopython3.org/examples/feed.xml.
+我设置我的服务器来执行一个永久重定向到http://diveintopython3.org/examples/feed.xml.
+
+And here it is: status code 301.
+这就是: 状态码 301
+
+But again, notice what didn’t happen: there was no request to the redirect URL.
+ 但是再次注意什么没有发生: 没有发送到重定向后的URL的请求
+
+Why not?
+为什么没有? 因为它已经在本地缓存了
+
+httplib2 “followed” the redirect right into its cache.
+httplib2 “跟随” 重定向到了它的缓存里面
+
+But wait!
+但是等等! 还有更多!
+
+Here’s the difference between temporary and permanent redirects: once httplib2 follows a permanent redirect, all further requests for that URL will transparently be rewritten to the target URL without hitting the network for the original URL.
+这是临时和永久重定向的区别: 一旦 httplib2跟随了一个永久重定向, 所有后续的对这个URL的请求会被透明的重写到目标URL 而不会接触网络来访问原始的URL
+
+Remember, debugging is still turned on, yet there is no output of network activity whatsoever.
+ 记住, 调试还开着, 但没有任何网络活动的输出
+
+Yep, this response was retrieved from the local cache.
+耶, 响应是从本地缓存获取的
+
+Yep, you got the entire feed (from the cache).
+耶, 你(从缓存里面)得到了整个供稿
+
+HTTP.
+HTTP. 它可以工作
+
+Beyond HTTP GET
+HTTP GET之外
+
+HTTP web services are not limited to GET requests.
+HTTP web 服务并不限于GET请求
+
+What if you want to create something new?
+当你要创建点东西的时候呢
+
+Whenever you post a comment on a discussion forum, update your weblog, publish your status on a microblogging service like Twitter or Identi.ca, you’re probably already using HTTP POST.
+当你在论坛上发表一个评论，更新你的博客，在Twitter 或者 Identi.ca这样的微博客上面发表状态消息的时候, 你很可能已经使用了HTTP POST.
+
+Both Twitter and Identi.ca both offer a simple HTTP-based API for publishing and updating your status in 140 characters or less.
+Twitter 和 Identi.ca 都提供一个基于HTTP的简单的API来发布并更新你状态(不超过140个字符)
+
+Let’s look at Identi.ca’s API documentation for updating your status:
+让我们来看看Identi.ca的关于更新状态的API文档 :
+
+Identi.ca REST API Method: statuses/update Updates the authenticating user’s status.
+Identi.ca 的REST API 方法: statuses/update 更新已认证用户的状态
+
+Requires the status parameter specified below.
+需要下面格式的status参数
+
+Request must be a POST.
+请求必须是POST.
+
+How does this work?
+怎么操作呢
+
+To publish a new message on Identi.ca, you need to issue an HTTP POST request to http://identi.ca/api/statuses/update.format.
+要在Identi.ca 发布一条消息, 你需要提交一个HTTP POST请求到http://identi.ca/api/statuses/update.format. (format字样不是URL的一部分; 你应该将其替换为你希望服务器返回的请求的格式
+
+(The format bit is not part of the URL;
+所以如果需要一个XML格式的返回
+
+you replace it with the data format you want the server to return in response to your request.
+你应该向https://identi.ca/api/statuses/update.xml发送请求
+
+So if you want a response in XML, you would post the request to https://identi.ca/api/statuses/update.xml.) The request needs to include a parameter called status, which contains the text of your status update.
+) 请求需要一个参数status, 包含了你的状态更新文本
+
+And the request needs to be authenticated.
+并且请求必须是已授权的
+
+Authenticated?
+授权? 当然
+
+Sure.
+要在Identi.ca上发布你的状态更新, 你得证明你的身份
+
+To update your status on Identi.ca, you need to prove who you are.
+Identi.ca 不是一个维基; 只有你自己可以更新你的状态
+
+Identi.ca is not a wiki;
+Identi.ca 使用建立在SSL之上的HTTP Basic Authentication (也就是RFC 2617) 来提供安全但方便的认证
+
+only you can update your own status.
+httplib2 支持SSL 和 HTTP Basic Authentication, 所以这部分很简单
+
+A POST request is different from a GET request, because it includes a payload.
+POST 请求同GET 请求不同, 因为它包含负荷(payload). 负荷是你要发送到服务器的数据
+
+The payload is the data you want to send to the server.
+这个API方法必须的参数是status, 并且它应该是URL编码过的
+
+The one piece of data that this API method requires is status, and it should be URL-encoded.
+ 这是一种很简单的序列化格式，将一组键值对(比如字典)转化为一个字符串
+
+Python comes with a utility function to URL-encode a dictionary: urllib.parse.urlencode().
+Python 带有一个工具函数用于URL编码一个字典: urllib.parse.urlencode().
+
+This is the sort of dictionary that the Identi.ca API is looking for.
+这就是Identi.ca API 所期望的字典
+
+It contains one key, status, whose value is the text of a single status update.
+它包含一个键，status, 对应值是状态更新文本
+
+This is what the URL-encoded string looks like.
+这是URL编码之后的字符串的样子
+
+This is the payload that will be sent “on the wire” to the Identi.ca API server in your HTTP POST request.
+这就是会通过线路发送到Identi.ca API 服务器的HTTP POST 请求中的负荷 .
+
+This is how httplib2 handles authentication.
+这是httplib2处理认证的方法
+
+Store your username and password with the add_credentials() method.
+ add_credentials()方法记录你的用户名和密码
+
+When httplib2 tries to issue the request, the server will respond with a 401 Unauthorized status code, and it will list which authentication methods it supports (in the WWW-Authenticate header).
+当httplib2 试图执行请求的时候，服务器会返回一个401 Unauthorized状态码, 并且列出所有它支持的认证方法(在 WWW-Authenticate 头中). httplib2会自动构造Authorization头并且重新请求该URL.
+
+The second parameter is the type of HTTP request, in this case POST.
+第二个参数是HTTP请求的类型
+
+The third parameter is the payload to send to the server.
+第三个参数是要发送到服务器的负荷 
+
+We’re sending the URL-encoded dictionary with a status message.
+我们发送包含状态消息的URL编码过的字典
+
+Finally, we need to tell the server that the payload is URL-encoded data.
+最后，我们得告诉服务器负荷是URL编码过的数据
+
+☞The third parameter to the add_credentials() method is the domain in which the credentials are valid.
+☞add_credentials()方法的第三个参数是该证书有效的域名
+
+You should always specify this!
+你应该总是指定这个参数! 如果你省略了这个参数，并且之后重用这个httplib2.Http对象访问另一个需要认证的站点，可能会导致httplib2将一个站点的用户名密码泄漏给其他站点
+
+This is what goes over the wire:
+发送到线路上的数据:
+
+After the first request, the server responds with a 401 Unauthorized status code.
+第一个请求，服务器以401 Unauthorized状态码返回
+
+httplib2 will never send authentication headers unless the server explicitly asks for them.
+httplib2从不主动发送认证头，除非服务器明确的要求
+
+This is how the server asks for them.
+这就是服务器要求认证头的方法
+
+httplib2 immediately turns around and requests the same URL a second time.
+httplib2 马上转个身，第二次请求同样的URL 
+
+This time, it includes the username and password that you added with the add_credentials() method.
+这一次，包含了你通过add_credentials()方法加入的用户名和密码
+
+It worked!
+成功!
+
+What does the server send back after a successful request?
+请求成功后服务器返回什么
+
+That depends entirely on the web service API.
+这个完全由web 服务 API决定
+
+In some protocols (like the Atom Publishing Protocol), the server sends back a 201 Created status code and the location of the newly created resource in the Location header.
+ 在一些协议里面(就像 Atom Publishing Protocol), 服务器会返回201 Created状态码，并通过Location提供新创建的资源的地址
+
+Identi.ca sends back a 200 OK and an XML document containing information about the newly created resource.
+Identi.ca 返回200 OK 和一个包含新创建资源信息的XML 文档
+
+Remember, the data returned by httplib2 is always bytes, not a string.
+记住, httplib2返回的数据总是字节串(bytes), 不是字符串
+
+To convert it to a string, you need to decode it using the proper character encoding.
+为了将其转化为字符串，你需要用合适的字符编码进行解码
+
+Identi.ca’s API always returns results in UTF-8, so that part is easy.
+Identi.ca的 API总是返回UTF-8编码的结果, 所以这部分很简单
+
+There’s the text of the status message we just published.
+这是我们刚发布的状态消息
+
+There’s the unique identifier for the new status message.
+这是新状态消息的唯一标识符
+
+Identi.ca uses this to construct a URL for viewing the message on the web.
+Identi.ca 用这个标识来构造在web上查看该消息的URL
+
+And here it is:
+下面就是这条消息:
+
+Beyond HTTP POST
+HTTP POST之外
+
+HTTP isn’t limited to GET and POST.
+HTTP 并不只限于GET 和 POST
+
+Those are certainly the most common types of requests, especially in web browsers.
+ 它们当然是最常见的请求类型，特别是在web浏览器里面
+
+But web service APIs can go beyond GET and POST, and httplib2 is ready.
+ 但是web服务API会使用GET和POST之外的东西, 对此httplib2也能处理
+
+The server returned XML, right?
+服务器返回的是XML, 对吧? 你知道如何解析XML.
+
+The findtext() method finds the first instance of the given expression and extracts its text content.
+findtext()方法找到对应表达式的第一个实例并抽取出它的文本内容
+
+In this case, we’re just looking for an  element.
+在这个例子中，我们查找元素.
+
+Based on the text content of the  element, we can construct a URL to delete the status message we just published.
+基于元素的文本内容，我们可以构造出一个URL用于删除我们刚刚发布的状态消息
+
+To delete a message, you simply issue an HTTP DELETE request to that URL.
+要删除一条消息，你只需要对该URL执行一个HTTP DELETE请求就可以了
+
+This is what goes over the wire:
+这就是发送到线路上的东西:
+
+“Delete this status message.”
+“删除该状态消息.”
+
+“I’m sorry, Dave, I’m afraid I can’t do that.”
+“对不起，Dave, 恐怕我不能这么干”
+
+“Unauthorized‽ Hmmph.
+“没有授权‽ 恩. 请删除这条消息…
+
+…and here’s my username and password.”
+…这是我的用户名和密码
+
+“Consider it done!”
+“应该是完成了!”
+
+And just like that, poof, it’s gone.
+证明确实是这样的，它不见了
+
+Further Reading
+进一步阅读
+
+httplib2:
+httplib2:
+
+httplib2 project page
+httplib2项目页面
+
+More httplib2 code examples
+更多httplib2的代码示例
+
+Doing HTTP Caching Right: Introducing httplib2
+正确的处理HTTP缓存: 介绍httplib2
+
+httplib2: HTTP Persistence and Authentication
+httplib2: HTTP 持久化和认证
+
+HTTP caching:
+HTTP 缓存:
+
+HTTP Caching Tutorial by Mark Nottingham
+HTTP 缓存教程 来自 Mark Nottingham
+
+How to control caching with HTTP headers on Google Doctype
+怎用使用HTTP头控制缓存 位于 Google Doctype
+
+RFCs:
+RFCs:
+
+RFC 2616: HTTP
+RFC 2616: HTTP
+
+RFC 2617: HTTP Basic Authentication
+RFC 2617: HTTP Basic Authentication
+
+RFC 1951: deflate compression
+RFC 1951: deflate compression
+
+RFC 1952: gzip compression
+RFC 1952: gzip compression
+

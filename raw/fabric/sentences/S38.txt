@@ -1,0 +1,375 @@
+Operations¶
+业务（Operation）¶
+
+Functions to be used in fabfiles and other non-core code, such as run()/sudo().
+应当在 fabfile 或者其他非核心代码中运行的函数，例如 run()/sudo()
+
+Download one or more files from a remote host.
+从远程主机下载一个或多个文件
+
+get returns an iterable containing the absolute paths to all local files downloaded, which will be empty if local_path was a StringIO object (see below for more on using StringIO).
+get returns an iterable containing the absolute paths to all local files downloaded, which will be empty if local_path was a StringIO object (see below for more on using StringIO). This object will also exhibit a .failed attribute containing any remote file paths which failed to download, and a .succeeded attribute equivalent to not .failed.
+
+remote_path is the remote file or directory path to download, which may contain shell glob syntax, e.g.
+remote_path is the remote file or directory path to download, which may contain shell glob syntax, e.g. "/var/log/apache2/*.log", and will have tildes replaced by the remote home directory. Relative paths will be considered relative to the remote user’s home directory, or the current remote working directory as manipulated by cd. If the remote path points to a directory, that directory will be downloaded recursively.
+
+local_path is the local file path where the downloaded file or files will be stored.
+local_path is the local file path where the downloaded file or files will be stored. If relative, it will honor the local current working directory as manipulated by lcd. It may be interpolated, using standard Python dict-based interpolation, with the following variables:
+
+While the SFTP protocol (which get uses) has no direct ability to download files from locations not owned by the connecting user, you may specify use_sudo=True to work around this.
+path：远程路径完整地址，例如： src/projectname/utils.py
+
+Note
+While the SFTP protocol (which get uses) has no direct ability to download files from locations not owned by the connecting user, you may specify use_sudo=True to work around this. When set, this setting allows get to copy (using sudo) the remote files to a temporary location on the remote end (defaults to remote user’s $HOME; this may be overridden via temp_dir), and then download them to local_path.
+
+When remote_path is an absolute directory path, only the inner directories will be recreated locally and passed into the above variables.
+注解
+
+Additionally, when downloading a single file, %(dirname)s and %(path)s do not make as much sense and will be empty and equivalent to %(basename)s, respectively.
+When remote_path is an absolute directory path, only the inner directories will be recreated locally and passed into the above variables. So for example, get('/var/log', '%(path)s') would start writing out files like apache2/access.log, postgresql/8.4/postgresql.log, etc, in the local working directory. It would not write out e.g. var/log/apache2/access.log.
+
+This behavior is intended to be consistent with the command-line scp program.
+Additionally, when downloading a single file, %(dirname)s and %(path)s do not make as much sense and will be empty and equivalent to %(basename)s, respectively. Thus a call like get('/var/log/apache2/access.log', '%(path)s') will save a local file named access.log, not var/log/apache2/access.log.
+
+If left blank, local_path defaults to "%(host)s/%(path)s" in order to be safe for multi-host invocations.
+这是为了与命令行程序 scp 保持一致
+
+Warning
+If left blank, local_path defaults to "%(host)s/%(path)s" in order to be safe for multi-host invocations.
+
+If your local_path argument does not contain %(host)s and your get call runs against multiple hosts, your local files will be overwritten on each successive run!
+警告
+
+If local_path does not make use of the above variables (i.e.
+If your local_path argument does not contain %(host)s and your get call runs against multiple hosts, your local files will be overwritten on each successive run!
+
+local_path may alternately be a file-like object, such as the result of open('path', 'w') or a StringIO instance.
+If local_path does not make use of the above variables (i.e. if it is a simple, explicit file path) it will act similar to scp or cp, overwriting pre-existing files if necessary, downloading into a directory if given (e.g. get('/path/to/remote_file.txt', 'local_directory') will create local_directory/remote_file.txt) and so forth.
+
+Note
+local_path may alternately be a file-like object, such as the result of open('path', 'w') or a StringIO instance.
+
+Attempting to get a directory into a file-like object is not valid and will result in an error.
+注解
+
+Note
+Attempting to get a directory into a file-like object is not valid and will result in an error.
+
+This function will use seek and tell to overwrite the entire contents of the file-like object, in order to be consistent with the behavior of put (which also considers the entire file).
+注解
+
+Note
+This function will use seek and tell to overwrite the entire contents of the file-like object, in order to be consistent with the behavior of put (which also considers the entire file). However, unlike put, the file pointer will not be restored to its previous location, as that doesn’t make as much sense here and/or may not even be possible.
+
+If a file-like object such as StringIO has a name attribute, that will be used in Fabric’s printed output instead of the default <file obj>
+注解
+
+Changed in version 1.0: Now honors the remote working directory as manipulated by cd, and the local working directory as manipulated by lcd.
+If a file-like object such as StringIO has a name attribute, that will be used in Fabric’s printed output instead of the default <file obj>
+
+Changed in version 1.0: Now allows file-like objects in the local_path argument.
+在 1.0 版更改: Now honors the remote working directory as manipulated by cd, and the local working directory as manipulated by lcd.
+
+Changed in version 1.0: local_path may now contain interpolated path- and host-related variables.
+在 1.0 版更改: Now allows file-like objects in the local_path argument.
+
+Changed in version 1.0: Directories may be specified in the remote_path argument and will trigger recursive downloads.
+在 1.0 版更改: local_path may now contain interpolated path- and host-related variables.
+
+Changed in version 1.0: Return value is now an iterable of downloaded local file paths, which also exhibits the .failed and .succeeded attributes.
+在 1.0 版更改: Directories may be specified in the remote_path argument and will trigger recursive downloads.
+
+Changed in version 1.5: Allow a name attribute on file-like objects for log output
+在 1.0 版更改: Return value is now an iterable of downloaded local file paths, which also exhibits the .failed and .succeeded attributes.
+
+Run a command on the local system.
+在 1.5 版更改: Allow a name attribute on file-like objects for log output
+
+local is simply a convenience wrapper around the use of the builtin Python subprocess module with shell=True activated.
+Run a command on the local system.
+
+shell is passed directly to subprocess.Popen‘s execute argument (which determines the local shell to use.) As per the linked documentation, on Unix the default behavior is to use /bin/sh, so this option is useful for setting that value to e.g.
+local is simply a convenience wrapper around the use of the builtin Python subprocess module with shell=True activated. If you need to do anything special, consider using the subprocess module directly.
+
+local is not currently capable of simultaneously printing and capturing output, as run/sudo do.
+shell is passed directly to subprocess.Popen‘s execute argument (which determines the local shell to use.) As per the linked documentation, on Unix the default behavior is to use /bin/sh, so this option is useful for setting that value to e.g. /bin/bash.
+
+When capture=False, the local subprocess’ stdout and stderr streams are hooked up directly to your terminal, though you may use the global output controls output.stdout and output.stderr to hide one or both if desired.
+local is not currently capable of simultaneously printing and capturing output, as run/sudo do. The capture kwarg allows you to switch between printing and capturing as necessary, and defaults to False.
+
+When capture=True, you will not see any output from the subprocess in your terminal, but the return value will contain the captured stdout/stderr.
+When capture=False, the local subprocess’ stdout and stderr streams are hooked up directly to your terminal, though you may use the global output controls output.stdout and output.stderr to hide one or both if desired. In this mode, the return value’s stdout/stderr values are always empty.
+
+In either case, as with run and sudo, this return value exhibits the return_code, stderr, failed, succeeded, command and real_command attributes.
+When capture=True, you will not see any output from the subprocess in your terminal, but the return value will contain the captured stdout/stderr.
+
+local will honor the lcd context manager, allowing you to control its current working directory independently of the remote end (which honors cd).
+In either case, as with run and sudo, this return value exhibits the return_code, stderr, failed, succeeded, command and real_command attributes. See run for details.
+
+Changed in version 1.0: Added the succeeded and stderr attributes.
+local will honor the lcd context manager, allowing you to control its current working directory independently of the remote end (which honors cd).
+
+Changed in version 1.0: Now honors the lcd context manager.
+在 1.0 版更改: Added the succeeded and stderr attributes.
+
+Changed in version 1.0: Changed the default value of capture from True to False.
+在 1.0 版更改: Now honors the lcd context manager.
+
+New in version 1.9: The return value attributes .command and .real_command.
+在 1.0 版更改: Changed the default value of capture from True to False.
+
+Invoke a fully interactive shell on the remote end.
+1.9 新版功能: The return value attributes .command and .real_command.
+
+If command is given, it will be sent down the pipe before handing control over to the invoking user.
+Invoke a fully interactive shell on the remote end.
+
+This function is most useful for when you need to interact with a heavily shell-based command or series of commands, such as when debugging or when fully interactive recovery is required upon remote program failure.
+If command is given, it will be sent down the pipe before handing control over to the invoking user.
+
+It should be considered an easy way to work an interactive shell session into the middle of a Fabric script and is not a drop-in replacement for run, which is also capable of interacting with the remote end (albeit only while its given command is executing) and has much stronger programmatic abilities such as error handling and stdout/stderr capture.
+This function is most useful for when you need to interact with a heavily shell-based command or series of commands, such as when debugging or when fully interactive recovery is required upon remote program failure.
+
+Specifically, open_shell provides a better interactive experience than run, but use of a full remote shell prevents Fabric from determining whether programs run within the shell have failed, and pollutes the stdout/stderr stream with shell output such as login banners, prompts and echoed stdin.
+It should be considered an easy way to work an interactive shell session into the middle of a Fabric script and is not a drop-in replacement for run, which is also capable of interacting with the remote end (albeit only while its given command is executing) and has much stronger programmatic abilities such as error handling and stdout/stderr capture.
+
+Thus, this function does not have a return value and will not trigger Fabric’s failure handling if any remote programs result in errors.
+Specifically, open_shell provides a better interactive experience than run, but use of a full remote shell prevents Fabric from determining whether programs run within the shell have failed, and pollutes the stdout/stderr stream with shell output such as login banners, prompts and echoed stdin.
+
+New in version 1.0.
+Thus, this function does not have a return value and will not trigger Fabric’s failure handling if any remote programs result in errors.
+
+Prompt user with text and return the input (like raw_input).
+1.0 新版功能.
+
+A single space character will be appended for convenience, but nothing else.
+Prompt user with text and return the input (like raw_input).
+
+If key is given, the user’s input will be stored as env. in addition to being returned by prompt.
+A single space character will be appended for convenience, but nothing else. Thus, you may want to end your prompt text with a question mark or a colon, e.g. prompt("What hostname
+
+If the key already existed in env, its value will be overwritten and a warning printed to the user.
+").
+
+If default is given, it is displayed in square brackets and used if the user enters nothing (i.e.
+If key is given, the user’s input will be stored as env. in addition to being returned by prompt. If the key already existed in env, its value will be overwritten and a warning printed to the user.
+
+The optional keyword argument validate may be a callable or a string:
+If default is given, it is displayed in square brackets and used if the user enters nothing (i.e. presses Enter without entering any text). default defaults to the empty string. If non-empty, a space will be appended, so that a call such as prompt("What hostname
+
+Either way, prompt will re-prompt until validation passes (or the user hits Ctrl-C).
+The optional keyword argument validate may be a callable or a string:
+
+Note
+Either way, prompt will re-prompt until validation passes (or the user hits Ctrl-C).
+
+prompt honors env.abort_on_prompts and will call abort instead of prompting if that flag is set to True.
+注解
+
+Examples:
+prompt honors env.abort_on_prompts and will call abort instead of prompting if that flag is set to True. If you want to block on user input regardless, try wrapping with settings.
+
+Upload one or more files to a remote host.
+Examples:
+
+As with the OpenSSH sftp program, put will overwrite pre-existing remote files without requesting confirmation.
+Upload one or more files to a remote host.
+
+put returns an iterable containing the absolute file paths of all remote files uploaded.
+put returns an iterable containing the absolute file paths of all remote files uploaded. This iterable also exhibits a .failed attribute containing any local file paths which failed to upload (and may thus be used as a boolean test.) You may also check .succeeded which is equivalent to not .failed.
+
+local_path may be a relative or absolute local file or directory path, and may contain shell-style wildcards, as understood by the Python glob module (give use_glob=False to disable this behavior).
+local_path may be a relative or absolute local file or directory path, and may contain shell-style wildcards, as understood by the Python glob module (give use_glob=False to disable this behavior). Tilde expansion (as implemented by os.path.expanduser) is also performed.
+
+local_path may alternately be a file-like object, such as the result of open('path') or a StringIO instance.
+local_path may alternately be a file-like object, such as the result of open('path') or a StringIO instance.
+
+Note
+注解
+
+In this case, put will attempt to read the entire contents of the file-like object by rewinding it using seek (and will use tell afterwards to preserve the previous file position).
+In this case, put will attempt to read the entire contents of the file-like object by rewinding it using seek (and will use tell afterwards to preserve the previous file position).
+
+remote_path may also be a relative or absolute location, but applied to the remote host.
+remote_path may also be a relative or absolute location, but applied to the remote host. Relative paths are relative to the remote user’s home directory, but tilde expansion (e.g. ~/.ssh/) will also be performed if necessary.
+
+An empty string, in either path argument, will be replaced by the appropriate end’s current working directory.
+An empty string, in either path argument, will be replaced by the appropriate end’s current working directory.
+
+While the SFTP protocol (which put uses) has no direct ability to upload files to locations not owned by the connecting user, you may specify use_sudo=True to work around this.
+While the SFTP protocol (which put uses) has no direct ability to upload files to locations not owned by the connecting user, you may specify use_sudo=True to work around this. When set, this setting causes put to upload the local files to a temporary location on the remote end (defaults to remote user’s $HOME; this may be overridden via temp_dir), and then use sudo to move them to remote_path.
+
+In some use cases, it is desirable to force a newly uploaded file to match the mode of its local counterpart (such as when uploading executable scripts).
+In some use cases, it is desirable to force a newly uploaded file to match the mode of its local counterpart (such as when uploading executable scripts). To do this, specify mirror_local_mode=True.
+
+Alternately, you may use the mode kwarg to specify an exact mode, in the same vein as os.chmod, such as an exact octal number (0755) or a string representing one ("0755").
+Alternately, you may use the mode kwarg to specify an exact mode, in the same vein as os.chmod or the Unix chmod command.
+
+put will honor cd, so relative values in remote_path will be prepended by the current remote working directory, if applicable.
+put will honor cd, so relative values in remote_path will be prepended by the current remote working directory, if applicable. Thus, for example, the below snippet would attempt to upload to /tmp/files/test.txt instead of ~/files/test.txt:
+
+Use of lcd will affect local_path in the same manner.
+Use of lcd will affect local_path in the same manner.
+
+Examples:
+Examples:
+
+Note
+注解
+
+If a file-like object such as StringIO has a name attribute, that will be used in Fabric’s printed output instead of the default <file obj>
+If a file-like object such as StringIO has a name attribute, that will be used in Fabric’s printed output instead of the default <file obj>
+
+Changed in version 1.0: Now honors the remote working directory as manipulated by cd, and the local working directory as manipulated by lcd.
+在 1.0 版更改: Now honors the remote working directory as manipulated by cd, and the local working directory as manipulated by lcd.
+
+Changed in version 1.0: Now allows file-like objects in the local_path argument.
+在 1.0 版更改: Now allows file-like objects in the local_path argument.
+
+Changed in version 1.0: Directories may be specified in the local_path argument and will trigger recursive uploads.
+在 1.0 版更改: Directories may be specified in the local_path argument and will trigger recursive uploads.
+
+Changed in version 1.0: Return value is now an iterable of uploaded remote file paths which also exhibits the .failed and .succeeded attributes.
+在 1.0 版更改: Return value is now an iterable of uploaded remote file paths which also exhibits the .failed and .succeeded attributes.
+
+Changed in version 1.5: Allow a name attribute on file-like objects for log output
+在 1.5 版更改: Allow a name attribute on file-like objects for log output
+
+Changed in version 1.7: Added use_glob option to allow disabling of globbing.
+在 1.7 版更改: Added use_glob option to allow disabling of globbing.
+
+Reboot the remote system.
+Reboot the remote system.
+
+Will temporarily tweak Fabric’s reconnection settings (timeout and connection_attempts) to ensure that reconnection does not give up for at least wait seconds.
+Will temporarily tweak Fabric’s reconnection settings (timeout and connection_attempts) to ensure that reconnection does not give up for at least wait seconds.
+
+Note
+注解
+
+As of Fabric 1.4, the ability to reconnect partway through a session no longer requires use of internal APIs.
+As of Fabric 1.4, the ability to reconnect partway through a session no longer requires use of internal APIs. While we are not officially deprecating this function, adding more features to it will not be a priority.
+
+Users who want greater control are encouraged to check out this function’s (6 lines long, well commented) source code and write their own adaptation using different timeout/attempt values or additional logic.
+Users who want greater control are encouraged to check out this function’s (6 lines long, well commented) source code and write their own adaptation using different timeout/attempt values or additional logic.
+
+New in version 0.9.2.
+0.9.2 新版功能.
+
+Changed in version 1.4: Changed the wait kwarg to be optional, and refactored to leverage the new reconnection functionality;
+在 1.4 版更改: Changed the wait kwarg to be optional, and refactored to leverage the new reconnection functionality; it may not actually have to wait for wait seconds before reconnecting.
+
+Changed in version 1.11: Added use_sudo as a kwarg.
+Check for given keys in the shared environment dict and abort if not found.
+
+Check for given keys in the shared environment dict and abort if not found.
+Positional arguments should be strings signifying what env vars should be checked for. If any of the given arguments do not exist, Fabric will abort execution and print the names of the missing keys.
+
+Positional arguments should be strings signifying what env vars should be checked for.
+The optional keyword argument used_for may be a string, which will be printed in the error output to inform users why this requirement is in place. used_for is printed as part of a string similar to:
+
+The optional keyword argument used_for may be a string, which will be printed in the error output to inform users why this requirement is in place.
+so format it appropriately.
+
+so format it appropriately.
+The optional keyword argument provided_by may be a list of functions or function names or a single function or function name which the user should be able to execute in order to set the key or keys; it will be included in the error output if requirements are not met.
+
+The optional keyword argument provided_by may be a list of functions or function names or a single function or function name which the user should be able to execute in order to set the key or keys;
+Note: it is assumed that the keyword arguments apply to all given keys as a group. If you feel the need to specify more than one used_for, for example, you should break your logic into multiple calls to require().
+
+Note: it is assumed that the keyword arguments apply to all given keys as a group.
+在 1.1 版更改: 支持可迭代变量 provided_by 而不再仅仅是单个值
+
+Changed in version 1.1: Allow iterable provided_by values instead of just single values.
+在远程主机上执行 shell 命令
+
+Run a shell command on a remote host.
+If shell is True (the default), run will execute the given command string via a shell interpreter, the value of which may be controlled by setting env.shell (defaulting to something similar to /bin/bash -l -c "".) Any double-quote (") or dollar-sign ($) characters in command will be automatically escaped when shell is True.
+
+If shell is True (the default), run will execute the given command string via a shell interpreter, the value of which may be controlled by setting env.shell (defaulting to something similar to /bin/bash -l -c "".) Any double-quote (") or dollar-sign ($) characters in command will be automatically escaped when shell is True (unless disabled by setting shell_escape=False).
+run will return the result of the remote program’s stdout as a single (likely multiline) string. This string will exhibit failed and succeeded boolean attributes specifying whether the command failed or succeeded, and will also include the return code as the return_code attribute. Furthermore, it includes a copy of the requested & actual command strings executed, as .command and .real_command, respectively.
+
+When shell=False, no shell wrapping or escaping will occur.
+Any text entered in your local terminal will be forwarded to the remote program as it runs, thus allowing you to interact with password or other prompts naturally. For more on how this works, see 与远程程序集成.
+
+run will return the result of the remote program’s stdout as a single (likely multiline) string.
+You may pass pty=False to forego creation of a pseudo-terminal on the remote end in case the presence of one causes problems for the command in question. However, this will force Fabric itself to echo any and all input you type while the command is running, including sensitive passwords. (With pty=True, the remote pseudo-terminal will echo for you, and will intelligently handle password-style prompts.) See 伪终端 for details.
+
+To lessen memory use when running extremely verbose programs (and, naturally, when having access to their full output afterwards is not necessary!) you may limit how much of the program’s stdout/err is stored by setting capture_buffer_size to an integer value.
+Similarly, if you need to programmatically examine the stderr stream of the remote program (exhibited as the stderr attribute on this function’s return value), you may set combine_stderr=False. Doing so has a high chance of causing garbled output to appear on your terminal (though the resulting strings returned by run will be properly separated). For more info, please read 合并 stdout 和 stderr.
+
+Warning
+To ignore non-zero return codes, specify warn_only=True. To both ignore non-zero return codes and force a command to run silently, specify quiet=True.
+
+Do not set capture_buffer_size to any value smaller than the length of env.sudo_prompt or you will likely break the functionality of sudo!
+To override which local streams are used to display remote stdout and/or stderr, specify stdout or stderr. (By default, the regular sys.stdout and sys.stderr Python stream objects are used.)
+
+Note
+For example, run("command", stderr=sys.stdout) would print the remote standard error to the local standard out, while preserving it as its own distinct attribute on the return value (as per above.) Alternately, you could even provide your own stream objects or loggers, e.g. myout = StringIO(); run("command", stdout=myout).
+
+This value is used for each buffer independently, so e.g.
+If you want an exception raised when the remote program takes too long to run, specify timeout=N where N is an integer number of seconds, after which to time out. This will cause run to raise a CommandTimeout exception.
+
+Any text entered in your local terminal will be forwarded to the remote program as it runs, thus allowing you to interact with password or other prompts naturally.
+If you want to disable Fabric’s automatic attempts at escaping quotes, dollar signs etc., specify shell_escape=False.
+
+You may pass pty=False to forego creation of a pseudo-terminal on the remote end in case the presence of one causes problems for the command in question.
+Examples:
+
+Similarly, if you need to programmatically examine the stderr stream of the remote program (exhibited as the stderr attribute on this function’s return value), you may set combine_stderr=False.
+1.0 新版功能: The succeeded and stderr return value attributes, the combine_stderr kwarg, and interactive behavior.
+
+To ignore non-zero return codes, specify warn_only=True.
+在 1.0 版更改: pty 默认值现在为 True
+
+To override which local streams are used to display remote stdout and/or stderr, specify stdout or stderr.
+在 1.0.2 版更改: The default value of combine_stderr is now None instead of True. However, the default behavior is unchanged, as the global setting is still True.
+
+For example, run("command", stderr=sys.stdout) would print the remote standard error to the local standard out, while preserving it as its own distinct attribute on the return value (as per above.) Alternately, you could even provide your own stream objects or loggers, e.g.
+1.5 新版功能: 关键字参数 quiet、warn_only、stdout 以及 stderr
+
+If you want an exception raised when the remote program takes too long to run, specify timeout=N where N is an integer number of seconds, after which to time out.
+1.5 新版功能: The return value attributes .command and .real_command.
+
+If you want to disable Fabric’s automatic attempts at escaping quotes, dollar signs etc., specify shell_escape=False.
+1.6 新版功能: timeout 参数
+
+Examples:
+1.7 新版功能: shell_escape 参数
+
+New in version 1.0: The succeeded and stderr return value attributes, the combine_stderr kwarg, and interactive behavior.
+在远程主机上使用超级用户权限执行 shell 命令
+
+Changed in version 1.0: The default value of pty is now True.
+sudo is identical in every way to run, except that it will always wrap the given command in a call to the sudo program to provide superuser privileges.
+
+Changed in version 1.0.2: The default value of combine_stderr is now None instead of True.
+sudo accepts additional user and group arguments, which are passed to sudo and allow you to run as some user and/or group other than root. On most systems, the sudo program can take a string username/group or an integer userid/groupid (uid/gid); user and group may likewise be strings or integers.
+
+New in version 1.5: The quiet, warn_only, stdout and stderr kwargs.
+You may set env.sudo_user at module level or via settings if you want multiple sudo calls to have the same user value. An explicit user argument will, of course, override this global setting.
+
+New in version 1.5: The return value attributes .command and .real_command.
+Examples:
+
+New in version 1.6: The timeout argument.
+在 1.0 版更改: 参见 run 的变更
+
+New in version 1.7: The shell_escape argument.
+在 1.5 版更改: Now honors env.sudo_user.
+
+New in version 1.11: The capture_buffer_size argument.
+1.5 新版功能: 关键字参数 quiet、warn_only、stdout 以及 stderr
+
+Run a shell command on a remote host, with superuser privileges.
+1.5 新版功能: The return value attributes .command and .real_command.
+
+sudo is identical in every way to run, except that it will always wrap the given command in a call to the sudo program to provide superuser privileges.
+1.7 新版功能: shell_escape 参数
+
+Examples:
+Pythonic remote execution
+
+Changed in version 1.0: See the changed and added notes for run.
+输入相关的术语，模块，类或者函数名称进行搜索
+

@@ -1,0 +1,51 @@
+Django 1.5 documentation
+Django 1.5 documentation
+
+Getting started¶
+新手入门¶
+
+New to Django?
+Django 新手
+
+Or to Web development in general?
+或刚开始 web 开发
+
+Well, you came to the right place: read this material to quickly get up and running.
+恭喜你，来对地方了：阅读以下为新手快速入门所准备的文章吧
+
+See also
+See also
+
+If you’re new to Python, you might want to start by getting an idea of what the language is like.
+如果你是初学 Python,你也许会想从了解这门语言开始
+
+Django is 100% Python, so if you’ve got minimal comfort with Python you’ll probably get a lot more out of Django.
+Django 是 100% 基于 Python 的， 因此，如果你对 Python 有坚实的基础，那么你必定将会使用 Django 得心应手
+
+If you’re new to programming entirely, you might want to start with this list of Python resources for non-programmers
+如果你是编程新手，那么你最好先看看 编程新手 Python 资源列表
+
+If you already know a few other languages and want to get up to speed with Python quickly, we recommend Dive Into Python (also available in a dead-tree version).
+如果你有其他语言的编程经验并想快速学习 Python ，那么我们推荐 Dive Into Python (有 纸质书 和 中文版). 如果这本书不符合你的要求，这里还有许多其他 关于 Python 的书.
+
+Browse
+Browse
+
+You are here:
+You are here:
+
+This Page
+This Page
+
+Quick search
+Quick search
+
+Enter search terms or a module, class or function name.
+Enter search terms or a module, class or function name.
+
+Last update:
+Last update:
+
+Oct 30, 2013
+Dec 02, 2013
+

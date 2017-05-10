@@ -1,0 +1,879 @@
+You are here: Home ‣ Dive Into Python 3 ‣
+当前位置: 首页 ‣ 深入 Python 3 ‣
+
+Difficulty level: ♦♦♢♢♢
+难度级别: ♦♦♢♢♢
+
+Unit Testing
+单元测试
+
+❝ Certitude is not the test of certainty.
+❝ Certitude is not the test of certainty. We have been cocksure of many things that were not so. ❞ — Oliver Wendell Holmes, Jr.
+
+(Not) Diving In
+（不要）深入
+
+Kids today.
+在此章节中，你将要编写及调试一系列用于阿拉伯数字与罗马数字相互转换的方法
+
+So spoiled by these fast computers and fancy “dynamic” languages.
+你阅读了在“案例学习：罗马数字”中关于构建及校验罗马数字的机制
+
+Write first, ship second, debug third (if ever).
+那么，现在考虑扩展该机制为一个双向的方法
+
+In this chapter, you’re going to write and debug a set of utility functions to convert to and from Roman numerals.
+罗马数字的规则引出很多有意思的结果：
+
+The converse is also true: if a string of characters is a valid Roman numeral, it represents only one number (that is, it can only be interpreted one way).
+反过来一样，一个字符串类型的有效的罗马数字也仅可以表示一个阿拉伯数字（即，这种转换方式也是只有一种）
+
+There is a limited range of numbers that can be expressed as Roman numerals, specifically 1 through 3999.
+只有有限范围的阿拉伯数字可以以罗马数字表示，那就是1-3999
+
+The Romans did have several ways of expressing larger numbers, for instance by having a bar over a numeral to represent that its normal value should be multiplied by 1000.
+而罗马数字表示大数字却有几种方式
+
+For the purposes of this chapter, let’s stipulate that Roman numerals go from 1 to 3999.
+例如，为了表示一个数字连续出现时正确的值则需要乘以1000
+
+There is no way to represent 0 in Roman numerals.
+无法用罗马数字来表示 0 
+
+There is no way to represent negative numbers in Roman numerals.
+无法用罗马数字来表示负数 
+
+There is no way to represent fractions or non-integer numbers in Roman numerals.
+无法用罗马数字来表示分数或非整数 
+
+Let’s start mapping out what a roman.py module should do.
+现在，开始设计 roman.py 模块
+
+It will have two main functions, to_roman() and from_roman().
+它有两个主要的方法：to_roman() 及 from_roman()
+
+The to_roman() function should take an integer from 1 to 3999 and return the Roman numeral representation as a string…
+to_roman() 方法接收一个从 1 到 3999 之间的整型数字，然后返回一个字符串类型的罗马数字
+
+Stop right there.
+在这里停下来
+
+Now let’s do something a little unexpected: write a test case that checks whether the to_roman() function does what you want it to.
+现在让我们进行一些意想不到的操作：编写一个测试用例来检测 to_roman 函数是否实现了你想要的功能
+
+You read that right: you’re going to write code that tests code that you haven’t written yet.
+你想得没错：你正在编写测试尚未编写代码的代码
+
+This is called test-driven development, or TDD.
+这就是所谓的测试驱动开发 或 TDD
+
+The set of two conversion functions — to_roman(), and later from_roman() — can be written and tested as a unit, separate from any larger program that imports them.
+那两个转换方法（ to_roman() 及之后的 from_roman()）可以独立于任何使用它们的大程序而作为一个单元来被编写及测试
+
+Python has a framework for unit testing, the appropriately-named unittest module.
+Python 自带一个单元测试框架，被恰当地命名为 unittest 模块
+
+Unit testing is an important part of an overall testing-centric development strategy.
+单元测试是整个以测试为中心的开发策略中的一个重要部分
+
+If you write unit tests, it is important to write them early and to keep them updated as code and requirements change.
+编写单元测试应该安排在项目的早期，同时要让它随同代码及需求变更一起更新
+
+Many people advocate writing tests before they write the code they’re testing, and that’s the style I’m going to demonstrate in this chapter.
+很多人都坚持测试代码应该先于被测试代码的，而这种风格也是我在本节中所主张的
+
+But unit tests are beneficial no matter when you write them.
+但是，不管你何时编写，单元测试都是有好处的
+
+Before writing code, writing unit tests forces you to detail your requirements in a useful fashion.
+在编写代码之前，通过编写单元测试来强迫你使用有用的方式细化你的需求
+
+While writing code, unit tests keep you from over-coding.
+在编写代码时，单元测试可以使你避免过度编码
+
+When all the test cases pass, the function is complete.
+当所有测试用例通过时，实现的方法就完成了
+
+When refactoring code, they can help prove that the new version behaves the same way as the old version.
+重构代码时，单元测试用例有助于证明新版本的代码跟老版本功能是一致的
+
+When maintaining code, having tests will help you cover your ass when someone comes screaming that your latest change broke their old code.
+在维护代码期间，如果有人对你大喊：你最新的代码修改破坏了原有代码的状态，那么此时单元测试可以帮助你反驳（“先生，所有单元测试用例通过了我才提交代码的...”）
+
+When writing code in a team, having a comprehensive test suite dramatically decreases the chances that your code will break someone else’s code, because you can run their unit tests first.
+在团队编码中，缜密的测试套件可以降低你的代码影响别人代码的机会，这是因为你需要优先执行别人的单元测试用例
+
+(I’ve seen this sort of thing in code sprints.
+（我曾经在代码冲刺见过这种实践
+
+A team breaks up the assignment, everybody takes the specs for their task, writes unit tests for it, then shares their unit tests with the rest of the team.
+一个团队把任务分解，每个人领取其中一小部分任务，同时为其编写单元测试;然后，团队相互分享他们的单元测试用例
+
+That way, nobody goes off too far into developing code that doesn’t play well with others.)
+这样，所有人都可以在编码过程中提前发现谁的代码与其他人的不可以良好工作
+
+A Single Question
+一个简单的问题
+
+A test case answers a single question about the code it is testing.
+一个测试用例仅回答一个关于它正在测试的代码问题
+
+A test case should be able to...
+一个测试用例应该可以：
+
+...run completely by itself, without any human input.
+……完全自动运行，而不需要人工干预
+
+Unit testing is about automation.
+单元测试几乎是全自动的
+
+...determine by itself whether the function it is testing has passed or failed, without a human interpreting the results.
+……自主判断被测试的方法是通过还是失败，而不需要人工解释结果
+
+...run in isolation, separate from any other test cases (even if they test the same functions).
+……独立运行，而不依赖其它测试用例（即使测试的是同样的方法）
+
+Each test case is an island.
+即，每一个测试用例都是一个孤岛
+
+Given that, let’s build a test case for the first requirement:
+让我们据此为第一个需求建立一个测试用例：
+
+The to_roman() function should return the Roman numeral representation for all integers 1 to 3999.
+to_roman() 方法应该返回代表1-3999的罗马数字
+
+It is not immediately obvious how this code does… well, anything.
+这些代码功效如何并不那么显而易见
+
+It defines a class which has no __init__() method.
+它定义了一个没有__init__ 方法的类
+
+The class does have another method, but it is never called.
+而该类当然有其它方法，但是这些方法都不会被调用
+
+The entire script has a __main__ block, but it doesn’t reference the class or its method.
+在整个脚本中，有一个__main__ 块，但它并不引用该类及它的方法
+
+But it does do something, I promise.
+但我承诺，它做别的事情了
+
+[download romantest1.py]
+[download romantest1.py]
+
+To write a test case, first subclass the TestCase class of the unittest module.
+为了编写测试用例，首先使该测试用例类成为unittest 模块的TestCase 类的子类
+
+This class provides many useful methods which you can use in your test case to test specific conditions.
+TestCase 提供了很多你可以用于测试特定条件的测试用例的有用的方法
+
+This is a tuple of integer/numeral pairs that I verified manually.
+这是一张我手工核实过的整型数字-罗马数字对的列表
+
+It includes the lowest ten numbers, the highest number, every number that translates to a single-character Roman numeral, and a random sampling of other valid numbers.
+它包括最小的十个数字、最大数字、每一个有唯一一个字符串格式的罗马数字的数字以及一个有其它有效数字产生的随机数
+
+You don’t need to test every possible input, but you should try to test all the obvious edge cases.
+你没有必要测试每一个可能的输入，而需要测试所有明显的边界用例
+
+Every individual test is its own method.
+每一个独立的测试都有它自己的不含参数及没有返回值的方法
+
+A test method takes no parameters, returns no value, and must have a name beginning with the four letters test.
+如果方法不抛出异常而正常退出则认为测试通过;否则，测试失败
+
+Here you call the actual to_roman() function.
+这里调用了真实的 to_roman() 方法. （当然，该方法还没编写;但一旦该方法被实现，这就是调用它的行号）
+
+(Well, the function hasn’t been written yet, but once it is, this is the line that will call it.) Notice that you have now defined the API for the to_roman() function: it must take an integer (the number to convert) and return a string (the Roman numeral representation).
+注意，现在你已经为 to_roman() 方法定义了 接口：它必须包含一个整型（被转换的数字）及返回一个字符串（罗马数字的表示形式）
+
+If the API is different than that, this test is considered failed.
+如果 接口 实现与这些定义不一致，那么测试就会被视为失败
+
+Also notice that you are not trapping any exceptions when you call to_roman().
+同样，当你调用 to_roman() 时，不要捕获任何异常
+
+This is intentional.
+这些都是unittest 故意设计的
+
+to_roman() shouldn’t raise an exception when you call it with valid input, and these input values are all valid.
+当你以有效的输入调用 to_roman() 时它不会抛出异常
+
+If to_roman() raises an exception, this test is considered failed.
+如果 to_roman() 抛出了异常，则测试被视为失败
+
+Assuming the to_roman() function was defined correctly, called correctly, completed successfully, and returned a value, the last step is to check whether it returned the right value.
+假设 to_roman() 方法已经被正确定义，正确调用，成功实现以及返回了一个值，那么最后一步就是去检查它的返回值是否 right 
+
+This is a common question, and the TestCase class provides a method, assertEqual, to check whether two values are equal.
+这是测试中一个普遍的问题
+
+If the result returned from to_roman() (result) does not match the known value you were expecting (numeral), assertEqual will raise an exception and the test will fail.
+TestCase 类提供了一个方法 assertEqual 来检查两个值是否相等
+
+If the two values are equal, assertEqual will do nothing.
+如果 to_roman() (result) 的返回值跟已知的期望值g (numeral)不一致，则抛出异常，并且测试失败
+
+If every value returned from to_roman() matches the known value you expect, assertEqual never raises an exception, so test_to_roman_known_values eventually exits normally, which means to_roman() has passed this test.
+如果两值相等， assertEqual 不会做任何事情
+
+Once you have a test case, you can start coding the to_roman() function.
+一旦你有了测试用例，你就可以开始编写 to_roman() 方法
+
+First, you should stub it out as an empty function and make sure the tests fail.
+首先，你应该用一个空方法作为存根，同时确认该测试失败
+
+If the tests succeed before you’ve written any code, your tests aren’t testing your code at all!
+因为如果在编写任何代码之前测试已经通过，那么你的测试对你的代码是完全不会有效果的
+
+Unit testing is a dance: tests lead, code follows.
+单元测试就像跳舞：测试先行，编码跟随
+
+Write a test that fails, then code until it passes.
+编写一个失败的测试，然后进行编码直到该测试通过
+
+At this stage, you want to define the API of the to_roman() function, but you don’t want to code it yet.
+在此阶段，你想定义to_roman()方法的 API ，但是你还不想编写（首先，你的测试需要失败）
+
+(Your test needs to fail first.) To stub it out, use the Python reserved word pass, which does precisely nothing.
+为了存根，需要使用Python 保留关键字pass，它恰恰什么都没做
+
+Execute romantest1.py on the command line to run the test.
+在命令行上运行 romantest1.py 来执行该测试
+
+If you call it with the -v command-line option, it will give more verbose output so you can see exactly what’s going on as each test case runs.
+如果使用-v命令行参数的话，会有更详细的输出来帮助你精确地查看每一条用例的执行过程
+
+With any luck, your output should look like this:
+幸运的话，你的输出应该如下：
+
+Running the script runs unittest.main(), which runs each test case.
+运行脚本就会执行 unittest.main() , 该方法执行了每一条测试用例
+
+Each test case is a method within a class in romantest.py.
+而每一条测试用例都是 romantest.py 中的类方法
+
+There is no required organization of these test classes;
+这些测试类没有必要的组织要求;它们每一个都包括一个独立的测试方法，或者你也可以编写一个含有多个测试方法的类
+
+they can each contain a single test method, or you can have one class that contains multiple test methods.
+唯一的要求就是每一个测试类都必须继承 unittest.TestCase
+
+For each test case, the unittest module will print out the docstring of the method and whether that test passed or failed.
+对于每一个测试用例， unittest 模块会打印出测试方法的 docstring ，并且说明该测试失败还是成功
+
+As expected, this test case fails.
+正如预期那样，该测试用例失败了
+
+For each failed test case, unittest displays the trace information showing exactly what happened.
+对于每一个失败的测试用例， unittest 模块会打印出详细的跟踪信息
+
+In this case, the call to assertEqual() raised an AssertionError because it was expecting to_roman(1) to return 'I', but it didn’t.
+在该用例中， assertEqual() 的调用抛出了一个 AssertionError 的异常，这是因为 to_roman(1) 本应该返回 'I' 的，但是它没有
+
+(Since there was no explicit return statement, the function returned None, the Python null value.)
+（因为没有显示的返回值，故方法返回了 Python 的空值 None）
+
+After the detail of each test, unittest displays a summary of how many tests were performed and how long it took.
+在说明每个用例的详细执行结果之后， unittest 打印出一个简述来说明“多少用例被执行了”和“测试执行了多长时间”
+
+Overall, the test run failed because at least one test case did not pass.
+从整体上说，该测试执行失败，因为至少有一条用例没有成功
+
+When a test case doesn’t pass, unittest distinguishes between failures and errors.
+如果测试用例没有通过的话， unittest 可以区别用例执行失败跟程序错误的
+
+A failure is a call to an assertXYZ method, like assertEqual or assertRaises, that fails because the asserted condition is not true or the expected exception was not raised.
+像 assertXYZ 、assertRaises 这样的 assertEqual 方法的失败是因为被声明的条件不是为真，或者预期的异常没有抛出
+
+An error is any other sort of exception raised in the code you’re testing or the unit test case itself.
+错误，则是另一种异常，它是因为被测试的代码或者单元测试用例本身的代码问题而引起的
+
+Now, finally, you can write the to_roman() function.
+至此，你可以实现 to_roman() 方法了
+
+[download roman1.py]
+[download roman1.py]
+
+roman_numeral_map is a tuple of tuples which defines three things: the character representations of the most basic Roman numerals;
+roman_numeral_map 是一个由元组组成的元组，它定义了三样东西：代表最基本的罗马数字的字符、罗马数字的顺序（逆序，从 M 到 I）、每一个罗马数字的阿拉伯数值
+
+the order of the Roman numerals (in descending value order, from M all the way down to I);
+每一个内部的元组都是一个(数，值)对
+
+the value of each Roman numeral.
+它不但定义了单字符罗马数字，也定义了双字符罗马数字，如CM（“比一千小一百”）
+
+Each inner tuple is a pair of (numeral, value).
+该元组使得 to_roman() 方法实现起来更简单
+
+Here’s where the rich data structure of roman_numeral_map pays off, because you don’t need any special logic to handle the subtraction rule.
+这里得益于 roman_numeral_map 的数据结构，因为你不需要任何特别得逻辑去处理减法
+
+To convert to Roman numerals, simply iterate through roman_numeral_map looking for the largest integer value less than or equal to the input.
+为了转化成罗马数字，通过查找等于或者小于输入值的最大值来简化对 roman_numeral_map 的迭代
+
+Once found, add the Roman numeral representation to the end of the output, subtract the corresponding integer value from the input, lather, rinse, repeat.
+一旦找到，就把罗马数字的字符串追加至输出值（result）末段，同时输入值要减去相应的数值，如此重复
+
+If you’re still not clear how the to_roman() function works, add a print() call to the end of the while loop:
+如果你仍然不清楚 to_roman() 如何工作，可以在 while 循环末段添加 print() 调用：
+
+With the debug print() statements, the output looks like this:
+因为用于调试的 print() 声明，输出会如下：
+
+So the to_roman() function appears to work, at least in this manual spot check.
+这样， to_roman() 至少在手工检查下是工作正常的
+
+But will it pass the test case you wrote?
+但它会通过你编写的测试用例么
+
+Hooray!
+万岁
+
+The to_roman() function passes the “known values” test case.
+to_roman() 函数通过了“known values” 测试用例
+
+It’s not comprehensive, but it does put the function through its paces with a variety of inputs, including inputs that produce every single-character Roman numeral, the largest possible input (3999), and the input that produces the longest possible Roman numeral (3888).
+该测试用例并不复杂，但是它的确使该方法按着输入值的变化而执行，其中的输入值包括：每一个单字符罗马数字、最大值数字（3999）、最长字符串数字（3888）
+
+At this point, you can be reasonably confident that the function works for any good input value you could throw at it.
+通过这些，你就可以有理由对“该方法接收任何正常的输入值都工作正常”充满信心了
+
+“Good” input?
+“正常”输入
+
+Hmm.
+”嗯
+
+What about bad input?
+那“非法”输入呢
+
+“Halt And Catch Fire”
+“停止然后着火”
+
+It is not enough to test that functions succeed when given good input;
+仅仅在“正常”值时证明方法通过的测试是不够的;你同样需要测试当输入“非法”值时方法失败
+
+you must also test that they fail when given bad input.
+但并不是说要枚举所有的失败类型，而是说必要在你预期的范围内失败
+
+That’s definitely not what you wanted — that’s not even a valid Roman numeral!
+这明显不是你所期望的──那也不是一个合法的罗马数字
+
+In fact, each of these numbers is outside the range of acceptable input, but the function returns a bogus value anyway.
+事实上，这些输入值都超过了允许的范围，但该函数却返回了假值
+
+Silently returning bad values is baaaaaaad;
+悄悄返回的错误值是 很糟糕 的，因为如果一个程序要挂掉的话，迅速且引人注目地挂掉会好很多
+
+if a program is going to fail, it is far better if it fails quickly and noisily.
+正如谚语“停止然后着火”
+
+“Halt and catch fire,” as the saying goes.
+Python 方式的停止并点火实际是引发一个例外
+
+The question to ask yourself is, “How can I express this as a testable requirement?” How’s this for starters:
+那问题是：我该如何表达这些内容为可测试需求呢
+
+The to_roman() function should raise an OutOfRangeError when given an integer greater than 3999.
+当输入值大于 3999 时， to_roman() 函数应该抛出一个 OutOfRangeError 异常
+
+What would that test look like?
+具体测试代码如下：
+
+[download romantest2.py]
+[download romantest2.py]
+
+Like the previous test case, you create a class that inherits from unittest.TestCase.
+如前一个测试用例，创建一个继承于 unittest.TestCase 的类
+
+You can have more than one test per class (as you’ll see later in this chapter), but I chose to create a new class here because this test is something different than the last one.
+你可以在每个类中实现多个测试（正如你在本节中将会看到的一样），但是我却选择了创建一个新类，因为该测试与上一个有点不同
+
+We’ll keep all the good input tests together in one class, and all the bad input tests together in another.
+这样，我们可以把正常输入的测试跟非法输入的测试分别放入不同的两个类中
+
+Like the previous test case, the test itself is a method of the class, with a name starting with test.
+如前一个测试用例，测试本身是类一个方法，并且该方法以 test 开头命名
+
+The unittest.TestCase class provides the assertRaises method, which takes the following arguments: the exception you’re expecting, the function you’re testing, and the arguments you’re passing to that function.
+unittest.TestCase 类提供e assertRaises 方法，该方法需要以下参数：你期望的异常、你要测试的方法及传入给方法的参数
+
+(If the function you’re testing takes more than one argument, pass them all to assertRaises, in order, and it will pass them right along to the function you’re testing.)
+（如果被测试的方法需要多个参数的话，则把所有参数依次传入 assertRaises， assertRaises 会正确地把参数传递给被测方法的
+
+Pay close attention to this last line of code.
+请关注代码的最后一行
+
+Instead of calling to_roman() directly and manually checking that it raises a particular exception (by wrapping it in a try...except block), the assertRaises method has encapsulated all of that for us.
+这里并不需要直接调用 to_roman() ，同时也不需要手动检查它抛出的异常类型（通过 一个 try...except 块来包装），而这些 assertRaises 方法都给我们完成了
+
+All you do is tell it what exception you’re expecting (roman2.OutOfRangeError), the function (to_roman()), and the function’s arguments (4000).
+你要做的所有事情就是告诉assertRaises你期望的异常类型（ roman2.OutOfRangeError）、被测方法（to_roman()）以及方法的参数（4000）
+
+The assertRaises method takes care of calling to_roman() and checking that it raises roman2.OutOfRangeError.
+assertRaises 方法负责调用 to_roman() 和检查方法抛出 roman2.OutOfRangeError 的异常
+
+Also note that you’re passing the to_roman() function itself as an argument;
+另外，注意你是把 to_roman() 方法作为参数传递;你没有调用被测方法，也不是把被测方法作为一个字符串名字传递进去
+
+you’re not calling it, and you’re not passing the name of it as a string.
+我是否在之前提到过 Python 中万物皆对象有多么轻便
+
+So what happens when you run the test suite with this new test?
+那么，当你执行该含有新测试的测试套件时，结果如下：
+
+You should have expected this to fail (since you haven’t written any code to pass it yet), but...
+测试本应该是失败的（因为并没有任何代码使它通过），但是它没有真正的“失败”，而是出现了“错误”
+
+it didn’t actually “fail,” it had an “error” instead.
+这里有些微妙但是重要的区别
+
+This is a subtle but important distinction.
+单元测试事实上有 三种 返回值：通过、失败以及错误
+
+A unit test actually has three return values: pass, fail, and error.
+“通过”，但当然就是说测试成功了──被测代码符合你的预期
+
+Pass, of course, means that the test passed — the code did what you expected.
+“失败”就是就如之前的测试用例一样（直到你编写代码令它通过）──执行了被测试的代码但返回值并不是所期望的
+
+“Fail” is what the previous test case did (until you wrote code to make it pass) — it executed the code but the result was not what you expected.
+“错误”就是被测试的代码甚至没有正确执行
+
+Why didn’t the code execute properly?
+为什么代码没有正确执行呢
+
+The traceback tells all.
+回溯说明了一切
+
+The module you’re testing doesn’t have an exception called OutOfRangeError.
+你正在测试的模块没有叫 OutOfRangeError 的异常
+
+Remember, you passed this exception to the assertRaises() method, because it’s the exception you want the function to raise given an out-of-range input.
+回忆一下，该异常是你传递给 assertRaises() 方法的，因为你期望当传递给被测试方法一个超大值时可以抛出该异常
+
+But the exception doesn’t exist, so the call to the assertRaises() method failed.
+但是，该异常并不存在，因此 assertRaises() 的调用会失败
+
+It never got a chance to test the to_roman() function;
+事实上测试代码并没有机会测试 to_roman() 方法，因为它还没有到达那一步
+
+To solve this problem, you need to define the OutOfRangeError exception in roman2.py.
+为了解决该问题，你需要在 roman2.py 中定义 OutOfRangeError 
+
+Exceptions are classes.
+异常也是类
+
+An “out of range” error is a kind of value error — the argument value is out of its acceptable range.
+“越界”错误是值错误的一类──参数值超出了可接受的范围
+
+So this exception inherits from the built-in ValueError exception.
+所以，该异常继承了内建的 ValueError 异常类
+
+This is not strictly necessary (it could just inherit from the base Exception class), but it feels right.
+这并不是严格的要求（它同样也可以继承于基类 Exception），只要它正确就行了
+
+Exceptions don’t actually do anything, but you need at least one line of code to make a class.
+事实上，异常类可以不做任何事情，但是至少添加一行代码使其成为一个类
+
+Calling pass does precisely nothing, but it’s a line of Python code, so that makes it a class.
+ pass 的真正意思是什么都不做，但是它是一行Python代码，所以可以使其成为类
+
+Now run the test suite again.
+再次执行该测试套件
+
+The new test is still not passing, but it’s not returning an error either.
+新的测试仍然没有通过，但是它并没有返回错误而是失败
+
+Instead, the test is failing.
+相反，测试失败了
+
+That’s progress!
+这就是进步
+
+It means the call to the assertRaises() method succeeded this time, and the unit test framework actually tested the to_roman() function.
+它意味着这回 assertRaises() 方法的调用是成功的，同时，单元测试框架事实上也测试了 to_roman() 函数
+
+Of course, the to_roman() function isn’t raising the OutOfRangeError exception you just defined, because you haven’t told it to do that yet.
+当然 to_roman() 方法没有引发你所定义的 OutOfRangeError 异常，因为你并没有让它这么做
+
+That’s excellent news!
+这真是个好消息
+
+It means this is a valid test case — it fails before you write the code to make it pass.
+因为它意味着这是个合格的测试案例——在编写代码使之通过之前它将会以失败为结果
+
+Now you can write the code to make this test pass.
+现在可以编写代码使其通过了
+
+[download roman2.py]
+[download roman2.py]
+
+This is straightforward: if the given input (n) is greater than 3999, raise an OutOfRangeError exception.
+非常直观：如果给定的输入 (n) 大于3999，引发一个 OutOfRangeError 例外
+
+The unit test does not check the human-readable string that accompanies the exception, although you could write another test that did check it (but watch out for internationalization issues for strings that vary by the user’s language or environment).
+本单元测试并不检测那些与例外相伴的人类可读的字符串，但你可以编写另一个测试来检查它（但请注意用户的语言或环境导致的不同国际化问题）
+
+Does this make the test pass?
+这样能让测试通过吗
+
+Let’s find out.
+让我们来寻找答案
+
+Hooray!
+万岁
+
+Both tests pass.
+两个测试都通过了
+
+Because you worked iteratively, bouncing back and forth between testing and coding, you can be sure that the two lines of code you just wrote were the cause of that one test going from “fail” to “pass.” That kind of confidence doesn’t come cheap, but it will pay for itself over the lifetime of your code.
+因为你是在测试与编码之间来回反复开发的，所以你可以肯定使得其中一个测试从“失败”转变为“通过”的原因就是你刚才新添的两行代码
+
+More Halting, More Fire
+More Halting, More Fire
+
+Along with testing numbers that are too large, you need to test numbers that are too small.
+与测试超大值一样，也必须测试超小值
+
+As we noted in our functional requirements, Roman numerals cannot express 0 or negative numbers.
+正如我们在功能需求中提到的那样，罗马数字无法表达 0 或负数
+
+Well that’s not good.
+显然，这不是好的结果
+
+Let’s add tests for each of these conditions.
+让我们为这些条件逐条添加测试
+
+[download romantest3.py]
+[download romantest3.py]
+
+The test_too_large() method has not changed since the previous step.
+test_too_large() 方法跟之前的步骤一样
+
+I’m including it here to show where the new code fits.
+我把它包含进来是为了说明新代码的位置
+
+Here’s a new test: the test_zero() method.
+这里是新的测试方法： test_zero() 
+
+Like the test_too_large() method, it tells the assertRaises() method defined in unittest.TestCase to call our to_roman() function with a parameter of 0, and check that it raises the appropriate exception, OutOfRangeError.
+如 test_too_large() 一样，它调用了在n unittest.TestCase 中定义的 assertRaises() 方法，并且以参数值 0 传入给 to_roman()，最后检查它抛出相应的异常：OutOfRangeError
+
+The test_negative() method is almost identical, except it passes -1 to the to_roman() function.
+test_negative() 也几乎类似，除了它给 to_roman() 函数传入 -1 
+
+If either of these new tests does not raise an OutOfRangeError (either because the function returns an actual value, or because it raises some other exception), the test is considered failed.
+如果新的测试中 没有 任何一个抛出了异常 OutOfRangeError （或者由于该函数返回了实际的值，或者由于它抛出了其他类型的异常），那么测试就被视为失败
+
+Now check that the tests fail:
+检查测试是否失败：
+
+Excellent.
+太棒了
+
+Both tests failed, as expected.
+两个测试都如期地失败了
+
+Now let’s switch over to the code and see what we can do to make them pass.
+接着转入被测试的代码并且思考如何才能使得测试通过
+
+[download roman3.py]
+[download roman3.py]
+
+This is a nice Pythonic shortcut: multiple comparisons at once.
+这是Python优雅的快捷方法：一次性的多比较
+
+This is equivalent to if not ((0 < n) and (n < 4000)), but it’s much easier to read.
+它等价于 if not ((0 < n) and (n < 4000))，但前者更适合阅读
+
+This one line of code should catch inputs that are too large, negative, or zero.
+这一行代码应该捕获那些超大的、负值的或者为 0 的输入
+
+If you change your conditions, make sure to update your human-readable error strings to match.
+当你改变条件的时候，要确保同步更新那些提示错误信息的可读字符串
+
+The unittest framework won’t care, but it’ll make it difficult to do manual debugging if your code is throwing incorrectly-described exceptions.
+unittest 框架并不关心这些，但是如果你的代码抛出描述不正确的异常信息的话会使得手工调试代码变得困难
+
+I could show you a whole series of unrelated examples to show that the multiple-comparisons-at-once shortcut works, but instead I’ll just run the unit tests and prove it.
+我本应该给你展示完整的一系列与本章节不相关的例子来说明一次性多比较的快捷方式是有效的，但是我将仅仅运行本测试用例来证明它的有效性
+
+And One More Thing…
+还有一件事情……
+
+There was one more functional requirement for converting numbers to Roman numerals: dealing with non-integers.
+还有一个把阿拉伯数字转换成罗马数字的 功能性需求 ：处理非整型数字
+
+Oh, that’s bad.
+喔，糟糕了
+
+Oh, that’s even worse.
+喔，更糟糕了
+
+Both of these cases should raise an exception.
+两个用例都本该抛出异常的
+
+Instead, they give bogus results.
+但却返回了假的结果
+
+Testing for non-integers is not difficult.
+测试非整数并不困难
+
+First, define a NotIntegerError exception.
+首先，定义一个 NotIntegerError 例外
+
+Next, write a test case that checks for the NotIntegerError exception.
+然后，编写一个检查 NotIntegerError 例外的案例
+
+Now check that the test fails properly.
+然后，检查该测试是否可以正确地失败
+
+Write the code that makes the test pass.
+编修代码，使得该测试可以通过
+
+The built-in isinstance() function tests whether a variable is a particular type (or, technically, any descendant type).
+内建的 isinstance() 方法可以检查一个变量是否属于某一类型（或者，技术上的任何派生类型）
+
+If the argument n is not an int, raise our newly minted NotIntegerError exception.
+如果参数 n 不是 int，则抛出新定义的 NotIntegerError 异常
+
+Finally, check that the code does indeed make the test pass.
+最后，验证修改后的代码的确通过测试
+
+The to_roman() function passes all of its tests, and I can’t think of any more tests, so it’s time to move on to from_roman().
+to_roman() 方法通过了所有的测试，而且我也想不出别的测试了，因此，下面着手 from_roman()吧
+
+A Pleasing Symmetry
+可喜的对称性
+
+Converting a string from a Roman numeral to an integer sounds more difficult than converting an integer to a Roman numeral.
+转换罗马数字为阿拉伯数字的实现难度听起来比反向转换要困难
+
+Certainly there is the issue of validation.
+当然，这种想法不无道理
+
+It’s easy to check if an integer is greater than 0, but a bit harder to check whether a string is a valid Roman numeral.
+例如，检查数值是否比0大容易，而检查一个字符串是否为有效的罗马数字则要困难些
+
+But we already constructed a regular expression to check for Roman numerals, so that part is done.
+但是，我们已经构造了一个用于检查罗马数字的规则表，因此规则表的工作可以免了
+
+That leaves the problem of converting the string itself.
+现在剩余的工作就是转换字符串了
+
+As we’ll see in a minute, thanks to the rich data structure we defined to map individual Roman numerals to integer values, the nitty-gritty of the from_roman() function is as straightforward as the to_roman() function.
+正如我们将要看到的一样，多亏我们定义的用于单个罗马数字映射至阿拉伯数字的良好的数据结构，from_roman() 的实现本质上与 to_roman() 一样简单
+
+But first, the tests.
+不过，测试先行
+
+We’ll need a “known values” test to spot-check for accuracy.
+为了证明其准确性，我们将需要一个对“已知取值”进行的测试
+
+Our test suite already contains a mapping of known values;
+我们的测试套件已经包含了一个已知取值的映射表，那么，我们就重用它
+
+There’s a pleasing symmetry here.
+这里看到了令人高兴的对称性
+
+The to_roman() and from_roman() functions are inverses of each other.
+to_roman() 与 from_roman() 函数是互逆的
+
+The first converts integers to specially-formatted strings, the second converts specially-formated strings to integers.
+前者把整型数字转换为特殊格式化的字符串，而后者则把特殊格式化的字符串转换为整型数字
+
+In theory, we should be able to “round-trip” a number by passing to the to_roman() function to get a string, then passing that string to the from_roman() function to get an integer, and end up with the same number.
+理论上，我们应该可以使一个数字“绕一圈”，即把数字传递给 to_roman() 方法，得到一个字符串;然后把该字符串传入 from_roman() 方法，得到一个整型数字，并且跟传给to_roman()方法的数字是一样的
+
+In this case, “all values” means any number between 1..3999, since that is the valid range of inputs to the to_roman() function.
+在本用例中，“全有取值”是说 从1到3999 的所有数值，因为这是 to_roman() 方法的有效输入范围
+
+We can express this symmetry in a test case that runs through all the values 1..3999, calls to_roman(), calls from_roman(), and checks that the output is the same as the original input.
+为了表达这两个方法之间的对称性，我们可以设计这样的测试用例，它的测试数据集是从1到3999之间（包括1和3999）的所有数值，首先调用 to_roman() ，然后调用 from_roman()，最后检查输出是否与原始输入一致
+
+These new tests won’t even fail yet.
+这些测试连失败的机会都没有
+
+We haven’t defined a from_roman() function at all, so they’ll just raise errors.
+因为我们根本还没定义 from_roman() 函数，所以它们仅仅会抛出错误的结果
+
+A quick stub function will solve that problem.
+一个简易的留空函数可以解决此问题
+
+(Hey, did you notice that?
+（嘿，你注意到了么
+
+I defined a function with nothing but a docstring.
+我定义了一个除了 docstring 之外没有任何东西的方法
+
+That’s legal Python.
+这是合法的 Python 代码
+
+In fact, some programmers swear by it.
+事实上，一些程序员喜欢这样做
+
+“Don’t stub;
+“不要留空
+
+document!”)
+写点文档
+
+Now the test cases will actually fail.
+现在测试用力将会失败
+
+Now it’s time to write the from_roman() function.
+现在是时候编写 from_roman() 函数了
+
+The pattern here is the same as the to_roman() function.
+此处的匹配模式与 to_roman() 完全相同
+
+You iterate through your Roman numeral data structure (a tuple of tuples), but instead of matching the highest integer values as often as possible, you match the “highest” Roman numeral character strings as often as possible.
+遍历整个罗马数字数据结构 (一个元组的元组)，与前面不同的是不去一个个地搜索最大的整数，而是搜寻 “最大的”罗马数字字符串
+
+If you're not clear how from_roman() works, add a print statement to the end of the while loop:
+如果不清楚 from_roman() 如何工作，在 while 结尾处添加一个 print 语句：
+
+Time to re-run the tests.
+重新执行一遍测试
+
+Two pieces of exciting news here.
+这儿有两个令人激动的消息
+
+The first is that the from_roman() function works for good input, at least for all the known values.
+一个是 from_roman() 对于所有有效输入运转正常，至少对于你测试的已知值是这样
+
+The second is that the “round trip” test also passed.
+第二个好消息是，完备性测试也通过了
+
+Combined with the known values tests, you can be reasonably sure that both the to_roman() and from_roman() functions work properly for all possible good values.
+与已知值测试的通过一起来看，你有理由相信 to_roman() 和 from_roman() 对于所有有效输入值工作正常
+
+(This is not guaranteed;
+(尚不能完全相信，理论上存在这种可能性： to_roman() 存在错误而导致一些特定输入会产生错误的罗马数字表示，and from_roman() 也存在相应的错误，把 to_roman() 错误产生的这些罗马数字错误地转换为最初的整数
+
+it is theoretically possible that to_roman() has a bug that produces the wrong Roman numeral for some particular set of inputs, and that from_roman() has a reciprocal bug that produces the same wrong integer values for exactly that set of Roman numerals that to_roman() generated incorrectly.
+取决于你的应用程序和你的要求，你或许需要考虑这个可能性
+
+Depending on your application and your requirements, this possibility may bother you;
+如果是这样，编写更全面的测试用例直到解决这个问题
+
+if so, write more comprehensive test cases until it doesn't bother you.)
+)
+
+More Bad Input
+更多错误输入
+
+Now that the from_roman() function works properly with good input, it's time to fit in the last piece of the puzzle: making it work properly with bad input.
+现在 from_roman() 对于有效输入能够正常工作了，是揭开最后一个谜底的时候了：使它正常工作于无效输入的情况下
+
+That means finding a way to look at a string and determine if it's a valid Roman numeral.
+这意味着要找出一个方法检查一个字符串是不是有效的罗马数字
+
+This is inherently more difficult than validating numeric input in the to_roman() function, but you have a powerful tool at your disposal: regular expressions.
+这比中验证有效的数字输入困难，但是你可以使用一个强大的工具：正则表达式
+
+(If you’re not familiar with regular expressions, now would be a good time to read the regular expressions chapter.)
+(如果你不熟悉正则表达式，现在是该好好读读正则表达式那一章节的时候了
+
+As you saw in Case Study: Roman Numerals, there are several simple rules for constructing a Roman numeral, using the letters M, D, C, L, X, V, and I.
+如你在 个案研究：罗马字母s中所见到的，构建罗马数字有几个简单的规则：使用的字母M ， D ， C ， L ， X ， V和I 
+
+Let's review the rules:
+让我们回顾一下：
+
+Sometimes characters are additive.
+有时字符是叠加组合的
+
+I is 1, II is 2, and III is 3.
+I 是 1, II 是 2,而III 是 3. VI 是 6 (从字面上理解, “5 和 1”), VII 是 7, 而 VIII 是 8
+
+The tens characters (I, X, C, and M) can be repeated up to three times.
+十位的字符 (I、 X、 C 和 M) 可以被重复最多三次
+
+At 4, you need to subtract from the next highest fives character.
+对于 4，你则需要利用下一个能够被5整除的字符进行减操作得到
+
+You can't represent 4 as IIII;
+你不能把 4 表示为IIII，而应该表示为IV (“比 5 小 1 ”)
+
+instead, it is represented as IV (“1 less than 5”).
+40 则被写作 XL (“比 50 小 10”)，41 表示为 XLI，42 表示为 XLII，43 表示为 XLIII， 44 表示为 XLIV (“比 50 小 10，加上 5 小 1”)
+
+Sometimes characters are… the opposite of additive.
+有时，字符串是……加法的对立面
+
+By putting certain characters before others, you subtract from the final value.
+通过将某些字符串放的其他一些之前，可以从最终值中相减
+
+For example, at 9, you need to subtract from the next highest tens character: 8 is VIII, but 9 is IX (“1 less than 10”), not VIIII (since the I character can not be repeated four times).
+例如，对于 9，你需要从下一个最高十位字符串中减去一个值：8 是 VIII，但 9 是 IX（“ 比 10 小 1”)，而不是VIIII （由于 I 字符不能重复四次）
+
+ is XC, 900 is CM.
+90 是 XC， 900 是 CM
+
+The fives characters can not be repeated.
+表示 5 的字符不能重复
+
+ is always represented as X, never as VV.
+10 总是表示为 X，而决不能是 VV
+
+ is always C, never LL.
+ 100 总是 C，决不能是 LL
+
+Roman numerals are read left to right, so the order of characters matters very much.
+罗马数字从左向右读，因此字符的顺序非常重要
+
+DC is 600;
+DC 是 600; CD 则是完全不同的数字 (400， “比 500 小 100 ”)
+
+CD is a completely different number (400, “100 less than 500”).
+ CI 是 101; IC 甚至不是合法的罗马数字（因为你不能直接从 100 减 1
+
+CI is 101;
+你将不得不将它表示为 XCIX，“比 100 小10 ，然后比 10” 小 1）
+
+Thus, one useful test would be to ensure that the from_roman() function should fail when you pass it a string with too many repeated numerals.
+因此，有用的测试将会确保 from_roman() 函数应当在传入太多重复数字时失败
+
+How many is “too many” depends on the numeral.
+“太多”是多少取决于数字
+
+Another useful test would be to check that certain patterns aren’t repeated.
+另一有效测试是检查某些未被重复的模式
+
+For example, IX is 9, but IXIX is never valid.
+例如，IX 代表 9，但 IXIX 绝不会合法
+
+A third test could check that numerals appear in the correct order, from highest to lowest value.
+第三个测试应当检测数字是否以正确顺序出现，从最高到最低位
+
+For example, CL is 150, but LC is never valid, because the numeral for 50 can never come before the numeral for 100.
+例如，CL 是 150，而 LC 永远是非法的，因为代表 50 的数字永远不能在 100 数字之前出现
+
+This test includes a randomly chosen set of invalid antecedents: I before M, V before X, and so on.
+ 该测试包括一个随机的可选项：I 在 M 之前， V 在 X 之前，等等
+
+Each of these tests relies the from_roman() function raising a new exception, InvalidRomanNumeralError, which we haven’t defined yet.
+这些测试中的每个都依赖于 from_roman() 引发一个新的例外 InvalidRomanNumeralError，而该例外尚未定义
+
+All three of these tests should fail, since the from_roman() function doesn’t currently have any validity checking.
+所有的测试都应该是失败的，因为 from_roman() 方法还没有任何有效性检查
+
+(If they don’t fail now, then what the heck are they testing?)
+ （如果没有失败，它们在测什么呢
+
+Good deal.
+好
+
+Now, all we need to do is add the regular expression to test for valid Roman numerals into the from_roman() function.
+现在，我们要做的所有事情就是添加正则表达式到 from_roman() 中以测试有效的罗马数字
+
+And re-run the tests…
+再运行一遍测试……
+
+And the anticlimax award of the year goes to… the word “OK”, which is printed by the unittest module when all the tests pass.
+本年度的虎头蛇尾奖颁发给……单词“OK”，在所有测试通过时，它由 unittest 模块输出
+

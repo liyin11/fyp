@@ -1,0 +1,222 @@
+Defining tasks¶
+定义任务¶
+
+As of Fabric 1.1, there are two distinct methods you may use in order to define which objects in your fabfile show up as tasks:
+在 Fabric 1.1 中存在两种定义 fabfile 中对象为任务的方式：
+
+Note
+“从 1.1 版本后支持的新”方法需要是 Task 或其子类的实现，and also descends into imported modules to allow building nested namespaces.
+
+These two methods are mutually exclusive: if Fabric finds any new-style task objects in your fabfile or in modules it imports, it will assume you’ve committed to this method of task declaration and won’t consider any non-Task callables.
+注解
+
+The rest of this document explores these two methods in detail.
+These two methods are mutually exclusive: if Fabric finds any new-style task objects in your fabfile or in modules it imports, it will assume you’ve committed to this method of task declaration and won’t consider any non-Task callables. If no new-style tasks are found, it reverts to the classic behavior.
+
+Note
+下面的文档将详细探究这两种方法
+
+To see exactly what tasks in your fabfile may be executed via fab, use fab --list.
+注解
+
+Fabric 1.1 introduced the Task class to facilitate new features and enable some programming best practices, specifically:
+Fabric 1.1 introduced the Task class to facilitate new features and enable some programming best practices, specifically:
+
+With the introduction of Task, there are two ways to set up new tasks:
+除刚刚介绍的 Task 外，还有两种设置新式任务的方式：
+
+Use of new-style tasks also allows you to set up namespaces.
+新式任务还允许设置 namespaces 
+
+The quickest way to make use of new-style task features is to wrap basic task functions with @task:
+The quickest way to make use of new-style task features is to wrap basic task functions with @task:
+
+When this decorator is used, it signals to Fabric that only functions wrapped in the decorator are to be loaded up as valid tasks.
+When this decorator is used, it signals to Fabric that only functions wrapped in the decorator are to be loaded up as valid tasks. (When not present, classic-style task behavior kicks in.)
+
+@task may also be called with arguments to customize its behavior.
+@task may also be called with arguments to customize its behavior. Any arguments not documented below are passed into the constructor of the task_class being used, with the function itself as the first argument (see 使用 @task 定制子类 for details.)
+
+Here’s a quick example of using the alias keyword argument to facilitate use of both a longer human-readable task name, and a shorter name which is quicker to type:
+Here’s a quick example of using the alias keyword argument to facilitate use of both a longer human-readable task name, and a shorter name which is quicker to type:
+
+Calling --list on this fabfile would show both the original deploy_with_migrations and its alias dwm:
+Calling --list on this fabfile would show both the original deploy_with_migrations and its alias dwm:
+
+When more than one alias for the same function is needed, simply swap in the aliases kwarg, which takes an iterable of strings instead of a single string.
+When more than one alias for the same function is needed, simply swap in the aliases kwarg, which takes an iterable of strings instead of a single string.
+
+In a similar manner to aliases, it’s sometimes useful to designate a given task within a module as the “default” task, which may be called by referencing just the module name.
+In a similar manner to aliases, it’s sometimes useful to designate a given task within a module as the “default” task, which may be called by referencing just the module name. This can save typing and/or allow for neater organization when there’s a single “main” task and a number of related tasks or subroutines.
+
+For example, a deploy submodule might contain tasks for provisioning new servers, pushing code, migrating databases, and so forth – but it’d be very convenient to highlight a task as the default “just deploy” action.
+For example, a deploy submodule might contain tasks for provisioning new servers, pushing code, migrating databases, and so forth – but it’d be very convenient to highlight a task as the default “just deploy” action. Such a deploy.py module might look like this:
+
+With the following task list (assuming a simple top level fabfile.py that just imports deploy):
+With the following task list (assuming a simple top level fabfile.py that just imports deploy):
+
+Calling deploy.full_deploy on every deploy could get kind of old, or somebody new to the team might not be sure if that’s really the right task to run.
+Calling deploy.full_deploy on every deploy could get kind of old, or somebody new to the team might not be sure if that’s really the right task to run.
+
+Using the default kwarg to @task, we can tag e.g.
+Using the default kwarg to @task, we can tag e.g. full_deploy as the default task:
+
+Doing so updates the task list like so:
+这样之后，将任务列表更新成这样：
+
+Note that full_deploy still exists as its own explicit task – but now deploy shows up as a sort of top level alias for full_deploy.
+Note that full_deploy still exists as its own explicit task – but now deploy shows up as a sort of top level alias for full_deploy.
+
+If multiple tasks within a module have default=True set, the last one to be loaded (typically the one lowest down in the file) will take precedence.
+If multiple tasks within a module have default=True set, the last one to be loaded (typically the one lowest down in the file) will take precedence.
+
+Using @task(default=True) in the top level fabfile will cause the denoted task to execute when a user invokes fab without any task names (similar to e.g.
+Using @task(default=True) in the top level fabfile will cause the denoted task to execute when a user invokes fab without any task names (similar to e.g. make.) When using this shortcut, it is not possible to specify arguments to the task itself – use a regular invocation of the task if this is necessary.
+
+If you’re used to classic-style tasks, an easy way to think about Task subclasses is that their run method is directly equivalent to a classic task;
+If you’re used to classic-style tasks, an easy way to think about Task subclasses is that their run method is directly equivalent to a classic task; its arguments are the task arguments (other than self) and its body is what gets executed.
+
+For example, this new-style task:
+例如，新式任务会像这样：
+
+is exactly equivalent to this function-based task:
+和下面这个基于函数的任务作用完全一致：
+
+Note how we had to instantiate an instance of our class;
+Note how we had to instantiate an instance of our class; that’s simply normal Python object-oriented programming at work. While it’s a small bit of boilerplate right now – for example, Fabric doesn’t care about the name you give the instantiation, only the instance’s name attribute – it’s well worth the benefit of having the power of classes available.
+
+We plan to extend the API in the future to make this experience a bit smoother.
+We plan to extend the API in the future to make this experience a bit smoother.
+
+It’s possible to marry custom Task subclasses with @task.
+It’s possible to marry custom Task subclasses with @task. This may be useful in cases where your core execution logic doesn’t do anything class/object-specific, but you want to take advantage of class metaprogramming or similar techniques.
+
+Specifically, any Task subclass which is designed to take in a callable as its first constructor argument (as the built-in WrappedCallableTask does) may be specified as the task_class argument to @task.
+Specifically, any Task subclass which is designed to take in a callable as its first constructor argument (as the built-in WrappedCallableTask does) may be specified as the task_class argument to @task.
+
+Fabric will automatically instantiate a copy of the given class, passing in the wrapped function as the first argument.
+Fabric will automatically instantiate a copy of the given class, passing in the wrapped function as the first argument. All other args/kwargs given to the decorator (besides the “special” arguments documented in 参数) are added afterwards.
+
+Here’s a brief and somewhat contrived example to make this obvious:
+Here’s a brief and somewhat contrived example to make this obvious:
+
+When this fabfile is loaded, a copy of CustomTask is instantiated, effectively calling:
+When this fabfile is loaded, a copy of CustomTask is instantiated, effectively calling:
+
+Note how the alias kwarg is stripped out by the decorator itself and never reaches the class instantiation;
+Note how the alias kwarg is stripped out by the decorator itself and never reaches the class instantiation; this is identical in function to how command-line task arguments work.
+
+With classic tasks, fabfiles were limited to a single, flat set of task names with no real way to organize them.
+With classic tasks, fabfiles were limited to a single, flat set of task names with no real way to organize them. In Fabric 1.1 and newer, if you declare tasks the new way (via @task or your own Task subclass instances) you may take advantage of namespacing:
+
+Let’s build up a fabfile package from simple to complex and see how this works.
+Let’s build up a fabfile package from simple to complex and see how this works.
+
+We start with a single __init__.py containing a few tasks (the Fabric API import omitted for brevity):
+We start with a single __init__.py containing a few tasks (the Fabric API import omitted for brevity):
+
+The output of fab --list would look something like this:
+fab --list 的输出会像这样：
+
+There’s just one namespace here: the “root” or global namespace.
+There’s just one namespace here: the “root” or global namespace. Looks simple now, but in a real-world fabfile with dozens of tasks, it can get difficult to manage.
+
+As mentioned above, Fabric will examine any imported module objects for tasks, regardless of where that module exists on your Python import path.
+As mentioned above, Fabric will examine any imported module objects for tasks, regardless of where that module exists on your Python import path. For now we just want to include our own, “nearby” tasks, so we’ll make a new submodule in our package for dealing with, say, load balancers – lb.py:
+
+And we’ll add this to the top of __init__.py:
+我们再在 __init__.py 的顶部加上：
+
+Now fab --list shows us:
+现在 fab --list 会显示：
+
+Again, with only one task in its own submodule, it looks kind of silly, but the benefits should be pretty obvious.
+Again, with only one task in its own submodule, it looks kind of silly, but the benefits should be pretty obvious.
+
+Namespacing isn’t limited to just one level.
+Namespacing isn’t limited to just one level. Let’s say we had a larger setup and wanted a namespace for database related tasks, with additional differentiation inside that. We make a sub-package named db/ and inside it, a migrations.py module:
+
+We need to make sure that this module is visible to anybody importing db, so we add it to the sub-package’s __init__.py:
+We need to make sure that this module is visible to anybody importing db, so we add it to the sub-package’s __init__.py:
+
+As a final step, we import the sub-package into our root-level __init__.py, so now its first few lines look like this:
+As a final step, we import the sub-package into our root-level __init__.py, so now its first few lines look like this:
+
+After all that, our file tree looks like this:
+这样之后文件的树形结构会变成这样：
+
+and fab --list shows:
+fab --list 会显示：
+
+We could also have specified (or imported) tasks directly into db/__init__.py, and they would show up as db. as you might expect.
+We could also have specified (or imported) tasks directly into db/__init__.py, and they would show up as db. as you might expect.
+
+You may limit what Fabric “sees” when it examines imported modules, by using the Python convention of a module level __all__ variable (a list of variable names.) If we didn’t want the db.migrations.run task to show up by default for some reason, we could add this to the top of db/migrations.py:
+You may limit what Fabric “sees” when it examines imported modules, by using the Python convention of a module level __all__ variable (a list of variable names.) If we didn’t want the db.migrations.run task to show up by default for some reason, we could add this to the top of db/migrations.py:
+
+Note the lack of 'run' there.
+Note the lack of 'run' there. You could, if needed, import run directly into some other part of the hierarchy, but otherwise it’ll remain hidden.
+
+We’ve been keeping our fabfile package neatly organized and importing it in a straightforward manner, but the filesystem layout doesn’t actually matter here.
+我们已经将 fabfile 库嵌套组织起来并直接引用，但是重要的并不是文件系统层级结构，Fabric 的加载器只关心模块名和引用的时机
+
+For example, if we changed the top of our root __init__.py to look like this:
+例如，如果我们修改最顶层的 __init__.py 成这样：
+
+Our task list would change thusly:
+任务列表会因此改变：
+
+This applies to any other import – you could import third party modules into your own task hierarchy, or grab a deeply nested module and make it appear near the top level.
+This applies to any other import – you could import third party modules into your own task hierarchy, or grab a deeply nested module and make it appear near the top level.
+
+As a final note, we’ve been using the default Fabric --list output during this section – it makes it more obvious what the actual task names are.
+As a final note, we’ve been using the default Fabric --list output during this section – it makes it more obvious what the actual task names are. However, you can get a more nested or tree-like view by passing nested to the --list-format option:
+
+While it slightly obfuscates the “real” task names, this view provides a handy way of noting the organization of tasks in large namespaces.
+While it slightly obfuscates the “real” task names, this view provides a handy way of noting the organization of tasks in large namespaces.
+
+Classic tasks¶
+传统任务¶
+
+When no new-style Task-based tasks are found, Fabric will consider any callable object found in your fabfile, except the following:
+When no new-style Task-based tasks are found, Fabric will consider any callable object found in your fabfile, except the following:
+
+Python’s import statement effectively includes the imported objects in your module’s namespace.
+Python’s import statement effectively includes the imported objects in your module’s namespace. Since Fabric’s fabfiles are just Python modules, this means that imports are also considered as possible classic-style tasks, alongside anything defined in the fabfile itself.
+
+Note
+注解
+
+This only applies to imported callable objects – not modules.
+This only applies to imported callable objects – not modules. Imported modules only come into play if they contain new-style tasks, at which point this section no longer applies.
+
+Because of this, we strongly recommend that you use the import module form of importing, followed by module.callable(), which will result in a cleaner fabfile API than doing from module import callable.
+Because of this, we strongly recommend that you use the import module form of importing, followed by module.callable(), which will result in a cleaner fabfile API than doing from module import callable.
+
+For example, here’s a sample fabfile which uses urllib.urlopen to get some data out of a webservice:
+下面是一个使用 urllib.urlopen 从网络服务下载数据的 fabfile 的例子
+
+This looks simple enough, and will run without error.
+看起来这已经足够简单，并且没有错误
+
+However, look what happens if we run fab --list on this fabfile:
+然而，如果在这个 fabfile 上运行 fab --list 就会这样：
+
+Our fabfile of only one task is showing two “tasks”, which is bad enough, and an unsuspecting user might accidentally try to call fab urlopen, which probably won’t work very well.
+Our fabfile of only one task is showing two “tasks”, which is bad enough, and an unsuspecting user might accidentally try to call fab urlopen, which probably won’t work very well. Imagine any real-world fabfile, which is likely to be much more complex, and hopefully you can see how this could get messy fast.
+
+For reference, here’s the recommended way to do it:
+作为参考，下面是推荐的使用方法：
+
+It’s a simple change, but it’ll make anyone using your fabfile a bit happier.
+这只是一个很小的变化，但能大幅改善 fabfile 的使用体验
+
+Fabric
+Fabric
+
+Pythonic remote execution
+Pythonic remote execution
+
+Enter search terms or a module, class or function name.
+输入相关的术语，模块，类或者函数名称进行搜索
+

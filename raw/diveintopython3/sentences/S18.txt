@@ -1,0 +1,1215 @@
+You are here: Home ‣ Dive Into Python 3 ‣
+你的位置: Home ‣ Dive Into Python 3 ‣
+
+Difficulty level: ♦♦♦♦♦
+难度等级: ♦♦♦♦♦
+
+Porting Code to Python 3 with 2to3
+使用2to3将代码移植到Python 3
+
+❝ Life is pleasant.
+❝ Life is pleasant. Death is peaceful. It’s the transition that’s troublesome. ❞ — Isaac Asimov (attributed)
+
+Diving In
+概述
+
+So much has changed between Python 2 and Python 3, there are vanishingly few programs that will run unmodified under both.
+几乎所有的Python 2程序都需要一些修改才能正常地运行在Python 3的环境下
+
+But don’t despair!
+为了简化这个转换过程，Python 3自带了一个叫做2to3的实用脚本(Utility Script)，这个脚本会将你的Python 2程序源文件作为输入，然后自动将其转换到Python 3的形式
+
+To help with this transition, Python 3 comes with a utility script called 2to3, which takes your actual Python 2 source code as input and auto-converts as much as it can to Python 3.
+案例研究:将chardet移植到Python 3(porting chardet to Python 3)描述了如何运行这个脚本，然后展示了一些它不能自动修复的情况
+
+Case study: porting chardet to Python 3 describes how to run the 2to3 script, then shows some things it can’t fix automatically.
+这篇附录描述了它能够自动修复的内容
+
+print statement
+print语句
+
+In Python 2, print was a statement.
+在Python 2里，print是一个语句
+
+Whatever you wanted to print simply followed the print keyword.
+无论你想输出什么，只要将它们放在print关键字后边就可以
+
+In Python 3, print() is a function.
+在Python 3里，print()是一个函数
+
+Whatever you want to print, pass it to print() like any other function.
+就像其他的函数一样，print()需要你将想要输出的东西作为参数传给它
+
+To print a blank line, call print() without any arguments.
+为输出一个空白行，需要调用不带参数的print()
+
+To print a single value, call print() with one argument.
+为输出一个单独的值，需要将这这个值作为print()的一个参数就可以了
+
+To print two values separated by a space, call print() with two arguments.
+为输出使用一个空格分隔的两个值，用两个参数调用print()即可
+
+This one is a little tricky.
+这个例子有一些技巧
+
+In Python 2, if you ended a print statement with a comma, it would print the values separated by spaces, then print a trailing space, then stop without printing a carriage return.
+在Python 2里，如果你使用一个逗号(,)作为print语句的结尾，它将会用空格分隔输出的结果，然后在输出一个尾随的空格(trailing space)，而不输出回车(carriage return)
+
+(Technically, it’s a little more complicated than that.
+在Python 3里，通过把end=' '作为一个关键字参数传给print()可以实现同样的效果
+
+The print statement in Python 2 used a now-deprecated attribute called softspace.
+参数end的默认值为'\n'，所以通过重新指定end参数的值，可以取消在末尾输出回车符
+
+In Python 2, you could redirect the output to a pipe — like sys.stderr — by using the >>pipe_name syntax.
+在Python 2里，你可以通过使用>>pipe_name语法，把输出重定向到一个管道，比如sys.stderr
+
+In Python 3, the way to do this is to pass the pipe in the file keyword argument.
+在Python 3里，你可以通过将管道作为关键字参数file的值传递给print()来完成同样的功能
+
+The file argument defaults to sys.stdout (standard out), so overriding it will output to a different pipe instead.
+参数file的默认值为std.stdout，所以重新指定它的值将会使print()输出到一个另外一个管道
+
+Unicode string literals
+Unicode字符串
+
+Python 2 had two string types: Unicode strings and non-Unicode strings.
+Python 2有两种字符串类型：Unicode字符串和非Unicode字符串
+
+Python 3 has one string type: Unicode strings.
+Python 3只有一种类型：Unicode字符串(Unicode strings)
+
+Unicode string literals are simply converted into string literals, which, in Python 3, are always Unicode.
+Python 2里的Unicode字符串在Python 3里即普通字符串，因为在Python 3里字符串总是Unicode形式的
+
+Unicode raw strings (in which Python does not auto-escape backslashes) are converted to raw strings.
+Unicode原始字符串(raw string)(使用这种字符串，Python不会自动转义反斜线"\")也被替换为普通的字符串，因为在Python 3里，所有原始字符串都是以Unicode编码的
+
+unicode() global function
+全局函数unicode()
+
+Python 2 had two global functions to coerce objects into strings: unicode() to coerce them into Unicode strings, and str() to coerce them into non-Unicode strings.
+Python 2有两个全局函数可以把对象强制转换成字符串：unicode()把对象转换成Unicode字符串，还有str()把对象转换为非Unicode字符串
+
+Python 3 has only one string type, Unicode strings, so the str() function is all you need.
+Python 3只有一种字符串类型，Unicode字符串，所以str()函数即可完成所有的功能
+
+(The unicode() function no longer exists.)
+(unicode()函数在Python 3里不再存在了
+
+long data type
+long 长整型
+
+Python 2 had separate int and long types for non-floating-point numbers.
+Python 2有为非浮点数准备的int和long类型
+
+An int could not be any larger than sys.maxint, which varied by platform.
+int类型的最大值不能超过sys.maxint，而且这个最大值是平台相关的
+
+Longs were defined by appending an L to the end of the number, and they could be, well, longer than ints.
+可以通过在数字的末尾附上一个L来定义长整型，显然，它比int类型表示的数字范围更大
+
+In Python 3, there is only one integer type, called int, which mostly behaves like the long type in Python 2.
+在Python 3里，只有一种整数类型int，大多数情况下，它很像Python 2里的长整型
+
+Since there are no longer two types, there is no need for special syntax to distinguish them.
+由于已经不存在两种类型的整数，所以就没有必要使用特殊的语法去区别他们
+
+Further reading: PEP 237: Unifying Long Integers and Integers.
+进一步阅读：PEP 237：统一长整型和整型
+
+Base 10 long integer literals become base 10 integer literals.
+在Python 2里的十进制长整型在Python 3里被替换为十进制的普通整数
+
+Base 16 long integer literals become base 16 integer literals.
+在Python 2里的十六进制长整型在Python 3里被替换为十六进制的普通整数
+
+In Python 3, the old long() function no longer exists, since longs don’t exist.
+在Python 3里，由于长整型已经不存在了，自然原来的long()函数也没有了
+
+To coerce a variable to an integer, use the int() function.
+为了强制转换一个变量到整型，可以使用int()函数
+
+To check whether a variable is an integer, get its type and compare it to int, not long.
+检查一个变量是否是整型，获得它的数据类型，并与一个int类型(不是long)的作比较
+
+You can also use the isinstance() function to check data types;
+你也可以使用isinstance()函数来检查数据类型
+
+again, use int, not long, to check for integers.
+再强调一次，使用int，而不是long，来检查整数类型
+
+<> comparison
+<> 比较运算符
+
+Python 2 supported <> as a synonym for !=, the not-equals comparison operator.
+Python 2支持<>作为!=的同义词
+
+Python 3 supports the != operator, but not <>.
+Python 3只支持!=，不再支持<>了
+
+A simple comparison.
+简单地比较
+
+A more complex comparison between three values.
+相对复杂的三个值之间的比较
+
+has_key() dictionary method
+字典类方法has_key()
+
+In Python 2, dictionaries had a has_key() method to test whether the dictionary had a certain key.
+在Python 2里，字典对象的has_key()方法用来测试字典是否包含特定的键(key)
+
+In Python 3, this method no longer exists.
+Python 3不再支持这个方法了
+
+Instead, you need to use the in operator.
+你需要使用in运算符
+
+The simplest form.
+最简单的形式
+
+The in operator takes precedence over the or operator, so there is no need for parentheses around x in a_dictionary or around y in a_dictionary.
+运算符or的优先级高于运算符in，所以这里不需要添加括号
+
+On the other hand, you do need parentheses around x or y here, for the same reason — in takes precedence over or.
+另一方面，出于同样的原因 — or的优先级大于in，这里需要添加括号
+
+(Note: this code is completely different from the previous line.
+(注意：这里的代码与前面那行完全不同
+
+Python interprets x or y first, which results in either x (if x is true in a boolean context) or y.
+Python会先解释x or y，得到结果x(如果x在布尔上下文里的值是真)或者y
+
+Then it takes that singular value and checks whether it is a key in a_dictionary.)
+然后Python检查这个结果是不是a_dictionary的一个键
+
+The + operator takes precedence over the in operator, so this form technically doesn’t need parentheses around x + y, but 2to3 includes them anyway.
+运算符in的优先级大于运算符+，所以代码里的这种形式从技术上说不需要括号，但是2to3还是添加了
+
+This form definitely needs parentheses around y in a_dictionary, since the + operator takes precedence over the in operator.
+这种形式一定需要括号，因为in的优先级大于+
+
+Dictionary methods that return lists
+返回列表的字典类方法
+
+In Python 2, many dictionary methods returned lists.
+在Python 2里，许多字典类方法的返回值是列表
+
+The most frequently used methods were keys(), items(), and values().
+其中最常用方法的有keys，items和values
+
+In Python 3, all of these methods return dynamic views.
+在Python 3里，所有以上方法的返回值改为动态视图(dynamic view)
+
+In some contexts, this is not a problem.
+在一些上下文环境里，这种改变并不会产生影响
+
+If the method’s return value is immediately passed to another function that iterates through the entire sequence, it makes no difference whether the actual type is a list or a view.
+如果这些方法的返回值被立即传递给另外一个函数，并且那个函数会遍历整个序列，那么以上方法的返回值是列表或者视图并不会产生什么不同
+
+In other contexts, it matters a great deal.
+在另外一些情况下，Python 3的这些改变干系重大
+
+If you were expecting a complete list with individually addressable elements, your code will choke, because views do not support indexing.
+如果你期待一个能被独立寻址元素的列表，那么Python 3的这些改变将会使你的代码卡住(choke)，因为视图(view)不支持索引(indexing)
+
+2to3 errs on the side of safety, converting the return value from keys() to a static list with the list() function.
+使用list()函数将keys()的返回值转换为一个静态列表，出于安全方面的考量，2to3可能会报错
+
+This will always work, but it will be less efficient than using a view.
+这样的代码是有效的，但是对于使用视图来说，它的效率低一些
+
+You should examine the converted code to see if a list is absolutely necessary, or if a view would do.
+你应该检查转换后的代码，看看是否一定需要列表，也许视图也能完成同样的工作
+
+Another view-to-list conversion, with the items() method.
+这是另外一种视图(关于items()方法的)到列表的转换
+
+to3 will do the same thing with the values() method.
+2to3对values()方法返回值的转换也是一样的
+
+Python 3 does not support the iterkeys() method anymore.
+Python 3里不再支持iterkeys()了
+
+Use keys(), and if necessary, convert the view to an iterator with the iter() function.
+如果必要，使用iter()将keys()的返回值转换成为一个迭代器
+
+2to3 recognizes when the iterkeys() method is used inside a list comprehension, and converts it to the keys() method (without wrapping it in an extra call to iter()).
+2to3能够识别出iterkeys()方法在列表解析里被使用，然后将它转换为Python 3里的keys()方法(不需要使用额外的iter()去包装其返回值)
+
+This works because views are iterable.
+这样是可行的，因为视图是可迭代的
+
+2to3 recognizes that the keys() method is immediately passed to a function which iterates through an entire sequence, so there is no need to convert the return value to a list first.
+2to3也能识别出keys()方法的返回值被立即传给另外一个会遍历整个序列的函数，所以也就没有必要先把keys()的返回值转换到一个列表
+
+The min() function will happily iterate through the view instead.
+相反的，min()函数会很乐意遍历视图
+
+This applies to min(), max(), sum(), list(), tuple(), set(), sorted(), any(), and all().
+这个过程对min()，max()，sum()，list()，tuple()，set()，sorted()，any()和all()同样有效
+
+Modules that have been renamed or reorganized
+被重命名或者重新组织的模块
+
+Several modules in the Python Standard Library have been renamed.
+从Python 2到Python 3，标准库里的一些模块已经被重命名了
+
+Several other modules which are related to each other have been combined or reorganized to make their association more logical.
+还有一些相互关联的模块也被组合或者重新组织，以使得这种关联更有逻辑性
+
+http
+http
+
+In Python 3, several related HTTP modules have been combined into a single package, http.
+在Python 3里，几个相关的HTTP模块被组合成一个单独的包，即http
+
+The http.client module implements a low-level library that can request HTTP resources and interpret HTTP responses.
+http.client模块实现了一个底层的库，可以用来请求HTTP资源，解析HTTP响应
+
+The http.cookies module provides a Pythonic interface to browser cookies that are sent in a Set-Cookie: HTTP header.
+http.cookies模块提供一个蟒样的(Pythonic)接口来获取通过HTTP头部(HTTP header)Set-Cookie发送的cookies
+
+The http.cookiejar module manipulates the actual files on disk that popular web browsers use to store cookies.
+常用的流行的浏览器会把cookies以文件形式存放在磁盘上，http.cookiejar模块可以操作这些文件
+
+The http.server module provides a basic HTTP server.
+http.server模块实现了一个基本的HTTP服务器
+
+urllib
+urllib
+
+Python 2 had a rat’s nest of overlapping modules to parse, encode, and fetch URLs.
+Python 2有一些用来分析，编码和获取URL的模块，但是这些模块就像老鼠窝一样相互重叠
+
+In Python 3, these have all been refactored and combined in a single package, urllib.
+在Python 3里，这些模块被重构、组合成了一个单独的包，即urllib
+
+The old urllib module in Python 2 had a variety of functions, including urlopen() for fetching data and splittype(), splithost(), and splituser() for splitting a URL into its constituent parts.
+以前，Python 2里的urllib模块有各种各样的函数，包括用来获取数据的urlopen()，还有用来将URL分割成其组成部分的splittype()，splithost()和splituser()函数
+
+These functions have been reorganized more logically within the new urllib package.
+在新的urllib包里，这些函数被组织得更有逻辑性
+
+to3 will also change all calls to these functions so they use the new naming scheme.
+2to3将会修改这些函数的调用以适应新的命名方案
+
+The old urllib2 module in Python 2 has been folded into the urllib package in Python 3.
+在Python 3里，以前的urllib2模块被并入了urllib包
+
+All your urllib2 favorites — the build_opener() method, Request objects, and HTTPBasicAuthHandler and friends — are still available.
+同时，以urllib2里各种你最喜爱的东西将会一个不缺地出现在Python 3的urllib模块里，比如build_opener()方法，Request对象，HTTPBasicAuthHandler和friends
+
+The urllib.parse module in Python 3 contains all the parsing functions from the old urlparse module in Python 2.
+Python 3里的urllib.parse模块包含了原来Python 2里urlparse模块所有的解析函数
+
+The urllib.robotparser module parses robots.txt files.
+urllib.robotparse模块解析robots.txt文件
+
+The FancyURLopener class, which handles HTTP redirects and other status codes, is still available in the new urllib.request module.
+处理HTTP重定向和其他状态码的FancyURLopener类在Python 3里的urllib.request模块里依然有效
+
+The urlencode() function has moved to urllib.parse.
+urlencode()函数已经被转移到了urllib.parse里
+
+The Request object is still available in urllib.request, but constants like HTTPError have been moved to urllib.error.
+Request对象在urllib.request里依然有效，但是像HTTPError这样的常量已经被转移到了urllib.error里
+
+Did I mention that 2to3 will rewrite your function calls too?
+我是否有提到2to3也会重写你的函数调用
+
+For example, if your Python 2 code imports the urllib module and calls urllib.urlopen() to fetch data, 2to3 will fix both the import statement and the function call.
+比如，如果你的Python 2代码里导入了urllib模块，调用了urllib.urlopen()函数获取数据，2to3会同时修改import语句和函数调用
+
+dbm
+dbm
+
+All the various DBM clones are now in a single package, dbm.
+所有的DBM克隆(DBM clone)现在在单独的一个包里，即dbm
+
+If you need a specific variant like GNU DBM, you can import the appropriate module within the dbm package.
+如果你需要其中某个特定的变体，比如GNU DBM，你可以导入dbm包中合适的模块
+
+xmlrpc
+xmlrpc
+
+XML-RPC is a lightweight method of performing remote RPC calls over HTTP.
+XML-RPC是一个通过HTTP协议执行远程RPC调用的轻重级方法
+
+The XML-RPC client library and several XML-RPC server implementations are now combined in a single package, xmlrpc.
+一些XML-RPC客户端和XML-RPC服务端的实现库现在被组合到了独立的包，即xmlrpc
+
+Other modules
+其他模块
+
+A common idiom in Python 2 was to try to import cStringIO as StringIO, and if that failed, to import StringIO instead.
+在Python 2里，你通常会这样做，首先尝试把cStringIO导入作为StringIO的替代，如果失败了，再导入StringIO
+
+Do not do this in Python 3;
+不要在Python 3里这样做
+
+the io module does it for you.
+io模块会帮你处理好这件事情
+
+It will find the fastest implementation available and use it automatically.
+它会找出可用的最快实现方法，然后自动使用它
+
+A similar idiom was used to import the fastest pickle implementation.
+在Python 2里，导入最快的pickle实现也是一个与上边相似的能用方法
+
+Do not do this in Python 3;
+在Python 3里，pickle模块会自动为你处理，所以不要再这样做
+
+The builtins module contains the global functions, classes, and constants used throughout the Python language.
+builtins模块包含了在整个Python语言里都会使用的全局函数，类和常量
+
+Redefining a function in the builtins module will redefine the global function everywhere.
+重新定义builtins模块里的某个函数意味着在每处都重定义了这个全局函数
+
+That is exactly as powerful and scary as it sounds.
+这听起来很强大，但是同时也是很可怕的
+
+The copyreg module adds pickle support for custom types defined in C.
+copyreg模块为用C语言定义的用户自定义类型添加了pickle模块的支持
+
+The queue module implements a multi-producer, multi-consumer queue.
+queue模块实现一个生产者消费者队列(multi-producer, multi-consumer queue)
+
+The socketserver module provides generic base classes for implementing different kinds of socket servers.
+socketserver模块为实现各种socket server提供了通用基础类
+
+The configparser module parses INI-style configuration files.
+configparser模块用来解析INI-style配置文件
+
+The reprlib module reimplements the built-in repr() function, with additional controls on how long the representations can be before they are truncated.
+reprlib模块重新实现了内置函数repr()，并添加了对字符串表示被截断前长度的控制
+
+The subprocess module allows you to spawn processes, connect to their pipes, and obtain their return codes.
+subprocess模块允许你创建子进程，连接到他们的管道，然后获取他们的返回值
+
+Relative imports within a package
+包内的相对导入
+
+A package is a group of related modules that function as a single entity.
+包是由一组相关联的模块共同组成的单个实体
+
+In Python 2, when modules within a package need to reference each other, you use import foo or from foo import Bar.
+在Python 2的时候，为了实现同一个包内模块的相互引用，你会使用import foo或者from foo import Bar
+
+The Python 2 interpreter first searches within the current package to find foo.py, and then moves on to the other directories in the Python search path (sys.path).
+Python 2解释器会先在当前目录里搜索foo.py，然后再去Python搜索路径(sys.path)里搜索
+
+Python 3 works a bit differently.
+在Python 3里这个过程有一点不同
+
+Instead of searching the current package, it goes directly to the Python search path.
+Python 3不会首先在当前路径搜索，它会直接在Python的搜索路径里寻找
+
+If you want one module within a package to import another module in the same package, you need to explicitly provide the relative path between the two modules.
+如果你想要包里的一个模块导入包里的另外一个模块，你需要显式地提供两个模块的相对路径
+
+Suppose you had this package, with multiple files in the same directory:
+假设你有如下包，多个文件在同一个目录下：
+
+Now suppose that universaldetector.py needs to import the entire constants.py file and one class from mbcharsetprober.py.
+现在假设universaldetector.py需要整个导入constants.py，另外还需要导入mbcharsetprober.py的一个类
+
+How do you do it?
+你会怎样做
+
+When you need to import an entire module from elsewhere in your package, use the new from .
+当你需要从包的其他地方导入整个模块，使用新的from . import语法
+
+import syntax.
+这里的句号(.)即表示当前文件(universaldetector.py)和你想要导入文件(constants.py)之间的相对路径
+
+The period is actually a relative path from this file (universaldetector.py) to the file you want to import (constants.py).
+在这个样例中，这两个文件在同一个目录里，所以使用了单个句号
+
+In this case, they are in the same directory, thus the single period.
+你也可以从父目录(from .. import anothermodule)或者子目录里导入
+
+To import a specific class or function from another module directly into your module’s namespace, prefix the target module with a relative path, minus the trailing slash.
+为了将一个特定的类或者函数从其他模块里直接导入到你的模块的名字空间里，在需要导入的模块名前加上相对路径，并且去掉最后一个斜线(slash)
+
+In this case, mbcharsetprober.py is in the same directory as universaldetector.py, so the path is a single period.
+在这个例子中，mbcharsetprober.py与universaldetector.py在同一个目录里，所以相对路径名就是一个句号
+
+You can also import form the parent directory (from ..anothermodule import AnotherClass) or a subdirectory.
+你也可以从父目录(from .. import anothermodule)或者子目录里导入
+
+next() iterator method
+迭代器方法next()
+
+In Python 2, iterators had a next() method which returned the next item in the sequence.
+在Python 2里，迭代器有一个next()方法，用来返回序列里的下一项
+
+That’s still true in Python 3, but there is now also a global next() function that takes an iterator as an argument.
+在Python 3里这同样成立，但是现在有了一个新的全局的函数next()，它使用一个迭代器作为参数
+
+In the simplest case, instead of calling an iterator’s next() method, you now pass the iterator itself to the global next() function.
+最简单的例子，你不再调用一个迭代器的next()方法，现在你将迭代器自身作为参数传递给全局函数next()
+
+If you have a function that returns an iterator, call the function and pass the result to the next() function.
+假如你有一个返回值是迭代器的函数，调用这个函数然后把结果作为参数传递给next()函数
+
+(The 2to3 script is smart enough to convert this properly.)
+(2to3脚本足够智能以正确执行这种转换
+
+If you define your own class and mean to use it as an iterator, define the __next__() special method.
+假如你想定义你自己的类，然后把它用作一个迭代器，在Python 3里，你可以通过定义特殊方法__next__()来实现
+
+If you define your own class and just happen to have a method named next() that takes one or more arguments, 2to3 will not touch it.
+如果你定义的类里刚好有一个next()，它使用一个或者多个参数，2to3执行的时候不会动它
+
+This class can not be used as an iterator, because its next() method takes arguments.
+这个类不能被当作迭代器使用，因为它的next()方法带有参数
+
+This one is a bit tricky.
+这一个有些复杂
+
+If you have a local variable named next, then it takes precedence over the new global next() function.
+如果你恰好有一个叫做next的本地变量，在Python 3里它的优先级会高于全局函数next()
+
+In this case, you need to call the iterator’s special __next__() method to get the next item in the sequence.
+在这种情况下，你需要调用迭代器的特别方法__next__()来获取序列里的下一个元素
+
+(Alternatively, you could also refactor the code so the local variable wasn’t named next, but 2to3 will not do that for you automatically.)
+(或者，你也可以重构代码以使这个本地变量的名字不叫next，但是2to3不会为你做这件事
+
+filter() global function
+全局函数filter()
+
+In Python 2, the filter() function returned a list, the result of filtering a sequence through a function that returned True or False for each item in the sequence.
+在Python 2里，filter()方法返回一个列表，这个列表是通过一个返回值为True或者False的函数来检测序列里的每一项得到的
+
+In Python 3, the filter() function returns an iterator, not a list.
+在Python 3里，filter()函数返回一个迭代器，不再是列表
+
+As with filter(), in the most basic case, 2to3 will wrap a call to map() with a call to list().
+最简单的情况下，2to3会用一个list()函数来包装filter()，list()函数会遍历它的参数然后返回一个列表
+
+For the special syntax of map(None, ...), the identity function, 2to3 will convert it to an equivalent call to list().
+然而，如果filter()调用已经被list()包裹，2to3不会再做处理，因为这种情况下filter()的返回值是否是一个迭代器是无关紧要的
+
+If the first argument to map() is a lambda function, 2to3 will convert it to an equivalent list comprehension.
+为了处理filter(None, ...)这种特殊的语法，2to3会将这种调用从语法上等价地转换为列表解析
+
+In contexts like for loops, which iterate through the entire sequence anyway, no changes are necessary.
+由于for循环会遍历整个序列，所以没有必要再做修改
+
+Again, no changes are necessary, because the list comprehension will iterate through the entire sequence, and it can do that just as well if map() returns an iterator as if it returns a list.
+与上面相同，不需要做修改，因为列表解析会遍历整个序列，即使filter()返回一个迭代器，它仍能像以前的filter()返回列表那样正常工作
+
+reduce() global function
+全局函数reduce()
+
+In Python 3, the reduce() function has been removed from the global namespace and placed in the functools module.
+在Python 3里，reduce()函数已经被从全局名字空间里移除了，它现在被放置在fucntools模块里
+
+apply() global function
+全局函数apply()
+
+Python 2 had a global function called apply(), which took a function f and a list [a, b, c] and returned f(a, b, c).
+Python 2有一个叫做apply()的全局函数，它使用一个函数f和一个列表[a, b, c]作为参数，返回值是f(a, b, c)
+
+You can accomplish the same thing by calling the function directly and passing it the list of arguments preceded by an asterisk.
+你也可以通过直接调用这个函数，在列表前添加一个星号(*)作为参数传递给它来完成同样的事情
+
+In Python 3, the apply() function no longer exists;
+在Python 3里，apply()函数不再存在了
+
+you must use the asterisk notation.
+必须使用星号标记法
+
+In the simplest form, you can call a function with a list of arguments (an actual list like [a, b, c]) by prepending the list with an asterisk (*).
+最简单的形式，可以通过在参数列表(就像[a, b, c]一样)前添加一个星号来调用函数
+
+This is exactly equivalent to the old apply() function in Python 2.
+这跟Python 2里的apply()函数是等价的
+
+In Python 2, the apply() function could actually take three parameters: a function, a list of arguments, and a dictionary of named arguments.
+在Python 2里，apply()函数实际上可以带3个参数：一个函数，一个参数列表，一个字典命名参数(dictionary of named arguments)
+
+In Python 3, you can accomplish the same thing by prepending the list of arguments with an asterisk (*) and the dictionary of named arguments with two asterisks (**).
+在Python 3里，你可以通过在参数列表前添加一个星号(*)，在字典命名参数前添加两个星号(**)来达到同样的效果
+
+The + operator, used here for list concatenation, takes precedence over the * operator, so there is no need for extra parentheses around a_list_of_args + z.
+运算符+在这里用作连接列表的功能，它的优先级高于运算符*，所以没有必要在a_list_of_args + z周围添加额外的括号
+
+The 2to3 script is smart enough to convert complex apply() calls, including calling functions within imported modules.
+2to3脚本足够智能来转换复杂的apply()调用，包括调用导入模块里的函数
+
+intern() global function
+全局函数intern()
+
+In Python 2, you could call the intern() function on a string to intern it as a performance optimization.
+在Python 2里，你可以用intern()函数作用在一个字符串上来限定(intern)它以达到性能优化
+
+In Python 3, the intern() function has been moved to the sys module.
+在Python 3里，intern()函数被转移到sys模块里了
+
+exec statement
+exec语句
+
+Just as the print statement became a function in Python 3, so too has the exec statement.
+就像print语句在Python 3里变成了一个函数一样，exec语句也是这样的
+
+The exec() function takes a string which contains arbitrary Python code and executes it as if it were just another statement or expression.
+exec()函数使用一个包含任意Python代码的字符串作为参数，然后就像执行语句或者表达式一样执行它
+
+exec() is like eval(), but even more powerful and evil.
+exec()跟eval()是相似的，但是exec()更加强大并更具有技巧性
+
+The eval() function can only evaluate a single expression, but exec() can execute multiple statements, imports, function declarations — essentially an entire Python program in a string.
+eval()函数只能执行单独一条表达式，但是exec()能够执行多条语句，导入(import)，函数声明 — 实际上整个Python程序的字符串表示也可以
+
+In the simplest form, the 2to3 script simply encloses the code-as-a-string in parentheses, since exec() is now a function instead of a statement.
+在最简单的形式下，因为exec()现在是一个函数，而不是语句，2to3会把这个字符串形式的代码用括号围起来
+
+The old exec statement could take a namespace, a private environment of globals in which the code-as-a-string would be executed.
+Python 2里的exec语句可以指定名字空间，代码将在这个由全局对象组成的私有空间里执行
+
+Python 3 can also do this;
+Python 3也有这样的功能
+
+just pass the namespace as the second argument to the exec() function.
+你只需要把这个名字空间作为第二个参数传递给exec()函数
+
+Even fancier, the old exec statement could also take a local namespace (like the variables defined within a function).
+更加神奇的是，Python 2里的exec语句还可以指定一个本地名字空间(比如一个函数里声明的变量)
+
+In Python 3, the exec() function can do that too.
+在Python 3里，exec()函数也有这样的功能
+
+execfile statement
+execfile语句
+
+Like the old exec statement, the old execfile statement will execute strings as if they were Python code.
+就像以前的exec语句，Python 2里的execfile语句也可以像执行Python代码那样使用字符串
+
+Where exec took a string, execfile took a filename.
+不同的是exec使用字符串，而execfile则使用文件
+
+In Python 3, the execfile statement has been eliminated.
+在Python 3里，execfile语句已经被去掉了
+
+If you really need to take a file of Python code and execute it (but you’re not willing to simply import it), you can accomplish the same thing by opening the file, reading its contents, calling the global compile() function to force the Python interpreter to compile the code, and then call the new exec() function.
+如果你真的想要执行一个文件里的Python代码(但是你不想导入它)，你可以通过打开这个文件，读取它的内容，然后调用compile()全局函数强制Python解释器编译代码，然后调用新的exec()函数
+
+repr literals (backticks)
+repr(反引号)
+
+In Python 2, there was a special syntax of wrapping any object in backticks (like `x`) to get a representation of the object.
+在Python 2里，为了得到一个任意对象的字符串表示，有一种把对象包装在反引号里(比如`x`)的特殊语法
+
+In Python 3, this capability still exists, but you can no longer use backticks to get it.
+在Python 3里，这种能力仍然存在，但是你不能再使用反引号获得这种字符串表示了
+
+Instead, use the global repr() function.
+你需要使用全局函数repr()
+
+Remember, x can be anything — a class, a function, a module, a primitive data type, &c.
+记住，x可以是任何东西 — 一个类，函数，模块，基本数据类型，等等
+
+The repr() function works on everything.
+repr()函数可以使用任何类型的参数
+
+In Python 2, backticks could be nested, leading to this sort of confusing (but valid) expression.
+在Python 2里，反引号可以嵌套，导致了这种令人费解的(但是有效的)表达式
+
+The 2to3 tool is smart enough to convert this into nested calls to repr().
+2to3足够智能以将这种嵌套调用转换到repr()函数
+
+try...except statement
+try...except语句
+
+The syntax for catching exceptions has changed slightly between Python 2 and Python 3.
+从Python 2到Python 3，捕获异常的语法有些许变化
+
+Instead of a comma after the exception type, Python 3 uses a new keyword, as.
+相对于Python 2里在异常类型后添加逗号，Python 3使用了一个新的关键字，as
+
+The as keyword also works for catching multiple types of exceptions at once.
+关键字as也可以用在一次捕获多种类型异常的情况下
+
+If you catch an exception but don’t actually care about accessing the exception object itself, the syntax is identical between Python 2 and Python 3.
+如果你捕获到一个异常，但是并不在意访问异常对象本身，Python 2和Python 3的语法是一样的
+
+Similarly, if you use a fallback to catch all exceptions, the syntax is identical.
+类似地，如果你使用一个保险方法(fallback)来捕获所有异常，Python 2和Python 3的语法是一样的
+
+☞You should never use a fallback to catch all exceptions when importing modules (or most other times).
+☞在导入模块(或者其他大多数情况)的时候，你绝对不应该使用这种方法(指以上的fallback)
+
+Doing so will catch things like KeyboardInterrupt (if the user pressed Ctrl-C to interrupt the program) and can make it more difficult to debug errors.
+不然的话，程序可能会捕获到像KeyboardInterrupt(如果用户按Ctrl-C来中断程序)这样的异常，从而使调试变得更加困难
+
+raise statement
+raise语句
+
+The syntax for raising your own exceptions has changed slightly between Python 2 and Python 3.
+Python 3里，抛出自定义异常的语法有细微的变化
+
+In the simplest form, raising an exception without a custom error message, the syntax is unchanged.
+抛出不带用户自定义错误信息的异常，这种最简单的形式下，语法没有改变
+
+The change becomes noticeable when you want to raise an exception with a custom error message.
+当你想要抛出一个带用户自定义错误信息的异常时，改变就显而易见了
+
+Python 2 separated the exception class and the message with a comma;
+Python 2用一个逗号来分隔异常类和错误信息
+
+Python 3 passes the error message as a parameter.
+Python 3把错误信息作为参数传递给异常类
+
+Python 2 supported a more complex syntax to raise an exception with a custom traceback (stack trace).
+Python 2支持一种更加复杂的语法来抛出一个带用户自定义回溯(stack trace，堆栈追踪)的异常
+
+You can do this in Python 3 as well, but the syntax is quite different.
+在Python 3里你也可以这样做，但是语法完全不同
+
+In Python 2, you could raise an exception with no exception class, just an error message.
+在Python 2里，你可以抛出一个不带异常类的异常，仅仅只有一个异常信息
+
+In Python 3, this is no longer possible.
+在Python 3里，这种形式不再被支持
+
+to3 will warn you that it was unable to fix this automatically.
+2to3将会警告你它不能自动修复这种语法
+
+throw method on generators
+生成器的throw方法
+
+In Python 2, generators have a throw() method.
+在Python 2里，生成器有一个throw()方法
+
+Calling a_generator.throw() raises an exception at the point where the generator was paused, then returns the next value yielded by the generator function.
+调用a_generator.throw()会在生成器被暂停的时候抛出一个异常，然后返回由生成器函数获取的下一个值
+
+In Python 3, this functionality is still available, but the syntax is slightly different.
+在Python 3里，这种功能仍然可用，但是语法上有一点不同
+
+In the simplest form, a generator throws an exception without a custom error message.
+最简单的形式下，生成器抛出不带用户自定义错误信息的异常
+
+In this case, the syntax has not changed between Python 2 and Python 3.
+这种情况下，从Python 2到Python 3语法上没有变化 
+
+If the generator throws an exception with a custom error message, you need to pass the error string to the exception when you create it.
+如果生成器抛出一个带用户自定义错误信息的异常，你需要将这个错误信息字符串(error string)传递给异常类来以实例化它
+
+Python 2 also supported throwing an exception with only a custom error message.
+Python 2还支持抛出只有异常信息的异常
+
+Python 3 does not support this, and the 2to3 script will display a warning telling you that you will need to fix this code manually.
+Python 3不支持这种语法，并且2to3会显示一个警告信息，告诉你需要手动地来修复这处代码
+
+xrange() global function
+全局函数xrange()
+
+In Python 2, there were two ways to get a range of numbers: range(), which returned a list, and xrange(), which returned an iterator.
+在Python 2里，有两种方法来获得一定范围内的数字：range()，它返回一个列表，还有range()，它返回一个迭代器
+
+In Python 3, range() returns an iterator, and xrange() doesn’t exist.
+在Python 3里，range()返回迭代器，xrange()不再存在了
+
+In the simplest case, the 2to3 script will simply convert xrange() to range().
+在最简单的情况下，2to3会简单地把xrange()转换为range()
+
+If your Python 2 code used range(), the 2to3 script does not know whether you needed a list, or whether an iterator would do.
+如果你的Python 2代码使用range()，2to3不知道你是否需要一个列表，或者是否一个迭代器也行
+
+It errs on the side of caution and coerces the return value into a list by calling the list() function.
+出于谨慎，2to3可能会报错，然后使用list()把range()的返回值强制转换为列表类型
+
+If the xrange() function was inside a list comprehension, the 2to3 script is clever enough not to wrap the range() function with a call to list().
+如果在列表解析里有xrange()函数，就没有必要将其返回值转换为一个列表，因为列表解析对迭代器同样有效
+
+Similarly, a for loop will work just fine with an iterator, so there is no need to change anything here.
+类似的，for循环也能作用于迭代器，所以这里也没有改变任何东西
+
+The sum() function will also work with an iterator, so 2to3 makes no changes here either.
+函数sum()能作用于迭代器，所以2to3也没有在这里做出修改
+
+Like dictionary methods that return views instead of lists, this applies to min(), max(), sum(), list(), tuple(), set(), sorted(), any(), and all().
+就像返回值为视图(view)而不再是列表的字典类方法一样，这同样适用于min()，max()，sum()，list()，tuple()，set()，sorted()，any()，all()
+
+raw_input() and input() global functions
+全局函数raw_input()和input()
+
+Python 2 had two global functions for asking the user for input on the command line.
+Python 2有两个全局函数，用来在命令行请求用户输入
+
+The first, called input(), expected the user to enter a Python expression (and returned the result).
+第一个叫做input()，它等待用户输入一个Python表达式(然后返回结果)
+
+The second, called raw_input(), just returned whatever the user typed.
+第二个叫做raw_input()，用户输入什么它就返回什么
+
+This was wildly confusing for beginners and widely regarded as a “wart” in the language.
+这让初学者非常困惑，并且这被广泛地看作是Python语言的一个“肉赘”(wart)
+
+Python 3 excises this wart by renaming raw_input() to input(), so it works the way everyone naively expects it to work.
+Python 3通过重命名raw_input()为input()，从而切掉了这个肉赘，所以现在的input()就像每个人最初期待的那样工作
+
+In the simplest form, raw_input() becomes input().
+最简单的形式，raw_input()被替换成input()
+
+In Python 2, the raw_input() function could take a prompt as a parameter.
+在Python 2里，raw_input()函数可以指定一个提示符作为参数
+
+This has been retained in Python 3.
+Python 3里保留了这个功能
+
+If you actually need to ask the user for a Python expression to evaluate, use the input() function and pass the result to eval().
+如果你真的想要请求用户输入一个Python表达式，计算结果，可以通过调用input()函数然后把返回值传递给eval()
+
+func_* function attributes
+函数属性func_*
+
+In Python 2, code within functions can access special attributes about the function itself.
+在Python 2里，函数的里的代码可以访问到函数本身的特殊属性
+
+In Python 3, these special function attributes have been renamed for consistency with other attributes.
+在Python 3里，为了一致性，这些特殊属性被重新命名了
+
+The __name__ attribute (previously func_name) contains the function’s name.
+__name__属性(原func_name)包含了函数的名字
+
+The __doc__ attribute (previously func_doc) contains the docstring that you defined in the function’s source code.
+__doc__属性(原funcdoc)包含了你在函数源代码里定义的文档字符串(docstring)
+
+The __defaults__ attribute (previously func_defaults) is a tuple containing default argument values for those arguments that have default values.
+__defaults__属性(原func_defaults)是一个保存参数默认值的元组
+
+The __dict__ attribute (previously func_dict) is the namespace supporting arbitrary function attributes.
+__dict__属性(原func_dict)是一个支持任意函数属性的名字空间
+
+The __closure__ attribute (previously func_closure) is a tuple of cells that contain bindings for the function’s free variables.
+__closure__属性(原func_closure)是一个由cell对象组成的元组，它包含了函数对自由变量(free variable)的绑定
+
+The __globals__ attribute (previously func_globals) is a reference to the global namespace of the module in which the function was defined.
+__globals__属性(原func_globals)是一个对模块全局名字空间的引用，函数本身在这个名字空间里被定义
+
+The __code__ attribute (previously func_code) is a code object representing the compiled function body.
+__code__属性(原func_code)是一个代码对象，表示编译后的函数体
+
+xreadlines() I/O method
+I/O方法xreadlines()
+
+In Python 2, file objects had an xreadlines() method which returned an iterator that would read the file one line at a time.
+在Python 2里，文件对象有一个xreadlines()方法，它返回一个迭代器，一次读取文件的一行
+
+This was useful in for loops, among other places.
+这在for循环中尤其有用
+
+In fact, it was so useful, later versions of Python 2 added the capability to file objects themselves.
+事实上，后来的Python 2版本给文件对象本身添加了这样的功能
+
+In Python 3, the xreadlines() method no longer exists.
+在Python 3里，xreadlines()方法不再可用了
+
+to3 can fix the simple cases, but some edge cases will require manual intervention.
+2to3可以解决简单的情况，但是一些边缘案例则需要人工介入
+
+If you used to call xreadlines() with no arguments, 2to3 will convert it to just the file object.
+如果你以前调用没有参数的xreadlines()，2to3会把它转换成文件对象本身
+
+In Python 3, this will accomplish the same thing: read the file one line at a time and execute the body of the for loop.
+在Python 3里，这种转换后的代码可以完成前同样的工作：一次读取文件的一行，然后执行for循环的循环体
+
+If you used to call xreadlines() with an argument (the number of lines to read at a time), 2to3 will not fix it, and your code will fail with an AttributeError: '_io.TextIOWrapper' object has no attribute 'xreadlines'.
+如果你以前使用一个参数(每次读取的行数)调用xreadlines()，2to3不能为你完成从Python 2到Python 3的转换，你的代码会以这样的方式失败：AttributeError: '_io.TextIOWrapper' object has no attribute 'xreadlines'
+
+You can manually change xreadlines() to readlines() to get it to work in Python 3.
+你可以手工的把xreadlines()改成readlines()以使代码能在Python 3下工作
+
+(The readlines() method now returns an iterator, so it is just as efficient as xreadlines() was in Python 2.)
+(readline()方法在Python 3里返回迭代器，所以它跟Python 2里的xreadlines()效率是不相上下的
+
+☃
+☃
+
+lambda functions that take a tuple instead of multiple parameters
+使用元组而非多个参数的lambda函数
+
+In Python 2, you could define anonymous lambda functions which took multiple parameters by defining the function as taking a tuple with a specific number of items.
+在Python 2里，你可以定义匿名lambda函数(anonymous lambda function)，通过指定作为参数的元组的元素个数，使这个函数实际上能够接收多个参数
+
+In effect, Python 2 would “unpack” the tuple into named arguments, which you could then reference (by name) within the lambda function.
+事实上，Python 2的解释器把这个元组“解开”(unpack)成命名参数(named arguments)，然后你可以在lambda函数里引用它们(通过名字)
+
+In Python 3, you can still pass a tuple to a lambda function, but the Python interpreter will not unpack the tuple into named arguments.
+在Python 3里，你仍然可以传递一个元组作为lambda函数的参数，但是Python解释器不会把它解析成命名参数
+
+Instead, you will need to reference each argument by its positional index.
+你需要通过位置索引(positional index)来引用每个参数
+
+If you had defined a lambda function that took a tuple of one item, in Python 3 that would become a lambda with references to x1[0].
+如果你已经定义了一个lambda函数，它使用包含一个元素的元组作为参数，在Python 3里，它会被转换成一个包含到x1[0]的引用的lambda函数
+
+The name x1 is autogenerated by the 2to3 script, based on the named arguments in the original tuple.
+x1是2to3脚本基于原来元组里的命名参数自动生成的
+
+A lambda function with a two-item tuple (x, y) gets converted to x_y with positional arguments x_y[0] and x_y[1].
+使用含有两个元素的元组(x, y)作为参数的lambda函数被转换为x_y，它有两个位置参数，即x_y[0]和x_y[1]
+
+The 2to3 script can even handle lambda functions with nested tuples of named arguments.
+2to3脚本甚至可以处理使用嵌套命名参数的元组作为参数的lambda函数
+
+The resulting Python 3 code is a bit unreadable, but it works the same as the old code did in Python 2.
+产生的结果代码有点难以阅读，但是它在Python 3下跟原来的代码在Python 2下的效果是一样的
+
+You can define lambda functions that take multiple arguments.
+你可以定义使用多个参数的lambda函数
+
+Without parentheses around the arguments, Python 2 just treats it as a lambda function with multiple arguments;
+如果没有括号包围在参数周围，Python 2会把它当作一个包含多个参数的lambda函数
+
+within the lambda function, you simply reference the arguments by name, just like any other function.
+在这个lambda函数体里，你通过名字引用这些参数，就像在其他类型的函数里所做的一样
+
+This syntax still works in Python 3.
+这种语法在Python 3里仍然有效
+
+Special method attributes
+特殊的方法属性
+
+In Python 2, class methods can reference the class object in which they are defined, as well as the method object itself.
+在Python 2里，类方法可以访问到定义他们的类对象(class object)，也能访问方法对象(method object)本身
+
+im_self is the class instance object;
+im_self是类的实例对象
+
+im_func is the function object;
+im_func是函数对象，im_class是类本身
+
+im_class is the class of im_self.
+在Python 3里，这些属性被重新命名，以遵循其他属性的命名约定
+
+__nonzero__ special method
+__nonzero__特殊方法
+
+In Python 2, you could build your own classes that could be used in a boolean context.
+在Python 2里，你可以创建自己的类，并使他们能够在布尔上下文(boolean context)中使用
+
+For example, you could instantiate the class and then use the instance in an if statement.
+举例来说，你可以实例化这个类，并把这个实例对象用在一个if语句中
+
+To do this, you defined a special __nonzero__() method which returned True or False, and it was called whenever the instance was used in a boolean context.
+为了实现这个目的，你定义一个特别的__nonzero__()方法，它的返回值为True或者False，当实例对象处在布尔上下文中的时候这个方法就会被调用 
+
+In Python 3, you can still do this, but the name of the method has changed to __bool__().
+在Python 3里，你仍然可以完成同样的功能，但是这个特殊方法的名字变成了__bool__()
+
+Instead of __nonzero__(), Python 3 calls the __bool__() method when evaluating an instance in a boolean context.
+当在布尔上下文使用一个类对象时，Python 3会调用__bool__()，而非__nonzero__()
+
+However, if you have a __nonzero__() method that takes arguments, the 2to3 tool will assume that you were using it for some other purpose, and it will not make any changes.
+然而，如果你有定义了一个使用两个参数的__nonzero__()方法，2to3脚本会假设你定义的这个方法有其他用处，因此不会对代码做修改
+
+Octal literals
+八进制类型
+
+The syntax for defining base 8 (octal) numbers has changed slightly between Python 2 and Python 3.
+在Python 2和Python 3之间，定义八进制(octal)数的语法有轻微的改变
+
+sys.maxint
+sys.maxint
+
+Due to the integration of the long and int types, the sys.maxint constant is no longer accurate.
+由于长整型和整型被整合在一起了，sys.maxint常量不再精确
+
+Because the value may still be useful in determining platform-specific capabilities, it has been retained but renamed as sys.maxsize.
+但是因为这个值对于检测特定平台的能力还是有用处的，所以它被Python 3保留，并且重命名为sys.maxsize
+
+maxint becomes maxsize.
+maxint变成了maxsize
+
+Any usage of sys.maxint becomes sys.maxsize.
+所有的sys.maxint都变成了sys.maxsize
+
+callable() global function
+全局函数callable()
+
+In Python 2, you could check whether an object was callable (like a function) with the global callable() function.
+在Python 2里，你可以使用全局函数callable()来检查一个对象是否可调用(callable，比如函数)
+
+In Python 3, this global function has been eliminated.
+在Python 3里，这个全局函数被取消了
+
+To check whether an object is callable, check for the existence of the __call__() special method.
+为了检查一个对象是否可调用，可以检查特殊方法__call__()的存在性
+
+zip() global function
+全局函数zip()
+
+In Python 2, the global zip() function took any number of sequences and returned a list of tuples.
+在Python 2里，全局函数zip()可以使用任意多个序列作为参数，它返回一个由元组构成的列表
+
+The first tuple contained the first item from each sequence;
+第一个元组包含了每个序列的第一个元素
+
+the second tuple contained the second item from each sequence;
+第二个元组包含了每个序列的第二个元素
+
+and so on.
+依次递推下去
+
+In Python 3, zip() returns an iterator instead of a list.
+在Python 3里，zip()返回一个迭代器，而非列表
+
+In the simplest form, you can get the old behavior of the zip() function by wrapping the return value in a call to list(), which will run through the iterator that zip() returns and return a real list of the results.
+最简单的形式，你可以通过调用list()函数包装zip()的返回值来恢复zip()函数以前的功能，list()函数会遍历这个zip()函数返回的迭代器，然后返回结果的列表表示
+
+In contexts that already iterate through all the items of a sequence (such as this call to the join() method), the iterator that zip() returns will work just fine.
+在已经会遍历序列所有元素的上下文环境里(比如这里对join()方法的调用)，zip()返回的迭代器能够正常工作
+
+The 2to3 script is smart enough to detect these cases and make no change to your code.
+2to3脚本会检测到这些情况，不会对你的代码作出改变
+
+StandardError exception
+StandardError异常
+
+In Python 2, StandardError was the base class for all built-in exceptions other than StopIteration, GeneratorExit, KeyboardInterrupt, and SystemExit.
+在Python 2里，StandardError是除了StopIteration，GeneratorExit，KeyboardInterrupt，SystemExit之外所有其他内置异常的基类
+
+In Python 3, StandardError has been eliminated;
+在Python 3里，StandardError已经被取消了
+
+use Exception instead.
+使用Exception替代
+
+types module constants
+types模块中的常量
+
+The types module contains a variety of constants to help you determine the type of an object.
+types模块里各种各样的常量能帮助你决定一个对象的类型
+
+In Python 2, it contained constants for all primitive types like dict and int.
+在Python 2里，它包含了代表所有基本数据类型的常量，如dict和int
+
+In Python 3, these constants have been eliminated;
+在Python 3里，这些常量被已经取消了
+
+just use the primitive type name instead.
+只需要使用基础类型的名字来替代
+
+☞types.StringType gets mapped to bytes instead of str because a Python 2 “string” (not a Unicode string, just a regular string) is really just a sequence of bytes in a particular character encoding.
+☞types.StringType被映射为bytes，而非str，因为Python 2里的“string”(非Unicode编码的字符串，即普通字符串)事实上只是一些使用某种字符编码的字节序列(a sequence of bytes)
+
+isinstance() global function
+全局函数isinstance()
+
+The isinstance() function checks whether an object is an instance of a particular class or type.
+isinstance()函数检查一个对象是否是一个特定类(class)或者类型(type)的实例
+
+In Python 2, you could pass a tuple of types, and isinstance() would return True if the object was any of those types.
+在Python 2里，你可以传递一个由类型(types)构成的元组给isinstance()，如果该对象是元组里的任意一种类型，函数返回True
+
+In Python 3, you can still do this, but passing the same type twice is deprecated.)
+在Python 3里，你依然可以这样做，但是不推荐使用把一种类型作为参数传递两次
+
+basestring datatype
+basestring数据类型
+
+Python 2 had two string types: Unicode and non-Unicode.
+Python 2有两种字符串类型：Unicode编码的字符串和非Unicode编码的字符串
+
+But there was also another type, basestring.
+但是其实还有另外 一种类型，即basestring
+
+It was an abstract type, a superclass for both the str and unicode types.
+它是一个抽象数据类型，是str和unicode类型的超类(superclass)
+
+It couldn’t be called or instantiated directly, but you could pass it to the global isinstance() function to check whether an object was either a Unicode or non-Unicode string.
+它不能被直接调用或者实例化，但是你可以把它作为isinstance()的参数来检测一个对象是否是一个Unicode字符串或者非Unicode字符串
+
+In Python 3, there is only one string type, so basestring has no reason to exist.
+在Python 3里，只有一种字符串类型，所以basestring就没有必要再存在了
+
+itertools module
+itertools模块
+
+Python 2.3 introduced the itertools module, which defined variants of the global zip(), map(), and filter() functions that returned iterators instead of lists.
+Python 2.3引入了itertools模块，它定义了全局函数zip()，map()，filter()的变体(variant)，这些变体的返回类型为迭代器，而非列表
+
+In Python 3, those global functions return iterators, so those functions in the itertools module have been eliminated.
+在Python 3里，由于这些全局函数的返回类型本来就是迭代器，所以这些itertools里的这些变体函数就被取消了
+
+(There are still lots of useful functions in the itertools module, just not these.)
+(在itertools模块里仍然还有许多其他的有用的函数，而不仅仅是以上列出的这些
+
+Instead of itertools.izip(), just use the global zip() function.
+使用全局的zip()函数，而非itertools.izip()
+
+Instead of itertools.imap(), just use map().
+使用map()而非itertools.imap()
+
+itertools.ifilter() becomes filter().
+itertools.ifilter()变成了filter()
+
+The itertools module still exists in Python 3, it just doesn’t have the functions that have migrated to the global namespace.
+itertools模块在Python 3里仍然存在，它只是不再包含那些已经转移到全局名字空间的函数
+
+The 2to3 script is smart enough to remove the specific imports that no longer exist, while leaving other imports intact.
+2to3脚本能够足够智能地去移除那些不再有用的导入语句，同时保持其他的导入语句的完整性
+
+sys.exc_type, sys.exc_value, sys.exc_traceback
+sys.exc_type, sys.exc_value, sys.exc_traceback
+
+Python 2 had three variables in the sys module that you could access while an exception was being handled: sys.exc_type, sys.exc_value, sys.exc_traceback.
+处理异常的时候，在sys模块里有三个你可以访问的变量：sys.exc_type，sys.exc_value，sys.exc_traceback
+
+(Actually, these date all the way back to Python 1.) Ever since Python 1.5, these variables have been deprecated in favor of sys.exc_info(), which is a function that returns a tuple containing those three values.
+(实际上这些在Python 1的时代就有
+
+In Python 3, these individual variables have finally gone away;
+)从Python 1.5开始，由于新出的sys.exc_info，不再推荐使用这三个变量了，这是一个包含所有以上三个元素的元组
+
+you must use the sys.exc_info() function.
+在Python 3里，这三个变量终于不再存在了
+
+List comprehensions over tuples
+对元组的列表解析
+
+In Python 2, if you wanted to code a list comprehension that iterated over a tuple, you did not need to put parentheses around the tuple values.
+在Python 2里，如果你需要编写一个遍历元组的列表解析，你不需要在元组值的周围加上括号
+
+In Python 3, explicit parentheses are required.
+在Python 3里，这些括号是必需的
+
+os.getcwdu() function
+os.getcwdu()函数
+
+Python 2 had a function named os.getcwd(), which returned the current working directory as a (non-Unicode) string.
+Python 2有一个叫做os.getcwd()的函数，它将当前的工作目录作为一个(非Unicode编码的)字符串返回
+
+Because modern file systems can handle directory names in any character encoding, Python 2.3 introduced os.getcwdu().
+由于现代的文件系统能够处理能何字符编码的目录名，Python 2.3引入了os.getcwdu()函数
+
+The os.getcwdu() function returned the current working directory as a Unicode string.
+os.getcwdu()函数把当前工作目录用Unicode编码的字符串返回
+
+In Python 3, there is only one string type (Unicode), so os.getcwd() is all you need.
+在Python 3里，由于只有一种字符串类型(Unicode类型的)，所以你只需要os.getcwd()就可以了
+
+Metaclasses
+元类(metaclass)
+
+In Python 2, you could create metaclasses either by defining the metaclass argument in the class declaration, or by defining a special class-level __metaclass__ attribute.
+在Python 2里，你可以通过在类的声明中定义metaclass参数，或者定义一个特殊的类级别的(class-level)__metaclass__属性，来创建元类
+
+In Python 3, the class-level attribute has been eliminated.
+在Python 3里，__metaclass__属性已经被取消了
+
+Declaring the metaclass in the class declaration worked in Python 2, and it still works the same in Python 3.
+在声明类的时候声明metaclass参数，这在Python 2和Python 3里都有效，它们是一样的
+
+Declaring the metaclass in a class attribute worked in Python 2, but doesn’t work in Python 3.
+在类的定义里声明__metaclass__属性在Python 2里有效，但是在Python 3里不再有效
+
+The 2to3 script is smart enough to construct a valid class declaration, even if the class is inherited from one or more base classes.
+2to3能够构建一个有效的类声明，即使这个类继承自多个父类
+
+Matters of style
+关于代码风格
+
+The rest of the “fixes” listed here aren’t really fixes per se.
+以下所列的“修补”(fixes)实质上并不算真正的修补
+
+That is, the things they change are matters of style, not substance.
+意思就是，他们只是代码的风格上的事情，而不涉及到代码的本质
+
+They work just as well in Python 3 as they do in Python 2, but the developers of Python have a vested interest in making Python code as uniform as possible.
+但是Python的开发者们在使得代码风格尽可能一致方面非常有兴趣(have a vested interest)
+
+To that end, there is an official Python style guide which outlines — in excruciating detail — all sorts of nitpicky details that you almost certainly don’t care about.
+为此，有一个专门o描述Python代码风格的官方指导手册 — 细致到能使人痛苦 — 都是一些你不太可能关心的在各种各样的细节上的挑剔
+
+And given that 2to3 provides such a great infrastructure for converting Python code from one thing to another, the authors took it upon themselves to add a few optional features to improve the readability of your Python programs.
+鉴于2to3为转换代码提供了一个这么好的条件，脚本的作者们添加了一些可选的特性以使你的代码更具可读性
+
+set() literals (explicit)
+set()字面值(literal)(显式的)
+
+In Python 2, the only way to define a literal set in your code was to call set(a_sequence).
+在Python 2城，定义一个字面值集合(literal set)的唯一方法就是调用set(a_sequence)
+
+This still works in Python 3, but a clearer way of doing it is to use the new set literal notation: curly braces.
+在Python 3里这仍然有效，但是使用新的标注记号(literal notation)：大括号({})是一种更清晰的方法
+
+This works for everything except empty sets, because dictionaries also use curly braces, so {} is an empty dictionary, not an empty set.
+这种方法除了空集以外都有效，因为字典也用大括号标记，所以{}表示一个空的字典，而不是一个空集
+
+☞The 2to3 script will not fix set() literals by default.
+☞2to3脚本默认不会修复set()字面值
+
+To enable this fix, specify -f set_literal on the command line when you call 2to3.
+为了开启这个功能，在命令行调用2to3的时候指定-f set_literal参数
+
+buffer() global function (explicit)
+全局函数buffer()(显式的)
+
+Python objects implemented in C can export a “buffer interface,” which allows other Python code to directly read and write a block of memory.
+用C实现的Python对象可以导出一个“缓冲区接口”(buffer interface)，它允许其他的Python代码直接读写一块内存
+
+(That is exactly as powerful and scary as it sounds.) In Python 3, buffer() has been renamed to memoryview().
+(这听起来很强大，它也同样可怕
+
+(It’s a little more complicated than that, but you can almost certainly ignore the differences.)
+)在Python 3里，buffer()被重新命名为memoryview()
+
+☞The 2to3 script will not fix the buffer() function by default.
+☞2to3脚本默认不会修复buffer()函数
+
+To enable this fix, specify -f buffer on the command line when you call 2to3.
+为了开启这个功能，在命令行调用2to3的时候指定-f buffer参数
+
+Whitespace around commas (explicit)
+逗号周围的空格(显式的)
+
+Despite being draconian about whitespace for indenting and outdenting, Python is actually quite liberal about whitespace in other areas.
+尽管Python对用于缩进和凸出(indenting and outdenting)的空格要求很严格，但是对于空格在其他方面的使用Python还是很自由的
+
+Within lists, tuples, sets, and dictionaries, whitespace can appear before and after commas with no ill effects.
+在列表，元组，集合和字典里，空格可以出现在逗号的前面或者后面，这不会有什么坏影响
+
+However, the Python style guide states that commas should be preceded by zero spaces and followed by one.
+但是，Python代码风格指导手册上指出，逗号前不能有空格，逗号后应该包含一个空格
+
+Although this is purely an aesthetic issue (the code works either way, in both Python 2 and Python 3), the 2to3 script can optionally fix this for you.
+尽管这纯粹只是一个美观上的考量(代码仍然可以正常工作，在Python 2和Python 3里都可以)，但是2to3脚本可以依据手册上的标准为你完成这个修复
+
+☞The 2to3 script will not fix whitespace around commas by default.
+☞2to3脚本默认不会修复逗号周围的空格
+
+To enable this fix, specify -f wscomma on the command line when you call 2to3.
+为了开启这个功能，在命令行调用2to3的时候指定-f wscomma参数
+
+Common idioms (explicit)
+惯例(Common idioms)(显式的)
+
+There were a number of common idioms built up in the Python community.
+在Python社区里建立起来了许多惯例
+
+Some, like the while 1: loop, date back to Python 1.
+有一些比如while 1: loop，它可以追溯到Python 1
+
+(Python didn’t have a true boolean type until version 2.3, so developers used 1 and 0 instead.
+(Python直到Python 2.3才有真正意义上的布尔类型，所以开发者以前使用1和0替代
+
+) Modern Python programmers should train their brains to use modern versions of these idioms instead.
+)当代的Python程序员应该锻炼他们的大脑以使用这些惯例的现代版
+
+☞The 2to3 script will not fix common idioms by default.
+☞2to3脚本默认不会为这些惯例做修复
+
+To enable this fix, specify -f idioms on the command line when you call 2to3.
+为了开启这个功能，在命令行调用2to3的时候指定-f idioms参数
+
+© 2001–11 Mark Pilgrim
+© 2001–9 Mark Pilgrim
+

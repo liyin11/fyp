@@ -1,0 +1,807 @@
+You are here: Home ‣ Dive Into Python 3 ‣
+当前位置: 首页 ‣ 深入 Python 3 ‣
+
+Difficulty level: ♦♦♦♢♢
+难度级别: ♦♦♢♢♢
+
+Closures & Generators
+闭合 与 生成器
+
+❝ My spelling is Wobbly.
+❝ My spelling is Wobbly. It’s good spelling but it Wobbles, and the letters get in the wrong places. ❞ — Winnie-the-Pooh
+
+Diving In
+深入
+
+Having grown up the son of a librarian and an English major, I have always been fascinated by languages.
+出于传递所有理解的原因，我一直对语言非常着迷
+
+Not programming languages.
+我指的不是编程语言
+
+Well yes, programming languages, but also natural languages.
+好吧，是编程语言，但同时也是自然语言
+
+Take English.
+使用英语
+
+English is a schizophrenic language that borrows words from German, French, Spanish, and Latin (to name a few).
+英语是一种七拼八凑的语言，它从德语、法语、西班牙语和拉丁语（等等）语言中借用了大量词汇
+
+Actually, “borrows” is the wrong word;
+事实上，“借用”是不恰当的词汇，“掠夺”更加符合
+
+“pillages” is more like it.
+或者也许叫“同化“——就像博格人（译注：根据维基百科资料，Borg 是《星际旅行》虚构宇宙中的一个种族，该译法未经原作者映证）
+
+Or perhaps “assimilates” — like the Borg.
+是的，我喜欢这样
+
+We are the Borg.
+我们就是博格人
+
+Your linguistic and etymological distinctiveness will be added to our own.
+你们的语言和词源特性将会被添加到我们自己的当中
+
+Resistance is futile.
+抵抗是徒劳的
+
+In this chapter, you’re going to learn about plural nouns.
+在本章中，将开始学习复数名词
+
+Also, functions that return other functions, advanced regular expressions, and generators.
+以及返回其它函数的函数、高级正则表达式和生成器
+
+But first, let’s talk about how to make plural nouns.
+但首先，让我们聊聊如何生成复数名词
+
+(If you haven’t read the chapter on regular expressions, now would be a good time.
+（如果还没有阅读《正则表达式》一章，现在也许是个好时机读一读
+
+This chapter assumes you understand the basics of regular expressions, and it quickly descends into more advanced uses.)
+本章将假定您理解了正则表达式的基础，并迅速进入更高级的用法
+
+If you grew up in an English-speaking country or learned English in a formal school setting, you’re probably familiar with the basic rules:
+如果在讲英语的国家长大，或在正规的学校学习过英语，您可能对下面的基本规则很熟悉 ：
+
+If a word ends in S, X, or Z, add ES.
+如果某个单词以 S 、X 或 Z 结尾，添加 ES 
+
+Bass becomes basses, fax becomes faxes, and waltz becomes waltzes.
+Bass 变成 basses， fax 变成 faxes，而 waltz 变成 waltzes
+
+If a word ends in a noisy H, add ES;
+如果某个单词以发音的 H 结尾，加 ES
+
+if it ends in a silent H, just add S.
+如果以不发音的 H 结尾，只需加上 S 
+
+What’s a noisy H?
+什么是发音的 H 
+
+One that gets combined with other letters to make a sound that you can hear.
+指的是它和其它字母组合在一起发出能够听到的声音
+
+So coach becomes coaches and rash becomes rashes, because you can hear the CH and SH sounds when you say them.
+因此 coach 变成 coaches 而 rash 变成 rashes，因为在说这两个单词的时候，能够听到 CH 和 SH 的发音
+
+But cheetah becomes cheetahs, because the H is silent.
+但是 cheetah 变成 cheetahs，因为 H 不发音
+
+If a word ends in Y that sounds like I, change the Y to IES;
+如果某个单词以发 I 音的字母 Y 结尾，将 Y 改成 IES
+
+if the Y is combined with a vowel to sound like something else, just add S.
+如果 Y 与某个原因字母组合发其它音的话，只需加上 S 
+
+So vacancy becomes vacancies, but day becomes days.
+因此 vacancy 变成 vacancies，但 day 变成 days 
+
+If all else fails, just add S and hope for the best.
+如果所有这些规则都不适用，只需加上 S 并作最好的打算
+
+(I know, there are a lot of exceptions.
+（我知道，还有许多例外情况
+
+Man becomes men and woman becomes women, but human becomes humans.
+Man 变成 men 而 woman 变成 women，但是 human 变成 humans
+
+Mouse becomes mice and louse becomes lice, but house becomes houses.
+Mouse 变成 mice 
+
+Knife becomes knives and wife becomes wives, but lowlife becomes lowlifes.
+ louse 变成 lice，但 house 变成 houses
+
+And don’t even get me started on words that are their own plural, like sheep, deer, and haiku.)
+Knife 变成 knives 
+
+Other languages, of course, are completely different.
+其它语言，当然是完全不同的
+
+Let’s design a Python library that automatically pluralizes English nouns.
+让我们设计一个 Python 类库用来自动进行英语名词的复数形式转换
+
+We’ll start with just these four rules, but keep in mind that you’ll inevitably need to add more.
+我们将以这四条规则为起点，但要记住的不可避免地还要增加更多规则
+
+I Know, Let’s Use Regular Expressions!
+我知道，让我们用正则表达式
+
+So you’re looking at words, which, at least in English, means you’re looking at strings of characters.
+因此，您正在看着单词，至少是英语单词，也就是说您正在看着字符的字符串
+
+You have rules that say you need to find different combinations of characters, then do different things to them.
+规则说你必须找到不同的字符组合，然后进行不同的处理
+
+This sounds like a job for regular expressions!
+这听起来是正则表达式的工作
+
+[download plural1.py]
+[下载 plural1.py]
+
+This is a regular expression, but it uses a syntax you didn’t see in Regular Expressions.
+这是一条正则表达式，但它使用了在 《正则表达式》 一章中没有讲过的语法
+
+The square brackets mean “match exactly one of these characters.” So [sxz] means “s, or x, or z”, but only one of them.
+中括号表示“匹配这些字符的其中之一”
+
+The $ should be familiar;
+因此 [sxz] 的意思是： “s、 x 或 z”，但只匹配其中之一
+
+it matches the end of string.
+对 $ 应该很熟悉了，它匹配字符串的结尾
+
+Combined, this regular expression tests whether noun ends with s, x, or z.
+经过组合，该正则表达式将测试 noun 是否以 s、 x 或 z 结尾
+
+This re.sub() function performs regular expression-based string substitutions.
+该 re.sub() 函数执行基于正则表达式的字符串替换
+
+Let’s look at regular expression substitutions in more detail.
+让我们看看正则表达式替换的细节
+
+Does the string Mark contain a, b, or c?
+字符串 Mark 包含 a、 b 或 c 吗
+
+Yes, it contains a.
+是的，它包含 a 
+
+OK, now find a, b, or c, and replace it with o.
+好了，现在查找 a、 b 或 c，并将其替换为 o
+
+Mark becomes Mork.
+Mark 变成了 Mork
+
+The same function turns rock into rook.
+同一函数将 rock 转换为 rook 
+
+You might think this would turn caps into oaps, but it doesn’t.
+您可能会认为该函数会将 caps 转换为 oaps，但实际上并是这样
+
+re.sub replaces all of the matches, not just the first one.
+re.sub 替换 所有的 匹配项，而不仅仅是第一个匹配项
+
+So this regular expression turns caps into oops, because both the c and the a get turned into o.
+因此该正则表达式将 caps 转换为 oops，因为无论是 c 还是 a 均被转换为 o 
+
+And now, back to the plural() function…
+接下来，回到 plural() 函数……
+
+Here, you’re replacing the end of the string (matched by $) with the string es.
+此处将字符串的结尾（通过 $ 匹配）替换为字符串 es 
+
+In other words, adding es to the string.
+换句话来说，向字符串尾部添加一个 es 
+
+You could accomplish the same thing with string concatenation, for example noun + 'es', but I chose to use regular expressions for each rule, for reasons that will become clear later in the chapter.
+可以通过字符串链接来完成同样的变化，例如 noun + 'es'，但我对每条规则都选用正则表达式，其原因将在本章稍后更加清晰
+
+Look closely, this is another new variation.
+仔细看看，这里出现了新的变化
+
+The ^ as the first character inside the square brackets means something special: negation.
+作为方括号中的第一个字符， ^ 有特别的含义：非
+
+[^abc] means “any single character except a, b, or c”.
+[^abc] 的意思是：“ 除了 a、 b 或 c 之外的任何字符”
+
+So [^aeioudgkprt] means any character except a, e, i, o, u, d, g, k, p, r, or t.
+因此 [^aeioudgkprt] 的意思是除了 a、 e、 i、 o、 u、 d、 g、 k、 p、r 或 t 之外的任何字符
+
+Then that character needs to be followed by h, followed by end of string.
+然后该字符必须紧随一个 h，其后是字符串的结尾
+
+You’re looking for words that end in H where the H can be heard.
+所匹配的是以 H 结尾且 H 发音的单词
+
+Same pattern here: match words that end in Y, where the character before the Y is not a, e, i, o, or u.
+此处有同样的模式：匹配以 Y 结尾的单词，而 Y 之前的字符 不是 a、 e、 i、 o 或 u
+
+You’re looking for words that end in Y that sounds like I.
+所匹配的是以 Y 结尾，且 Y 发音听起来像 I 的单词
+
+Let’s look at negation regular expressions in more detail.
+让我们看看“否定”正则表达式的更多细节
+
+vacancy matches this regular expression, because it ends in cy, and c is not a, e, i, o, or u.
+vacancy 匹配该正则表达式，因为它以 cy 结尾，且 c 并非 a、 e、 i、 o 或 u
+
+boy does not match, because it ends in oy, and you specifically said that the character before the y could not be o.
+boy 不匹配，因为它以 oy 结尾，可以明确地说 y 之前的字符不能是 o 
+
+day does not match, because it ends in ay.
+day 不匹配，因为它以 ay 结尾
+
+pita does not match, because it does not end in y.
+pita 不匹配，因为它不以 y 结尾
+
+This regular expression turns vacancy into vacancies and agency into agencies, which is what you wanted.
+该正则表达式将 vacancy 转换为 vacancies ，将 agency 转换为 agencies，这正是想要的结果
+
+Note that it would also turn boy into boies, but that will never happen in the function because you did that re.search first to find out whether you should do this re.sub.
+注意，它也会将 boy 转换为 boies，但这永远也不会在函数中发生，因为我们首先进行了 re.search 以找出永远不应进行该 re.sub 操作的单词
+
+Just in passing, I want to point out that it is possible to combine these two regular expressions (one to find out if the rule applies, and another to actually apply it) into a single regular expression.
+顺便，我还想指出可以将该两条正则表达式合并起来（一条查找是否应用该规则，另一条实际应用规则），使其成为一条正则表达式
+
+Here’s what that would look like.
+它看起来是下面这个样子：其中多数内容看起来应该很熟悉：使用了在 案例研究：分析电话号码 中用到的记忆分组
+
+Most of it should look familiar: you’re using a remembered group, which you learned in Case study: Parsing Phone Numbers.
+该分组用于保存字母 y 之前的字符
+
+The group is used to remember the character before the letter y.
+然后在替换字符串中，用到了新的语法： \1，它表示“嘿，记住的第一个分组呢
+
+Then in the substitution string, you use a new syntax, \1, which means “hey, that first group you remembered?
+把它放到这里
+
+put it right here.” In this case, you remember the c before the y;
+”在此例中， 记住了 y 之前的 c ，在进行替换时，将用 c 替代 c，用 ies 替代 y 
+
+when you do the substitution, you substitute c in place of c, and ies in place of y.
+（如果有超过一个的记忆分组，可以使用 \2 和 \3 等等
+
+(If you have more than one remembered group, you can use \2 and \3 and so on.)
+）
+
+Regular expression substitutions are extremely powerful, and the \1 syntax makes them even more powerful.
+正则表达式替换功能非常强大，而 \1 语法则使之愈加强大
+
+But combining the entire operation into one regular expression is also much harder to read, and it doesn’t directly map to the way you first described the pluralizing rules.
+但是，将整个操作组合成一条正则表达式也更难阅读，而且也没有直接映射到刚才所描述的复数规则
+
+You originally laid out rules like “if the word ends in S, X, or Z, then add ES”.
+刚才所阐述的规则，像 “如果单词以 S 、X 或 Z 结尾，则添加 ES 
+
+If you look at this function, you have two lines of code that say “if the word ends in S, X, or Z, then add ES”.
+”如果查看该函数，有两行代码都在表述“如果以 S 、X 或 Z 结尾，那么添加 ES 
+
+It doesn’t get much more direct than that.
+”它没有之前那种模式更直接
+
+A List Of Functions
+函数列表
+
+Now you’re going to add a level of abstraction.
+现在要增加一些抽象层次的内容
+
+You started by defining a list of rules: if this, do that, otherwise go to the next rule.
+我们开始时定义了一系列规则：如果这样，那样做
+
+Let’s temporarily complicate part of the program so you can simplify another part.
+否则前往下一条规则
+
+[download plural2.py]
+[download plural2.py]
+
+Now, each match rule is its own function which returns the results of calling the re.search() function.
+现在，每条匹配规则都有自己的函数，它们返回对 re.search() 函数调用结果
+
+Each apply rule is also its own function which calls the re.sub() function to apply the appropriate pluralization rule.
+每条应用规则也都有自己的函数，它们调用 re.sub() 函数以应用恰当的复数变化规则
+
+Instead of having one function (plural()) with multiple rules, you have the rules data structure, which is a sequence of pairs of functions.
+现在有了一个 rules 数据结构——一个函数对的序列，而不是一个函数（plural()）实现多个条规则
+
+Since the rules have been broken out into a separate data structure, the new plural() function can be reduced to a few lines of code.
+由于所有的规则被分割成单独的数据结构，新的 plural() 函数可以减少到几行代码
+
+Using a for loop, you can pull out the match and apply rules two at a time (one match, one apply) from the rules structure.
+使用 for 循环，可以一次性从 rules 这个数据结构中取出匹配规则和应用规则这两样东西（一条匹配对应一条应用）
+
+On the first iteration of the for loop, matches_rule will get match_sxz, and apply_rule will get apply_sxz.
+在 for 循环的第一次迭代过程中， matches_rule 将获取 match_sxz，而 apply_rule 将获取 apply_sxz
+
+On the second iteration (assuming you get that far), matches_rule will be assigned match_h, and apply_rule will be assigned apply_h.
+在第二次迭代中（假定可以进行到这一步）， matches_rule 将会赋值为 match_h，而 apply_rule 将会赋值为 apply_h 
+
+The function is guaranteed to return something eventually, because the final match rule (match_default) simply returns True, meaning the corresponding apply rule (apply_default) will always be applied.
+该函数确保最终能够返回某个值，因为终极匹配规则 (match_default) 只返回 True，意思是对应的应用规则 (apply_default) 将总是被应用
+
+The reason this technique works is that everything in Python is an object, including functions.
+该技术能够成功运作的原因是 Python 中一切都是对象，包括了函数
+
+The rules data structure contains functions — not names of functions, but actual function objects.
+数据结构 rules 包含了函数——不是函数的名称，而是实际的函数对象
+
+When they get assigned in the for loop, then matches_rule and apply_rule are actual functions that you can call.
+在 for 循环中被赋值后，matches_rule 和 apply_rule 是可实际调用的函数
+
+On the first iteration of the for loop, this is equivalent to calling matches_sxz(noun), and if it returns a match, calling apply_sxz(noun).
+在第一次 for 循环的迭代过程中，这相当于调用 matches_sxz(noun)，如果返回一个匹配值，将调用 apply_sxz(noun) 
+
+If this additional level of abstraction is confusing, try unrolling the function to see the equivalence.
+如果这种附加抽象层令你迷惑，可以试着展开函数以了解其等价形式
+
+The entire for loop is equivalent to the following:
+整个 for 循环等价于下列代码：
+
+The benefit here is that the plural() function is now simplified.
+这段代码的好处是 plural() 函数被简化了
+
+It takes a sequence of rules, defined elsewhere, and iterates through them in a generic fashion.
+它处理一系列其它地方定义的规则，并以通用的方式对它们进行迭代
+
+Get a match rule
+获取某匹配规则
+
+Does it match?
+是否匹配
+
+Then call the apply rule and return the result.
+然后调用应用规则，并返回结果
+
+No match?
+不匹配
+
+Go to step 1.
+返回步骤 1 
+
+The rules could be defined anywhere, in any way.
+这些规则可在任何地方以任何方式定义
+
+The plural() function doesn’t care.
+plural() 函数并不关心
+
+Now, was adding this level of abstraction worth it?
+现在，新增的抽象层是否值得呢
+
+Well, not yet.
+嗯，还没有
+
+Let’s consider what it would take to add a new rule to the function.
+让我们考虑下要向函数中新增一条规则时该如何操作
+
+In the first example, it would require adding an if statement to the plural() function.
+在第一例中，将需要新增一条 if 语句到 plural() 函数中
+
+In this second example, it would require adding two functions, match_foo() and apply_foo(), and then updating the rules sequence to specify where in the order the new match and apply functions should be called relative to the other rules.
+在第二例中，将需要新增两个函数， match_foo() 和 apply_foo()，然后更新 rules 序列以指定新的匹配和应用函数按照其它规则按顺序调用
+
+But this is really just a stepping stone to the next section.
+但是对于下一节来说，这只是一个跳板而已
+
+Let’s move on…
+让我们继续……
+
+A List Of Patterns
+匹配模式列表
+
+Defining separate named functions for each match and apply rule isn’t really necessary.
+其实并不是真的有必要为每个匹配和应用规则定义各自的命名函数
+
+You never call them directly;
+它们从未直接被调用，而只是被添加到 rules 序列并从该处被调用
+
+you add them to the rules sequence and call them through there.
+此外，每个函数遵循两种模式的其中之一
+
+Furthermore, each function follows one of two patterns.
+所有的匹配函数调用 re.search()，而所有的应用函数调用 re.sub()
+
+All the match functions call re.search(), and all the apply functions call re.sub().
+让我们将模式排除在考虑因素之外，使新规则定义更加简单
+
+[download plural3.py]
+[download plural3.py]
+
+build_match_and_apply_functions() is a function that builds other functions dynamically.
+build_match_and_apply_functions() 函数用于动态创建其它函数
+
+It takes pattern, search and replace, then defines a matches_rule() function which calls re.search() with the pattern that was passed to the build_match_and_apply_functions() function, and the word that was passed to the matches_rule() function you’re building.
+它接受 pattern、 search 和 replace 三个参数，并定义了 matches_rule() 函数，该函数通过传给 build_match_and_apply_functions() 函数的 pattern 及传递给所创建的 matchs_rules() 函数的 word 调用 re.search() 函数，哇
+
+Building the apply function works the same way.
+应用函数的创建工作采用了同样的方式
+
+The apply function is a function that takes one parameter, and calls re.sub() with the search and replace parameters that were passed to the build_match_and_apply_functions() function, and the word that was passed to the apply_rule() function you’re building.
+应用函数只接受一个参数，并使用传递给 build_match_and_apply_functions() 函数的 search 和 replace 参数、以及传递给要创建 apply_rule() 函数的 word 调用 re.sub()
+
+This technique of using the values of outside parameters within a dynamic function is called closures.
+在动态函数中使用外部参数值的技术称为 闭合【closures】
+
+You’re essentially defining constants within the apply function you’re building: it takes one parameter (word), but it then acts on that plus two other values (search and replace) which were set when you defined the apply function.
+基本上，常量的创建工作都在创建应用函数过程中完成：它接受一个参数 （word），但实际操作还加上了另外两个值（search 和 replace），该两个值都在定义应用函数时进行设置
+
+Finally, the build_match_and_apply_functions() function returns a tuple of two values: the two functions you just created.
+最后，build_match_and_apply_functions() 函数返回一个包含两个值的元组：即刚才所创建的两个函数
+
+The constants you defined within those functions (pattern within the matches_rule() function, and search and replace within the apply_rule() function) stay with those functions, even after you return from build_match_and_apply_functions().
+在这些函数中定义的常量（ match_rule() 函数中的 pattern 函数，apply_rule() 函数中的 search 和 replace ）与这些函数呆在一起，即便是在从 build_match_and_apply_functions() 中返回后也一样
+
+That’s insanely cool.
+这真是非常酷的一件事情
+
+If this is incredibly confusing (and it should be, this is weird stuff), it may become clearer when you see how to use it.
+但如果此方式导致了难以置信的混乱（应该是这样，它确实有点奇怪），在看看如何使用之后可能会清晰一些
+
+Our pluralization “rules” are now defined as a tuple of tuples of strings (not functions).
+我们的复数形式“规则”现在被定义为 字符串 的元组的元组（而不是函数）
+
+The first string in each group is the regular expression pattern that you would use in re.search() to see if this rule matches.
+每个组的第一个字符串是在 re.search() 中用于判断该规则是否匹配的正则表达式
+
+The second and third strings in each group are the search and replace expressions you would use in re.sub() to actually apply the rule to turn a noun into its plural.
+各组中的第二和第三个字符串是在 re.sub() 中将实际用于使用规则将名词转换为复数形式的搜索和替换表达式
+
+There’s a slight change here, in the fallback rule.
+此处的后备规则略有变化
+
+In the previous example, the match_default() function simply returned True, meaning that if none of the more specific rules matched, the code would simply add an s to the end of the given word.
+在前例中，match_default() 函数仅返回 True，意思是如果更多的指定规则无一匹配，代码将简单地向给定词汇的尾部添加一个 s
+
+This example does something functionally equivalent.
+本例则进行了一些功能等同的操作
+
+The final regular expression asks whether the word has an end ($ matches the end of a string).
+最后的正则表达式询问单词是否有一个结尾（$ 匹配字符串的结尾）
+
+Of course, every string has an end, even an empty string, so this expression always matches.
+当然，每个字符串都有一个结尾，甚至是空字符串也有，因此该规则将始终被匹配
+
+Thus, it serves the same purpose as the match_default() function that always returned True: it ensures that if no more specific rule matches, the code adds an s to the end of the given word.
+因此，它实现了 match_default() 函数同样的目的，始终返回 True：它确保了如果没有更多的指定规则用于匹配，代码将向给定单词的尾部增加一个 s 
+
+This line is magic.
+本行代码非常神奇
+
+It takes the sequence of strings in patterns and turns them into a sequence of functions.
+它以 patterns 中的字符串序列为参数，并将其转换为一个函数序列
+
+How?
+怎么做到的
+
+By “mapping” the strings to the build_match_and_apply_functions() function.
+通过将字符串“映射”到 build_match_and_apply_functions() 函数
+
+That is, it takes each triplet of strings and calls the build_match_and_apply_functions() function with those three strings as arguments.
+也就是说，它接受每组三重字符串为参数，并将该三个字符串作为实参调用 build_match_and_apply_functions() 函数
+
+The build_match_and_apply_functions() function returns a tuple of two functions.
+ build_match_and_apply_functions() 函数返回一个包含两个函数的元组
+
+This means that rules ends up being functionally equivalent to the previous example: a list of tuples, where each tuple is a pair of functions.
+也就是说该 规则 最后的结尾与前例在功能上是等价的：一个元组列表，每个元组都是一对函数
+
+The first function is the match function that calls re.search(), and the second function is the apply function that calls re.sub().
+第一个函数是调用 re.search() 的匹配函数
+
+Rounding out this version of the script is the main entry point, the plural() function.
+此版本脚本的最前面是主入口点—— plural() 函数
+
+Since the rules list is the same as the previous example (really, it is), it should come as no surprise that the plural() function hasn’t changed at all.
+由于 规则 列表与前例中的一样（实际上确实相同），因此毫不奇怪 plural() 函数基本没有发生变化
+
+It’s completely generic;
+它是完全通用的，它以规则函数列表为参数，并按照顺序调用它们
+
+it takes a list of rule functions and calls them in order.
+它并不关系规则是如何定义的
+
+It doesn’t care how the rules are defined.
+在前例中，它们被定义为各自命名的函数
+
+In the previous example, they were defined as separate named functions.
+现在它们通过将 build_match_and_apply_functions() 函数的输出映射为源字符串的列表来动态创建
+
+Now they are built dynamically by mapping the output of the build_match_and_apply_functions() function onto a list of raw strings.
+这没有任何关系
+
+It doesn’t matter;
+ plural() 函数将以同样方式运作
+
+A File Of Patterns
+匹配模式文件
+
+You’ve factored out all the duplicate code and added enough abstractions so that the pluralization rules are defined in a list of strings.
+目前，已经排除了重复代码，增加了足够的抽象性，因此复数形式规则可以字符串列表的形式进行定义
+
+The next logical step is to take these strings and put them in a separate file, where they can be maintained separately from the code that uses them.
+下一个逻辑步骤是将这些字符串放入一个单独的文件中，因此可独立于使用它们的代码来进行维护
+
+First, let’s create a text file that contains the rules you want.
+首先，让我们创建一份包含所需规则的文本文件
+
+No fancy data structures, just whitespace-delimited strings in three columns.
+没有花哨的数据结构，只有空白符分隔的三列字符串
+
+Let’s call it plural4-rules.txt.
+将其命名为 plural4-rules.txt.
+
+[download plural4-rules.txt]
+[download plural4-rules.txt]
+
+Now let’s see how you can use this rules file.
+下面看看如何使用该规则文件
+
+[download plural4.py]
+[download plural4.py]
+
+The build_match_and_apply_functions() function has not changed.
+build_match_and_apply_functions() 函数没有发生变化
+
+You’re still using closures to build two functions dynamically that use variables defined in the outer function.
+仍然使用了闭合技术：通过外部函数中定义的变量来动态创建两个函数
+
+The global open() function opens a file and returns a file object.
+全局的 open() 函数打开文件并返回一个文件对象
+
+In this case, the file we’re opening contains the pattern strings for pluralizing nouns.
+此例中，将要打开的文件包含了名词复数形式的模式字符串
+
+The with statement creates what’s called a context: when the with block ends, Python will automatically close the file, even if an exception is raised inside the with block.
+with 语句创建了叫做 context【上下文】的东西：当 with 块结束时，Python 将自动关闭文件，即便是在 with 块中引发了例外也会这样
+
+You’ll learn more about with blocks and file objects in the Files chapter.
+在 《文件》 一章中将学到关于 with 块和文件对象的更多内容
+
+The for line in  idiom reads data from the open file, one line at a time, and assigns the text to the line variable.
+for line in  代码从打开的文件中读取数据，并将文本赋值给 line 变量
+
+You’ll learn more about reading from files in the Files chapter.
+在 《文件》 一章中将学到更多关于读取文件的内容
+
+Each line in the file really has three values, but they’re separated by whitespace (tabs or spaces, it makes no difference).
+文件中每行都有三个值，单它们通过空白分隔（制表符或空白，没有区别）
+
+To split it out, use the split() string method.
+要将它们分开，可使用字符串方法 split() 
+
+The first argument to the split() method is None, which means “split on any whitespace (tabs or spaces, it makes no difference).” The second argument is 3, which means “split on whitespace 3 times, then leave the rest of the line alone.” A line like [sxz]$ $ es will be broken up into the list ['[sxz]$', '$', 'es'], which means that pattern will get '[sxz]$', search will get '$', and replace will get 'es'.
+split() 方法的第一个参数是 None，表示“对任何空白字符进行分隔（制表符或空白，没有区别）”
+
+That’s a lot of power in one little line of code.
+第二个参数是 3，意思是“针对空白分隔三次，丢弃该行剩下的部分
+
+Finally, you pass pattern, search, and replace to the build_match_and_apply_functions() function, which returns a tuple of functions.
+最后，将 pattern 、 search 和 replace 传入 build_match_and_apply_functions() 函数，它将返回一个函数的元组
+
+You append this tuple to the rules list, and rules ends up storing the list of match and apply functions that the plural() function expects.
+将该元组添加到 rules 列表，最终 rules 将储存 plural() 函数所预期的匹配和应用函数列表
+
+The improvement here is that you’ve completely separated the pluralization rules into an external file, so it can be maintained separately from the code that uses it.
+此处的改进是将复数形式规则独立地放到了一份外部文件中，因此可独立于使用它的代码单独对规则进行维护
+
+Code is code, data is data, and life is good.
+代码是代码，数据是数据，生活更美好
+
+Generators
+生成器
+
+Wouldn’t it be grand to have a generic plural() function that parses the rules file?
+如果有个通用 plural() 函数解析规则文件不就更棒了吗
+
+Get rules, check for a match, apply appropriate transformation, go to next rule.
+获取规则，检查匹配，应用相应的转换，进入下一条规则
+
+That’s all the plural() function has to do, and that’s all the plural() function should do.
+这是 plural() 函数所必须完成的事，也是 plural() 函数必须做的事
+
+[download plural5.py]
+[download plural5.py]
+
+How the heck does that work?
+这段代码到底是如何运作的
+
+Let’s look at an interactive example first.
+让我们先看一个交互式例子
+
+The presence of the yield keyword in make_counter means that this is not a normal function.
+make_counter 中出现的 yield 命令的意思是这不是一个普通的函数
+
+It is a special kind of function which generates values one at a time.
+它是一次生成一个值的特殊类型函数
+
+You can think of it as a resumable function.
+可以将其视为可恢复函数
+
+Calling it will return a generator that can be used to generate successive values of x.
+调用该函数将返回一个可用于生成连续 x 值的 生成器【Generator】
+
+To create an instance of the make_counter generator, just call it like any other function.
+为创建 make_counter 生成器的实例，仅需像调用其它函数那样对它进行调用
+
+Note that this does not actually execute the function code.
+注意该调用并不实际执行函数代码
+
+You can tell this because the first line of the make_counter() function calls print(), but nothing has been printed yet.
+可以这么说，是因为 make_counter() 函数的第一行调用了 print()，但实际并未打印任何内容
+
+The make_counter() function returns a generator object.
+该 make_counter() 函数返回了一个生成器对象
+
+The next() function takes a generator object and returns its next value.
+next() 函数以一个生成器对象为参数，并返回其下一个值
+
+The first time you call next() with the counter generator, it executes the code in make_counter() up to the first yield statement, then returns the value that was yielded.
+对 counter 生成器第一次调用 next() ，它针对第一条 yield 语句执行 make_counter() 中的代码，然后返回所产生的值
+
+In this case, that will be 2, because you originally created the generator by calling make_counter(2).
+在此情况下，该代码输出将为 2，因其仅通过调用 make_counter(2) 对生成器进行初始创建
+
+Repeatedly calling next() with the same generator object resumes exactly where it left off and continues until it hits the next yield statement.
+对同一生成器对象反复调用 next() 将确切地从上次调用的位置开始继续，直到下一条 yield 语句
+
+All variables, local state, &c.
+所有的变量、局部数据等内容在 yield 时被保存，在 next() 时被恢复
+
+are saved on yield and restored on next().
+下一行代码等待被执行以调用 print() 以打印出 incrementing x 
+
+The next line of code waiting to be executed calls print(), which prints incrementing x.
+之后，执行语句 x = x + 1
+
+After that, the statement x = x + 1.
+然后它继续通过 while 再次循环，而它再次遇上的第一条语句是 yield x，该语句将保存所有一切状态，并返回当前 x 的值（当前为 3）
+
+The second time you call next(counter), you do all the same things again, but this time x is now 4.
+第二次调用 next(counter) 时，又进行了同样的工作，但这次 x 为 4
+
+Since make_counter sets up an infinite loop, you could theoretically do this forever, and it would just keep incrementing x and spitting out values.
+由于 make_counter 设置了一个无限循环，理论上可以永远执行该过程，它将不断递增 x 并输出数值
+
+But let’s look at more productive uses of generators instead.
+还是让我们看一个更加实用的生成器用法
+
+A Fibonacci Generator
+斐波那奇生成器
+
+[download fibonacci.py]
+[download fibonacci.py]
+
+The Fibonacci sequence is a sequence of numbers where each number is the sum of the two numbers before it.
+斐波那契序列是一系列的数字，每个数字都是其前两个数字之和
+
+It starts with 0 and 1, goes up slowly at first, then more and more rapidly.
+它从 0 和 1 开始，初始时上升缓慢，但越来越快
+
+To start the sequence, you need two variables: a starts at 0, and b starts at 1.
+启动该序列需要两个变量：从 0 开始的 a，和从 1 开始的 b 
+
+a is the current number in the sequence, so yield it.
+a 是当前序列中的数字，因此对它进行 yield 操作
+
+b is the next number in the sequence, so assign that to a, but also calculate the next value (a + b) and assign that to b for later use.
+b 是序列中下一个数字，因此将它赋值给 a，但同时计算下一个值 (a + b) 并将其赋值给 b 以供稍后使用
+
+Note that this happens in parallel;
+注意该步骤是并行发生的
+
+if a is 3 and b is 5, then a, b = b, a + b will set a to 5 (the previous value of b) and b to 8 (the sum of the previous values of a and b).
+如果 a 为 3 且 b 为 5，那么 a, b = b, a + b 将会把 a 设置 5 （b 之前的值），将 b 设置为 8 （ a 和 b 之前值的和）
+
+So you have a function that spits out successive Fibonacci numbers.
+因此，现在有了一个连续输出斐波那契数值的函数
+
+Sure, you could do that with recursion, but this way is easier to read.
+当然，还可以使用递归来完成该功能，但这个方式更易于阅读
+
+Also, it works well with for loops.
+同样，它也与 for 循环合作良好
+
+You can use a generator like fib() in a for loop directly.
+可以在 for 循环中直接使用像 fib() 这样的生成器
+
+The for loop will automatically call the next() function to get values from the fib() generator and assign them to the for loop index variable (n).
+for 循环将会自动调用 next() 函数，从 fib() 生成器获取数值并赋值给 for 循环索引变量
+
+Each time through the for loop, n gets a new value from the yield statement in fib(), and all you have to do is print it out.
+每经过一次 for 循环， n 从 fib() 的 yield 语句获取一个新值，所需做的仅仅是输出它
+
+Once fib() runs out of numbers (a becomes bigger than max, which in this case is 1000), then the for loop exits gracefully.
+一旦 fib() 的数字用尽（a 大于 max，即本例中的 1000）， for 循环将会自动退出
+
+This is a useful idiom: pass a generator to the list() function, and it will iterate through the entire generator (just like the for loop in the previous example) and return a list of all the values.
+这是一个很有用的用法：将一个生成器传递给 list() 函数，它将遍历整个生成器（就像前例中的 for 循环）并返回所有数值的列表
+
+A Plural Rule Generator
+复数规则生成器
+
+Let’s go back to plural5.py and see how this version of the plural() function works.
+让我们回到 plural5.py 看看该版本的 plural() 函数是如何运作的
+
+No magic here.
+此处没有太神奇的代码
+
+Remember that the lines of the rules file have three values separated by whitespace, so you use line.split(None, 3) to get the three “columns” and assign them to three local variables.
+由于规则文件中每行都靠包括以空白相间的三个值，因此使用 line.split(None, 3) 获取三个“列”的值并将它们赋值给三个局部变量
+
+And then you yield.
+然后使用了 yield
+
+What do you yield?
+ 但生产了什么呢
+
+Two functions, built dynamically with your old friend, build_match_and_apply_functions(), which is identical to the previous examples.
+通过老朋友—— build_match_and_apply_functions() 动态创建的两个函数，这与之前的例子是一样的
+
+In other words, rules() is a generator that spits out match and apply functions on demand.
+换而言之， rules() 是按照需求连续生成匹配和应用函数的生成器
+
+Since rules() is a generator, you can use it directly in a for loop.
+由于 rules() 是生成器，可直接在 for 循环中使用它
+
+The first time through the for loop, you will call the rules() function, which will open the pattern file, read the first line, dynamically build a match function and an apply function from the patterns on that line, and yield the dynamically built functions.
+对 for 循环的第一次遍历，可以调用 rules() 函数打开模式文件，读取第一行，从该行的模式动态创建一个匹配函数和应用函数，然后生成动态创建的函数
+
+The second time through the for loop, you will pick up exactly where you left off in rules() (which was in the middle of the for line in pattern_file loop).
+对 for 循环的第二次遍历，将会精确地回到 rules() 中上次离开的位置（在 for line in pattern_file 循环的中间）
+
+The first thing it will do is read the next line of the file (which is still open), dynamically build another match and apply function based on the patterns on that line in the file, and yield the two functions.
+要进行的第一项工作是读取文件（仍处于打开状态）的下一行，基于该行的模式动态创建另一匹配和应用函数，然后生成两个函数
+
+What have you gained over stage 4?
+通过第四步获得了什么呢
+
+Startup time.
+启动时间
+
+In stage 4, when you imported the plural4 module, it read the entire patterns file and built a list of all the possible rules, before you could even think about calling the plural() function.
+在第四步中引入 plural4 模块时，它读取了整个模式文件，并创建了一份所有可能规则的列表，甚至在考虑调用 plural() 函数之前
+
+With generators, you can do everything lazily: you read the first rule and create functions and try them, and if that works you don’t ever read the rest of the file or create any other functions.
+有了生成器，可以轻松地处理所有工作：可以读取规则，创建函数并试用它们，如果该规则可用甚至可以不读取文件剩下的部分或创建更多的函数
+
+What have you lost?
+失去了什么
+
+Performance!
+性能
+
+Every time you call the plural() function, the rules() generator starts over from the beginning — which means re-opening the patterns file and reading from the beginning, one line at a time.
+每次调用 plural() 函数，rules() 生成器将从头开始——这意味着重新打开模式文件，并从头开始读取，每次一行
+
+What if you could have the best of both worlds: minimal startup cost (don’t execute any code on import), and maximum performance (don’t build the same functions over and over again).
+要是能够两全其美多好啊：最低的启动成本（无需对 import 执行任何代码），同时 最佳的性能（无需一次次地创建同一函数）
+
+Oh, and you still want to keep the rules in a separate file (because code is code and data is data), just as long as you never have to read the same line twice.
+哦，还需将规则保存在单独的文件中（因为代码和数据要泾渭分明），还有就是永远不必两次读取同一行
+
+To do that, you’ll need to build your own iterator.
+要实现该目标，必须建立自己的生成器
+
+But before you do that, you need to learn about Python classes.
+在进行此工作之前，必须对 Python 的类进行学习
+
+Further Reading
+深入阅读
+
+PEP 255: Simple Generators
+PEP 255: 简单生成器
+
+Understanding Python’s “with” statement
+理解 Python 的 “with” 语句
+
+Closures in Python
+Python 中的闭合
+
+Fibonacci numbers
+斐波那契数值
+
+English Irregular Plural Nouns
+英语的不规则复数名词
+
+© 2001–11 Mark Pilgrim
+© 2001–9 Mark Pilgrim
+

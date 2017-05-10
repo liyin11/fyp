@@ -1,0 +1,399 @@
+Django 1.5 documentation
+Django 1.5 documentation
+
+Writing your first Django app, part 1¶
+编写你的第一个 Django 程序 第1部分¶
+
+Let’s learn by example.
+让我们通过例子来学习
+
+Throughout this tutorial, we’ll walk you through the creation of a basic poll application.
+在本教程中，我们将引导您创建一个基本的投票应用
+
+It’ll consist of two parts:
+它将包含两部分：
+
+We’ll assume you have Django installed already.
+我们假设你已经 安装了 Django 
+
+You can tell Django is installed and which version by running the following command:
+你可以运行以下命令来验证是否已经安装了 Django 和运行着的版本号：
+
+You should see either the version of your Django installation or an error telling “No module named django”.
+你应该看到你安装的 Django 版本或一个提示你 “No module named django” 的错误
+
+Check also that the version number matches the version of this tutorial.
+此外，还应该检查下你的版本与本教程的版本是否一致
+
+If they don’t match, you can refer to the tutorial for your version of Django or update Django to the newest version.
+ 若不一致，你可以参考 Django 版本对应的教程或者更新 Django 到最新版本
+
+See How to install Django for advice on how to remove older versions of Django and install a newer one.
+请参考 如何安装 Django 中的意见先删除旧版本的 Django 再安装一个新的
+
+Where to get help:
+在哪里可以获得帮助：
+
+If you’re having trouble going through this tutorial, please post a message to django-users or drop by #django on irc.freenode.net to chat with other Django users who might be able to help.
+如果您在学习本教程中遇到问题，请在 django-users 上发贴或者在 #django on irc.freenode.net 上与其他可能会帮助您的 Django 用户交流
+
+Creating a project¶
+创建一个项目¶
+
+If this is your first time using Django, you’ll have to take care of some initial setup.
+如果这是你第一次使用 Django ，那么你必须进行一些初始设置
+
+Namely, you’ll need to auto-generate some code that establishes a Django project – a collection of settings for an instance of Django, including database configuration, Django-specific options and application-specific settings.
+也就是通过自动生成代码来建立一个 Django 项目 project – 一个 Django 项目的设置集，包含了数据库配置、 Django 详细选项设置和应用特性配置
+
+From the command line, cd into a directory where you’d like to store your code, then run the following command:
+在命令行中，使用 cd 命令进入你想存储代码所在的目录，然后运行以下命令：
+
+This will create a mysite directory in your current directory.
+这将在当前目录创建一个 mysite 目录
+
+Script name may differ in distribution packages
+Note
+
+If you installed Django using a Linux distribution’s package manager (e.g.
+你需要避免使用 python 保留字或 Django 组件名作为项目的名称
+
+apt-get or yum) django-admin.py may have been renamed to django-admin.
+尤其是你应该避免使用的命名如： django (与 Django 本身会冲突) 或者 test (与 Python 内置的包名会冲突).
+
+Mac OS X permissions
+这段代码应该放在哪里
+
+If you’re using Mac OS X, you may see the message “permission denied” when you try to run django-admin.py startproject.
+如果你有一般 PHP 的编程背景（未使用流行的框架），可能会将你的代码放在 Web 服务器的文档根目录下（例如：``/var/www``）
+
+This is because, on Unix-based systems like OS X, a file must be marked as “executable” before it can be run as a program.
+而在 Django 中，你不必这么做
+
+To do this, open Terminal.app and navigate (using the cd command) to the directory where django-admin.py is installed, then run the command sudo chmod +x django-admin.py.
+将任何 Python 代码放在你的 Web 服务器文档根目录不会是一个好主意，因为这可能会增加人们通过 Web 方式查看到你的代码的风险
+
+Note
+将你的代码放在你的文档根目录 以外 的某些目录, 例如 /home/mycode 
+
+You’ll need to avoid naming projects after built-in Python or Django components.
+让我们来看看 startproject 都创建了些什么:
+
+django-admin.py should be on your system path if you installed Django via python setup.py.
+和你看到的不一样
+
+Where should this code live?
+默认的项目布局最近刚刚改变过
+
+If your background is in PHP, you’re probably used to putting code under the Web server’s document root (in a place such as /var/www).
+这些文件是：
+
+Doesn’t match what you see?
+让我们来验证是否工作
+
+The default project layout recently changed.
+你已经启动了 Django 开发服务器，一个纯粹的由 Python 编写的轻量级 Web 服务器
+
+If you’re seeing a “flat” layout (with no inner mysite/ directory), you’re probably using a version of Django that doesn’t match this tutorial version.
+我们在 Django 内包含了这个服务器，这样你就可以迅速开发了，在产品投入使用之前不必去配置一台生产环境下的服务器 – 例如 Apache 
+
+These files are:
+现在是一个很好的提示时机：**不要** 在任何类似生产环境中使用此服务器
+
+You’ve started the Django development server, a lightweight Web server written purely in Python.
+更改端口号
+
+Now’s a good time to note: DON’T use this server in anything resembling a production environment.
+默认情况下，:djadmin:runserver 命令启动的开发服务器只监听本地 IP 的 8000 端口
+
+Now that the server’s running, visit http://127.0.0.1:8000/ with your Web browser.
+如果你想改变服务器的端口，把它作为一个命令行参数传递即可
+
+You’ll see a “Welcome to Django” page, in pleasant, light-blue pastel.
+例如以下命令启动的服务器将监听 8080 端口：
+
+Changing the port
+如果你想改变服务器 IP ，把它和端口号一起传递即可
+
+By default, the runserver command starts the development server on the internal IP at port 8000.
+有关开发服务器的完整文档可以在 runserver 内参考
+
+Full docs for the development server can be found in the runserver reference.
+现在，编辑 mysite/settings.py 
+
+ENGINE – Either 'django.db.backends.postgresql_psycopg2', 'django.db.backends.mysql', 'django.db.backends.sqlite3' or 'django.db.backends.oracle'.
+NAME – 你的数据库名
+
+Other backends are also available.
+如果你使用 SQLite，该数据库将是你计算机上的一个文件
+
+NAME – The name of your database.
+当指定路径时，总是使用正斜杠，即使是在 Windows 下(例如：``C:/homes/user/mysite/sqlite3.db``) 
+
+When specifying the path, always use forward slashes, even on Windows (e.g.
+USER – 你的数据库用户名 ( SQLite 下不需要) 
+
+USER – Your database username (not used for SQLite).
+PASSWORD – 你的数据库密码 ( SQLite 下不需要) 
+
+PASSWORD – Your database password (not used for SQLite).
+HOST – 你的数据库主机地址
+
+HOST – The host your database is on.
+如果你是新建数据库，我们建议只使用 SQLite ，将 ENGINE 改为 'django.db.backends.sqlite3' 并且将 NAME 设置为你想存放数据库的地方
+
+Leave this as an empty string if your database server is on the same physical machine (not used for SQLite).
+ SQLite 是内置在 Python 中的，因此你不需要安装任何东西来支持你的数据库
+
+If you’re new to databases, we recommend simply using SQLite by setting ENGINE to 'django.db.backends.sqlite3' and NAME to the place where you’d like to store the database.
+Note
+
+Note
+如果你使用 PostgreSQL 或者 MySQL，确保你已经创建了一个数据库
+
+If you’re using PostgreSQL or MySQL, make sure you’ve created a database by this point.
+如果你使用 SQLite ，你不需要事先创建任何东西 - 在需要的时候，将会自动创建数据库文件
+
+If you’re using SQLite, you don’t need to create anything beforehand - the database file will be created automatically when it is needed.
+当你编辑 settings.py 时，将 TIME_ZONE 修改为你所在的时区
+
+While you’re editing settings.py, set TIME_ZONE to your time zone.
+同时，注意文件底部的 INSTALLED_APPS 设置
+
+The default value is the Central time zone in the U.S.
+它保存了当前 Django 实例已激活的所有 Django 应用
+
+(Chicago).
+每个应用可以被多个项目使用，而且你可以打包和分发给其他人在他们的项目中使用
+
+Also, note the INSTALLED_APPS setting toward the bottom of the file.
+默认情况下，:setting:INSTALLED_APPS 包含以下应用，这些都是由 Django 提供的：
+
+By default, INSTALLED_APPS contains the following apps, all of which come with Django:
+这些应用在一般情况下是默认包含的
+
+These applications are included by default as a convenience for the common case.
+所有这些应用中每个应用至少使用一个数据库表，所以在使用它们之前我们需要创建数据库中的表
+
+Each of these applications makes use of at least one database table, though, so we need to create the tables in the database before we can use them.
+syncdb 命令参照 INSTALLED_APPS 设置，并在你的 settings.py 文件所配置的数据库中创建必要的数据库表
+
+To do that, run the following command:
+每创建一个数据库表你都会看到一条消息，接着你会看到一个提示询问你是否想要在身份验证系统内创建个超级用户
+
+The syncdb command looks at the INSTALLED_APPS setting and creates any necessary database tables according to the database settings in your settings.py file.
+如果你感兴趣，可以在你的数据库命令行下输入：``dt`` (PostgreSQL), SHOW TABLES; (MySQL), 或 .schema (SQLite) 来列出 Django 所创建的表
+
+If you’re interested, run the command-line client for your database and type \dt (PostgreSQL), SHOW TABLES;
+极简主义者
+
+For the minimalists
+就像我们上面所说的，一般情况下以上应用都默认包含在内，但不是每个人都需要它们
+
+Now that your environment – a “project” – is set up, you’re set to start doing work.
+现在你的项目开发环境建立好了， 你可以开工了
+
+Each application you write in Django consists of a Python package, somewhere on your Python path, that follows a certain convention.
+你通过 Djaong 编写的每个应用都是由 Python 包组成的，这些包存放在你的 Python path 中并且遵循一定的命名规范
+
+Django comes with a utility that automatically generates the basic directory structure of an app, so you can focus on writing code rather than creating directories.
+ Django 提供了个实用工具可以自动生成一个应用的基本目录架构，因此你可以专注于编写代码而不是去创建目录
+
+Projects vs.
+项目 ( Projects ) vs. 应用 ( apps )
+
+What’s the difference between a project and an app?
+项目与应用之间有什么不同之处
+
+An app is a Web application that does something – e.g., a Weblog system, a database of public records or a simple poll app.
+应用是一个提供功能的 Web 应用 – 例如：一个博客系统、一个公共记录的数据库或者一个简单的投票系统
+
+A project is a collection of configuration and apps for a particular Web site.
+ 项目是针对一个特定的 Web 网站相关的配置和其应用的组合
+
+A project can contain multiple apps.
+一个项目可以包含多个应用
+
+An app can be in multiple projects.
+一个应用可以在多个项目中使用
+
+Your apps can live anywhere on your Python path.
+你的应用可以存放在 Python path 中的任何位置
+
+In this tutorial, we’ll create our poll app right next to your manage.py file so that it can be imported as its own top-level module, rather than a submodule of mysite.
+在本教材中，我们将通过你的 manage.py 文件创建我们的投票应用，以便它可以作为顶层模块导入，而不是作为 mysite 的子模块
+
+To create your app, make sure you’re in the same directory as manage.py and type this command:
+要创建你的应用，请确认与 manage.py 文件在同一的目录下并输入以下命令：
+
+That’ll create a directory polls, which is laid out like this:
+这将创建一个 polls 目录，其展开的样子如下所示：:
+
+This directory structure will house the poll application.
+此目录结构就是投票应用
+
+The first step in writing a database Web app in Django is to define your models – essentially, your database layout, with additional metadata.
+在 Django 中编写一个有数据库支持的 Web 应用的第一步就是定义你的模型 – 从本质上讲就是数据库设计及其附加的元数据
+
+Philosophy
+哲理
+
+A model is the single, definitive source of data about your data.
+模型是有关你数据的唯一且明确的数据源
+
+It contains the essential fields and behaviors of the data you’re storing.
+它包含了你所要存储的数据的基本字段和行为
+
+Django follows the DRY Principle.
+ Django 遵循 DRY 原则 
+
+The goal is to define your data model in one place and automatically derive things from it.
+目标是为了只在一个地方定义你的数据模型就可从中自动获取数据
+
+In our simple poll app, we’ll create two models: Poll and Choice.
+在这简单的投票应用中，我们将创建两个模型： Poll 和 Choice``
+
+A Poll has a question and a publication date.
+``Poll 有问题和发布日期两个字段
+
+A Choice has two fields: the text of the choice and a vote tally.
+``Choice`` 有两个字段： 选项 ( choice ) 的文本内容和投票数
+
+Each Choice is associated with a Poll.
+每一个 Choice 都与一个 Poll 关联
+
+These concepts are represented by simple Python classes.
+这些概念都由简单的 Python 类来表现
+
+Edit the polls/models.py file so it looks like this:
+编辑 polls/models.py 文件后如下所示：
+
+The code is straightforward.
+代码很简单
+
+Each model is represented by a class that subclasses django.db.models.Model.
+每个模型都由继承自 django.db.models.Model 子类的类来描述
+
+Each model has a number of class variables, each of which represents a database field in the model.
+ 每个模型都有一些类变量，每一个类变量都代表了一个数据库字段
+
+Each field is represented by an instance of a Field class – e.g., CharField for character fields and DateTimeField for datetimes.
+每个字段由一个 Field 的实例来表现 – 比如 CharField 表示字符类型的字段和 DateTimeField 表示日期时间型的字段
+
+This tells Django what type of data each field holds.
+这会告诉 Django 每个字段都保存了什么类型的数据
+
+The name of each Field instance (e.g.
+每一个 Field 实例的名字就是字段的名字（如： question 或者 pub_date ），其格式属于亲和机器式的
+
+question or pub_date ) is the field’s name, in machine-friendly format.
+在你的 Python 的代码中会使用这个值，而你的数据库会将这个值作为表的列名
+
+You can use an optional first positional argument to a Field to designate a human-readable name.
+你可以在初始化 Field 实例时使用第一个位置的可选参数来指定人类可读的名字
+
+That’s used in a couple of introspective parts of Django, and it doubles as documentation.
+这在Django的内省部分中被使用到了，而且兼作文档的一部分来增强代码的可读性
+
+If this field isn’t provided, Django will use the machine-readable name.
+若字段未提供该参数，Django 将使用符合机器习惯的名字
+
+In this example, we’ve only defined a human-readable name for Poll.pub_date.
+在本例中，我们仅定义了一个符合人类习惯的字段名 Poll.pub_date 
+
+For all other fields in this model, the field’s machine-readable name will suffice as its human-readable name.
+对于模型中的其他字段，机器名称就已经足够替代人类名称了
+
+Some Field classes have required elements.
+一些 Field 实例是需要参数的
+
+CharField, for example, requires that you give it a max_length.
+ 例如 CharField 需要你指定 :attr:`~django.db.models.CharField.max_length`
+
+That’s used not only in the database schema, but in validation, as we’ll soon see.
+这不仅适用于数据库结构，以后我们还会看到也用于数据验证中
+
+Finally, note a relationship is defined, using ForeignKey.
+一个 Field 实例可以有不同的可选参数
+
+That tells Django each Choice is related to a single Poll.
+ 在本例中，我们将 votes 的 default 的值设为 0 
+
+Django apps are “pluggable”: You can use an app in multiple projects, and you can distribute apps, because they don’t have to be tied to a given Django installation.
+刚才那点模型代码提供给 Django 大量信息
+
+Edit the settings.py file again, and change the INSTALLED_APPS setting to include the string 'polls'.
+但首先，我们需要告诉我们的项目已经安装了 polls 应用
+
+Now Django knows to include the polls app.
+哲理
+
+You should see something similar to the following (the CREATE TABLE SQL statements for the polls app):
+Django 应用是“可插拔的”：你可以在多个项目使用一个应用，你还可以分发应用，因为它们没有被捆绑到一个给定的 Django 安装环境中
+
+Note the following:
+再次编辑 settings.py 文件，在 INSTALLED_APPS 设置中加入 'polls' 字符
+
+If you’re interested, also run the following commands:
+现在 Django 已经知道包含了 polls 应用
+
+Looking at the output of those commands can help you understand what’s actually happening under the hood.
+你将看到类似如下所示内容 ( 有关投票应用的 CREATE TABLE SQL 语句 )：
+
+Now, run syncdb again to create those model tables in your database:
+请注意如下事项：
+
+The syncdb command runs the SQL from sqlall on your database for all apps in INSTALLED_APPS that don’t already exist in your database.
+如果你感兴趣，还可以运行以下命令：
+
+Read the django-admin.py documentation for full information on what the manage.py utility can do.
+看看这些输出的命令可以帮助你理解框架底层实际上处理了些什么
+
+We’re using this instead of simply typing “python”, because manage.py sets the DJANGO_SETTINGS_MODULE environment variable, which gives Django the Python import path to your settings.py file.
+syncdb 命令会给在 INSTALLED_APPS 中有但数据库中没有对应表的应用执行 sqlall 操作
+
+Bypassing manage.py
+请阅读 django-admin.py documentation 文档了解 manage.py 工具更多的功能
+
+Once you’re in the shell, explore the database API:
+现在，我们进入 Python 的交互式 shell 中玩弄 Django 提供给你的 API 
+
+Wait a minute.
+我们当前使用的环境不同于简单的输入 “python” 进入的 shell 环境，因为 manage.py 设置了 DJANGO_SETTINGS_MODULE 环境变量，该变量给定了 Django 需要导入的 settings.py 文件所在路径
+
+It’s important to add __unicode__() methods to your models, not only for your own sanity when dealing with the interactive prompt, but also because objects’ representations are used throughout Django’s automatically-generated admin.
+忽略 manage.py
+
+Why __unicode__() and not __str__()?
+若你不想使用 manage.py ，也是没有问题的
+
+If you’re familiar with Python, you might be in the habit of adding __str__() methods to your classes, not __unicode__() methods.
+想了解更多的信息，请参考 django-admin.py 文档 
+
+Django models have a default __str__() method that calls __unicode__() and converts the result to a UTF-8 bytestring.
+一旦你进入了 shell，就可通过 database API 来浏览数据：:
+
+If all of this is gibberish to you, just remember to add __unicode__() methods to your models.
+请稍等
+
+With any luck, things should Just Work for you.
+``<Poll: Poll object>`` 这样显示对象绝对是无意义的
+
+Note these are normal Python methods.
+给你的模型添加 __unicode__() 方法是很重要的， 不仅是让你在命令行下有明确提示，而且在 Django 自动生成的管理界面中也会使用到对象的呈现
+
+Note the addition of import datetime and from django.utils import timezone, to reference Python’s standard datetime module and Django’s time-zone-related utilities in django.utils.timezone, respectively.
+为什么是 __unicode__() 而不是 __str__()
+
+Save these changes and start a new Python interactive shell by running python manage.py shell again:
+如果你熟悉 Python，那么你可能会习惯在类中添加 __str__() 方法而不是 __unicode__() 方法
+
+For more information on model relations, see Accessing related objects.
+Django 模型有个默认的 __str__() 方法 会去调用 __unicode__() 并将结果转换为 UTF-8 编码的字符串
+
+For more on how to use double underscores to perform field lookups via the API, see Field lookups.
+这就意味着 unicode(p) 会返回一个 Unicode 字符串，而 str(p) 会返回一个以 UTF-8 编码的普通字符串
+
+When you’re comfortable with the API, read part 2 of this tutorial to get Django’s automatic admin working.
+如果这让你感觉困惑，那么你只要记住在模型中添加 __unicode__() 方法
+

@@ -1,0 +1,117 @@
+Interaction with remote programs¶
+与远程程序集成¶
+
+Fabric’s primary operations, run and sudo, are capable of sending local input to the remote end, in a manner nearly identical to the ssh program.
+Fabric 的核心业务 run 和 sudo 都支持将本地的输入发送至远程，其表现形式和 ssh 基本一致
+
+For example, programs which display password prompts (e.g.
+例如，有时候会遇到需要密码的情况（比如 dump 数据库，或者修改用户密码时），程序会提供近乎直接的交互环境
+
+However, as with ssh itself, Fabric’s implementation of this feature is subject to a handful of limitations which are not always intuitive.
+然而，由于 ssh 本身的限制，Fabric 对于该功能的实现并不能保证直观
+
+This document discusses such issues in detail.
+这篇文档将详细地讨论这些问题
+
+Note
+注解
+
+Readers unfamiliar with the basics of Unix stdout and stderr pipes, and/or terminal devices, may wish to visit the Wikipedia pages for Unix pipelines and Pseudo terminals respectively.
+不熟悉 Unix stdout、stderr 管道和终端设备的读者，可能需要先访问 Wikipedia Unix 管道 以及 伪终端 页面了解相关知识
+
+Combining stdout and stderr¶
+合并 stdout 和 stderr¶
+
+The first issue to be aware of is that of the stdout and stderr streams, and why they are separated or combined as needed.
+首先摆在我们面前的是 stdout 和 stderr 流问题，以及他们为什么要根据需求分开或者合并
+
+Fabric 0.9.x and earlier, and Python itself, buffer output on a line-by-line basis: text is not printed to the user until a newline character is found.
+Fabric 0.9.x 包括更早版本，以及 Python 本身，都是通过将缓冲区一行行地输出：直到遇到换行符才会将这一整行输出给用户
+
+This works fine in most situations but becomes problematic when one needs to deal with partial-line output such as prompts.
+在大多数情况下这都能正常工作，但是在这样需要输出半行的情况就很难处理
+
+Note
+注解
+
+Line-buffered output can make programs appear to halt or freeze for no reason, as prompts print out text without a newline, waiting for the user to enter their input and press Return.
+行级输出缓冲可能导致程序无理由地挂起或冻结，比如输出没有后继行的文本、等待用户输入及确认
+
+Newer Fabric versions buffer both input and output on a character-by-character basis in order to make interaction with prompts possible.
+新版本的 Fabric 基于字节缓冲输入和输出，这样就可以支持输入提示
+
+This has the convenient side effect of enabling interaction with complex programs utilizing the “curses” libraries or which otherwise redraw the screen (think top).
+同时还方便了和利用了 “curses” 库的复杂程序或者会重新绘制屏幕的程序（比如 top）集成
+
+Unfortunately, printing to stderr and stdout simultaneously (as many programs do) means that when the two streams are printed independently one byte at a time, they can become garbled or meshed together.
+不幸的是，（像很多其它程序那样）同时打印 stderr 和 stdout 将会导致每次只能输出两者的一个字节，最终的结果互相交叉，混乱地混合在一起
+
+While this can sometimes be mitigated by line-buffering one of the streams and not the other, it’s still a serious issue.
+这时如果使用行级输出，虽然仍然是一个严重的问题，但会比另一者好得多
+
+To solve this problem, Fabric uses a setting in our SSH layer which merges the two streams at a low level and causes output to appear more naturally.
+为了解决这个问题，Fabric 在 SSH 层通过配置，在更低的层面合并两条输出流，保证输出能够更加自然一些
+
+This setting is represented in Fabric as the combine_stderr env var and keyword argument, and is True by default.
+这项设置对应 Fabric 环境变量以及关键字参数 combine_stderr，其默认值是 True
+
+Due to this default setting, output will appear correctly, but at the cost of an empty .stderr attribute on the return values of run/sudo, as all output will appear to be stdout.
+得益于这项默认设置，才保证输出的正确，但是这会导致 run/sudo`返回值的 `.stderr`` 属性为空，因为全部被合并进了 stdout
+
+Conversely, users requiring a distinct stderr stream at the Python level and who aren’t bothered by garbled user-facing output (or who are hiding stdout and stderr from the command in question) may opt to set this to False as needed.
+反过来，如果用户要求清晰的 Python 级 stderr 输出流，而不在乎用户（或者其它处理命令输出的 stdout 和 stderr 的事物）将要面对混乱的输出，可以根据需要选择将其设置为 False
+
+Pseudo-terminals¶
+伪终端¶
+
+The other main issue to consider when presenting interactive prompts to users is that of echoing the user’s own input.
+处理提示交互的另一个大问题在于输出用户自身的输入
+
+Typical terminal applications or bona fide text terminals (e.g.
+一般的终端程序或者 bona fide 文本终端（例如没有 GUI 的 Unix 系统）将会提供一个被称为 tty 或者 pty（即 pseudo-terminal，伪终端）的程序，它将会（通过 stdout）自动重播用户所输入的全部文本，如果没有的就太难使用了
+
+when using a Unix system without a running GUI) present programs with a terminal device called a tty or pty (for pseudo-terminal).
+终端也可以选择关闭重播，比如请求用户安全密码时
+
+However, it’s possible for programs to be run without a tty or pty present at all (consider cron jobs, for example) and in this situation, any stdin data being fed to the program won’t be echoed.
+不过，如果是没有 tty 或者 pty 的程序（比如 cron 定时任务），在这种情况下，程序所接收到的数据都不会被重播回来，这是为了程序能够在没有人类监控的情况下也能完成任务，也是 老版本 Fabric 的默认行为
+
+Unfortunately, in the context of executing commands via Fabric, when no pty is present to echo a user’s stdin, Fabric must echo it for them.
+不幸的是，使用 Fabric 执行命令的上下文环境，没有用于重复用户输入的 pty，Fabric 只能自实现输出，对于很多程序来说，这已经足够了，但是在请求密码时会有安全问题
+
+In the interests of security and meeting the principle of least surprise (insofar as users are typically expecting things to behave as they would when run in a terminal emulator), Fabric 1.0 and greater force a pty by default.
+本着对安全的重视和最小惊讶原则（目前为止，用户的体验都如同时在模拟终端中操作一样），Fabric 1.0 以及以上版本默认强制启用 pty，Fabric 简单地由远程端决定是重播还是隐藏输入，而不是自己实现重播
+
+Note
+注解
+
+In addition to allowing normal echo behavior, a pty also means programs that behave differently when attached to a terminal device will then do so.
+为了支持普通输出行为，使用 pty 还意味着附属在终端设备上时的行为会有所差异
+
+For example, programs that colorize output on terminals but not when run in the background will print colored output.
+例如，对于彩色化终端输出但不处理后台输出的程序，这时将会输出彩色输出
+
+Be wary of this if you inspect the return value of run or sudo!
+在检查 run 和 sudo 的输出时需要保持警惕
+
+For situations requiring the pty behavior turned off, the --no-pty command-line argument and always_use_pty env var may be used.
+如果想要关闭 pty 行为，可以使用命令行参数 --no-pty 和环境变量 always_use_pty
+
+Combining the two¶
+两者结合¶
+
+As a final note, keep in mind that use of pseudo-terminals effectively implies combining stdout and stderr – in much the same way as the combine_stderr setting does.
+最后需要提到的是，时刻记住伪终端的使用十分依赖 stdout 和 stderr 的组合——就像 combine_stderr 的设置那样
+
+This is because a terminal device naturally sends both stdout and stderr to the same place – the user’s display – thus making it impossible to differentiate between them.
+这是因为终端设备会将 stdout 和 stderr 发送向同一个地方——用户屏幕——因此要将它们区分开来是不可能做到的
+
+However, at the Fabric level, the two groups of settings are distinct from one another and may be combined in various ways.
+然而，在 Fabric 级，这两组设置互相独立，并且可以通过多种方式组合使用
+
+The default is for both to be set to True;
+默认情况下，两者的值都为 True，其它组合的效果如下：
+
+Pythonic remote execution
+run("cmd", pty=True, combine_stderr=False): 合法，但并没有什么不同，因为 pty=True 会导致输出流合并，在需要避免 combine_stderr 的某些特殊边界情况下（目前没有已知用例）可能会有用
+

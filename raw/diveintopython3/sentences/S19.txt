@@ -1,0 +1,1398 @@
+You are here: Home ‣ Dive Into Python 3 ‣
+当前位置: 首页 ‣ 深入 Python 3 ‣
+
+Difficulty level: ♦♦♦♦♦
+难度级别: ♦♦♦♦♦
+
+Special Method Names
+特殊方法名称
+
+❝ My specialty is being right when other people are wrong.
+❝ My specialty is being right when other people are wrong. ❞ — George Bernard Shaw
+
+Diving In
+深入
+
+Throughout this book, you’ve seen examples of “special methods” — certain “magic” methods that Python invokes when you use certain syntax.
+在本书其它几处，我们已经见识过一些特殊方法——即在使用某些语法时 Python 所调用的“神奇”方法
+
+Using special methods, your classes can act like sets, like dictionaries, like functions, like iterators, or even like numbers.
+使用特殊方法，类用起来如同序列、字典、函数、迭代器，或甚至像个数字
+
+This appendix serves both as a reference for the special methods we’ve seen already and a brief introduction to some of the more esoteric ones.
+本附录为我们已经见过特殊方法提供了参考，并对一些更加深奥的特殊方法进行了简要介绍
+
+Basics
+基础知识
+
+If you’ve read the introduction to classes, you’ve already seen the most common special method: the __init__() method.
+如果曾阅读 《类的简介》一章，你可能已经见识过了最常见的特殊方法： __init__() 方法
+
+The majority of classes I write end up needing some initialization.
+盖章结束时，我写的类多数需要进行一些初始化工作
+
+There are also a few other basic special methods that are especially useful for debugging your custom classes.
+还有一些其它的基础特殊方法对调试自定义类也特别有用
+
+to initialize an instance
+初始化一个实例
+
+x = MyClass()
+x = MyClass()
+
+x.__init__()
+x.__init__()
+
+the “official” representation as a string
+字符串的“官方”表现形式
+
+repr(x)
+repr(x)
+
+x.__repr__()
+x.__repr__()
+
+the “informal” value as a string
+字符串的“非正式”值
+
+str(x)
+str(x)
+
+x.__str__()
+x.__str__()
+
+the “informal” value as a byte array
+字节数组的“非正式”值
+
+bytes(x)
+bytes(x)
+
+x.__bytes__()
+x.__bytes__()
+
+the value as a formatted string
+格式化字符串的值
+
+format(x, format_spec)
+format(x, format_spec)
+
+x.__format__(format_spec)
+x.__format__(format_spec)
+
+The __init__() method is called after the instance is created.
+对 __init__() 方法的调用发生在实例被创建 之后 
+
+If you want to control the actual creation process, use the __new__() method.
+如果要控制实际创建进程，请使用 __new__() 方法
+
+By convention, the __repr__() method should return a string that is a valid Python expression.
+按照约定， __repr__() 方法所返回的字符串为合法的 Python 表达式
+
+The __str__() method is also called when you print(x).
+在调用 print(x) 的同时也调用了 __str__() 方法
+
+New in Python 3, since the bytes type was introduced.
+由于 bytes 类型的引入而从 Python 3 开始出现
+
+By convention, format_spec should conform to the Format Specification Mini-Language.
+按照约定，format_spec 应当遵循 迷你语言格式规范【Format Specification Mini-Language】
+
+decimal.py in the Python standard library provides its own __format__() method.
+Python 标准类库中的 decimal.py 提供了自己的 __format__() 方法
+
+Classes That Act Like Iterators
+行为方式与迭代器类似的类
+
+In the Iterators chapter, you saw how to build an iterator from the ground up using the __iter__() and __next__() methods.
+在 《迭代器》一章中，我们已经学习了如何使用 __iter__() 和 __next__() 方法从零开始创建迭代器
+
+to iterate through a sequence
+遍历某个序列
+
+iter(seq)
+iter(seq)
+
+seq.__iter__()
+seq.__iter__()
+
+to get the next value from an iterator
+从迭代器中获取下一个值
+
+next(seq)
+next(seq)
+
+seq.__next__()
+seq.__next__()
+
+to create an iterator in reverse order
+按逆序创建一个迭代器
+
+reversed(seq)
+reversed(seq)
+
+seq.__reversed__()
+seq.__reversed__()
+
+The __iter__() method is called whenever you create a new iterator.
+无论何时创建迭代器都将调用 __iter__() 方法
+
+It’s a good place to initialize the iterator with initial values.
+这是用初始值对迭代器进行初始化的绝佳之处
+
+The __next__() method is called whenever you retrieve the next value from an iterator.
+无论何时从迭代器中获取下一个值都将调用 __next__() 方法
+
+The __reversed__() method is uncommon.
+__reversed__() 方法并不常用
+
+It takes an existing sequence and returns an iterator that yields the items in the sequence in reverse order, from last to first.
+它以一个现有序列为参数，并将该序列中所有元素从尾到头以逆序排列生成一个新的迭代器
+
+As you saw in the Iterators chapter, a for loop can act on an iterator.
+正如我们在 《迭代器》一章中看到的，for 循环也可用作迭代器
+
+In this loop:
+在下面的循环中：
+
+Python 3 will call seq.__iter__() to create an iterator, then call the __next__() method on that iterator to get each value of x.
+Python 3 将会调用 seq.__iter__() 以创建一个迭代器，然后对迭代器调用 __next__() 方法以获取 x 的每个值
+
+When the __next__() method raises a StopIteration exception, the for loop ends gracefully.
+当 __next__() 方法引发 StopIteration 例外时， for 循环正常结束
+
+Computed Attributes
+计算属性
+
+to get a computed attribute (unconditionally)
+获取一个计算属性（无条件的）
+
+x.my_property
+x.my_property
+
+x.__getattribute__('my_property')
+x.__getattribute__('my_property')
+
+to get a computed attribute (fallback)
+获取一个计算属性（后备）
+
+x.my_property
+x.my_property
+
+x.__getattr__('my_property')
+x.__getattr__('my_property')
+
+to set an attribute
+设置某属性
+
+x.my_property = value
+x.my_property = value
+
+x.__setattr__('my_property', value)
+x.__setattr__('my_property', value)
+
+to delete an attribute
+删除某属性
+
+del x.my_property
+del x.my_property
+
+x.__delattr__('my_property')
+x.__delattr__('my_property')
+
+to list all attributes and methods
+列出所有属性和方法
+
+dir(x)
+dir(x)
+
+x.__dir__()
+x.__dir__()
+
+If your class defines a __getattribute__() method, Python will call it on every reference to any attribute or method name (except special method names, since that would cause an unpleasant infinite loop).
+如果某个类定义了 __getattribute__() 方法，在 每次引用属性或方法名称时 Python 都调用它（特殊方法名称除外，因为那样将会导致讨厌的无限循环）
+
+If your class defines a __getattr__() method, Python will call it only after looking for the attribute in all the normal places.
+如果某个类定义了 __getattr__() 方法，Python 将只在正常的位置查询属性时才会调用它
+
+If an instance x defines an attribute color, x.color will not call x.__getattr__('color');
+如果实例 x 定义了属性 color， x.color 将 不会 调用 x.__getattr__('color')
+
+it will simply return the already-defined value of x.color.
+而只会返回 x.color 已定义好的值
+
+The __setattr__() method is called whenever you assign a value to an attribute.
+无论何时给属性赋值，都会调用 __setattr__() 方法
+
+The __delattr__() method is called whenever you delete an attribute.
+无论何时删除一个属性，都将调用 __delattr__() 方法
+
+The __dir__() method is useful if you define a __getattr__() or __getattribute__() method.
+如果定义了 __getattr__() 或 __getattribute__() 方法， __dir__() 方法将非常有用
+
+Normally, calling dir(x) would only list the regular attributes and methods.
+通常，调用 dir(x) 将只显示正常的属性和方法
+
+If your __getattr__() method handles a color attribute dynamically, dir(x) would not list color as one of the available attributes.
+如果 __getattr()__ 方法动态处理 color 属性， dir(x) 将不会将 color 列为可用属性
+
+Overriding the __dir__() method allows you to list color as an available attribute, which is helpful for other people who wish to use your class without digging into the internals of it.
+可通过覆盖 __dir__() 方法允许将 color 列为可用属性，对于想使用你的类但却不想深入其内部的人来说，该方法非常有益
+
+The distinction between the __getattr__() and __getattribute__() methods is subtle but important.
+__getattr__() 和 __getattribute__() 方法的区别非常细微，但非常重要
+
+I can explain it with two examples:
+可以用两个例子来解释一下：
+
+The attribute name is passed into the __getattr__() method as a string.
+属性名称以字符串的形式传入 __getattr()__ 方法
+
+If the name is 'color', the method returns a value.
+如果名称为 'color'，该方法返回一个值
+
+(In this case, it’s just a hard-coded string, but you would normally do some sort of computation and return the result.)
+（在此情况下，它只是一个硬编码的字符串，但可以正常地进行某些计算并返回结果
+
+If the attribute name is unknown, the __getattr__() method needs to raise an AttributeError exception, otherwise your code will silently fail when accessing undefined attributes.
+如果属性名称未知， __getattr()__ 方法必须引发一个 AttributeError 例外，否则在访问未定义属性时，代码将只会默默地失败
+
+(Technically, if the method doesn’t raise an exception or explicitly return a value, it returns None, the Python null value.
+（从技术角度而言，如果方法不引发例外或显式地返回一个值，它将返回 None ——Python 的空值
+
+This means that all attributes not explicitly defined will be None, which is almost certainly not what you want.)
+这意味着 所有 未显式定义的属性将为 None，几乎可以肯定这不是你想看到的
+
+The dyn instance does not have an attribute named color, so the __getattr__() method is called to provide a computed value.
+dyn 实例没有名为 color 的属性，因此在提供计算值时将调用 __getattr__() 
+
+After explicitly setting dyn.color, the __getattr__() method will no longer be called to provide a value for dyn.color, because dyn.color is already defined on the instance.
+在显式地设置 dyn.color 之后，将不再为提供 dyn.color 的值而调用 __getattr__() 方法，因为 dyn.color 已在该实例中定义
+
+On the other hand, the __getattribute__() method is absolute and unconditional.
+另一方面，__getattribute__() 方法是绝对的、无条件的
+
+The __getattribute__() method is called to provide a value for dyn.color.
+在获取 dyn.color 的值时将调用 __getattribute__() 方法
+
+Even after explicitly setting dyn.color, the __getattribute__() method is still called to provide a value for dyn.color.
+即便已经显式地设置 dyn.color，在获取 dyn.color 的值时, 仍将调用 __getattribute__() 方法
+
+If present, the __getattribute__() method is called unconditionally for every attribute and method lookup, even for attributes that you explicitly set after creating an instance.
+如果存在 __getattribute__() 方法，将在每次查找属性和方法时 无条件地调用 它，哪怕在创建实例之后已经显式地设置了属性
+
+☞If your class defines a __getattribute__() method, you probably also want to define a __setattr__() method and coordinate between them to keep track of attribute values.
+☞ 如果定义了类的 __getattribute__() 方法，你可能还想定义一个 __setattr__() 方法，并在两者之间进行协同，以跟踪属性的值
+
+Otherwise, any attributes you set after creating an instance will disappear into a black hole.
+否则，在创建实例之后所设置的值将会消失在黑洞中
+
+You need to be extra careful with the __getattribute__() method, because it is also called when Python looks up a method name on your class.
+必须特别小心 __getattribute__() 方法，因为 Python 在查找类的方法名称时也将对其进行调用
+
+This class defines a __getattribute__() method which always raises an AttributeError exception.
+该类定义了一个总是引发 AttributeError 例外的 __getattribute__() 方法
+
+No attribute or method lookups will succeed.
+没有属性或方法的查询会成功
+
+When you call hero.swim(), Python looks for a swim() method in the Rastan class.
+调用 hero.swim() 时，Python 将在 Rastan 类中查找 swim() 方法
+
+This lookup goes through the __getattribute__() method, because all attribute and method lookups go through the __getattribute__() method.
+该查找将执行整个 __getattribute__() 方法，因为所有的属性和方法查找都通过 __getattribute__() 方法
+
+In this case, the __getattribute__() method raises an AttributeError exception, so the method lookup fails, so the method call fails.
+在此例中， __getattribute__() 方法引发 AttributeError 例外，因此该方法查找过程将会失败，而方法调用也将失败
+
+Classes That Act Like Functions
+行为方式与函数类似的类
+
+You can make an instance of a class callable — exactly like a function is callable — by defining the __call__() method.
+可以让类的实例变得可调用——就像函数可以调用一样——通过定义 __call__() 方法
+
+to “call” an instance like a function
+像调用函数一样“调用”一个实例
+
+my_instance()
+my_instance()
+
+my_instance.__call__()
+my_instance.__call__()
+
+The zipfile module uses this to define a class that can decrypt an encrypted zip file with a given password.
+zipfile 模块 通过该方式定义了一个可以使用给定密码解密 经加密 zip 文件的类
+
+The zip decryption algorithm requires you to store state during decryption.
+该 zip 解密 算法需要在解密的过程中保存状态
+
+Defining the decryptor as a class allows you to maintain this state within a single instance of the decryptor class.
+通过将解密器定义为类，使我们得以在 decryptor 类的单个实例中对该状态进行维护
+
+The state is initialized in the __init__() method and updated as the file is decrypted.
+状态在 __init__() 方法中进行初始化，如果文件 经加密 则进行更新
+
+But since the class is also “callable” like a function, you can pass the instance as the first argument of the map() function, like so:
+但由于该类像函数一样“可调用”，因此可以将实例作为 map() 函数的第一个参数传入，代码如下：
+
+The _ZipDecryptor class maintains state in the form of three rotating keys, which are later updated in the _UpdateKeys() method (not shown here).
+_ZipDecryptor 类维护了以三个旋转密钥形式出现的状态，该状态稍后将在 _UpdateKeys() 方法中更新（此处未展示）
+
+The class defines a __call__() method, which makes class instances callable like functions.
+该类定义了一个 __call__() 方法，使得该类可像函数一样调用
+
+In this case, the __call__() method decrypts a single byte of the zip file, then updates the rotating keys based on the byte that was decrypted.
+在此例中，__call__() 对 zip 文件的单个字节进行解密，然后基于经解密的字节对旋转密码进行更新
+
+zd is an instance of the _ZipDecryptor class.
+zd 是 _ZipDecryptor 类的一个实例
+
+The pwd variable is passed to the __init__() method, where it is stored and used to update the rotating keys for the first time.
+变量 pwd 被传入 __init__() 方法，并在其中被存储和用于首次旋转密码更新
+
+Given the first 12 bytes of a zip file, decrypt them by mapping the bytes to zd, in effect “calling” zd 12 times, which invokes the __call__() method 12 times, which updates its internal state and returns a resulting byte 12 times.
+给出 zip 文件的头 12 个字节，将这些字节映射给 zd 进行解密，实际上这将导致调用 __call__() 方法 12 次，也就是 更新内部状态并返回结果字节 12 次
+
+Classes That Act Like Sets
+行为方式与序列类似的类
+
+If your class acts as a container for a set of values — that is, if it makes sense to ask whether your class “contains” a value — then it should probably define the following special methods that make it act like a set.
+如果类作为一系列值的容器出现——也就是说如果对某个类来说，是否“包含”某值是件有意义的事情——那么它也许应该定义下面的特殊方法已，让它的行为方式与序列类似
+
+the number of items
+序列的长度
+
+len(s)
+len(seq)
+
+s.__len__()
+seq.__len__()
+
+to know whether it contains a specific value
+了解某序列是否包含特定的值
+
+x in s
+x in seq
+
+s.__contains__(x)
+seq.__contains__(x)
+
+The cgi module uses these methods in its FieldStorage class, which represents all of the form fields or query parameters submitted to a dynamic web page.
+cgi 模块 在其 FieldStorage 类中使用了这些方法，该类用于表示提交给动态网页的所有表单字段或查询参数
+
+Once you create an instance of the cgi.FieldStorage class, you can use the “in” operator to check whether a particular parameter was included in the query string.
+一旦创建了 cgi.FieldStorage 类的实例，就可以使用 “in” 运算符来检查查询字符串中是否包含了某个特定参数
+
+The __contains__() method is the magic that makes this work.
+而 __contains__() 方法是令该魔法生效的主角
+
+The any() function takes a generator expression and returns True if the generator spits out any items.
+如果代码为 if 'q' in fs，Python 将在 fs 对象中查找 __contains__() 方法，而该方法在 cgi.py 中已经定义
+
+The any() function is smart enough to stop as soon as the first match is found.
+'q' 的值被当作 key 参数传入 __contains__() 方法
+
+The same FieldStorage class also supports returning its length, so you can say len(fs) and it will call the __len__() method on the FieldStorage class to return the number of query parameters that it identified.
+同样的 FieldStorage 类还支持返回其长度，因此可以编写代码 len(fs) 而其将调用 FieldStorage 的 __len__() 方法，并返回其识别的查询参数个数
+
+The self.keys() method checks whether self.list is None, so the __len__ method doesn’t need to duplicate this error checking.
+self.keys() 方法检查 self.list is None 是否为真值，因此 __len__ 方法无需重复该错误检查
+
+Classes That Act Like Dictionaries
+行为方式与字典类似的类
+
+Extending the previous section a bit, you can define classes that not only respond to the “in” operator and the len() function, but they act like full-blown dictionaries, returning values based on keys.
+在前一节的基础上稍作拓展，就不仅可以对 “in” 运算符和 len() 函数进行响应，还可像全功能字典一样根据键来返回值
+
+to get a value by its key
+通过键来获取值
+
+x[key]
+x[key]
+
+x.__getitem__(key)
+x.__getitem__(key)
+
+to set a value by its key
+通过键来设置值
+
+x[key] = value
+x[key] = value
+
+x.__setitem__(key, value)
+x.__setitem__(key, value)
+
+to delete a key-value pair
+删除一个键值对
+
+del x[key]
+del x[key]
+
+x.__delitem__(key)
+x.__delitem__(key)
+
+to provide a default value for missing keys
+为缺失键提供默认值
+
+x[nonexistent_key]
+x[nonexistent_key]
+
+x.__missing__(nonexistent_key)
+x.__missing__(nonexistent_key)
+
+The FieldStorage class from the cgi module also defines these special methods, which means you can do things like this:
+cgi 模块 的 FieldStorage 类 同样定义了这些特殊方法，也就是说可以像下面这样编码：
+
+The fs object is an instance of cgi.FieldStorage, but you can still evaluate expressions like fs['q'].
+fs 对象是 cgi.FieldStorage 类的一个实例，但仍然可以像 fs['q'] 这样估算表达式
+
+fs['q'] invokes the __getitem__() method with the key parameter set to 'q'.
+fs['q'] 将 key 参数设置为 'q' 来调用 __getitem__() 方法
+
+It then looks up in its internally maintained list of query parameters (self.list) for an item whose .name matches the given key.
+然后它将在其内部维护的查询参数列表 (self.list) 中查找一个 .name 与给定键相符的字典项
+
+Classes That Act Like Numbers
+行为方式与数值类似的类
+
+Using the appropriate special methods, you can define your own classes that act like numbers.
+使用适当的特殊方法，可以将类的行为方式定义为与数字相仿
+
+That is, you can add them, subtract them, and perform other mathematical operations on them.
+也就是说，可以进行相加、相减，并进行其它数学运算
+
+This is how fractions are implemented — the Fraction class implements these special methods, then you can do things like this:
+这就是 分数 的实现方式—— Fraction 类实现了这些特殊方法，然后就可以进行下列运算了：
+
+Here is the comprehensive list of special methods you need to implement a number-like class.
+以下是实现“类数字”类的完整特殊方法清单：
+
+addition
+加法
+
+x + y
+x + y
+
+x.__add__(y)
+x.__add__(y)
+
+subtraction
+减法
+
+x - y
+x - y
+
+x.__sub__(y)
+x.__sub__(y)
+
+multiplication
+乘法
+
+x * y
+x * y
+
+x.__mul__(y)
+x.__mul__(y)
+
+division
+除法
+
+x / y
+x / y
+
+x.__truediv__(y)
+x.__truediv__(y)
+
+floor division
+地板除
+
+x // y
+x // y
+
+x.__floordiv__(y)
+x.__floordiv__(y)
+
+modulo (remainder)
+取模（取余）
+
+x % y
+x % y
+
+x.__mod__(y)
+x.__mod__(y)
+
+floor division & modulo
+地板除 & 取模
+
+divmod(x, y)
+divmod(x, y)
+
+x.__divmod__(y)
+x.__divmod__(y)
+
+raise to power
+乘幂
+
+x ** y
+x ** y
+
+x.__pow__(y)
+x.__pow__(y)
+
+left bit-shift
+左位移
+
+x << y
+x << y
+
+x.__lshift__(y)
+x.__lshift__(y)
+
+right bit-shift
+右位移
+
+x >> y
+x >> y
+
+x.__rshift__(y)
+x.__rshift__(y)
+
+bitwise and
+按位 and
+
+x & y
+x & y
+
+x.__and__(y)
+x.__and__(y)
+
+bitwise xor
+按位 xor
+
+x ^ y
+x ^ y
+
+x.__xor__(y)
+x.__xor__(y)
+
+bitwise or
+按位 or
+
+x | y
+x | y
+
+x.__or__(y)
+x.__or__(y)
+
+That’s all well and good if x is an instance of a class that implements those methods.
+如果 x 是某个实现了所有这些方法的类的实例，那么万事大吉
+
+But what if it doesn’t implement one of them?
+但如果未实现其中之一呢
+
+Or worse, what if it implements it, but it can’t handle certain kinds of arguments?
+或者更糟，如果实现了，但却无法处理某几类参数会怎么样
+
+For example:
+例如：
+
+This is not a case of taking a Fraction and dividing it by an integer (as in the previous example).
+这并 不是 传入一个 分数 并将其除以一个整数（如前例那样）的情况
+
+That case was straightforward: x / 3 calls x.__truediv__(3), and the __truediv__() method of the Fraction class handles all the math.
+前例中的情况非常直观： x / 3 调用 x.__truediv__(3)，而Fraction 的 __truediv__() 方法处理所有的数学运算
+
+But integers don’t “know” how to do arithmetic operations with fractions.
+但整数并不“知道”如何对分数进行数学计算
+
+So why does this example work?
+因此本例该如何运作呢
+
+There is a second set of arithmetic special methods with reflected operands.
+和 反映操作 相关的还有第二部分算数特殊方法
+
+Given an arithmetic operation that takes two operands (e.g.
+给定一个二元算术运算 （例如： x / y），有两种方法来实现它：
+
+Tell x to divide itself by y, or
+告诉 x 将自己除以 y，或者
+
+Tell y to divide itself into x
+告诉 y 去除 x
+
+The set of special methods above take the first approach: given x / y, they provide a way for x to say “I know how to divide myself by y.” The following set of special methods tackle the second approach: they provide a way for y to say “I know how to be the denominator and divide myself into x.”
+之前提到的特殊方法集合采用了第一种方式：对于给定 x / y，它们为 x 提供了一种途径来表述“我知道如何将自己除以 y
+
+addition
+加法
+
+x + y
+x + y
+
+y.__radd__(x)
+y.__radd__(x)
+
+subtraction
+减法
+
+x - y
+x - y
+
+y.__rsub__(x)
+y.__rsub__(x)
+
+multiplication
+乘法
+
+x * y
+x * y
+
+y.__rmul__(x)
+y.__rmul__(x)
+
+division
+除法
+
+x / y
+x / y
+
+y.__rtruediv__(x)
+y.__rtruediv__(x)
+
+floor division
+地板除
+
+x // y
+x // y
+
+y.__rfloordiv__(x)
+y.__rfloordiv__(x)
+
+modulo (remainder)
+取模（取余）
+
+x % y
+x % y
+
+y.__rmod__(x)
+y.__rmod__(x)
+
+floor division & modulo
+地板除 & 取模
+
+divmod(x, y)
+divmod(x, y)
+
+y.__rdivmod__(x)
+y.__rdivmod__(x)
+
+raise to power
+乘幂
+
+x ** y
+x ** y
+
+y.__rpow__(x)
+y.__rpow__(x)
+
+left bit-shift
+左位移
+
+x << y
+x << y
+
+y.__rlshift__(x)
+y.__rlshift__(x)
+
+right bit-shift
+右位移
+
+x >> y
+x >> y
+
+y.__rrshift__(x)
+y.__rrshift__(x)
+
+bitwise and
+按位 and
+
+x & y
+x & y
+
+y.__rand__(x)
+y.__rand__(x)
+
+bitwise xor
+按位 xor
+
+x ^ y
+x ^ y
+
+y.__rxor__(x)
+y.__rxor__(x)
+
+bitwise or
+按位 or
+
+x | y
+x | y
+
+y.__ror__(x)
+y.__ror__(x)
+
+But wait!
+但是等一下
+
+There’s more!
+还有更多特殊方法
+
+If you’re doing “in-place” operations, like x /= 3, there are even more special methods you can define.
+如果在进行“原地”操作，如： x /= 3，还可定义更多的特殊方法
+
+in-place addition
+原地加法
+
+x += y
+x += y
+
+x.__iadd__(y)
+x.__iadd__(y)
+
+in-place subtraction
+原地减法
+
+x -= y
+x -= y
+
+x.__isub__(y)
+x.__isub__(y)
+
+in-place multiplication
+原地乘法
+
+x *= y
+x *= y
+
+x.__imul__(y)
+x.__imul__(y)
+
+in-place division
+原地除法
+
+x /= y
+x /= y
+
+x.__itruediv__(y)
+x.__itruediv__(y)
+
+in-place floor division
+原地地板除法
+
+x //= y
+x //= y
+
+x.__ifloordiv__(y)
+x.__ifloordiv__(y)
+
+in-place modulo
+原地取模
+
+x %= y
+x %= y
+
+x.__imod__(y)
+x.__imod__(y)
+
+in-place raise to power
+原地乘幂
+
+x **= y
+x **= y
+
+x.__ipow__(y)
+x.__ipow__(y)
+
+in-place left bit-shift
+原地左位移
+
+x <<= y
+x <<= y
+
+x.__ilshift__(y)
+x.__ilshift__(y)
+
+in-place right bit-shift
+原地右位移
+
+x >>= y
+x >>= y
+
+x.__irshift__(y)
+x.__irshift__(y)
+
+in-place bitwise and
+原地按位 and
+
+x &= y
+x &= y
+
+x.__iand__(y)
+x.__iand__(y)
+
+in-place bitwise xor
+原地按位 xor
+
+x ^= y
+x ^= y
+
+x.__ixor__(y)
+x.__ixor__(y)
+
+in-place bitwise or
+原地按位 or
+
+x |= y
+x |= y
+
+x.__ior__(y)
+x.__ior__(y)
+
+Note: for the most part, the in-place operation methods are not required.
+注意：多数情况下，并不需要原地操作方法
+
+If you don’t define an in-place method for a particular operation, Python will try the methods.
+如果未对特定运算定义“就地”方法，Python 将会试着使用（普通）方法
+
+For example, to execute the expression x /= y, Python will:
+例如，为执行表达式 x /= y，Python 将会：
+
+Try calling x.__itruediv__(y).
+试着调用 x.__itruediv__(y)
+
+If this method is defined and returns a value other than NotImplemented, we’re done.
+如果该方法已经定义，并返回了 NotImplemented 之外的值，那已经大功告成了
+
+Try calling x.__truediv__(y).
+试图调用 x.__truediv__(y)
+
+If this method is defined and returns a value other than NotImplemented, the old value of x is discarded and replaced with the return value, just as if you had done x = x / y instead.
+如果该方法已定义并返回一个 NotImplemented 之外的值， x 的旧值将被丢弃，并将所返回的值替代它，就像是进行了 x = x / y 运算
+
+Try calling y.__rtruediv__(x).
+试图调用 y.__rtruediv__(x)
+
+If this method is defined and returns a value other than NotImplemented, the old value of x is discarded and replaced with the return value.
+如果该方法已定义并返回了一个 NotImplemented 之外的值，x 的旧值将被丢弃，并用所返回值进行替换
+
+So you only need to define in-place methods like the __itruediv__() method if you want to do some special optimization for in-place operands.
+因此如果想对原地运算进行优化，仅需像 __itruediv__() 方法一样定义“原地”方法
+
+Otherwise Python will essentially reformulate the in-place operand to use a regular operand + a variable assignment.
+否则，基本上 Python 将会重新生成原地运算公式，以使用常规的运算及变量赋值
+
+There are also a few “unary” mathematical operations you can perform on number-like objects by themselves.
+还有一些“一元”数学运算，可以对“类-数字”对象自己执行
+
+negative number
+负数
+
+-x
+-x
+
+x.__neg__()
+x.__neg__()
+
+positive number
+正数
+
++x
++x
+
+x.__pos__()
+x.__pos__()
+
+absolute value
+绝对值
+
+abs(x)
+abs(x)
+
+x.__abs__()
+x.__abs__()
+
+inverse
+取反
+
+~x
+~x
+
+x.__invert__()
+x.__invert__()
+
+complex number
+复数
+
+complex(x)
+complex(x)
+
+x.__complex__()
+x.__complex__()
+
+integer
+整数转换
+
+int(x)
+int(x)
+
+x.__int__()
+x.__int__()
+
+floating point number
+浮点数
+
+float(x)
+float(x)
+
+x.__float__()
+x.__float__()
+
+number rounded to nearest integer
+四舍五入至最近的整数
+
+round(x)
+round(x)
+
+x.__round__()
+x.__round__()
+
+number rounded to nearest n digits
+四舍五入至最近的 n 位小数
+
+round(x, n)
+round(x, n)
+
+x.__round__(n)
+x.__round__(n)
+
+smallest integer >= x
+>= x 的最小整数
+
+math.ceil(x)
+math.ceil(x)
+
+x.__ceil__()
+x.__ceil__()
+
+largest integer <= x
+<= x的最大整数
+
+math.floor(x)
+math.floor(x)
+
+x.__floor__()
+x.__floor__()
+
+truncate x to nearest integer toward 0
+对 x 朝向 0 取整
+
+math.trunc(x)
+math.trunc(x)
+
+x.__trunc__()
+x.__trunc__()
+
+number as a list index
+作为列表索引的数字
+
+a_list[x]
+a_list[x]
+
+a_list[x.__index__()]
+a_list[x.__index__()]
+
+Classes That Can Be Compared
+可比较的类
+
+I broke this section out from the previous one because comparisons are not strictly the purview of numbers.
+我将此内容从前一节中拿出来使其单独成节，是因为“比较”操作并不局限于数字
+
+Many datatypes can be compared — strings, lists, even dictionaries.
+许多数据类型都可以进行比较——字符串、列表，甚至字典
+
+If you’re creating your own class and it makes sense to compare your objects to other objects, you can use the following special methods to implement comparisons.
+如果要创建自己的类，且对象之间的比较有意义，可以使用下面的特殊方法来实现比较
+
+equality
+相等
+
+x == y
+x == y
+
+x.__eq__(y)
+x.__eq__(y)
+
+inequality
+不相等
+
+x != y
+x != y
+
+x.__ne__(y)
+x.__ne__(y)
+
+less than
+小于
+
+x < y
+x < y
+
+x.__lt__(y)
+x.__lt__(y)
+
+less than or equal to
+小于或等于
+
+x <= y
+x <= y
+
+x.__le__(y)
+x.__le__(y)
+
+greater than
+大于
+
+x > y
+x > y
+
+x.__gt__(y)
+x.__gt__(y)
+
+greater than or equal to
+大于或等于
+
+x >= y
+x >= y
+
+x.__ge__(y)
+x.__ge__(y)
+
+truth value in a boolean context
+布尔上上下文环境中的真值
+
+if x:
+if x:
+
+x.__bool__()
+x.__bool__()
+
+☞If you define a __lt__() method but no __gt__() method, Python will use the __lt__() method with operands swapped.
+☞如果定义了 __lt__() 方法但没有定义 __gt__() 方法，Python 将通过经交换的算子调用 __lt__() 方法
+
+However, Python will not combine methods.
+然而，Python 并不会组合方法
+
+For example, if you define a __lt__() method and a __eq__() method and try to test whether x <= y, Python will not call __lt__() and __eq__() in sequence.
+例如，如果定义了 __lt__() 方法和 __eq()__ 方法，并试图测试是否 x <= y，Python 不会按顺序调用 __lt__() 和 __eq()__ 
+
+It will only call the __le__() method.
+它将只调用 __le__() 方法
+
+Classes That Can Be Serialized
+可序列化的类
+
+Python supports serializing and unserializing arbitrary objects.
+Python 支持 任意对象的序列化和反序列化
+
+(Most Python references call this process “pickling” and “unpickling.”) This can be useful for saving state to a file and restoring it later.
+（多数 Python 参考资料称该过程为 “pickling” 和 “unpickling”）
+
+All of the native datatypes support pickling already.
+该技术对与将状态保存为文件并在稍后恢复它非常有意义
+
+If you create a custom class that you want to be able to pickle, read up on the pickle protocol to see when and how the following special methods are called.
+所有的 内置数据类型 均已支持 pickling 
+
+a custom object copy
+自定义对象的复制
+
+copy.copy(x)
+copy.copy(x)
+
+x.__copy__()
+x.__copy__()
+
+a custom object deepcopy
+自定义对象的深度复制
+
+copy.deepcopy(x)
+copy.deepcopy(x)
+
+x.__deepcopy__()
+x.__deepcopy__()
+
+to get an object’s state before pickling
+在 pickling 之前获取对象的状态
+
+pickle.dump(x, file)
+pickle.dump(x, file)
+
+x.__getstate__()
+x.__getstate__()
+
+to serialize an object
+序列化某对象
+
+pickle.dump(x, file)
+pickle.dump(x, file)
+
+x.__reduce__()
+x.__reduce__()
+
+to serialize an object (new pickling protocol)
+序列化某对象（新 pickling 协议）
+
+pickle.dump(x, file, protocol_version)
+pickle.dump(x, file, protocol_version)
+
+x.__reduce_ex__(protocol_version)
+x.__reduce_ex__(protocol_version)
+
+control over how an object is created during unpickling
+控制 unpickling 过程中对象的创建方式
+
+x = pickle.load(file)
+x = pickle.load(file)
+
+x.__getnewargs__()
+x.__getnewargs__()
+
+to restore an object’s state after unpickling
+在 unpickling 之后还原对象的状态
+
+x = pickle.load(file)
+x = pickle.load(file)
+
+x.__setstate__()
+x.__setstate__()
+
+* To recreate a serialized object, Python needs to create a new object that looks like the serialized object, then set the values of all the attributes on the new object.
+* 要重建序列化对象，Python 需要创建一个和被序列化的对象看起来一样的新对象，然后设置新对象的所有属性
+
+The __getnewargs__() method controls how the object is created, then the __setstate__() method controls how the attribute values are restored.
+__getnewargs__() 方法控制新对象的创建过程，而 __setstate__() 方法控制属性值的还原方式
+
+Classes That Can Be Used in a with Block
+可在 with 语块中使用的类
+
+A with block defines a runtime context;
+with 语块定义了 运行时刻上下文环境
+
+you “enter” the context when you execute the with statement, and you “exit” the context after you execute the last statement in the block.
+在执行 with 语句时将“进入”该上下文环境，而执行该语块中的最后一条语句将“退出”该上下文环境
+
+do something special when entering a with block
+在进入 with 语块时进行一些特别操作
+
+with x:
+with x:
+
+x.__enter__()
+x.__enter__()
+
+do something special when leaving a with block
+在退出 with 语块时进行一些特别操作
+
+with x:
+with x:
+
+x.__exit__(exc_type, exc_value, traceback)
+x.__exit__()
+
+This is how the with file idiom works.
+以下是 with file 习惯用法 的运作方式：
+
+The file object defines both an __enter__() and an __exit__() method.
+该文件对象同时定义了一个 __enter__() 和一个 __exit__() 方法
+
+The __enter__() method checks that the file is open;
+该 __enter__() 方法检查文件是否处于打开状态
+
+if it’s not, the _checkClosed() method raises an exception.
+如果没有， _checkClosed() 方法引发一个例外
+
+The __enter__() method should almost always return self — this is the object that the with block will use to dispatch properties and methods.
+__enter__() 方法将始终返回 self —— 这是 with 语块将用于调用属性和方法的对象
+
+After the with block, the file object automatically closes.
+在 with 语块结束后，文件对象将自动关闭
+
+How?
+怎么做到的
+
+In the __exit__() method, it calls self.close().
+在 __exit__() 方法中调用了 self.close() .
+
+☞The __exit__() method will always be called, even if an exception is raised inside the with block.
+☞该 __exit__() 方法将总是被调用，哪怕是在 with 语块中引发了例外
+
+In fact, if an exception is raised, the exception information will be passed to the __exit__() method.
+实际上，如果引发了例外，该例外信息将会被传递给 __exit__() 方法
+
+See With Statement Context Managers for more details.
+查阅 With 状态上下文环境管理器 了解更多细节
+
+For more on context managers, see Closing Files Automatically and Redirecting Standard Output.
+要了解关于上下文管理器的更多内容，请查阅 《自动关闭文件》 和 《重定向标准输出》
+
+Really Esoteric Stuff
+真正神奇的东西
+
+If you know what you’re doing, you can gain almost complete control over how classes are compared, how attributes are defined, and what kinds of classes are considered subclasses of your class.
+如果知道自己在干什么，你几乎可以完全控制类是如何比较的、属性如何定义，以及类的子类是何种类型
+
+a class constructor
+类构造器
+
+x = MyClass()
+x = MyClass()
+
+x.__new__()
+x.__new__()
+
+a class destructor
+类析构器
+
+del x
+del x
+
+x.__del__()
+x.__del__()
+
+only a specific set of attributes to be defined
+只定义特定集合的某些属性
+
+x.__slots__()
+x.__slots__()
+
+a custom hash value
+自定义散列值
+
+hash(x)
+hash(x)
+
+x.__hash__()
+x.__hash__()
+
+to get a property’s value
+获取某个属性的值
+
+x.color
+x.color
+
+type(x).__dict__['color'].__get__(x, type(x))
+type(x).__dict__['color'].__get__(x, type(x))
+
+to set a property’s value
+设置某个属性的值
+
+x.color = 'PapayaWhip'
+x.color = 'PapayaWhip'
+
+type(x).__dict__['color'].__set__(x, 'PapayaWhip')
+type(x).__dict__['color'].__set__(x, 'PapayaWhip')
+
+to delete a property
+删除某个属性
+
+del x.color
+del x.color
+
+type(x).__dict__['color'].__del__(x)
+type(x).__dict__['color'].__del__(x)
+
+to control whether an object is an instance of your class
+控制某个对象是否是该对象的实例 your class
+
+isinstance(x, MyClass)
+isinstance(x, MyClass)
+
+MyClass.__instancecheck__(x)
+MyClass.__instancecheck__(x)
+
+to control whether a class is a subclass of your class
+控制某个类是否是该类的子类
+
+issubclass(C, MyClass)
+issubclass(C, MyClass)
+
+MyClass.__subclasscheck__(C)
+MyClass.__subclasscheck__(C)
+
+to control whether a class is a subclass of your abstract base class
+控制某个类是否是该抽象基类的子类
+
+issubclass(C, MyABC)
+issubclass(C, MyABC)
+
+MyABC.__subclasshook__(C)
+MyABC.__subclasshook__(C)
+
+* Exactly when Python calls the __del__() special method is incredibly complicated.
+* 确切掌握 Python 何时调用 __del__() 特别方法 是件难以置信的复杂事情
+
+To fully understand it, you need to know how Python keeps track of objects in memory.
+要想完全理解它，必须清楚 Python 如何在内存中跟踪对象
+
+Here’s a good article on Python garbage collection and class destructors.
+以下有一篇好文章介绍 Python 垃圾收集和类析构器
+
+You should also read about weak references, the weakref module, and probably the gc module for good measure.
+还可以阅读 《弱引用》、《weakref 模块》，还可以将 《gc 模块》 当作补充阅读材料
+
+Further Reading
+深入阅读
+
+Modules mentioned in this appendix:
+本附录中提到的模块：
+
+zipfile module
+zipfile 模块
+
+cgi module
+cgi 模块
+
+collections module
+collections 模块
+
+math module
+math［数学］ 模块
+
+pickle module
+pickle 模块
+
+copy module
+copy 模块
+
+abc (“Abstract Base Classes”) module
+abc (“抽象基类”) 模块
+
+Other light reading:
+其它启发式阅读：
+
+Format Specification Mini-Language
+迷你语言格式规范
+
+Python data model
+Python 数据模型
+
+Built-in types
+内建类型
+
+PEP 357: Allowing Any Object to be Used for Slicing
+PEP 357: 使任何对象可以使用切片
+
+PEP 3119: Introducing Abstract Base Classes
+PEP 3119: 抽象基类简介
+
+© 2001–11 Mark Pilgrim
+© 2001–9 Mark Pilgrim
+

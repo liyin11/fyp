@@ -1,0 +1,111 @@
+Django 1.5 documentation
+Django 1.5 documentation
+
+Quick install guide¶
+快速安装指南¶
+
+Before you can use Django, you’ll need to get it installed.
+在你开始使用 Django 之前，你需要先安装它
+
+We have a complete installation guide that covers all the possibilities;
+我们有一个 完整安装指南 它涵盖了所有的安装步骤和可能遇到的问题
+
+this guide will guide you to a simple, minimal installation that’ll work while you walk through the introduction.
+本指南将会给你一个最简单、简洁的安装指引
+
+Install Python¶
+安装 Python¶
+
+Being a Python Web framework, Django requires Python.
+作为一个 Web 框架，Django 需要使用 Python 
+
+It works with any Python version from 2.6.5 to 2.7 (due to backwards incompatibilities in Python 3.0, Django does not currently work with Python 3.0;
+它适用 2.6.5 到 2.7 的所有 Python 版本
+
+see the Django FAQ for more information on supported Python versions and the 3.0 transition), these versions of Python include a lightweight database called SQLite so you won’t need to set up a database just yet.
+它还具有 3.2 和 3.3 版本的实验性支持
+
+Get Python at http://www.python.org.
+在 http://www.python.org 获取 Python 
+
+If you’re running Linux or Mac OS X, you probably already have it installed.
+如果你使用 Linux 或者 Mac OS X，那很可能已经安装了 Python 
+
+Django on Jython
+在 Jython 使用 Django
+
+If you use Jython (a Python implementation for the Java platform), you’ll need to follow a few additional steps.
+如果你使用 Jython (一个在 Java 平台上实现的 Python )，你需要遵循一些额外的步骤
+
+See Running Django on Jython for details.
+查看 在 Jyton 上运行 Python 获取详细信息
+
+You can verify that Python is installed by typing python from your shell;
+在你的终端命令行(shell)下输入 python 来验证是否已经安装 Python ; 你将看到如下类似的提示信息:
+
+Set up a database¶
+建立一个数据库¶
+
+This step is only necessary if you’d like to work with a “large” database engine like PostgreSQL, MySQL, or Oracle.
+若你需要一个“大”数据库引擎，例如：PostgreSQL ，MySQL ，或 Oracle ，那此步骤是需要的
+
+To install such a database, consult the database installation information.
+ 想要安装这样一个数据库，请参考 数据库安装信息.
+
+Remove any old versions of Django¶
+删除旧版本的 Django¶
+
+If you are upgrading your installation of Django from a previous version, you will need to uninstall the old Django version before installing the new version.
+如果你是从旧版本的 Django 升级安装，你将需要 在安装新版本之前先卸载旧版本的 Django.
+
+Install Django¶
+安装 Django¶
+
+You’ve got three easy options to install Django:
+你可以使用下面这简单的三个方式来安装 Django:
+
+Always refer to the documentation that corresponds to the version of Django you’re using!
+总是参考你所使用的对应版本的 Django 文档
+
+If you do either of the first two steps, keep an eye out for parts of the documentation marked new in development version.
+如果采用了前两种方式进行安装，你需要注意在文档中标明**在开发版中新增**的标记
+
+That phrase flags features that are only available in development versions of Django, and they likely won’t work with an official release.
+这个标记表明这个特性仅适用开发版的 Django ，而他们可能不在官方版本发布
+
+Verifying¶
+验证安装¶
+
+To verify that Django can be seen by Python, type python from your shell.
+为了验证 Django 被成功的安装到 Python 中，在你的终端命令行 (shell) 下输入 python 
+
+Then at the Python prompt, try to import Django:
+ 然后在 Python 提示符下，尝试导入 Django:
+
+That’s it – you can now move onto the tutorial.
+安装完成 – 现在你可以 学习入门教程.
+
+Table Of Contents
+Table Of Contents
+
+Browse
+Browse
+
+You are here:
+You are here:
+
+This Page
+This Page
+
+Quick search
+Quick search
+
+Enter search terms or a module, class or function name.
+Enter search terms or a module, class or function name.
+
+Last update:
+Last update:
+
+Oct 30, 2013
+Dec 02, 2013
+

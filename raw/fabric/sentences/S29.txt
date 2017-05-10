@@ -1,0 +1,105 @@
+Managing output¶
+输出管理¶
+
+The fab tool is very verbose by default and prints out almost everything it can, including the remote end’s stderr and stdout streams, the command strings being executed, and so forth.
+fab 的输出默认情况下是非常复杂的，几乎是将尽可能地输出所有能输出的内容，包括远程的 stderr 和 stdout 输出流、被执行的命令，等等
+
+While this is necessary in many cases in order to know just what’s going on, any nontrivial Fabric task will quickly become difficult to follow as it runs.
+在很多情况下，为了了解远程的执行进度这是必须的，但是对于复杂的 Fabric 任务，很快就跟不上它的运行状态
+
+Output levels¶
+输出等级¶
+
+To aid in organizing task output, Fabric output is grouped into a number of non-overlapping levels or groups, each of which may be turned on or off independently.
+为了改进任务输出，Fabric 的输出会被整合进一系列基本独立的层级或者集合，其中每一个都以独立开启或关闭
+
+This provides flexible control over what is displayed to the user.
+这为用户端的输出提供了灵活的控制
+
+Note
+注解
+
+All levels, save for debug and exceptions, are on by default.
+所有层级的输出在 debug 和 exceptions 情况下默认都会保存下来
+
+The standard, atomic output levels/groups are as follows:
+标准的原子输出层级／集合包括以下：
+
+Changed in version 0.9.2: Added “Executing task” lines to the running output level.
+status：状态信息
+
+Changed in version 0.9.2: Added the user output level.
+aborts：终止信息
+
+There are two more atomic output levels for use when troubleshooting: debug, which behaves slightly differently from the rest, and exceptions, whose behavior is included in debug but may be enabled separately.
+warnings：警报信息
+
+debug: Turn on debugging (which is off by default.) Currently, this is largely used to view the “full” commands being run;
+running：输出正在执行的命令或者正在传输的文件名称，比如： [myserver] run: ls /var/www
+
+take for example this run call:
+同时它还输出正在运行的任务名，比如：[myserver] Executing task 'foo'
+
+Normally, the running line will show exactly what is passed into run, like so:
+stdout：本地或远程的 stdout
+
+With debug on, and assuming you’ve left shell set to True, you will see the literal, full string as passed to the remote server:
+stderr：本地或远程的 stderr
+
+Enabling debug output will also display full Python tracebacks during aborts (as if exceptions output was enabled).
+user：用户生成的输出
+
+Note
+在 0.9.2 版更改: running 输出级别中新增 “Executing task” 行
+
+Where modifying other pieces of output (such as in the above example where it modifies the ‘running’ line to show the shell and any escape characters), this setting takes precedence over the others;
+在 0.9.2 版更改: 添加 user 输出级别
+
+exceptions: Enables display of tracebacks when exceptions occur;
+在调试问题的时候还有几个可用的原子输出级别：debug，和其它的都有所不同
+
+intended for use when debug is set to False but one is still interested in detailed error info.
+exceptions，其行为只能包含在 debug 中，不过也可以单独设定
+
+Changed in version 1.0: Debug output now includes full Python tracebacks during aborts.
+debug：开启调试模式（默认是关闭的）
+
+Changed in version 1.11: Added the exceptions output level.
+通常情况下 running 会详细显示 run 所接收到的内容，就像这样：
+
+In addition to the atomic/standalone levels above, Fabric also provides a couple of convenience aliases which map to multiple other levels.
+开启 debug 模式，同时保证 shell 设置是 ``True`，你将会看到传向远程服务器的所有字符都会输出出来：
+
+Changed in version 1.4: Added the commands output alias.
+启用 debug 时输出同时还会显示推出时的完整的 Python traceback（如果 exceptions 也启用了的话）
+
+You may toggle any of Fabric’s output levels in a number of ways;
+exceptions：异常发生时是否显示 traceback
+
+for examples, please see the API docs linked in each bullet point:
+如果你对详细的错误信息感兴趣，但 debug 为 False 时可以使用
+
+Direct modification of fabric.state.output: fabric.state.output is a dictionary subclass (similar to env) whose keys are the output level names, and whose values are either True (show that particular type of output) or False (hide it.)
+在 1.0 版更改: 终止时的调试输出现在会包含整个 Python traceback
+
+fabric.state.output is the lowest-level implementation of output levels and is what Fabric’s internals reference when deciding whether or not to print their output.
+在 1.11 版更改: 新增 exceptions 输出级别
+
+Context managers: hide and show are twin context managers that take one or more output level names as strings, and either hide or show them within the wrapped block.
+作为对上述原子／独立级别的补充，Fabric 还提供了一系列方便的对应多个级别的别名，这可能会涉及到一些其它级别涉及的地方，可以用于高效地切换它所对应的级别的状态
+
+See also
+output：对应 stdout 和 stderr
+
+settings, which can nest calls to hide and/or show inside itself.
+everything：包括 warnings、running、user 和 output （见上面介绍）
+
+Command-line arguments: You may use the --hide and/or --show arguments to fab options and arguments, which behave exactly like the context managers of the same names (but are, naturally, globally applied) and take comma-separated strings as input.
+commands：包含 stdout 和 running
+
+Pythonic remote execution
+你可以通过多种方式切换 Fabric 的输出层级，你可以看看下面每条对应的 API 文档作为例子：
+
+Enter search terms or a module, class or function name.
+直接修改 fabric.state.output：fabric.state.output 是字典的子类（类似于 env），以输出层级名为键，值为真（显示某个层级的输出）或假（隐藏）
+

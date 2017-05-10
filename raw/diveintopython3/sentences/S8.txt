@@ -1,0 +1,681 @@
+You are here: Home ‣ Dive Into Python 3 ‣
+当前位置: 首页‣ 深入 Python 3 ‣
+
+Difficulty level: ♦♦♦♢♢
+难度级别: ♦♦♦♢♢
+
+Classes & Iterators
+类&迭代器
+
+❝ East is East, and West is West, and never the twain shall meet.
+❝ 东是东，西是西，东西不相及 ❞ — 拉迪亚德·吉卜林
+
+Diving In
+深入
+
+Iterators are the “secret sauce” of Python 3.
+生成器是一类特殊 迭代器
+
+They’re everywhere, underlying everything, always just out of sight.
+ 一个产生值的函数 yield 是一种产生一个迭代器却不需要构建迭代器的精密小巧的方法
+
+Comprehensions are just a simple form of iterators.
+ 我会告诉你我是什么意思
+
+Remember the Fibonacci generator?
+记得 菲波拉稀生成器吗
+
+Here it is as a built-from-scratch iterator:
+ 这里是一个从无到有的迭代器：
+
+[download fibonacci2.py]
+[下载 fibonacci2.py]
+
+Let’s take that one line at a time.
+让我们一行一行来分析
+
+class?
+类(class)
+
+What’s a class?
+什么是类
+
+Defining Classes
+类的定义
+
+Python is fully object-oriented: you can define your own classes, inherit from your own or built-in classes, and instantiate the classes you’ve defined.
+Python 是完全面向对象的：你可以定义自己的类，从你自己或系统自带的类继承，并生成实例
+
+Defining a class in Python is simple.
+在Python里定义一个类非常简单
+
+As with functions, there is no separate interface definition.
+就像函数一样， 没有分开的接口定义
+
+Just define the class and start coding.
+ 只需定义类就开始编码
+
+A Python class starts with the reserved word class, followed by the class name.
+ Python类以保留字 class 开始， 后面跟类名
+
+Technically, that’s all that’s required, since a class doesn’t need to inherit from any other class.
+ 技术上来说，只需要这么多就够了，因为一个类不是必须继承其他类
+
+The name of this class is PapayaWhip, and it doesn’t inherit from any other class.
+类名是 PapayaWhip， 没有从其他类继承
+
+Class names are usually capitalized, EachWordLikeThis, but this is only a convention, not a requirement.
+ 类名通常是大写字母分隔， 如EachWordLikeThis， 但这只是个习惯，并非必须
+
+You probably guessed this, but everything in a class is indented, just like the code within a function, if statement, for loop, or any other block of code.
+你可能猜到，类内部的内容都需缩进，就像函数中的代码一样， if 语句， for 循环， 或其他代码块
+
+The first line not indented is outside the class.
+第一行非缩进代码表示到了类外
+
+This PapayaWhip class doesn’t define any methods or attributes, but syntactically, there needs to be something in the definition, thus the pass statement.
+PapayaWhip 类没有定义任何方法和属性， 但依据句法，应该在定义中有东西，这就是 pass 语句
+
+This is a Python reserved word that just means “move along, nothing to see here”.
+ 这是Python 保留字，意思是“继续，这里看不到任何东西”
+
+It’s a statement that does nothing, and it’s a good placeholder when you’re stubbing out functions or classes.
+ 这是一个什么都不做的语句，是一个很好的占位符，如果你的函数和类什么都不想做（删空函数或类）
+
+☞The pass statement in Python is like a empty set of curly braces ({}) in Java or C.
+☞Python中的pass 就像Java 或 C中的空大括号对 ({}) 
+
+Many classes are inherited from other classes, but this one is not.
+很多类继承自其他类， 但这个类没有
+
+Many classes define methods, but this one does not.
+ 很多类有方法，这个类也没有
+
+There is nothing that a Python class absolutely must have, other than a name.
+ Python 类不是必须有东西，除了一个名字
+
+In particular, C++ programmers may find it odd that Python classes don’t have explicit constructors and destructors.
+ 特别是C++ 程序员发现 Python 类没有显式的构造和析构函数会觉得很古怪
+
+Although it’s not required, Python classes can have something similar to a constructor: the __init__() method.
+ 尽管不是必须， Python 类 可以 具有类似构造函数的东西： __init__() 方法
+
+The __init__() Method
+__init__() 方法
+
+This example shows the initialization of the Fib class using the __init__ method.
+本示例展示 Fib 类使用 __init__ 方法
+
+Classes can (and should) have docstrings too, just like modules and functions.
+类同样可以 (而且应该) 具有docstring， 与模块和方法一样
+
+The __init__() method is called immediately after an instance of the class is created.
+类实例创建后，__init__() 方法被立即调用
+
+It would be tempting — but technically incorrect — to call this the “constructor” of the class.
+很容易将其——但技术上来说不正确——称为该类的“构造函数” 
+
+It’s tempting, because it looks like a C++ constructor (by convention, the __init__() method is the first method defined for the class), acts like one (it’s the first piece of code executed in a newly created instance of the class), and even sounds like one.
+ 很容易，因为它看起来很像 C++ 的构造函数（按约定，__init__() 是类中第一个被定义的方法），行为一致（是类的新实例中第一片被执行的代码）， 看起来完全一样
+
+Incorrect, because the object has already been constructed by the time the __init__() method is called, and you already have a valid reference to the new instance of the class.
+ 错了， 因为__init__() 方法调用时，对象已经创建了，你已经有了一个合法类对象的引用
+
+The first argument of every class method, including the __init__() method, is always a reference to the current instance of the class.
+每个方法的第一个参数，包括 __init__() 方法，永远指向当前的类对象
+
+By convention, this argument is named self.
+ 习惯上，该参数叫 self
+
+This argument fills the role of the reserved word this in C++ or Java, but self is not a reserved word in Python, merely a naming convention.
+ 该参数和C++或Java中 this 角色一样， 但 self 不是 Python的保留字， 仅仅是个命名习惯
+
+Nonetheless, please don’t call it anything but self;
+ 虽然如此，请不要取别的名字，只用 self
+
+this is a very strong convention.
+ 这是一个很强的命名习惯
+
+In all class methods, self refers to the instance whose method was called.
+在 __init__() 方法中， self 指向新创建的对象
+
+But in the specific case of the __init__() method, the instance whose method was called is also the newly created object.
+ 在其他类对象中， 它指向方法所属的实例
+
+Although you need to specify self explicitly when defining the method, you do not specify it when calling the method;
+尽管需在定义方法时显式指定self ，调用方法时并 不 必须明确指定
+
+Python will add it for you automatically.
+ Python 会自动添加
+
+Instantiating Classes
+实例化类
+
+Instantiating classes in Python is straightforward.
+Python 中实例化类很直接
+
+To instantiate a class, simply call the class as if it were a function, passing the arguments that the __init__() method requires.
+ 实例化类时就像调用函数一样简单，将 __init__() 方法需要的参数传入
+
+The return value will be the newly created object.
+ 返回值就是新创建的对象
+
+You are creating an instance of the Fib class (defined in the fibonacci2 module) and assigning the newly created instance to the variable fib.
+你正创建一个 Fib 类的实例（在fibonacci2 模块中定义） 将新创建的实例赋给变量fib
+
+You are passing one parameter, 100, which will end up as the max argument in Fib’s __init__() method.
+ 你传入一个参数 100， 这是Fib的__init__()方法作为max参数传入的结束值
+
+fib is now an instance of the Fib class.
+fib 是 Fib 的实例
+
+Every class instance has a built-in attribute, __class__, which is the object’s class.
+每个类实例具有一个内建属性， __class__， 它是该对象的类
+
+Java programmers may be familiar with the Class class, which contains methods like getName() and getSuperclass() to get metadata information about an object.
+ Java 程序员可能熟悉 Class 类， 包含方法如 getName() 和 getSuperclass() 获取对象相关元数据
+
+In Python, this kind of metadata is available through attributes, but the idea is the same.
+ Python里面， 这类元数据由属性提供，但思想一致
+
+You can access the instance’s docstring just as with a function or a module.
+你可访问对象的 docstring ，就像函数或模块中的一样
+
+All instances of a class share the same docstring.
+ 类的所有实例共享一份 docstring
+
+☞In Python, simply call a class as if it were a function to create a new instance of the class.
+☞Python里面， 和调用函数一样简单的调用一个类来创建该类的新实例
+
+There is no explicit new operator like there is in C++ or Java.
+ 与C++ 或 Java不一样，没有显式的 new 操作符
+
+Instance Variables
+实例变量
+
+On to the next line:
+继续下一行：
+
+What is self.max?
+self.max是什么
+
+It’s an instance variable.
+ 它就是实例变量
+
+It is completely separate from max, which was passed into the __init__() method as an argument.
+ 与作为参数传入 __init__() 方法的 max完全是两回事
+
+self.max is “global” to the instance.
+ self.max 是实例内 “全局” 的
+
+That means that you can access it from other methods.
+ 这意味着可以在其他方法中访问它
+
+self.max is defined in the __init__() method…
+self.max 在 __init__() 方法中定义……
+
+…and referenced in the __next__() method.
+……在 __next__() 方法中引用
+
+Instance variables are specific to one instance of a class.
+实例变量特定于某个类的实例
+
+For example, if you create two Fib instances with different maximum values, they will each remember their own values.
+ 例如， 如果你创建 Fib 的两个具有不同最大值的实例， 每个实例会记住自己的值
+
+A Fibonacci Iterator
+菲波拉稀迭代器
+
+Now you’re ready to learn how to build an iterator.
+现在 你已经准备学习如何创建一个迭代器了
+
+An iterator is just a class that defines an __iter__() method.
+ 迭代器就是一个定义了 __iter__() 方法的类
+
+[download fibonacci2.py]
+[下载 fibonacci2.py]
+
+To build an iterator from scratch, Fib needs to be a class, not a function.
+从无到有创建一个迭代器， fib 应是一个类，而不是一个函数
+
+“Calling” Fib(max) is really creating an instance of this class and calling its __init__() method with max.
+“调用” Fib(max) 会创建该类一个真实的实例，并以max做为参数调用__init__() 方法
+
+The __init__() method saves the maximum value as an instance variable so other methods can refer to it later.
+ __init__() 方法以实例变量保存最大值，以便随后的其他方法可以引用
+
+The __iter__() method is called whenever someone calls iter(fib).
+当有人调用iter(fib)的时候，__iter__()就会被调用
+
+(As you’ll see in a minute, a for loop will call this automatically, but you can also call it yourself manually.) After performing beginning-of-iteration initialization (in this case, resetting self.a and self.b, our two counters), the __iter__() method can return any object that implements a __next__() method.
+（正如你等下会看到的， for 循环会自动调用它， 你也可以自己手动调用
+
+In this case (and in most cases), __iter__() simply returns self, since this class implements its own __next__() method.
+） 在完成迭代器初始化后，（在本例中， 重置我们两个计数器 self.a 和 self.b）， __iter__() 方法能返回任何实现了 __next__() 方法的对象
+
+The __next__() method is called whenever someone calls next() on an iterator of an instance of a class.
+当有人在迭代器的实例中调用next()方法时，__next__() 会自动调用
+
+That will make more sense in a minute.
+ 随后会有更多理解
+
+When the __next__() method raises a StopIteration exception, this signals to the caller that the iteration is exhausted.
+当 __next__() 方法抛出 StopIteration 异常， 这是给调用者表示迭代用完了的信号
+
+Unlike most exceptions, this is not an error;
+ 和大多数异常不同， 这不是错误
+
+it’s a normal condition that just means that the iterator has no more values to generate.
+它是正常情况，仅表示迭代器没有值可产生了
+
+If the caller is a for loop, it will notice this StopIteration exception and gracefully exit the loop.
+ 如果调用者是 for 循环， 它会注意到该 StopIteration 异常并优雅的退出
+
+(In other words, it will swallow the exception.) This little bit of magic is actually the key to using iterators in for loops.
+ （换句话说，它会吞掉该异常
+
+To spit out the next value, an iterator’s __next__() method simply returns the value.
+为了分离出下一个值， 迭代器的 __next__() 方法简单 return该值
+
+Do not use yield here;
+ 不要使用 yield 
+
+that’s a bit of syntactic sugar that only applies when you’re using generators.
+ 该语法上的小甜头仅用于你使用生成器的时候
+
+Here you’re creating your own iterator from scratch;
+ 这里你从无到有创建迭代器，使用 return 代替
+
+Thoroughly confused yet?
+完全晕了
+
+Excellent.
+ 太好了
+
+Let’s see how to call this iterator:
+ 让我们看如何调用该迭代器：
+
+Why, it’s exactly the same!
+为什么
+
+Byte for byte identical to how you called Fibonacci-as-a-generator (modulo one capital letter).
+完全一模一样
+
+But how?
+ 一字节一字节的与你调用 Fibonacci-as-a-generator （模块第一个字母大写）相同
+
+There’s a bit of magic involved in for loops.
+for 循环内有魔力
+
+Here’s what happens:
+下面是究竟发生了什么：
+
+The for loop calls Fib(1000), as shown.
+如你所见，for 循环调用 Fib(1000)
+
+This returns an instance of the Fib class.
+ 这返回Fib 类的实例
+
+Call this fib_inst.
+ 叫它 fib_inst
+
+Secretly, and quite cleverly, the for loop calls iter(fib_inst), which returns an iterator object.
+背地里，且十分聪明的， for 循环调用 iter(fib_inst)， 它返回迭代器
+
+Call this fib_iter.
+ 叫它 fib_iter
+
+In this case, fib_iter == fib_inst, because the __iter__() method returns self, but the for loop doesn’t know (or care) about that.
+ 本例中， fib_iter == fib_inst， 因为 __iter__() 方法返回 self，但for 循环不知道（也不关心）那些
+
+To “loop through” the iterator, the for loop calls next(fib_iter), which calls the __next__() method on the fib_iter object, which does the next-Fibonacci-number calculations and returns a value.
+为“循环通过”迭代器， for 循环调用 next(fib_iter)， 它又调用 fib_iter对象的 __next__() 方法，产生下一个菲波拉稀计算并返回值
+
+The for loop takes this value and assigns it to n, then executes the body of the for loop for that value of n.
+ for 拿到该值并赋给 n， 然后执行n值的 for 循环体
+
+How does the for loop know when to stop?
+for循环如何知道什么时候结束
+
+I’m glad you asked!
+很高兴你问到
+
+When next(fib_iter) raises a StopIteration exception, the for loop will swallow the exception and gracefully exit.
+ 当next(fib_iter) 抛出 StopIteration 异常时， for循环将吞下该异常并优雅退出
+
+(Any other exception will pass through and be raised as usual.) And where have you seen a StopIteration exception?
+ （其他异常将传过并如常抛出
+
+In the __next__() method, of course!
+） 在哪里你见过 StopIteration 异常
+
+A Plural Rule Iterator
+复数规则迭代器
+
+Now it’s time for the finale.
+现在到曲终的时候了
+
+Let’s rewrite the plural rules generator as an iterator.
+我们重写 复数规则生成器 为迭代器
+
+[download plural6.py]
+[下载plural6.py]
+
+So this is a class that implements __iter__() and __next__(), so it can be used as an iterator.
+因此这是一个实现了 __iter__() 和 __next__()的类
+
+Then, you instantiate the class and assign it to rules.
+所以它可以 被用作迭代器
+
+This happens just once, on import.
+然后，你实例化它并将其赋给 rules 
+
+Let’s take the class one bite at a time.
+让我们一口一口来吃：
+
+When we instantiate the LazyRules class, open the pattern file but don’t read anything from it.
+当我们实例化 LazyRules 类时， 打开模式文件，但不读取任何东西
+
+(That comes later.)
+ （随后再进行）
+
+After opening the patterns file, initialize the cache.
+打开模式文件之后，初始化缓存
+
+You’ll use this cache later (in the __next__() method) as you read lines from the pattern file.
+ 随后读取模式文件行的时候会用到它（在 __next__() 方法中） 
+
+Before we continue, let’s take a closer look at rules_filename.
+我们继续之前，让我们近观 rules_filename
+
+It’s not defined within the __iter__() method.
+它没在 __iter__() 方法中定义
+
+In fact, it’s not defined within any method.
+事实上，它没在任何方法中定义
+
+It’s defined at the class level.
+它定义于类级别
+
+It’s a class variable, and although you can access it just like an instance variable (self.rules_filename), it is shared across all instances of the LazyRules class.
+它是 类变量， 尽管访问时和实例变量一样 （self.rules_filename）， LazyRules 类的所有实例共享该变量
+
+Each instance of the class inherits the rules_filename attribute with the value defined by the class.
+类的每个实例继承了 rules_filename 属性及它在类中定义的值
+
+Changing the attribute’s value in one instance does not affect other instances…
+修改一个实例属性的值不影响其他实例……
+
+…nor does it change the class attribute.
+……也不会修改类的属性
+
+You can access the class attribute (as opposed to an individual instance’s attribute) by using the special __class__ attribute to access the class itself.
+可以使用特殊的 __class__ 属性来访问类属性（于此相对的是单独实例的属性）
+
+If you change the class attribute, all instances that are still inheriting that value (like r1 here) will be affected.
+如果修改类属性， 所有仍然继承该实例的值的实例 （如这里的r1 ） 会受影响
+
+Instances that have overridden that attribute (like r2 here) will not be affected.
+已经覆盖（overridden）了该属性（如这里的 r2 ）的所有实例 将不受影响
+
+And now back to our show.
+现在回到我们的演示：
+
+The __iter__() method will be called every time someone — say, a for loop — calls iter(rules).
+无论何时有人——如 for 循环——调用 iter(rules)的时候，__iter__() 方法都会被调用
+
+The one thing that every __iter__() method must do is return an iterator.
+每个__iter__() 方法都需要做的就是必须返回一个迭代器
+
+In this case, it returns self, which signals that this class defines a __next__() method which will take care of returning values throughout the iteration.
+ 在本例中，返回 self，意味着该类定义了__next__() 方法，由它来关注整个迭代过程中的返回值
+
+The __next__() method gets called whenever someone — say, a for loop — calls next(rules).
+无论何时有人——如 for 循环——调用 __next__() 方法， next(rules)都跟着被调用
+
+This method will only make sense if we start at the end and work backwards.
+ 该方法仅在我们从后往前移动时比较好体会
+
+So let’s do that.
+所以我们就这么做
+
+The last part of this function should look familiar, at least.
+函数的最后一部分至少应该眼熟
+
+The build_match_and_apply_functions() function hasn’t changed;
+ build_match_and_apply_functions() 函数还没修改
+
+it’s the same as it ever was.
+与它从前一样
+
+The only difference is that, before returning the match and apply functions (which are stored in the tuple funcs), we’re going to save them in self.cache.
+唯一的不同是，在返回匹配和应用功能之前（保存在元组 funcs中），我们将其保存到 self.cache
+
+Moving backwards…
+从后往前移动……
+
+A bit of advanced file trickery here.
+这里有点高级文件操作的技巧
+
+The readline() method (note: singular, not the plural readlines()) reads exactly one line from an open file.
+ readline() 方法 （注意：是单数，不是复数 readlines()） 从一个打开的文件中精确读取一行，即下一行
+
+Specifically, the next line.
+（文件对象同样也是迭代器
+
+(File objects are iterators too!
+ 它自始至终是迭代器……）
+
+If there was a line for readline() to read, line will not be an empty string.
+如果有一行 readline() 可以读， line 就不会是空字符串
+
+Even if the file contained a blank line, line would end up as the one-character string '\n' (a carriage return).
+ 甚至文件包含一个空行， line 将会是一个字符的字符串 '\n' （回车换行符）
+
+If line is really an empty string, that means there are no more lines to read from the file.
+ 如果 line 是真的空字符串， 就意味着文件已经没有行可读了
+
+When we reach the end of the file, we should close the file and raise the magic StopIteration exception.
+当我们到达文件尾时， 我们应关闭文件并抛出神奇的 StopIteration 异常
+
+Remember, we got to this point because we needed a match and apply function for the next rule.
+ 记住，开门见山的说是因为我们需要为下一条规则找到一个匹配和应用功能
+
+The next rule comes from the next line of the file… but there is no next line!
+下一条规则从文件的下一行获取…… 但已经没有下一行了
+
+Therefore, we have no value to return.
+ 所以，我们没有规则返回
+
+The iteration is over.
+ 迭代器结束
+
+(♫ The party’s over… ♫)
+ （♫ 派对结束 ♫）
+
+Moving backwards all the way to the start of the __next__() method…
+由后往前直到 __next__()方法的开始……
+
+self.cache will be a list of the functions we need to match and apply individual rules.
+self.cache 将是一个我们匹配并应用单独规则的功能列表
+
+(At least that should sound familiar!) self.cache_index keeps track of which cached item we should return next.
+ （至少那个应该看起来熟悉
+
+If we haven’t exhausted the cache yet (i.e.
+） self.cache_index 记录我们下一步返回的缓存条目
+
+if the length of self.cache is greater than self.cache_index), then we have a cache hit!
+ 如果我们还没有耗尽缓存 （举例 如果 self.cache 的长度大于 self.cache_index），那么我们就会命中一条缓存
+
+Hooray!
+ 哇
+
+We can return the match and apply functions from the cache instead of building them from scratch.
+ 我们可以从缓存中返回匹配和应用功能而不是从无到有创建
+
+On the other hand, if we don’t get a hit from the cache, and the file object has been closed (which could happen, further down the method, as you saw in the previous code snippet), then there’s nothing more we can do.
+另一方面，如果我们没有从缓存中命中条目， 并且 文件对象也已关闭（这会发生， 在本方法下面一点， 正如你从预览的代码片段中所看到的），那么我们什么都不能做
+
+If the file is closed, it means we’ve exhausted it — we’ve already read through every line from the pattern file, and we’ve already built and cached the match and apply functions for each pattern.
+ 如果文件被关闭，意味着我们已经用完了它——我们已经从头至尾读取了模式文件的每一行，而且已经对每个模式创建并缓存了匹配和应用功能
+
+The file is exhausted;
+文件已经读完
+
+the cache is exhausted;
+缓存已经用完
+
+I’m exhausted.
+我也快完了
+
+Wait, what?
+等等，什么
+
+Hang in there, we’re almost done.
+坚持一下，我们几乎完成了
+
+Putting it all together, here’s what happens when:
+放到一起，发生了什么事
+
+When the module is imported, it creates a single instance of the LazyRules class, called rules, which opens the pattern file but does not read from it.
+当模块引入时，创建了LazyRules 类的一个单一实例， 叫 rules， 它打开模式文件但并没有读取
+
+When asked for the first match and apply function, it checks its cache but finds the cache is empty.
+当要求第一个匹配和应用功能时，检查缓存并发现缓存为空
+
+So it reads a single line from the pattern file, builds the match and apply functions from those patterns, and caches them.
+ 于是，从模式文件读取一行， 从模式中创建匹配和应用功能，并缓存之
+
+Let’s say, for the sake of argument, that the very first rule matched.
+假如，因为参数的缘故，正好是第一行匹配了
+
+If so, no further match and apply functions are built, and no further lines are read from the pattern file.
+如果那样，不会有更多的匹配和应用会创建，也不会有更多的行会从模式文件中读取
+
+Furthermore, for the sake of argument, suppose that the caller calls the plural() function again to pluralize a different word.
+更进一步， 因为参数的缘故，假设调用者再次调用 plural() 函数来让一个不同的单词变复数
+
+The for loop in the plural() function will call iter(rules), which will reset the cache index but will not reset the open file object.
+ plural() 函数中的for 循环会调用iter(rules)，这会重置缓存索引但不会重置打开的文件对象
+
+The first time through, the for loop will ask for a value from rules, which will invoke its __next__() method.
+第一次遍历， for循环会从rules中索要一个值，该值会调用其__next__()方法
+
+This time, however, the cache is primed with a single pair of match and apply functions, corresponding to the patterns in the first line of the pattern file.
+然而这一次， 缓存已经被装入了一个匹配和应用功能对， 与模式文件中第一行模式一致
+
+Since they were built and cached in the course of pluralizing the previous word, they’re retrieved from the cache.
+ 由于对前一个单词做复数变换时已经被创建和缓存，它们被从缓存中返回
+
+The cache index increments, and the open file is never touched.
+ 缓存索引递增，打开的文件无需访问
+
+Let’s say, for the sake of argument, that the first rule does not match this time around.
+假如，因为参数的缘故，这一轮第一个规则 不 匹配
+
+So the for loop comes around again and asks for another value from rules.
+ 所以 for 循环再次运转并从 rules请求一个值
+
+This invokes the __next__() method a second time.
+ 这会再次调用 __next__() 方法
+
+This time, the cache is exhausted — it only contained one item, and we’re asking for a second — so the __next__() method continues.
+ 这一次， 缓存被用完了——它仅有一个条目，而我们被请求第二个——于是 __next__() 方法继续
+
+It reads another line from the open file, builds match and apply functions out of the patterns, and caches them.
+ 从打开的文件中读取下一行，从模式中创建匹配和应用功能，并缓存之
+
+This read-build-and-cache process will continue as long as the rules being read from the pattern file don’t match the word we’re trying to pluralize.
+该“读取创建并缓存”过程一直持续直到我们从模式文件中读取的规则与我们想变复数的单词不匹配
+
+If we do find a matching rule before the end of the file, we simply use it and stop, with the file still open.
+ 如果我们确实在文件结束前找到了一个匹配规则，我们仅需使用它并停止，文件还一直打开
+
+The file pointer will stay wherever we stopped reading, waiting for the next readline() command.
+文件指针会留在我们停止读取，等待下一个 readline() 命令的地方
+
+In the meantime, the cache now has more items in it, and if we start all over again trying to pluralize a new word, each of those items in the cache will be tried before reading the next line from the pattern file.
+现在，缓存已经有更多条目了，并且再次从头开始来将一个新单词变复数，在读取模式文件下一行之前，缓存中的每一个条目都将被尝试
+
+We have achieved pluralization nirvana.
+我们已经到达复数变换的极乐世界
+
+Minimal startup cost.
+最小化初始代价
+
+The only thing that happens on import is instantiating a single class and opening a file (but not reading from it).
+ 在 import 时发生的唯一的事就是实例化一个单一的类并打开一个文件（但并不读取）
+
+Maximum performance.
+最大化性能 前述示例会在每次你想让一个单词变复数时，读遍文件并动态创建功能
+
+The previous example would read through the file and build functions dynamically every time you wanted to pluralize a word.
+本版本将在创建的同时缓存功能，在最坏情况下，仅需要读完一遍文件，无论你要让多少单词变复数
+
+Separation of code and data.
+将代码和数据分离
+
+All the patterns are stored in a separate file.
+ 所有模式被存在一个分开的文件
+
+Code is code, and data is data, and never the twain shall meet.
+代码是代码，数据是数据，二者永远不会交织
+
+☞Is this really nirvana?
+☞这真的是极乐世界
+
+Well, yes and no.
+ 嗯，是或不是
+
+Here’s something to consider with the LazyRules example: the pattern file is opened (during __init__()), and it remains open until the final rule is reached.
+ 这里有一些LazyRules 示例需要细想的地方： 模式文件被打开（在 __init__()中），并持续打开直到读取最后一个规则
+
+Python will eventually close the file when it exits, or after the last instantiation of the LazyRules class is destroyed, but still, that could be a long time.
+ 当Python退出或最后一个LazyRules 类的实例销毁，Python 会最终关闭文件，但是那仍然可能会是一个很长的时间
+
+If this class is part of a long-running Python process, the Python interpreter may never exit, and the LazyRules object may never get destroyed.
+如果该类是一个“长时间运行”的Python进程的一部分，Python可能从不退出， LazyRules 对象就可能一直不会释放
+
+There are ways around this.
+这种情况有解决办法
+
+Instead of opening the file during __init__() and leaving it open while you read rules one line at a time, you could open the file, read all the rules, and immediately close the file.
+ 不要在 __init__() 中打开文件并让其在一行一行读取规则时一直打开，你可以打开文件，读取所有规则，并立即关闭文件
+
+Or you could open the file, read one rule, save the file position with the tell() method, close the file, and later re-open it and use the seek() method to continue reading where you left off.
+或你可以打开文件，读取一条规则，用tell() 方法保存文件位置，关闭文件，后面再次打开它，使用seek() 方法 继续从你离开的地方读取
+
+Or you could not worry about it and just leave the file open, like this example code does.
+ 或者你不需担心这些就让文件打开，如同本示例所做
+
+Programming is design, and design is all about trade-offs and constraints.
+ 编程即是设计， 而设计牵扯到所有的权衡和限制
+
+Leaving a file open too long might be a problem;
+让一个文件一直打开太长时间可能是问题
+
+making your code more complicated might be a problem.
+让你代码太复杂也可能是问题
+
+Which one is the bigger problem depends on your development team, your application, and your runtime environment.
+哪一个是更大的问题，依赖于你的开发团队，你的应用，和你的运行环境
+
+Further Reading
+深入阅读
+
+Iterator types
+迭代器类型
+
+PEP 234: Iterators
+PEP 234: 迭代器（ Iterators ）
+
+PEP 255: Simple Generators
+PEP 255:简单生成器（ Simple Generators ）
+
+Generator Tricks for Systems Programmers
+系统程序员的生成器诀窍（ Generator Tricks for Systems Programmers ）
+
+© 2001–11 Mark Pilgrim
+© 2001–9 Mark Pilgrim
+

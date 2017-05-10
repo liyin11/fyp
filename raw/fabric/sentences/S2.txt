@@ -1,0 +1,396 @@
+fab options and arguments¶
+fab 选项和参数¶
+
+The most common method for utilizing Fabric is via its command-line tool, fab, which should have been placed on your shell’s executable path when Fabric was installed.
+The most common method for utilizing Fabric is via its command-line tool, fab, which should have been placed on your shell’s executable path when Fabric was installed. fab tries hard to be a good Unix citizen, using a standard style of command-line switches, help output, and so forth.
+
+Basic use¶
+基本应用¶
+
+In its most simple form, fab may be called with no options at all, and with one or more arguments, which should be task names, e.g.:
+In its most simple form, fab may be called with no options at all, and with one or more arguments, which should be task names, e.g.:
+
+As detailed in Overview and Tutorial and Execution model, this will run task1 followed by task2, assuming that Fabric was able to find a fabfile nearby containing Python functions with those names.
+As detailed in 概览 & 教程 and Execution model, this will run task1 followed by task2, assuming that Fabric was able to find a fabfile nearby containing Python functions with those names.
+
+However, it’s possible to expand this simple usage into something more flexible, by using the provided options and/or passing arguments to individual tasks.
+However, it’s possible to expand this simple usage into something more flexible, by using the provided options and/or passing arguments to individual tasks.
+
+Arbitrary remote shell commands¶
+直接执行远程命令¶
+
+New in version 0.9.2.
+0.9.2 新版功能.
+
+Fabric leverages a lesser-known command line convention and may be called in the following manner:
+Fabric 还实现了一个鲜为人知的命令行接口，可以像下面这样调用：
+
+where everything after the -- is turned into a temporary run call, and is not parsed for fab options.
+-- 之后的所有字符都会用于创建一个 run 临时调用，是不是做为 fab 的参数解析
+
+If you’ve defined a host list at the module level or on the command line, this usage will act like a one-line anonymous task.
+如果你在模块级或者命令行中设置了的主机列表参数，它的执行方式将类似单行的匿名任务
+
+For example, let’s say you just wanted to get the kernel info for a bunch of systems;
+例如：假设你想要获取多个系统的内核信息，可以这样做：
+
+which would be literally equivalent to the following fabfile:
+它的作用完全等价于下面的 fabfile：
+
+as if it were executed thusly:
+像这样执行：
+
+Most of the time you will want to just write out the task in your fabfile (anything you use once, you’re likely to use again) but this feature provides a handy, fast way to quickly dash off an SSH-borne command while leveraging your fabfile’s connection settings.
+大多数情况下，你更愿意将（仅执行一次，不大会再度执行的）任务写入 fabfile，而该特性基于 fabfile 连接设置，提供了一个方便、快捷的 SSH 命令传输
+
+Command-line options¶
+命令行参数¶
+
+A quick overview of all possible command line options can be found via fab --help.
+A quick overview of all possible command line options can be found via fab --help. If you’re looking for details on a specific option, we go into detail below.
+
+Note
+注解
+
+fab uses Python’s optparse library, meaning that it honors typical Linux or GNU style short and long options, as well as freely mixing options and arguments.
+fab uses Python’s optparse library, meaning that it honors typical Linux or GNU style short and long options, as well as freely mixing options and arguments. E.g. fab task1 -H hostname task2 -i path/to/keyfile is just as valid as the more straightforward fab -H hostname -i path/to/keyfile task1 task2.
+
+Sets env.no_agent to True, forcing our SSH layer not to talk to the SSH agent when trying to unlock private key files.
+Sets env.no_agent to True, forcing our SSH layer not to talk to the SSH agent when trying to unlock private key files.
+
+New in version 0.9.1.
+0.9.1 新版功能.
+
+Sets env.forward_agent to True, enabling agent forwarding.
+Sets env.forward_agent to True, enabling agent forwarding.
+
+New in version 1.4.
+1.4 新版功能.
+
+Sets env.abort_on_prompts to True, forcing Fabric to abort whenever it would prompt for input.
+Sets env.abort_on_prompts to True, forcing Fabric to abort whenever it would prompt for input.
+
+New in version 1.1.
+1.1 新版功能.
+
+Sets env.rcfile to the given file path, which Fabric will try to load on startup and use to update environment variables.
+Sets env.rcfile to the given file path, which Fabric will try to load on startup and use to update environment variables.
+
+Prints the entire docstring for the given task, if there is one.
+Prints the entire docstring for the given task, if there is one. Does not currently print out the task’s function signature, so descriptive docstrings are a good idea. (They’re always a good idea, of course – just moreso here.)
+
+Set number of times to attempt connections.
+Set number of times to attempt connections. Sets env.connection_attempts.
+
+See also
+参见
+
+env.connection_attempts, env.timeout
+env.connection_attempts, env.timeout
+
+New in version 1.4.
+1.4 新版功能.
+
+Sets env.disable_known_hosts to True, preventing Fabric from loading the user’s SSH known_hosts file.
+Sets env.disable_known_hosts to True, preventing Fabric from loading the user’s SSH known_hosts file.
+
+The fabfile name pattern to search for (defaults to fabfile.py), or alternately an explicit file path to load as the fabfile (e.g.
+The fabfile name pattern to search for (defaults to fabfile.py), or alternately an explicit file path to load as the fabfile (e.g. /path/to/my/fabfile.py.)
+
+See also
+参见
+
+Fabfile construction and use
+Fabfile 文件的结构和使用
+
+Allows control over the output format of --list.
+Allows control over the output format of --list. short is equivalent to --shortlist, normal is the same as simply omitting this option entirely (i.e. the default), and nested prints out a nested namespace tree.
+
+New in version 1.1.
+1.1 新版功能.
+
+See also
+参见
+
+--shortlist, --list
+--shortlist、--list
+
+Sets env.gateway to HOST host string.
+Sets env.gateway to HOST host string.
+
+New in version 1.5.
+1.5 新版功能.
+
+Toggles use of GSS-API authentication.
+Displays a standard help message, with all possible options and a brief overview of what they do, then exits.
+
+See also
+A comma-separated list of output levels to hide by default.
+
+gss_(auth|deleg|kex)
+Sets env.hosts to the given comma-delimited list of host strings.
+
+New in version 1.11.
+Sets env.exclude_hosts to the given comma-delimited list of host strings to then keep out of the final host list.
+
+Toggles whether GSS-API client credentials are delegated.
+1.1 新版功能.
+
+See also
+When set to a file path, will load the given file as an SSH identity file (usually a private key.) This option may be repeated multiple times. Sets (or appends to) env.key_filename.
+
+gss_(auth|deleg|kex)
+Forces a password prompt at the start of the session (after fabfile load and option parsing, but before executing any tasks) in order to pre-fill env.password.
+
+New in version 1.11.
+This is useful for fire-and-forget runs (especially parallel sessions, in which runtime input is not possible) when setting the password via --password or by setting env.password in your fabfile, is undesirable.
+
+Toggles whether GSS-API key exchange is used.
+注解
+
+See also
+The value entered into this prompt will overwrite anything supplied via env.password at module level, or via --password.
+
+gss_(auth|deleg|kex)
+参见
+
+New in version 1.11.
+Password management
+
+Displays a standard help message, with all possible options and a brief overview of what they do, then exits.
+Sets env.no_keys to True, forcing the SSH layer to not look for SSH private key files in one’s home directory.
+
+A comma-separated list of output levels to hide by default.
+0.9.1 新版功能.
+
+Sets env.hosts to the given comma-delimited list of host strings.
+Sets env.keepalive to the given (integer) value, specifying an SSH keepalive interval.
+
+Sets env.exclude_hosts to the given comma-delimited list of host strings to then keep out of the final host list.
+1.1 新版功能.
+
+New in version 1.1.
+Forces output to be buffered line-by-line instead of byte-by-byte. Often useful or required for parallel execution.
+
+When set to a file path, will load the given file as an SSH identity file (usually a private key.) This option may be repeated multiple times.
+1.3 新版功能.
+
+Forces a password prompt at the start of the session (after fabfile load and option parsing, but before executing any tasks) in order to pre-fill env.password.
+Imports a fabfile as normal, but then prints a list of all discovered tasks and exits. Will also print the first line of each task’s docstring, if it has one, next to it (truncating if necessary.)
+
+This is useful for fire-and-forget runs (especially parallel sessions, in which runtime input is not possible) when setting the password via --password or by setting env.password in your fabfile, is undesirable.
+在 0.9.1 版更改: Added docstring to output.
+
+Note
+参见
+
+The value entered into this prompt will overwrite anything supplied via env.password at module level, or via --password.
+--shortlist, --list-format
+
+See also
+Sets env.password to the given string; it will then be used as the default password when making SSH connections or calling the sudo program.
+
+Password management
+参见
+
+Like --initial-password-prompt, but for prefilling sudo_password instead of password.
+--initial-password-prompt
+
+New in version 1.12.
+Sets env.parallel to True, causing tasks to run in parallel.
+
+Sets env.no_keys to True, forcing the SSH layer to not look for SSH private key files in one’s home directory.
+1.3 新版功能.
+
+New in version 0.9.1.
+参见
+
+Sets env.keepalive to the given (integer) value, specifying an SSH keepalive interval.
+并行执行
+
+New in version 1.1.
+Sets env.always_use_pty to False, causing all run/sudo calls to behave as if one had specified pty=False.
+
+Forces output to be buffered line-by-line instead of byte-by-byte.
+1.0 新版功能.
+
+New in version 1.3.
+Sets env.reject_unknown_hosts to True, causing Fabric to abort when connecting to hosts not found in the user’s SSH known_hosts file.
+
+Imports a fabfile as normal, but then prints a list of all discovered tasks and exits.
+Sets env.roles to the given comma-separated list of role names.
+
+Changed in version 0.9.1: Added docstring to output.
+Allows you to set default values for arbitrary Fabric env vars. Values set this way have a low precedence – they will not override more specific env vars which are also specified on the command line. E.g.:
+
+See also
+will result in env.password = 'bar', not 'foo'
+
+--shortlist, --list-format
+Multiple KEY=VALUE pairs may be comma-separated, e.g. fab --set var1=val1,var2=val2.
+
+Sets env.password to the given string;
+Other than basic string values, you may also set env vars to True by omitting the =VALUE (e.g. fab --set KEY), and you may set values to the empty string (and thus a False-equivalent value) by keeping the equals sign, but omitting VALUE (e.g. fab --set KEY=.)
+
+See also
+1.4 新版功能.
+
+--initial-password-prompt, --sudo-password
+Sets env.shell to the given string, overriding the default shell wrapper used to execute remote commands.
+
+Sets env.parallel to True, causing tasks to run in parallel.
+Similar to --list, but without any embellishment, just task names separated by newlines with no indentation or docstrings.
+
+New in version 1.3.
+0.9.2 新版功能.
+
+See also
+参见
+
+Parallel execution
+--list
+
+Sets env.always_use_pty to False, causing all run/sudo calls to behave as if one had specified pty=False.
+A comma-separated list of output levels to be added to those that are shown by default.
+
+New in version 1.0.
+参见
+
+Sets env.reject_unknown_hosts to True, causing Fabric to abort when connecting to hosts not found in the user’s SSH known_hosts file.
+run, sudo
+
+Sets env.roles to the given comma-separated list of role names.
+Sets env.ssh_config_path.
+
+Allows you to set default values for arbitrary Fabric env vars.
+1.4 新版功能.
+
+will result in env.password = 'bar', not 'foo'
+参见
+
+Multiple KEY=VALUE pairs may be comma-separated, e.g.
+Leveraging native SSH config files
+
+Other than basic string values, you may also set env vars to True by omitting the =VALUE (e.g.
+Sets env.skip_bad_hosts, causing Fabric to skip unavailable hosts.
+
+New in version 1.4.
+1.4 新版功能.
+
+Sets env.shell to the given string, overriding the default shell wrapper used to execute remote commands.
+Sets env.skip_unknown_tasks, causing Fabric to skip unknown tasks.
+
+Similar to --list, but without any embellishment, just task names separated by newlines with no indentation or docstrings.
+参见
+
+New in version 0.9.2.
+env.skip_unknown_tasks
+
+See also
+Set connection timeout in seconds. Sets env.timeout.
+
+--list
+参见
+
+A comma-separated list of output levels to be added to those that are shown by default.
+env.timeout, env.connection_attempts
+
+See also
+1.4 新版功能.
+
+run, sudo
+Set remote command timeout in seconds. Sets env.command_timeout.
+
+Sets env.ssh_config_path.
+参见
+
+New in version 1.4.
+env.command_timeout,
+
+See also
+1.6 新版功能.
+
+Leveraging native SSH config files
+Sets env.user to the given string; it will then be used as the default username when making SSH connections.
+
+Sets env.skip_bad_hosts, causing Fabric to skip unavailable hosts.
+Displays Fabric’s version number, then exits.
+
+New in version 1.4.
+Sets env.warn_only to True, causing Fabric to continue execution even when commands encounter error conditions.
+
+Sets env.skip_unknown_tasks, causing Fabric to skip unknown tasks.
+Sets env.pool_size, which specifies how many processes to run concurrently during parallel execution.
+
+See also
+1.3 新版功能.
+
+env.skip_unknown_tasks
+参见
+
+Sets env.sudo_password.
+并行执行
+
+See also
+The options given in 命令行参数 apply to the invocation of fab as a whole; even if the order is mixed around, options still apply to all given tasks equally. Additionally, since tasks are just Python functions, it’s often desirable to pass in arguments to them at runtime.
+
+env.timeout, env.connection_attempts
+Answering both these needs is the concept of “per-task arguments”, which is a special syntax you can tack onto the end of any task name:
+
+New in version 1.4.
+Additionally, since this process involves string parsing, all values will end up as Python strings, so plan accordingly. (We hope to improve upon this in future versions of Fabric, provided an intuitive syntax can be found.)
+
+Set remote command timeout in seconds.
+For example, a “create a new user” task might be defined like so (omitting most of the actual logic for brevity):
+
+See also
+You can specify just the username:
+
+env.command_timeout,
+Or treat it as an explicit keyword argument:
+
+New in version 1.6.
+If both args are given, you can again give them as positional args:
+
+Sets env.user to the given string;
+Or mix and match, just like in Python:
+
+Displays Fabric’s version number, then exits.
+The print call above is useful for illustrating escaped commas, like so:
+
+Sets env.warn_only to True, causing Fabric to continue execution even when commands encounter error conditions.
+注解
+
+Sets env.pool_size, which specifies how many processes to run concurrently during parallel execution.
+Quoting the backslash-escaped comma is required, as not doing so will cause shell syntax errors. Quotes are also needed whenever an argument involves other shell-related characters such as spaces.
+
+New in version 1.3.
+All of the above are translated into the expected Python function calls. For example, the last call above would become:
+
+See also
+As mentioned in the section on task execution, there are a handful of per-task keyword arguments (host, hosts, role and roles) which do not actually map to the task functions themselves, but are used for setting per-task host and/or role lists.
+
+Parallel execution
+These special kwargs are removed from the args/kwargs sent to the task function itself; this is so that you don’t run into TypeErrors if your task doesn’t define the kwargs in question. (It also means that if you do define arguments with these names, you won’t be able to specify them in this manner – a regrettable but necessary sacrifice.)
+
+Answering both these needs is the concept of “per-task arguments”, which is a special syntax you can tack onto the end of any task name:
+If both the plural and singular forms of these kwargs are given, the value of the plural will win out and the singular will be discarded.
+
+Additionally, since this process involves string parsing, all values will end up as Python strings, so plan accordingly.
+When using the plural form of these arguments, one must use semicolons (;) since commas are already being used to separate arguments from one another. Furthermore, since your shell is likely to consider semicolons a special character, you’ll want to quote the host list string to prevent shell interpretation, e.g.:
+
+For example, a “create a new user” task might be defined like so (omitting most of the actual logic for brevity):
+Again, since the hosts kwarg is removed from the argument list sent to the new_user task function, the actual Python invocation would be new_user('myusername'), and the function would be executed on a host list of ['host1', 'host2'].
+
+If both args are given, you can again give them as positional args:
+Fabric currently honors a simple user settings file, or fabricrc (think bashrc but for fab) which should contain one or more key-value pairs, one per line. These lines will be subject to string.split('='), and thus can currently only be used to specify string settings. Any such key-value pairs will be used to update env when fab runs, and is loaded prior to the loading of any fabfile.
+
+Or mix and match, just like in Python:
+By default, Fabric looks for ~/.fabricrc, and this may be overridden by specifying the -c flag to fab.
+
+The print call above is useful for illustrating escaped commas, like so:
+For example, if your typical SSH login username differs from your workstation username, and you don’t want to modify env.user in a project’s fabfile (possibly because you expect others to use it as well) you could write a fabricrc file like so:
+
+Note
+Then, when running fab, your fabfile would load up with env.user set to 'ssh_user_name'. Other users of that fabfile could do the same, allowing the fabfile itself to be cleanly agnostic regarding the default username.
+

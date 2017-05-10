@@ -1,0 +1,1005 @@
+You are here: Home ‣ Dive Into Python 3 ‣
+你的位置: Home ‣ Dive Into Python 3 ‣
+
+Difficulty level: ♦♦♦♦♢
+难度等级: ♦♦♦♦♢
+
+XML
+XML
+
+❝ In the archonship of Aristaechmus, Draco enacted his ordinances.
+❝ In the archonship of Aristaechmus, Draco enacted his ordinances. ❞ — Aristotle
+
+Diving In
+概述
+
+Nearly all the chapters in this book revolve around a piece of sample code.
+这本书的大部分章节都是以样例代码为中心的
+
+But XML isn’t about code;
+但是XML这章不是
+
+it’s about data.
+它以数据为中心
+
+One common use of XML is “syndication feeds” that list the latest articles on a blog, forum, or other frequently-updated website.
+最常见的XML应用为“聚合订阅(syndication feeds)”，它用来展示博客，论坛或者其他会经常更新的网站的最新内容
+
+Most popular blogging software can produce a feed and update it whenever new articles, discussion threads, or blog posts are published.
+大多数的博客软件都会在新文章，新的讨论区，或者新博文发布的时候自动生成和更新feed
+
+You can follow a blog by “subscribing” to its feed, and you can follow multiple blogs with a dedicated “feed aggregator” like Google Reader.
+我们可以通过“订阅(subscribe)”feed来关注它们，还可以使用专门的“feed聚合工具(feed aggregator)”，比如Google Reader
+
+Here, then, is the XML data we’ll be working with in this chapter.
+以下的XML数据是我们这一章中要用到的
+
+It’s a feed — specifically, an Atom syndication feed.
+它是一个feed — 更确切地说是一个Atom聚合feed
+
+[download feed.xml]
+[download feed.xml]
+
+A 5-Minute Crash Course in XML
+5分钟XML速成
+
+If you already know about XML, you can skip this section.
+如果你已经了解XML，可以跳过这一部分
+
+XML is a generalized way of describing hierarchical structured data.
+XML是一种描述层次结构化数据的通用方法
+
+An XML document contains one or more elements, which are delimited by start and end tags.
+XML文档包含由起始和结束标签(tag)分隔的一个或多个元素(element)
+
+This is a complete (albeit boring) XML document:
+以下也是一个完整的(虽然空洞)XML文件：
+
+This is the start tag of the foo element.
+这是foo元素的起始标签
+
+This is the matching end tag of the foo element.
+这是foo元素对应的结束标签
+
+Like balancing parentheses in writing or mathematics or code, every start tag must be closed (matched) by a corresponding end tag.
+就如写作、数学或者代码中需要平衡括号一样，每一个起始标签必须有对应的结束标签来闭合（匹配）
+
+Elements can be nested to any depth.
+元素可以嵌套到任意层次
+
+An element bar inside an element foo is said to be a subelement or child of foo.
+位于foo中的元素bar可以被称作其子元素
+
+The first element in every XML document is called the root element.
+XML文档中的第一个元素叫做根元素(root element)
+
+An XML document can only have one root element.
+并且每份XML文档只能有一个根元素
+
+The following is not an XML document, because it has two root elements:
+以下不是一个XML文档，因为它存在两个“根元素”
+
+Elements can have attributes, which are name-value pairs.
+元素可以有其属性(attribute)，它们是一些名字-值(name-value)对
+
+Attributes are listed within the start tag of an element and separated by whitespace.
+属性由空格分隔列举在元素的起始标签中
+
+Attribute names can not be repeated within an element.
+一个元素中属性名不能重复
+
+Attribute values must be quoted.
+属性值必须用引号包围起来
+
+You may use either single or double quotes.
+单引号、双引号都是可以
+
+The foo element has one attribute, named lang.
+foo元素有一个叫做lang的属性
+
+The value of its lang attribute is en.
+lang的值为en
+
+The bar element has two attributes, named id and lang.
+bar元素则有两个属性，分别为id和lang
+
+The value of its lang attribute is fr.
+其中lang属性的值为fr
+
+This doesn’t conflict with the foo element in any way.
+它不会与foo的那个属性产生冲突
+
+Each element has its own set of attributes.
+每个元素都其独立的属性集
+
+If an element has more than one attribute, the ordering of the attributes is not significant.
+如果元素有多个属性，书写的顺序并不重要
+
+An element’s attributes form an unordered set of keys and values, like a Python dictionary.
+元素的属性是一个无序的键-值对集，跟Python中的列表对象一样
+
+There is no limit to the number of attributes you can define on each element.
+另外，元素中属性的个数是没有限制的
+
+Elements can have text content.
+元素可以有其文本内容(text content)
+
+Elements that contain no text and no children are empty.
+如果某一元素既没有文本内容，也没有子元素，它也叫做空元素
+
+There is a shorthand for writing empty elements.
+表达空元素有一种简洁的方法
+
+By putting a / character in the start tag, you can skip the end tag altogther.
+通过在起始标签的尾部添加/字符，我们可以省略结束标签
+
+The XML document in the previous example could be written like this instead:
+上一个例子中的XML文档可以写成这样：
+
+Like Python functions can be declared in different modules, XML elements can be declared in different namespaces.
+就像Python函数可以在不同的模块(modules)中声明一样，也可以在不同的名字空间(namespace)中声明XML元素
+
+Namespaces usually look like URLs.
+XML文档的名字空间通常看起来像URL
+
+You use an xmlns declaration to define a default namespace.
+我们可以通过声明xmlns来定义默认名字空间
+
+A namespace declaration looks similar to an attribute, but it has a different purpose.
+名字空间声明跟元素属性看起来很相似，但是它们的作用是不一样的
+
+The feed element is in the http://www.w3.org/2005/Atom namespace.
+feed元素处在名字空间http://www.w3.org/2005/Atom中
+
+The title element is also in the http://www.w3.org/2005/Atom namespace.
+title元素也是
+
+The namespace declaration affects the element where it’s declared, plus all child elements.
+名字空间声明不仅会作用于当前声明它的元素，还会影响到该元素的所有子元素
+
+You can also use an xmlns:prefix declaration to define a namespace and associate it with a prefix.
+也可以通过xmlns:prefix声明来定义一个名字空间并取其名为prefix
+
+Then each element in that namespace must be explicitly declared with the prefix.
+然后该名字空间中的每个元素都必须显式地使用这个前缀(prefix)来声明
+
+The feed element is in the http://www.w3.org/2005/Atom namespace.
+feed元素属于名字空间http://www.w3.org/2005/Atom
+
+The title element is also in the http://www.w3.org/2005/Atom namespace.
+title元素也在那个名字空间
+
+As far as an XML parser is concerned, the previous two XML documents are identical.
+对于XML解析器而言，以上两个XML文档是一样的
+
+Namespace + element name = XML identity.
+名字空间 + 元素名 = XML标识
+
+Prefixes only exist to refer to namespaces, so the actual prefix name (atom:) is irrelevant.
+前缀只是用来引用名字空间的，所以对于解析器来说，这些前缀名(atom:)其实无关紧要的
+
+The namespaces match, the element names match, the attributes (or lack of attributes) match, and each element’s text content matches, therefore the XML documents are the same.
+名字空间相同，元素名相同，属性（或者没有属性）相同，每个元素的文本内容相同，则XML文档相同
+
+Finally, XML documents can contain character encoding information on the first line, before the root element.
+最后，在根元素之前，字符编码信息可以出现在XML文档的第一行
+
+(If you’re curious how a document can contain information which needs to be known before the document can be parsed, Section F of the XML specification details how to resolve this Catch-22.)
+（这里存在一个两难的局面(catch-22)，直观上来说，解析XML文档需要这些编码信息，而这些信息又存在于XML文档中，如果你对XML如何解决此问题有兴趣，请参阅XML规范中 F 章节）
+
+And now you know just enough XML to be dangerous!
+现在我们已经知道足够多的XML知识，可以开始探险了
+
+The Structure Of An Atom Feed
+Atom Feed的结构
+
+Think of a weblog, or in fact any website with frequently updated content, like CNN.com.
+想像一下网络上的博客，或者互联网上任何需要频繁更新的网站，比如CNN.com
+
+The site itself has a title (“CNN.com”), a subtitle (“Breaking News, U.S., World, Weather, Entertainment & Video News”), a last-updated date (“updated 12:43 p.m.
+该站点有一个标题(“CNN.com”)，一个子标题(“Breaking News, U.S., World, Weather, Entertainment & Video News”)，包含上次更新的日期(“updated 12:43 p.m. EDT, Sat May 16, 2009”)，还有在不同时期发布的文章的列表
+
+EDT, Sat May 16, 2009”), and a list of articles posted at different times.
+每一篇文章也有自己的标题，第一次发布的日期（如果曾经修订过或者改正过某个输入错误，或许也有一个上次更新的日期），并且每篇文章有自己唯一的URL
+
+The Atom syndication format is designed to capture all of this information in a standard format.
+Atom聚合格式被设计成可以包含所有这些信息的标准格式
+
+My weblog and CNN.com are wildly different in design, scope, and audience, but they both have the same basic structure.
+我的博客无论在设计，主题还是读者上都与CNN.com大不相同，但是它们的基本结构是相同的
+
+CNN.com has a title;
+CNN.com能做的事情，我的博客也能做…
+
+At the top level is the root element, which every Atom feed shares: the feed element in the http://www.w3.org/2005/Atom namespace.
+每一个Atom订阅都共享着一个根元素：即在名字空间http://www.w3.org/2005/Atom中的元素feed
+
+http://www.w3.org/2005/Atom is the Atom namespace.
+http://www.w3.org/2005/Atom表示名字空间Atom
+
+Any element can contain an xml:lang attribute, which declares the language of the element and its children.
+每一个元素都可以包含xml:lang属性，它用来声明该元素及其子元素使用的语言
+
+In this case, the xml:lang attribute is declared once on the root element, which means the entire feed is in English.
+在当前样例中，xml:lang在根元素中被声明了一次，也就意味着，整个feed都使用英文
+
+An Atom feed contains several pieces of information about the feed itself.
+描述Atom feed自身的一些信息在根元素feed的子元素中被声明
+
+The title of this feed is dive into mark.
+该行表示这个feed的标题为dive into mark
+
+The subtitle of this feed is currently between addictions.
+这一行表示子标题为currently between addictions
+
+Every feed needs a globally unique identifier.
+每一个feed都要有一个全局唯一标识符(globally unique identifier)
+
+See RFC 4151 for how to create one.
+想要知道如何创建它，请查阅RFC 4151
+
+This feed was last updated on March 27, 2009, at 21:56 GMT.
+表示当前feed上次更新的时间为March 27, 2009, at 21:56 GMT
+
+This is usually equivalent to the last-modified date of the most recent article.
+通常来说，它与最近一篇文章最后一次被修改的时间是一样的
+
+Now things start to get interesting.
+事情开始变得有趣了…link元素没有文本内容，但是它有三个属性：rel，type和href
+
+This link element has no text content, but it has three attributes: rel, type, and href.
+rel元素的值能告诉我们链接的类型
+
+The rel value tells you what kind of link this is;
+rel='alternate'表示这个链接指向当前feed的另外一个版本
+
+rel='alternate' means that this is a link to an alternate representation of this feed.
+type='text/html'表示链接的目标是一个HTML页面
+
+The type='text/html' attribute means that this is a link to an HTML page.
+然后目标地址在href属性中指出
+
+Now we know that this is a feed for a site named “dive into mark“ which is available at http://diveintomark.org/ and was last updated on March 27, 2009.
+现在我们知道这个feed上一更新是在on March 27, 2009，它是为一个叫做“dive into mark”的站点准备的，并且站点的地址为http://diveintomark.org/
+
+☞Although the order of elements can be relevant in some XML documents, it is not relevant in an Atom feed.
+☞在有一些XML文档中，元素的排列顺序是有意义的，但是Atom feed中不需要这样做
+
+After the feed-level metadata is the list of the most recent articles.
+feed级的元数据后边就是最近文章的列表了
+
+An article looks like this:
+单独的一篇文章就像这样：
+
+The author element tells who wrote this article: some guy named Mark, whom you can find loafing at http://diveintomark.org/.
+author元素指示文章的作者：一个叫做Mark的伙计，并且我们可以在http://diveintomark.org/找到他的事迹
+
+(This is the same as the alternate link in the feed metadata, but it doesn’t have to be.
+（这就像是feed元素里的备用链接，但是没有规定一定要这样
+
+Many weblogs have multiple authors, each with their own personal website.)
+许多网络日志由多个作者完成，他们都有自己的个人主页
+
+The title element gives the title of the article, “Dive into history, 2009 edition”.
+title元素给出这篇文章的标题，即“Dive into history, 2009 edition”
+
+As with the feed-level alternate link, this link element gives the address of the HTML version of this article.
+如feed元素中的备用链接一样，link元素给出这篇文章的HTML版本地址
+
+Entries, like feeds, need a unique identifier.
+每个条目也像feed一样，需要一个唯一的标识
+
+Entries have two dates: a first-published date (published) and a last-modified date (updated).
+每个条目有两个日期与其相关：第一次发布日期(published)和上次修改日期(updated)
+
+Entries can have an arbitrary number of categories.
+条目可以属于任意多个类别
+
+This article is filed under diveintopython, docbook, and html.
+这篇文章被归类到diveintopython，docbook，和html
+
+The summary element gives a brief summary of the article.
+summary元素中有这篇文章的概要性描述
+
+(There is also a content element, not shown here, if you want to include the complete article text in your feed.) This summary element has the Atom-specific type='html' attribute, which specifies that this summary is a snippet of HTML, not plain text.
+（还有一个元素这里没有展示出来，即content，我们可以把整篇文章的内容都放在里边
+
+This is important, since it has HTML-specific entities in it (&mdash;
+）当前样例中，summary元素含有一个Atom特有的type='html'属性，它用来告知这份概要为HTML格式，而非纯文本
+
+and &hellip;) which should be rendered as “—” and “…” rather than displayed directly.
+这非常重要，因为概要内容中包含了HTML中特有的实体（&mdash;和&hellip;），它们不应该以纯文本直接显示，正确的形式应该为“—”和“…”
+
+Finally, the end tag for the entry element, signaling the end of the metadata for this article.
+最后就是entry元素的结束标记了，它指示文章元数据的结尾
+
+Parsing XML
+解析XML
+
+Python can parse XML documents in several ways.
+Python可以使用几种不同的方式解析XML文档
+
+It has traditional DOM and SAX parsers, but I will focus on a different library called ElementTree.
+它包含了DOM和SAX解析器，但是我们焦点将放在另外一个叫做ElementTree的库上边
+
+[download feed.xml]
+[download feed.xml]
+
+The ElementTree library is part of the Python standard library, in xml.etree.ElementTree.
+ElementTree属于Python标准库的一部分，它的位置为xml.etree.ElementTree
+
+The primary entry point for the ElementTree library is the parse() function, which can take a filename or a file-like object.
+parse()函数是ElementTree库的主要入口，它使用文件名或者流对象作为参数
+
+This function parses the entire document at once.
+parse()函数会立即解析完整个文档
+
+If memory is tight, there are ways to parse an XML document incrementally instead.
+如果内存资源紧张，也可以增量式地解析XML文档
+
+The parse() function returns an object which represents the entire document.
+parse()函数会返回一个能代表整篇文档的对象
+
+This is not the root element.
+这不是根元素
+
+To get a reference to the root element, call the getroot() method.
+要获得根元素的引用可以调用getroot()方法
+
+As expected, the root element is the feed element in the http://www.w3.org/2005/Atom namespace.
+如预期的那样，根元素即http://www.w3.org/2005/Atom名字空间中的feed
+
+The string representation of this object reinforces an important point: an XML element is a combination of its namespace and its tag name (also called the local name).
+该字符串表示再次重申了非常重要的一点：XML元素由名字空间和标签名（也称作本地名(local name)）组成
+
+Every element in this document is in the Atom namespace, so the root element is represented as {http://www.w3.org/2005/Atom}feed.
+这篇文档中的每个元素都在名字空间Atom中，所以根元素被表示为{http://www.w3.org/2005/Atom}feed
+
+☞ElementTree represents XML elements as {namespace}localname.
+☞ElementTree使用{namespace}localname来表达XML元素
+
+You’ll see and use this format in multiple places in the ElementTree API.
+我们将会在ElementTree的API中多次见到这种形式
+
+Elements Are Lists
+元素即列表
+
+In the ElementTree API, an element acts like a list.
+在ElementTree API中，元素的行为就像列表一样
+
+The items of the list are the element’s children.
+列表中的项即该元素的子元素
+
+Continuing from the previous example, the root element is {http://www.w3.org/2005/Atom}feed.
+紧接前一例子，根元素为{http://www.w3.org/2005/Atom}feed
+
+The “length” of the root element is the number of child elements.
+根元素的“长度”即子元素的个数
+
+You can use the element itself as an iterator to loop through all of its child elements.
+我们可以像使用迭代器一样来遍历其子元素
+
+As you can see from the output, there are indeed 8 child elements: all of the feed-level metadata (title, subtitle, id, updated, and link) followed by the three entry elements.
+从输出可以看到，根元素总共有8个子元素：所有feed级的元数据（title，subtitle，id，updated和link），还有紧接着的三个entry元素
+
+You may have guessed this already, but I want to point it out explicitly: the list of child elements only includes direct children.
+也许你已经注意到了，但我还是想要指出来：该列表只包含直接子元素
+
+Each of the entry elements contain their own children, but those are not included in the list.
+每一个entry元素都有其子元素，但是并没有包括在这个列表中
+
+They would be included in the list of each entry’s children, but they are not included in the list of the feed’s children.
+这些子元素本可以包括在entry元素的列表中，但是确实不属于feed的子元素
+
+There are ways to find elements no matter how deeply nested they are;
+但是，无论这些元素嵌套的层次有多深，总是有办法定位到它们的
+
+we’ll look at two such ways later in this chapter.
+在这章的后续部分我们会介绍两种方法
+
+Attributes Are Dictonaries
+属性即字典
+
+XML isn’t just a collection of elements;
+XML不只是元素的集合
+
+each element can also have its own set of attributes.
+每一个元素还有其属性集
+
+Once you have a reference to a specific element, you can easily get its attributes as a Python dictionary.
+一旦获取了某个元素的引用，我们可以像操作Python的字典一样轻松获取到其属性
+
+The attrib property is a dictionary of the element’s attributes.
+attrib是一个代表元素属性的字典
+
+The original markup here was <feed xmlns='http://www.w3.org/2005/Atom' xml:lang='en'>.
+这个地方原来的标记语言是这样描述的：<feed xmlns='http://www.w3.org/2005/Atom' xml:lang='en'>
+
+The xml: prefix refers to a built-in namespace that every XML document can use without declaring it.
+前缀xml:指示一个内置的名字空间，每一个XML不需要声明就可以使用它
+
+The fifth child — [4] in a 0-based list — is the link element.
+第五个子元素 — 以0为起始的列表中即[4] — 为元素link
+
+The link element has three attributes: href, type, and rel.
+link元素有三个属性：href，type，和rel
+
+The fourth child — [3] in a 0-based list — is the updated element.
+第四个子元素 — [3] — 为updated
+
+The updated element has no attributes, so its .attrib is just an empty dictionary.
+元素updated没有子元素，所以.attrib是一个空的字典对象
+
+Searching For Nodes Within An XML Document
+在XML文档中查找结点
+
+So far, we’ve worked with this XML document “from the top down,” starting with the root element, getting its child elements, and so on throughout the document.
+到目前为止，我们已经“自顶向下“地从根元素开始，一直到其子元素，走完了整个文档
+
+But many uses of XML require you to find specific elements.
+但是许多情况下我们需要找到XML中特定的元素
+
+Etree can do that, too.
+Etree也能完成这项工作
+
+The findall() method finds child elements that match a specific query.
+findfall()方法查找匹配特定格式的子元素
+
+(More on the query format in a minute.)
+（关于查询的格式稍后会讲到
+
+Each element — including the root element, but also child elements — has a findall() method.
+每个元素 — 包括根元素及其子元素 — 都有findall()方法
+
+It finds all matching elements among the element’s children.
+它会找到所有匹配的子元素
+
+But why aren’t there any results?
+但是为什么没有看到任何结果呢
+
+Although it may not be obvious, this particular query only searches the element’s children.
+也许不太明显，这个查询只会搜索其子元素
+
+Since the root feed element has no child named feed, this query returns an empty list.
+由于根元素feed中不存在任何叫做feed的子元素，所以查询的结果为一个空的列表
+
+This result may also surprise you.
+这个结果也许也在你的意料之外
+
+There is an author element in this document;
+在这篇文档中确实存在author元素
+
+in fact, there are three (one in each entry).
+事实上总共有三个（每个entry元素中都有一个）
+
+But those author elements are not direct children of the root element;
+但是那些author元素不是根元素的直接子元素
+
+they are “grandchildren” (literally, a child element of a child element).
+我们可以在任意嵌套层次中查找author元素，但是查询的格式会有些不同
+
+For convenience, the tree object (returned from the etree.parse() function) has several methods that mirror the methods on the root element.
+为了方便，对象tree（调用etree.parse()的返回值）中的一些方法是根元素中这些方法的镜像
+
+The results are the same as if you had called the tree.getroot().findall() method.
+在这里，如果调用tree.getroot().findall()，则返回值是一样的
+
+Perhaps surprisingly, this query does not find the author elements in this document.
+也许有些意外，这个查询请求也没有找到文档中的author元素
+
+Why not?
+为什么没有呢
+
+Because this is just a shortcut for tree.getroot().findall('{http://www.w3.org/2005/Atom}author'), which means “find all the author elements that are children of the root element.” The author elements are not children of the root element;
+因为它只是tree.getroot().findall('{http://www.w3.org/2005/Atom}author')的一种简洁表示，即“查询所有是根元素的子元素的author”
+
+they’re children of the entry elements.
+因为这些author是entry元素的子元素，所以查询没有找到任何匹配的
+
+There is also a find() method which returns the first matching element.
+find()方法用来返回第一个匹配到的元素
+
+This is useful for situations where you are only expecting one match, or if there are multiple matches, you only care about the first one.
+当我们认为只会有一个匹配，或者有多个匹配但我们只关心第一个的时候，这个方法是很有用的
+
+You saw this in the previous example.
+在前一样例中已经看到
+
+It finds all the atom:entry elements.
+这一句返回所有的atom:entry元素
+
+The find() method takes an ElementTree query and returns the first matching element.
+find()方法使用ElementTree作为参数，返回第一个匹配到的元素
+
+There are no elements in this entry named foo, so this returns None.
+在entries[0]中没有叫做foo的元素，所以返回值为None
+
+☞There is a “gotcha” with the find() method that will eventually bite you.
+☞可逮住你了，在这里find()方法非常容易被误解
+
+In a boolean context, ElementTree element objects will evaluate to False if they contain no children (i.e.
+在布尔上下文中，如果ElementTree元素对象不包含子元素，其值则会被认为是False（即如果len(element)等于0）
+
+if len(element) is 0).
+这就意味着if element.find('...')并非在测试是否find()方法找到了匹配项
+
+This means that if element.find('...') is not testing whether the find() method found a matching element;
+这条语句是在测试匹配到的元素是否包含子元素
+
+it’s testing whether that matching element has any child elements!
+想要测试find()方法是否返回了一个元素，则需使用if element.find('...') is not None
+
+There is a way to search for descendant elements, i.e.
+也可以在所有派生(descendant)元素中搜索，即任意嵌套层次的子元素，孙子元素等…
+
+This query — //{http://www.w3.org/2005/Atom}link — is very similar to the previous examples, except for the two slashes at the beginning of the query.
+//{http://www.w3.org/2005/Atom}link与前一样例很相似，除了开头的两条斜线
+
+Those two slashes mean “don’t just look for direct children;
+这两条斜线告诉findall()方法“不要只在直接子元素中查找
+
+I want any elements, regardless of nesting level.” So the result is a list of four link elements, not just one.
+查找的范围可以是任意嵌套层次”
+
+The first result is a direct child of the root element.
+查询到的第一个结果是根元素的直接子元素
+
+As you can see from its attributes, this is the feed-level alternate link that points to the HTML version of the website that the feed describes.
+从它的属性中可以看出，它是一个指向该feed的HTML版本的备用链接
+
+The other three results are each entry-level alternate links.
+其他的三个结果分别是低一级的备用链接
+
+Each entry has a single link child element, and because of the double slash at the beginning of the query, this query finds all of them.
+每一个entry都有单独一个link子元素，由于在查询语句前的两条斜线的作用，我们也能定位到他们
+
+Overall, ElementTree’s findall() method is a very powerful feature, but the query language can be a bit surprising.
+总的来说，ElementTree的findall()方法是其一个非常强大的特性，但是它的查询语言却让人有些出乎意料
+
+It is officially described as “limited support for XPath expressions.” XPath is a W3C standard for querying XML documents.
+官方描述它为“有限的XPath支持
+
+ElementTree’s query language is similar enough to XPath to do basic searching, but dissimilar enough that it may annoy you if you already know XPath.
+”XPath是一种用于查询XML文档的W3C标准
+
+Now let’s look at a third-party XML library that extends the ElementTree API with full XPath support.
+对于基础地查询来说，ElementTree与XPath语法上足够相似，但是如果已经会XPath的话，它们之间的差异可能会使你感到不快
+
+Going Further With lxml
+深入lxml
+
+lxml is an open source third-party library that builds on the popular libxml2 parser.
+lxml是一个开源的第三方库，以流行的libxml2 解析器为基础开发
+
+It provides a 100% compatible ElementTree API, then extends it with full XPath 1.0 support and a few other niceties.
+提供了与ElementTree完全兼容的API，并且扩展它以提供了对XPath 1.0的全面支持，以及改进了一些其他精巧的细节
+
+There are installers available for Windows;
+提供Windows的安装程序
+
+Linux users should always try to use distribution-specific tools like yum or apt-get to install precompiled binaries from their repositories.
+Linux用户推荐使用特定发行版自带的工具比如yum或者apt-get从它们的程序库中安装预编译好了的二进制文件
+
+Otherwise you’ll need to install lxml manually.
+要不然，你就得手工安装他们了
+
+Once imported, lxml provides the same API as the built-in ElementTree library.
+导入lxml以后，可以发现它与内置的ElementTree库提供相同的API
+
+parse() function: same as ElementTree.
+parse()函数：与ElementTree相同
+
+getroot() method: also the same.
+getroot()方法：相同
+
+findall() method: exactly the same.
+findall()方法：完全相同
+
+For large XML documents, lxml is significantly faster than the built-in ElementTree library.
+对于大型的XML文档，lxml明显比内置的ElementTree快了许多
+
+If you’re only using the ElementTree API and want to use the fastest available implementation, you can try to import lxml and fall back to the built-in ElementTree.
+如果现在只用到了ElementTree的API，并且想要使用其最快的实现(implementation)，我们可以尝试导入lxml，并且将内置的ElementTree作为备用
+
+But lxml is more than just a faster ElementTree.
+但是lxml不只是一个更快速的ElementTree
+
+Its findall() method includes support for more complicated expressions.
+它的findall()方法能够支持更加复杂的表达式
+
+In this example, I’m going to import lxml.etree (instead of, say, from lxml import etree), to emphasize that these features are specific to lxml.
+在这个样例中，我使用了import lxml.etree（而非from lxml import etree），以强调这些特性只限于lxml
+
+This query finds all elements in the Atom namespace, anywhere in the document, that have an href attribute.
+这一句在整个文档范围内搜索名字空间Atom中具有href属性的所有元素
+
+The // at the beginning of the query means “elements anywhere (not just as children of the root element).” {http://www.w3.org/2005/Atom} means “only elements in the Atom namespace.” * means “elements with any local name.” And [@href] means “has an href attribute.”
+在查询语句开头的//表示“搜索的范围为整个文档（不只是根元素的子元素）
+
+The query finds all Atom elements with an href whose value is http://diveintomark.org/.
+该查询找出所有包含href属性并且其值为http://diveintomark.org/的Atom元素
+
+After doing some quick string formatting (because otherwise these compound queries get ridiculously long), this query searches for Atom author elements that have an Atom uri element as a child.
+在简单的字符串格式化后（要不然这条复合查询语句会变得特别长），它搜索名字空间Atom中包含uri元素作为子元素的author元素
+
+This only returns two author elements, the ones in the first and second entry.
+该条语句只返回了第一个和第二个entry元素中的author元素
+
+The author in the last entry contains only a name, not a uri.
+最后一个entry元素中的author只包含有name属性，没有uri
+
+Not enough for you?
+仍然不够用
+
+lxml also integrates support for arbitrary XPath 1.0 expressions.
+lxml也集成了对任意XPath 1.0表达式的支持
+
+I’m not going to go into depth about XPath syntax;
+我们不会深入讲解XPath的语法
+
+that could be a whole book unto itself!
+那可能需要一整本书
+
+But I will show you how it integrates into lxml.
+但是我会给你展示它是如何集成到lxml去的
+
+To perform XPath queries on namespaced elements, you need to define a namespace prefix mapping.
+要查询名字空间中的元素，首先需要定义一个名字空间前缀映射
+
+This is just a Python dictionary.
+它就是一个Python字典对象
+
+Here is an XPath query.
+这就是一个XPath查询请求
+
+The XPath expression searches for category elements (in the Atom namespace) that contain a term attribute with the value accessibility.
+这个XPath表达式目的在于搜索category元素，并且该元素包含有值为accessibility的term属性
+
+But that’s not actually the query result.
+但是那并不是查询的结果
+
+Look at the very end of the query string;
+请看查询字符串的尾端
+
+did you notice the /..
+是否注意到了/..这一块
+
+bit?
+它的意思是，“然后返回已经找到的category元素的父元素
+
+That means “and then return the parent element of the category element you just found.” So this single XPath query will find all entries with a child element of <category term='accessibility'>.
+”所以这条XPath查询语句会找到所有包含<category term='accessibility'>作为子元素的条目
+
+The xpath() function returns a list of ElementTree objects.
+xpath()函数返回一个ElementTree对象列表
+
+In this document, there is only one entry with a category whose term is accessibility.
+在这篇文档中，只有一个category元素，并且它的term属性值为accessibility
+
+XPath expressions don’t always return a list of elements.
+XPath表达式并不总是会返回一个元素列表
+
+Technically, the DOM of a parsed XML document doesn’t contain elements;
+技术上说，一个解析了的XML文档的DOM模型并不包含元素
+
+it contains nodes.
+它只包含结点(node)
+
+Depending on their type, nodes can be elements, attributes, or even text content.
+依据它们的类型，结点可以是元素，属性，甚至是文本内容
+
+The result of an XPath query is a list of nodes.
+XPath查询的结果是一个结点列表
+
+This query returns a list of text nodes: the text content (text()) of the title element (atom:title) that is a child of the current element (./).
+当前查询返回一个文本结点列表：title元素(atom:title)的文本内容(text())，并且title元素必须是当前元素的子元素(./)
+
+Generating XML
+生成XML
+
+Python’s support for XML is not limited to parsing existing documents.
+Python对XML的支持不只限于解析已存在的文档
+
+You can also create XML documents from scratch.
+我们也可以从头来创建XML文档
+
+To create a new element, instantiate the Element class.
+实例化Element类来创建一个新元素
+
+You pass the element name (namespace + local name) as the first argument.
+可以将元素的名字（名字空间 + 本地名）作为其第一个参数
+
+This statement creates a feed element in the Atom namespace.
+当前语句在Atom名字空间中创建一个feed元素
+
+This will be our new document’s root element.
+它将会成为我们文档的根元素
+
+To add attributes to the newly created element, pass a dictionary of attribute names and values in the attrib argument.
+将属性名和值构成的字典对象传递给attrib参数，这样就可以给新创建的元素添加属性
+
+Note that the attribute name should be in the standard ElementTree format, {namespace}localname.
+请注意，属性名应该使用标准的ElementTree格式，{namespace}localname
+
+At any time, you can serialize any element (and its children) with the ElementTree tostring() function.
+在任何时候，我们可以使用ElementTree的tostring()函数序列化任意元素（还有它的子元素）
+
+Was that serialization surprising to you?
+这种序列化结果有使你感到意外吗
+
+The way ElementTree serializes namespaced XML elements is technically accurate but not optimal.
+技术上说，ElementTree使用的序列化方法是精确的，但却不是最理想的
+
+The sample XML document at the beginning of this chapter defined a default namespace (xmlns='http://www.w3.org/2005/Atom').
+在本章开头给出的XML样例文档中定义了一个默认名字空间(default namespace)(xmlns='http://www.w3.org/2005/Atom')
+
+Defining a default namespace is useful for documents — like Atom feeds — where every element is in the same namespace, because you can declare the namespace once and declare each element with just its local name (, , ).
+对于每个元素都在同一个名字空间中的文档 — 比如Atom feeds — 定义默认的名字空间非常有用，因为只需要声明一次名字空间，然后在声明每个元素的时候只需要使用其本地名即可(，，)
+
+There is no need to use any prefixes unless you want to declare elements from another namespace.
+除非想要定义另外一个名字空间中的元素，否则没有必要使用前缀
+
+An XML parser won’t “see” any difference between an XML document with a default namespace and an XML document with a prefixed namespace.
+对于XML解析器来说，它不会“注意”到使用默认名字空间和使用前缀名字空间的XML文档之间有什么不同
+
+The resulting DOM of this serialization:
+当前序列化结果的DOM为：
+
+is identical to the DOM of this serialization:
+与下列序列化的DOM是一模一样的：
+
+The only practical difference is that the second serialization is several characters shorter.
+实际上唯一不同的只是第二个序列化短了几个字符长度
+
+If we were to recast our entire sample feed with a ns0: prefix in every start and end tag, it would add 4 characters per start tag × 79 tags + 4 characters for the namespace declaration itself, for a total of 320 characters.
+如果我们改动整个样例feed，使每一个起始和结束标签都有一个ns0:前缀，这将为每个起始标签增加 4 个字符 × 79 个标签 + 4 个名字空间声明本身用到的字符，总共320个字符
+
+Assuming UTF-8 encoding, that’s 320 extra bytes.
+假设我们使用UTF-8编码，那将是320个额外的字节
+
+(After gzipping, the difference drops to 21 bytes, but still, 21 bytes is 21 bytes.) Maybe that doesn’t matter to you, but for something like an Atom feed, which may be downloaded several thousand times whenever it changes, saving a few bytes per request can quickly add up.
+（使用gzip压缩以后，大小可以降到21个字节，但是，21个字节也是字节
+
+The built-in ElementTree library does not offer this fine-grained control over serializing namespaced elements, but lxml does.
+内置的ElementTree库没有提供细粒度地对序列化时名字空间内的元素的控制，但是lxml有这样的功能
+
+To start, define a namespace mapping as a dictionary.
+首先，定义一个用于名字空间映射的字典对象
+
+Dictionary values are namespaces;
+其值为名字空间
+
+dictionary keys are the desired prefix.
+字典中的键即为所需要的前缀
+
+Using None as a prefix effectively declares a default namespace.
+使用None作为前缀来定义默认的名字空间
+
+Now you can pass the lxml-specific nsmap argument when you create an element, and lxml will respect the namespace prefixes you’ve defined.
+现在我们可以在创建元素的时候，给lxml专有的nsmap参数传值，并且lxml会参照我们所定义的名字空间前缀
+
+As expected, this serialization defines the Atom namespace as the default namespace and declares the feed element without a namespace prefix.
+如所预期的那样，该序列化使用Atom作为默认的名字空间，并且在声明feed元素的时候没有使用名字空间前缀
+
+Oops, we forgot to add the xml:lang attribute.
+啊噢… 我们忘了加上xml:lang属性
+
+You can always add attributes to any element with the set() method.
+我们可以使用set()方法来随时给元素添加所需属性
+
+It takes two arguments: the attribute name in standard ElementTree format, then the attribute value.
+该方法使用两个参数：标准ElementTree格式的属性名，然后，属性值
+
+(This method is not lxml-specific.
+（该方法不是lxml特有的
+
+The only lxml-specific part of this example was the nsmap argument to control the namespace prefixes in the serialized output.)
+在该样例中，只有nsmap参数是lxml特有的，它用来控制序列化输出时名字空间的前缀
+
+Are XML documents limited to one element per document?
+难道每个XML文档只能有一个元素吗
+
+No, of course not.
+当然不了
+
+You can easily create child elements, too.
+我们可以创建子元素
+
+To create a child element of an existing element, instantiate the SubElement class.
+给已有元素创建子元素，我们需要实例化SubElement类
+
+The only required arguments are the parent element (new_feed in this case) and the new element’s name.
+它只要求两个参数，父元素（即该样例中的new_feed）和子元素的名字
+
+Since this child element will inherit the namespace mapping of its parent, there is no need to redeclare the namespace or prefix here.
+由于该子元素会从父元素那儿继承名字空间的映射关系，所以这里不需要再声明名字空间前缀
+
+You can also pass in an attribute dictionary.
+我们也可以传递属性字典给它
+
+Keys are attribute names;
+字典的键即属性名
+
+values are attribute values.
+值为属性的值
+
+As expected, the new title element was created in the Atom namespace, and it was inserted as a child of the feed element.
+如预期的那样，新创建的title元素在Atom名字空间中，并且它作为子元素插入到feed元素中
+
+Since the title element has no text content and no children of its own, lxml serializes it as an empty element (with the /> shortcut).
+由于title元素没有文件内容，也没有其子元素，所以lxml将其序列化为一个空元素（使用/>）
+
+To set the text content of an element, simply set its .text property.
+设定元素的文本内容，只需要设定其.text属性
+
+Now the title element is serialized with its text content.
+当前title元素序列化的时候就使用了其文本内容
+
+Any text content that contains less-than signs or ampersands needs to be escaped when serialized.
+任何包含了<或者&符号的内容在序列化的时候需要被转义
+
+lxml handles this escaping automatically.
+lxml会自动处理转义
+
+You can also apply “pretty printing” to the serialization, which inserts line breaks after end tags, and after start tags of elements that contain child elements but no text content.
+我们也可以在序列化的时候应用“漂亮的输出(pretty printing)”，这会在每个结束标签的末尾，或者含有子元素但没有文本内容的标签的末尾添加换行符
+
+In technical terms, lxml adds “insignificant whitespace” to make the output more readable.
+用术语说就是，lxml添加“无意义的空白(insignificant whitespace)”以使输出更具可读性
+
+☞You might also want to check out xmlwitch, another third-party library for generating XML.
+☞你也许也想要看一看xmlwitch，它也是用来生成XML的另外一个第三方库
+
+It makes extensive use of the with statement to make XML generation code more readable.
+它大量地使用了with语句来使生成的XML代码更具可读性
+
+Parsing Broken XML
+解析破损的XML
+
+The XML specification mandates that all conforming XML parsers employ “draconian error handling.” That is, they must halt and catch fire as soon as they detect any sort of wellformedness error in the XML document.
+XML规范文档中指出，要求所有遵循XML规范的解析器使用“严厉的(draconian)错误处理”
+
+Wellformedness errors include mismatched start and end tags, undefined entities, illegal Unicode characters, and a number of other esoteric rules.
+即，当它们在XML文档中检测到任何编排良好性(wellformedness)错误的时候，应当立即停止解析
+
+This is in stark contrast to other common formats like HTML — your browser doesn’t stop rendering a web page if you forget to close an HTML tag or escape an ampersand in an attribute value.
+编排良好性错误包括不匹配的起始和结束标签，未定义的实体(entity)，非法的Unicode字符，还有一些只有内行才懂的规则(esoteric rules)
+
+(It is a common misconception that HTML has no defined error handling.
+这与其他的常见格式，比如HTML，形成了鲜明的对比 — 即使忘记了封闭HTML标签，或者在属性值中忘了转义&字符，我们的浏览器也不会停止渲染一个Web页面
+
+HTML error handling is actually quite well-defined, but it’s significantly more complicated than “halt and catch fire on first error.”)
+（通常大家认为HTML没有错误处理机制，这是一个常见的误解
+
+Some people (myself included) believe that it was a mistake for the inventors of XML to mandate draconian error handling.
+一些人（包括我自己）认为XML的设计者强制实行这种严格的错误处理本身是一个失误
+
+Don’t get me wrong;
+请不要误解我
+
+I can certainly see the allure of simplifying the error handling rules.
+我当然能看到简化错误处理机制的优势
+
+But in practice, the concept of “wellformedness” is trickier than it sounds, especially for XML documents (like Atom feeds) that are published on the web and served over HTTP.
+但是在现实中，“编排良好性”这种构想比乍听上去更加复杂，特别是对XML（比如Atom feeds）这种发布在网络上，通过HTTP传播的文档
+
+Despite the maturity of XML, which standardized on draconian error handling in 1997, surveys continually show a significant fraction of Atom feeds on the web are plagued with wellformedness errors.
+早在1997年XML就标准化了这种严厉的错误处理，尽管XML已经非常成熟，研究一直表明，网络上相当一部分的Atom feeds仍然存在着编排完整性错误
+
+So, I have both theoretical and practical reasons to parse XML documents “at any cost,” that is, not to halt and catch fire at the first wellformedness error.
+所以，从理论上和实际应用两种角度来看，我有理由“不惜任何代价”来解析XML文档，即，当遇到编排良好性错误时，不会中断解析操作
+
+If you find yourself wanting to do this too, lxml can help.
+如果你认为你也需要这样做，lxml可以助你一臂之力
+
+Here is a fragment of a broken XML document.
+以下是一个破损的XML文档的片断
+
+I’ve highlighted the wellformedness error.
+其中的编排良好性错误已经被高亮标出来了
+
+That’s an error, because the &hellip;
+因为实体&hellip;并没有在XML中被定义，所以这算作一个错误
+
+entity is not defined in XML.
+（它在HTML中被定义
+
+(It is defined in HTML.) If you try to parse this broken feed with the default settings, lxml will choke on the undefined entity.
+）如果我们尝试使用默认的设置来解析该破损的feed，lxml会因为这个未定义的实体而停下来
+
+To parse this broken XML document, despite its wellformedness error, you need to create a custom XML parser.
+为了解析该破损的XML文档，忽略它的编排良好性错误，我们需要创建一个自定义的XML解析器
+
+To create a custom parser, instantiate the lxml.etree.XMLParser class.
+实例化lxml.etree.XMLParser类来创建一个自定义的解析器
+
+It can take a number of different named arguments.
+它可以使用许多不同的命名参数
+
+The one we’re interested in here is the recover argument.
+在此，我们感兴趣的为recover参数
+
+When set to True, the XML parser will try its best to “recover” from wellformedness errors.
+当它的值被设为True，XML解析器会尽力尝试从编排良好性错误中“恢复”
+
+To parse an XML document with your custom parser, pass the parser object as the second argument to the parse() function.
+为使用自定的解析器来处理XML文档，将对象parser作为第二个参数传递给parse()函数
+
+Note that lxml does not raise an exception about the undefined &hellip;
+注意，lxml没有因为那个未定义的&hellip;实体而抛出异常
+
+The parser keeps a log of the wellformedness errors that it has encountered.
+解析器会记录它所遇到的所有编排良好性错误
+
+(This is actually true regardless of whether it is set to recover from those errors or not.)
+（无论它是否被设置为需要从错误中恢复，这个记录总会存在
+
+Since it didn’t know what to do with the undefined &hellip;
+由于不知道如果处理该未定义的&hellip;实体，解析器默认会将其省略掉
+
+entity, the parser just silently dropped it.
+title元素的文本内容变成了'dive into '
+
+As you can see from the serialization, the &hellip;
+从序列化的结果可以看出，实体&hellip;并没有被移到其他地方去
+
+entity didn’t get moved;
+它就是被省略了
+
+It is important to reiterate that there is no guarantee of interoperability with “recovering” XML parsers.
+在此，必须反复强调，这种“可恢复的”XML解析器没有互用性(interoperability)保证
+
+A different parser might decide that it recognized the &hellip;
+另一个不同的解析器可能就会认为&hellip;来自HTML，然后将其替换为&amp;hellip;
+
+entity from HTML, and replace it with &amp;hellip;
+这样“更好”吗
+
+instead.
+也许吧
+
+Is that “better”?
+这样“更正确”吗
+
+Maybe.
+不，两种处理方法都不正确
+
+Is it “more correct”?
+正确的行为（根据XML规范）应该是终止解析操作
+
+No, they are both equally incorrect.
+如果你已经决定不按规范来，你得自己负责
+
+Further Reading
+进一步阅读
+
+XML on Wikipedia.org
+维基百科上的词条　XML
+
+The ElementTree XML API
+ElementTree的XML API
+
+Elements and Element Trees
+元素和树状元素
+
+XPath Support in ElementTree
+ElementTree中对XPath的支持
+
+The ElementTree iterparse Function
+ElementTree的迭代式解析(iterparse)功能
+
+lxml
+lxml
+
+Parsing XML and HTML with lxml
+使用lxml解析XML和HTML with
+
+XPath and XSLT with lxml
+使用lxml解析XPath和XSLT
+
+xmlwitch
+xmlwitch
+
+© 2001–11 Mark Pilgrim
+© 2001–9 Mark Pilgrim
+

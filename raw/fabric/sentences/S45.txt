@@ -1,0 +1,30 @@
+Running Fabric’s Tests¶
+运行 Fabric 的测试¶
+
+Fabric is maintained with 100% passing tests.
+Fabric 保持着 100% 的测试通过率，提交的补丁也应该尽可能包括相应的测试，以便于检验 & 合并
+
+When developing on Fabric, it works best to establish a virtualenv to install the dependencies in isolation for running tests.
+开发 Fabric 时，最好建立一个独立的 virtualenv 环境来安装依赖并运行测试
+
+First-time Setup¶
+初次设置¶
+
+You should always run tests on master (or the release branch you’re working with) to ensure they’re passing before working on your own changes/tests.
+你需要在 master （或者正处理的 release 分支）运行测试，来保证自己的修改/测试没有问题
+
+Alternatively, if you’ve run python setup.py develop on your Fabric clone, you can also run:
+如果你已经在 Fabric 代码库中运行过 python setup.py develop ，也可以执行：
+
+This adds additional flags which enable running doctests & adds nice coloration.
+它会额外执行 doctest，并提供彩色输出结果
+
+Fabric
+Fabric
+
+Pythonic remote execution
+Pythonic remote execution
+
+Enter search terms or a module, class or function name.
+输入相关的术语，模块，类或者函数名称进行搜索
+

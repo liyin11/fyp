@@ -1,0 +1,42 @@
+Documentation helpers¶
+文档助手¶
+
+Replace task objects on module with their wrapped functions instead.
+将 module 中的任务对象替换为自己封装的函数
+
+Specifically, look for instances of WrappedCallableTask and replace them with their .wrapped attribute (the original decorated function.)
+具体来说，你可以将 WrappedCallableTask 的实例替换为其 .wrapped 属性（原先被封装的函数）
+
+This is intended for use with the Sphinx autodoc tool, to be run near the bottom of a project’s conf.py.
+它应该和 Sphinx 文档工具一起使用，使用在项目 conf.py 文件的底部，用于保证文档工具只会接触到“真正”的函数，不包括函数签名之类
+
+It ensures that the autodoc extension will have full access to the “real” function, in terms of function signature and so forth.
+通过使用 unwrap_tasks ，自动生成文档工具将不会发现文档签名（尽管任然能发现 __doc__ 等）
+
+For example, at the bottom of your conf.py:
+例如，你可以在 conf.py 的底部写上：
+
+You can go above and beyond, and explicitly hide all non-task functions, by saying hide_nontasks=True.
+只需要设置 hide_nontasks=True 就可以 隐藏 所有非任务函数，它保证所有这些对象不会被识别为任务，因此会被当作是私有的，Sphinx 自动生成文档时也会将其略过
+
+hide_nontasks is thus useful when you have a fabfile mixing in subroutines with real tasks and want to document just the real tasks.
+如果你的 fabfile 中混有子程序（subroutine）和任务，而你 只 希望将任务文档化， hide_nontasks 对你会非常有用
+
+If you run this within an actual Fabric-code-using session (instead of within a Sphinx conf.py), please seek immediate medical attention.
+如果你在 Fabric 代码实际运行环境中使用它（而非 Sphinx conf.py 中），请立即就医
+
+See also
+参见
+
+WrappedCallableTask, task
+WrappedCallableTask ， task
+
+Fabric
+Fabric
+
+Pythonic remote execution
+Pythonic remote execution
+
+Enter search terms or a module, class or function name.
+输入相关的术语，模块，类或者函数名称进行搜索
+

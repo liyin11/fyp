@@ -1,0 +1,144 @@
+Network¶
+网络¶
+
+Classes and subroutines dealing with network connections and related topics.
+Classes and subroutines dealing with network connections and related topics.
+
+Disconnect from all currently connected servers.
+Disconnect from all currently connected servers.
+
+Used at the end of fab‘s main loop, and also intended for use by library users.
+Used at the end of fab‘s main loop, and also intended for use by library users.
+
+Dict subclass allowing for caching of host connections/clients.
+Dict subclass allowing for caching of host connections/clients.
+
+This subclass will intelligently create new client connections when keys are requested, or return previously created connections instead.
+This subclass will intelligently create new client connections when keys are requested, or return previously created connections instead.
+
+It also handles creating new socket-like objects when required to implement gateway connections and ProxyCommand, and handing them to the inner connection methods.
+It also handles creating new socket-like objects when required to implement gateway connections and ProxyCommand, and handing them to the inner connection methods.
+
+Key values are the same as host specifiers throughout Fabric: optional username + @, mandatory hostname, optional : + port number.
+Key values are the same as host specifiers throughout Fabric: optional username + @, mandatory hostname, optional : + port number. Examples:
+
+When the username is not given, env.user is used.
+When the username is not given, env.user is used. env.user defaults to the currently running user at startup but may be overwritten by user code or by specifying a command-line flag.
+
+Note that differing explicit usernames for the same hostname will result in multiple client connections being made.
+Note that differing explicit usernames for the same hostname will result in multiple client connections being made. For example, specifying user1@example.com will create a connection to example.com, logged in as user1; later specifying user2@example.com will create a new, 2nd connection as user2.
+
+The same applies to ports: specifying two different ports will result in two different connections to the same host being made.
+The same applies to ports: specifying two different ports will result in two different connections to the same host being made. If no port is given, 22 is assumed, so example.com is equivalent to example.com:22.
+
+Autoconnect + return connection object
+Autoconnect + return connection object
+
+list of weak references to the object (if defined)
+list of weak references to the object (if defined)
+
+Force a new connection to key host string.
+Force a new connection to key host string.
+
+Create and return a new SSHClient instance connected to given host.
+Create and return a new SSHClient instance connected to given host.
+
+Strips out default values for the given host string.
+Strips out default values for the given host string.
+
+If the user part is the default user, it is removed;
+If the user part is the default user, it is removed; if the port is port 22, it also is removed.
+
+Disconnect from all currently connected servers.
+Disconnect from all currently connected servers.
+
+Used at the end of fab‘s main loop, and also intended for use by library users.
+Used at the end of fab‘s main loop, and also intended for use by library users.
+
+Create and return a gateway socket, if one is needed.
+Create and return a gateway socket, if one is needed.
+
+This function checks env for gateway or proxy-command settings and returns the necessary socket-like object for use by a final host connection.
+This function checks env for gateway or proxy-command settings and returns the necessary socket-like object for use by a final host connection.
+
+A socket.socket-like object, or None if none was created.
+A socket.socket-like object, or None if none was created.
+
+Turns user/host/port strings into user@host:port combined string.
+Turns user/host/port strings into user@host:port combined string.
+
+This function is not responsible for handling missing user/port strings;
+This function is not responsible for handling missing user/port strings; for that, see the normalize function.
+
+If host looks like IPv6 address, it will be enclosed in square brackets
+If host looks like IPv6 address, it will be enclosed in square brackets
+
+If port is omitted, the returned string will be of the form user@host.
+If port is omitted, the returned string will be of the form user@host.
+
+Returns list of SSH key filenames for the current env.host_string.
+Returns list of SSH key filenames for the current env.host_string.
+
+Takes into account ssh_config and env.key_filename, including normalization to a list.
+Takes into account ssh_config and env.key_filename, including normalization to a list. Also performs os.path.expanduser expansion on any key filenames.
+
+Returns a paramiko-ready key from a text string of a private key
+Returns a paramiko-ready key from a text string of a private key
+
+Prompt user for value of env.host_string when env.host_string is empty.
+Prompt user for value of env.host_string when env.host_string is empty.
+
+This decorator is basically a safety net for silly users who forgot to specify the host/host list in one way or another.
+This decorator is basically a safety net for silly users who forgot to specify the host/host list in one way or another. It should be used to wrap operations which require a network connection.
+
+Due to how we execute commands per-host in main(), it’s not possible to specify multiple hosts at this point in time, so only a single host will be prompted for.
+Due to how we execute commands per-host in main(), it’s not possible to specify multiple hosts at this point in time, so only a single host will be prompted for.
+
+Because this decorator sets env.host_string, it will prompt once (and only once) per command.
+Because this decorator sets env.host_string, it will prompt once (and only once) per command. As main() clears env.host_string between commands, this decorator will also end up prompting the user once per command (in the case where multiple commands have no hosts set, of course.)
+
+Normalizes a given host string, returning explicit host, user, port.
+Normalizes a given host string, returning explicit host, user, port.
+
+If omit_port is given and is True, only the host and user are returned.
+If omit_port is given and is True, only the host and user are returned.
+
+This function will process SSH config files if Fabric is configured to do so, and will use them to fill in some default values or swap in hostname aliases.
+This function will process SSH config files if Fabric is configured to do so, and will use them to fill in some default values or swap in hostname aliases.
+
+Regarding SSH port used:
+normalize() returns a tuple; this returns another valid host string.
+
+normalize() returns a tuple;
+Prompts for and returns a new password if required; otherwise, returns None.
+
+Prompts for and returns a new password if required;
+A trailing colon is appended unless no_colon is True.
+
+A trailing colon is appended unless no_colon is True.
+If the user supplies an empty password, the user will be re-prompted until they enter a non-empty password.
+
+If the user supplies an empty password, the user will be re-prompted until they enter a non-empty password.
+prompt_for_password autogenerates the user prompt based on the current host being connected to. To override this, specify a string value for prompt.
+
+prompt_for_password autogenerates the user prompt based on the current host being connected to.
+stream is the stream the prompt will be printed to; if not given, defaults to sys.stderr.
+
+stream is the stream the prompt will be printed to;
+Return ssh configuration dict for current env.host_string host value.
+
+Return ssh configuration dict for current env.host_string host value.
+Memoizes the loaded SSH config file, but not the specific per-host results.
+
+Memoizes the loaded SSH config file, but not the specific per-host results.
+This function performs the necessary “is SSH config enabled
+
+This function performs the necessary “is SSH config enabled?” checks and will simply return an empty dict if not.
+May give an explicit host string as host_string.
+
+Pythonic remote execution
+输入相关的术语，模块，类或者函数名称进行搜索
+
+Enter search terms or a module, class or function name.
+Consider supporting the authors on Gratipay:
+

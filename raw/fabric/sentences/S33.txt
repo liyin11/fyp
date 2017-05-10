@@ -1,0 +1,27 @@
+Color output functions¶
+提供彩色输出的函数¶
+
+New in version 0.9.2.
+0.9.2 新版功能.
+
+Functions for wrapping strings in ANSI color codes.
+封装字符串，提供 ANSI 色彩输出的函数
+
+Each function within this module returns the input string text, wrapped with ANSI color codes for the appropriate color.
+本模块中的所有函数均返回包裹对应色彩 ANSI 字符的 text 字符串
+
+For example, to print some text as green on supporting terminals:
+例如，在支持 ANSI 的终端中打印绿色文字：
+
+Because these functions simply return modified strings, you can nest them:
+这些函数返回值都是修改后的字符串，因此你也可以嵌套使用它们：
+
+If bold is set to True, the ANSI flag for bolding will be flipped on for that particular invocation, which usually shows up as a bold or brighter version of the original color on most terminals.
+如果 bold 值为 True ，字符串将会被 ANSI 粗体标记所包裹，通常根据终端实现上的不同显示黑体或更明亮的颜色
+
+Pythonic remote execution
+输入相关的术语，模块，类或者函数名称进行搜索
+
+Enter search terms or a module, class or function name.
+Consider supporting the authors on Gratipay:
+

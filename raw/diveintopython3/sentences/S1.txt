@@ -1,0 +1,645 @@
+You are here: Home ‣ Dive Into Python 3 ‣
+当前位置: 首页 ‣ 深入 Python 3 ‣
+
+Difficulty level: ♦♢♢♢♢
+难度级别: ♦♢♢♢♢
+
+Installing Python
+安装 Python
+
+❝ Tempora mutantur nos et mutamur in illis.
+❝ Tempora mutantur nos et mutamur in illis. （时光流转，吾等亦随之而变
+
+(Times change, and we change with them.) ❞ — ancient Roman proverb
+） ❞ — 古罗马谚语
+
+Diving In
+深入
+
+Before you can start programming in Python 3, you need to install it.
+欢迎来到 Python 3 的世界
+
+Or do you?
+让我们继续深入
+
+Which Python Is Right For You?
+何种版本的 Python 适合您
+
+If you're using an account on a hosted server, your ISP may have already installed Python 3.
+对 Python 要做的第一件事情是安装
+
+If you’re running Linux at home, you may already have Python 3, too.
+还是说已经装了
+
+The easiest way to check for Python 3 on your Linux or Mac OS X system is from the command line.
+如果使用的是托管服务器上的帐号， ISP［互联网供应商］ 可能已经安装了 Python 3 
+
+Once you’re at a command line prompt, just type python3 (all lowercase, no spaces), press ENTER, and see what happens.
+如果是在家运行的 Linux ，也可能已经安装了 Python 3 
+
+On my home Linux system, Python 3.1 is already installed, and this command gets me into the Python interactive shell.
+多数流行的 GNU/Linux 发行包在缺省安装中都包括了 Python 2 
+
+(Type exit() and press ENTER to exit the Python interactive shell.)
+在 Linux 或 Mac OS X 系统上检测 Python 3 的最简单办法是进入命令行
+
+My web hosting provider also runs Linux and provides command-line access, but my server does not have Python 3 installed.
+见到命令行提示符之后，只需输入 python3 （全部字母小写、无空格），并观察接下来发生的事情
+
+(Boo!)
+我家中的 Linux 系统已经安装了 Python 3 ，运行该命令将把我带入Python 交互式 shell 中
+
+So back to the question that started this section, “Which Python is right for you?” Whichever one runs on the computer you already have.
+（输入 exit() 并按下 回车键 可退出 Python 交互式 shell
+
+[Read on for Windows instructions, or skip to Installing on Mac OS X, Installing on Ubuntu Linux, or Installing on Other Platforms.]
+我选择的 虚拟主机服务商 也运行 Linux 并提供命令行访问，但我的服务器未安装 Python 3 
+
+Visit python.org/download/ and download the appropriate Python 3 Windows installer for your architecture.
+访问 python.org/download/ 并下载与计算机架构对应的 Python 3 Windows 安装程序
+
+Your choices will look something like this:
+面对的选择可能包括下面这些：
+
+Python 3.1 Windows installer (Windows binary — does not include source)
+Python 3.1 Windows 安装程序 （Windows 二进制 — 不包括源码）
+
+Python 3.1 Windows AMD64 installer (Windows AMD64 binary — does not include source)
+Python 3.1 Windows AMD64 安装程序 （Windows AMD64 二进制 — 不包括源码）
+
+I don’t want to include direct download links here, because minor updates of Python happen all the time and I don’t want to be responsible for you missing important updates.
+未在此处提供直接下载链接是因为 Python 总是在进行小的更新，而我又不想为您错过更新负责
+
+You should always install the most recent version of Python 3.x unless you have some esoteric reason not to.
+应该总是安装最新的 Python 3.x 版本，除非您有特别的理由不这么做
+
+Once your download is complete, double-click the .msi file.
+下载完成后，双击该 .msi 文件
+
+Windows will pop up a security alert, since you’re about to be running executable code.
+由于正要运行的是可执行代码，Windows 将弹出一个安全警告
+
+The official Python installer is digitally signed by the Python Software Foundation, the non-profit corporation that oversees Python development.
+官方 Python 安装程序由负责 Python 开发的非盈利性组织 Python 软件基金会 进行数字签名
+
+Don’t accept imitations!
+千万别接受山寨版
+
+Click the Run button to launch the Python 3 installer.
+点击 Run［运行］ 按钮启动 Python 3 安装程序
+
+The first question the installer will ask you is whether you want to install Python 3 for all users or just for you.
+安装程序将会询问的第一个问题是：是为所有用户，还是仅为您自己安装 Python 3
+
+The default choice is “install for all users,” which is the best choice unless you have a good reason to choose otherwise.
+缺省的选项是 “为所有用户安装”，如果没有更好理由选择其它选项，这是最好的选择
+
+(One possible reason why you would want to “install just for me” is that you are installing Python on your company’s computer and you don’t have administrative rights on your Windows account.
+（想要”只为我安装“的一个可能原因是：正往公司的计算机上安装 Python 而您的 Windows 帐号又没有 Administrator 权限
+
+But then, why are you installing Python without permission from your company’s Windows administrator?
+不过，您又为啥未经公司 Windows 管理员的许可而安装 Python 呢
+
+Don’t get me in trouble here!)
+这个问题上不要给我惹麻烦
+
+Click the Next button to accept your choice of installation type.
+点击 Next［下一步］ 按钮接受对安装类型的选择
+
+Next, the installer will prompt you to choose a destination directory.
+接下来，安装程序将会提示选择一个目标目录
+
+The default for all versions of Python 3.1.x is C:\Python31\, which should work well for most users unless you have a specific reason to change it.
+所有 Python 3.1.x 版本缺省的目标目录是： C:\Python31\，这对绝大多数用户都是合适的，除非您有特别的理由修改它
+
+If you maintain a separate drive letter for installing applications, you can browse to it using the embedded controls, or simply type the pathname in the box below.
+如果有单独的磁盘驱动器用于安装应用程序，可通过嵌入式控件找到它，或直接在下方的文本框中输入该路径名
+
+You are not limited to installing Python on the C: drive;
+如果在 C: 盘安装 Python 受限
+
+you can install it on any drive, in any folder.
+可在其它盘的任何目录下安装
+
+Click the Next button to accept your choice of destination directory.
+点击 Next [下一步] 按钮接受对目标目录的选择
+
+The next page looks complicated, but it’s not really.
+接下来的页面看着有点复杂，但其实并不真的复杂
+
+Like many installers, you have the option not to install every single component of Python 3.
+和其它安装程序一样，您可以选择不安装 Python 3 每个单独部件
+
+If disk space is especially tight, you can exclude certain components.
+如果磁盘空间特别紧张，可以将某些部件排除在外
+
+Register Extensions allows you to double-click Python scripts (.py files) and run them.
+Register Extensions ［注册扩展名］ 允许通过双击 Python 脚本 (.py files) 来运行它们
+
+Recommended but not required.
+建议选上，但不是必需的
+
+(This option doesn’t require any disk space, so there is little point in excluding it.)
+（该选项不占用任何磁盘空间，因此排除它没有任何意义
+
+Tcl/Tk is the graphics library used by the Python Shell, which you will use throughout this book.
+Tcl/Tk 是 Python Shell 使用的图形化类库，您将在整本书都用到它
+
+I strongly recommend keeping this option.
+强烈建议保留该选项
+
+Documentation installs a help file that contains much of the information on docs.python.org.
+Documentation ［文档］ 安装的帮助文件包括大量来自 docs.python.org 信息
+
+Recommended if you are on dialup or have limited Internet access.
+如果使用拨号上网或者互联网访问受限的话，建议保留
+
+Utility Scripts includes the 2to3.py script which you’ll learn about later in this book.
+Utility Scripts［实用脚本］ 包括本书稍后将学到的 2to3.py 脚本
+
+Required if you want to learn about migrating existing Python 2 code to Python 3.
+如果想学习如何将现有 Python 2 代码移植到 Python 3 ，这是必需的部件
+
+If you have no existing Python 2 code, you can skip this option.
+若无现有的 Python 2 代码，可略过该选项
+
+Test Suite is a collection of scripts used to test the Python interpreter itself.
+Test Suite ［测试套件］ 是用于测试 Python 解释器的脚本集合
+
+We will not use it in this book, nor have I ever used it in the course of programming in Python.
+本书中将不会用到，而且我在用 Python 编程的过程中也从未用到
+
+Completely optional.
+完全是可选的
+
+If you’re unsure how much disk space you have, click the Disk Usage button.
+如果不确定有多少磁盘空间，点击 Disk Usage［磁盘使用情况］按钮
+
+The installer will list your drive letters, compute how much space is available on each drive, and calculate how much would be left after installation.
+安装程序将列出所有驱动器盘符，并计算每个驱动器上有多少可用空间，以及安装后会剩下多少空间
+
+Click the OK button to return to the “Customizing Python” page.
+点击 OK［确定］ 按钮返回“Customizing Python［自定义 Python］” 页面
+
+If you decide to exclude an option, select the drop-down button before the option and select “Entire feature will be unavailable.” For example, excluding the test suite will save you a whopping 7908KB of disk space.
+如果决心排除某选项，选择选项之前的下拉选项按钮并选中 “Entire feature will be unavailable.［整个功能将不可用］”选项
+
+Click the Next button to accept your choice of options.
+点击 Next［下一步］ 按钮接受对所选内容的选择
+
+The installer will copy all the necessary files to your chosen destination directory.
+安装程序将把所有必需的文件拷贝到所选择的目标目录中
+
+(This happens so quickly, I had to try it three times to even get a screenshot of it!)
+（该过程非常快捷，以至于我不得不试了三遍才捕捉到它的屏幕截图
+
+Click the Finish button to exit the installer.
+点击 Finish［完成］ 按钮退出该安装程序
+
+In your Start menu, there should be a new item called Python 3.1.
+在 开始 菜单中，将会出现一条名为 Python 3.1 的新菜单项
+
+Within that, there is a program called IDLE.
+在其中有一个名为 IDLE 的程序
+
+Select this item to run the interactive Python Shell.
+选择此菜单项以运行交互式 Python Shell 
+
+[Skip to using the Python Shell]
+[跳到 使用 Python Shell]
+
+Installing on Mac OS X
+在 Mac OS X 上安装
+
+All modern Macintosh computers use the Intel chip (like most Windows PCs).
+所有的现代麦金塔计算机使用英特尔芯片（像大多数 Windows PC 一样)
+
+Older Macs used PowerPC chips.
+旧款的苹果电脑使用 PowerPC 芯片
+
+You don’t need to understand the difference, because there’s just one Mac Python installer for all Macs.
+你无须理解其中区别，因为所有苹果电脑只有一种 Mac Python 安装程序
+
+Visit python.org/download/ and download the Mac installer.
+访问 python.org/download/ 并下载 Mac 安装程序
+
+It will be called something like Python 3.1 Mac Installer Disk Image, although the version number may vary.
+它可能被叫做 Python 3.1 Mac Installer Disk Image 之类的名字，尽管版本号可能会不同
+
+Be sure to download version 3.x, not 2.x.
+请确定下载的是 3.x 版，而不是 2.x 版
+
+Your browser should automatically mount the disk image and open a Finder window to show you the contents.
+浏览器可以自动挂载磁盘映像，并打开一个 Finder 窗口展示其内容
+
+(If this doesn’t happen, you’ll need to find the disk image in your downloads folder and double-click to mount it.
+（如果没有发生这样的情形，则需要在下载目录中找到磁盘映像，并双击挂载
+
+It will be named something like python-3.1.dmg.) The disk image contains a number of text files (Build.txt, License.txt, ReadMe.txt), and the actual installer package, Python.mpkg.
+它可能被命名为 python-3.1.dmg 之类的名称
+
+Double-click the Python.mpkg installer package to launch the Mac Python installer.
+双击 Python.mpkg 安装程序包以启动 Mac Python 安装程序
+
+The first page of the installer gives a brief description of Python itself, then refers you to the ReadMe.txt file (which you didn’t read, did you?) for more details.
+安装程序的第一页就 Python 本身给出了一段简要描述，然后提示您参阅 ReadMe.txt 文件（您没有读过该文件，不是吗
+
+Click the Continue button to move along.
+点击 Continue［继续］ 按钮进入下一步
+
+The next page actually contains some important information: Python requires Mac OS X 10.3 or later.
+接下来的页面实际包含一些重要信息： Python 必须安装在 Mac OS X 10.3 或其后续版本之上
+
+If you are still running Mac OS X 10.2, you should really upgrade.
+如果仍在使用 Mac OS X 10.2，那就真的需要升级一下了
+
+Apple no longer provides security updates for your operating system, and your computer is probably at risk if you ever go online.
+苹果公司已经不再为（Mac OS X 10.2）操作系统提供安全更新了，而且如果曾经上网的话，您的计算机可能已经处于危险之中了
+
+Also, you can’t run Python 3.
+此外，您也无法运行 Python 3 
+
+Click the Continue button to advance.
+点击 Continue［继续］ 按钮继续前进
+
+Like all good installers, the Python installer displays the software license agreement.
+如同所有优秀的安装程序，Python 安装程序列出了软件许可协议
+
+Python is open source, and its license is approved by the Open Source Initiative.
+Python 是开源软件，其许可协议由 Open Source Initiative［开源软件促进会］ 提供
+
+Python has had a number of owners and sponsors throughout its history, each of which has left its mark on the software license.
+历史上，Python 有过一些所有者和赞助者，每个都在软件许可协议之上留下了痕迹
+
+But the end result is this: Python is open source, and you may use it on any platform, for any purpose, without fee or obligation of reciprocity.
+但最终结果是：Python 是开源的，可在任何平台上为任何目的使用它，而无需付费或承担对等义务
+
+Click the Continue button once again.
+再次点击 Continue［继续］ 按钮
+
+Due to quirks in the standard Apple installer framework, you must “agree” to the software license in order to complete the installation.
+根据苹果安装程序框架的习惯，必须“agree［同意］” 软件许可协议以完成安装
+
+Since Python is open source, you are really “agreeing” that the license is granting you additional rights, rather than taking them away.
+由于 Python 是开源的，实际上您所“同意”的只是授予您额外的权利，而不是剥夺它们
+
+Click the Agree button to continue.
+点击 Agree［同意］ 按钮以继续安装
+
+The next screen allows you to change your install location.
+下一个画面允许您修改安装位置
+
+You must install Python on your boot drive, but due to limitations of the installer, it does not enforce this.
+必须 将 Python 安装到启动驱动器上，但由于安装程序的限制，它并没有强迫这么做
+
+In truth, I have never had the need to change the install location.
+说实话，我从来没有需要过修改安装位置
+
+From this screen, you can also customize the installation to exclude certain features.
+从该画面中，您还可以自定义安装以剔除特定功能
+
+If you want to do this, click the Customize button;
+如果想这么做，点击 Customize［自定义］ 按钮
+
+otherwise click the Install button.
+否则点击 Install［安装］ 按钮
+
+If you choose a Custom Install, the installer will present you with the following list of features:
+如果选择了自定义安装，安装程序将为您提供下列功能：
+
+Python Framework.
+Python Framework ［Python 框架］. 这是 Python 的核心所在，由于必须被安装，它已经被选中并处于无法取消状态
+
+GUI Applications includes IDLE, the graphical Python Shell which you will use throughout this book.
+GUI Applications［GUI 应用程序］ 包括 IDLE，即本书通篇将用到的图形化 Python Shell 
+
+I strongly recommend keeping this option selected.
+强烈建议保留该选项
+
+UNIX command-line tools includes the command-line python3 application.
+UNIX command-line tools［UNIX 命令行工具］ 包括了 python3 命令行应用程序
+
+I strongly recommend keeping this option, too.
+同样强烈建议保留该选项
+
+Python Documentation contains much of the information on docs.python.org.
+Python Documentation［Python 文档］ 包含了来自 docs.python.org 的许多信息
+
+Recommended if you are on dialup or have limited Internet access.
+如果使用拨号上网或者互联网访问受限的话，建议保留
+
+Shell profile updater controls whether to update your shell profile (used in Terminal.app) to ensure that this version of Python is on the search path of your shell.
+Shell profile updater［Shell 文档更新程序］ 控制是否更新 shell 设置（用于 Terminal.app 中）以确保此版本的 Python 位于 Shell 的搜索路径当中
+
+You probably don’t need to change this.
+您可能不需要修改该项设置
+
+Fix system Python should not be changed.
+Fix system Python［修复系统 Python］ 不应作变更
+
+(It tells your Mac to use Python 3 as the default Python for all scripts, including built-in system scripts from Apple.
+（它告诉 Mac 将 Python 3 用作所有脚本的缺省 Python ，包括来自苹果公司的内置系统脚本
+
+This would be very bad, since most of those scripts are written for Python 2, and they would fail to run properly under Python 3.)
+这将会导致非常糟糕的结果，因为多数这些脚本是为 Python 2 编写的，在 Python 3 环境中将无法正确运行
+
+Click the Install button to continue.
+点击 Install［安装］ 按钮以继续
+
+Because it installs system-wide frameworks and binaries in /usr/local/bin/, the installer will ask you for an administrative password.
+由于是安装系统级的框架，且二进制文件被安装至 /usr/local/bin/ 之中，安装程序将会向您询问管理员口令
+
+There is no way to install Mac Python without administrator privileges.
+没有管理员权限是无法安装 Mac Python 的
+
+Click the OK button to begin the installation.
+点击 OK［确定］ 按钮开始安装
+
+The installer will display a progress meter while it installs the features you’ve selected.
+在安装所选功能时，安装程序将会显示进度条
+
+Assuming all went well, the installer will give you a big green checkmark to tell you that the installation completed successfully.
+假定一切顺利，安装程序将会展示一个很大的绿色对号，告知安装成功完成
+
+Click the Close button to exit the installer.
+点击 Close［关闭］ 按钮退出该安装程序
+
+Assuming you didn’t change the install location, you can find the newly installed files in the Python 3.1 folder within your /Applications folder.
+加入没有修改安装位置，您可以在 /Applications 目录下的 Python 3.1 目录中找到新安装的文件
+
+The most important piece is IDLE, the graphical Python Shell.
+ 最重要的部分是图形化 Python Shell IDLE
+
+Double-click IDLE to launch the Python Shell.
+双击 IDLE 以启动 Python Shell
+
+The Python Shell is where you will spend most of your time exploring Python.
+Python Shell 是您探索 Python 过程中花费时间最多的地方
+
+Examples throughout this book will assume that you can find your way into the Python Shell.
+本书中所有的例子都假定您能够找到进入 Python Shell 的方法
+
+[Skip to using the Python Shell]
+[跳到 使用 Python Shell]
+
+Installing on Ubuntu Linux
+在 Ubuntu Linux 上安装
+
+Modern Linux distributions are backed by vast repositories of precompiled applications, ready to install.
+现代的 Linux 发行版背后都有着大型的预编译应用程序仓库，随时可用于安装
+
+The exact details vary by distribution.
+具体的细节各发行版均不同
+
+In Ubuntu Linux, the easiest way to install Python 3 is through the Add/Remove application in your Applications menu.
+对于 Ubuntu Linux 而言，安装 Python 3 的最简单途径是通过 Applications 菜单中的增加／删除 应用程序
+
+When you first launch the Add/Remove application, it will show you a list of preselected applications in different categories.
+在首次运行 增加／删除 应用程序时，它将展示一份分成多类的预选程序清单
+
+Some are already installed;
+有的已经安装
+
+most are not.
+多数还没有
+
+Because the repository contains over 10,000 applications, there are different filters you can apply to see small parts of the repository.
+因为该仓库包括超过 10,000 种应用程序，所以可以使用过滤器参看仓库的不同部分
+
+The default filter is “Canonical-maintained applications,” which is a small subset of the total number of applications that are officially supported by Canonical, the company that creates and maintains Ubuntu Linux.
+默认过滤器是“由 Canonical 维护的应用程序”，它是创建及维护 Ubuntu Linux 的 Canonical 公司官方所支持的大量应用程序中的一个小子集
+
+Python 3 is not maintained by Canonical, so the first step is to drop down this filter menu and select “All Open Source applications.”
+Python 3 并非由 Canonical 维护，因此第一个步骤是下拉过滤器菜单，并选择“所有开源应用程序”
+
+Once you’ve widened the filter to include all open source applications, use the Search box immediately after the filter menu to search for Python 3.
+放宽过滤器以包括所有开源应用程序之后，使用进紧挨着过滤器菜单的”搜索“框来搜索 Python 3
+
+Now the list of applications narrows to just those matching Python 3.
+现在应用程序列表收窄为仅包括匹配 Python 3 的那些内容
+
+You’re going to check two packages.
+您将查看两个安装包
+
+The first is Python (v3.0).
+第一个是 Python (v3.0) 
+
+This contains the Python interpreter itself.
+该安装包包含了 Python 解释器自身
+
+The second package you want is immediately above: IDLE (using Python-3.0).
+第二个要安装的包就在正上方： IDLE (using Python-3.0)
+
+This is a graphical Python Shell that you will use throughout this book.
+这是你在整本书都要用到的图形化 Python Shell 
+
+After you’ve checked those two packages, click the Apply Changes button to continue.
+选好这两个包后，点击 Apply Changes［应用修改］ 按钮以继续
+
+The package manager will ask you to confirm that you want to add both IDLE (using Python-3.0) and Python (v3.0).
+该软件包管理器将会要求您确认是否要添加 IDLE (using Python-3.0) 和 Python (v3.0) 
+
+Click the Apply button to continue.
+点击 Apply［应用］ 按钮以继续
+
+The package manager will show you a progress meter while it downloads the necessary packages from Canonical’s Internet repository.
+在从 Canonical 互联网仓库下载所需安装包时，软件包管理器将显示一个进度条
+
+Once the packages are downloaded, the package manager will automatically begin installing them.
+下好安装包后，软件包管理器将会自动开始安装
+
+If all went well, the package manager will confirm that both packages were successfully installed.
+如果一切顺利，软件包管理器将确认两个安装包都已安装成功
+
+From here, you can double-click IDLE to launch the Python Shell, or click the Close button to exit the package manager.
+从此，您可双击 IDLE 启动 Python Shell，或者点击 Close［关闭］ 按钮退出软件包管理器
+
+You can always relaunch the Python Shell by going to your Applications menu, then the Programming submenu, and selecting IDLE.
+您还可以从 Applications［应用程序］ 菜单，然后进入Programming 子菜单并选择 IDLE，以重新启动 Python Shell
+
+The Python Shell is where you will spend most of your time exploring Python.
+Python Shell 是您探索 Python 过程中花费时间最多的地方
+
+Examples throughout this book will assume that you can find your way into the Python Shell.
+本书中所有的例子都假定您能够找到进入 Python Shell 的方法
+
+[Skip to using the Python Shell]
+[跳到 使用 Python Shell]
+
+Installing on Other Platforms
+在其它平台上安装
+
+Python 3 is available on a number of different platforms.
+Python 3 还可在一些其它平台上安装
+
+In particular, it is available in virtually every Linux, BSD, and Solaris-based distribution.
+特别要指出的是，它几乎可以在所有的 Linux、 BSD 和基于 Solaris 的发行版纸上安装
+
+For example, RedHat Linux uses the yum package manager.
+例如，RedHat Linux 使用 yum 软件包管理器
+
+FreeBSD has its ports and packages collection, SUSE has zypper, and Solaris has pkgadd.
+FreeBSD 有 移植和软件包集合
+
+A quick web search for Python 3 + your operating system should tell you whether a Python 3 package is available, and if so, how to install it.
+Solaris 有 pkgadd 和 friends 
+
+Using The Python Shell
+使用 Python Shell
+
+The Python Shell is where you can explore Python syntax, get interactive help on commands, and debug short programs.
+Python Shell 是您探索 Python 语法，通过命令获取交互式帮助以及调试段程序的地方
+
+The graphical Python Shell (named IDLE) also contains a decent text editor that supports Python syntax coloring and integrates with the Python Shell.
+图形化 Python Shell （名为 IDLE）还包括了一个不错的文本编辑器，它支持 Python 语法着色并与 Python Shell 进行了整和
+
+If you don’t already have a favorite text editor, you should give IDLE a try.
+如果还没有喜欢的文本编辑器，不妨试用下 IDLE 
+
+First things first.
+重中之重
+
+The Python Shell itself is an amazing interactive playground.
+Python Shell 本身是一款了不起的互动环境
+
+Throughout this book, you’ll see examples like this:
+在本书中，您将看到下面这样的例子：
+
+The three angle brackets, >>>, denote the Python Shell prompt.
+这三个尖括号， >>>，表示 Python Shell 提示符
+
+Don’t type that part.
+不要输入该部分
+
+That’s just to let you know that this example is meant to be followed in the Python Shell.
+它只是让您知道该例要在 Python Shell 中运行
+
+1 + 1 is the part you type.
+1 + 1 是您输入的部分
+
+You can type any valid Python expression or command in the Python Shell.
+您可在 Python Shell 中输入任何有效的 Python 表达式和命令
+
+Don’t be shy;
+别怕羞，它不会咬你
+
+it won’t bite!
+最糟糕的事情也不过看到一条错误信息
+
+The worst that will happen is you’ll get an error message.
+命令将立即得到执行（一旦您按下 ENTER［回车键］）
+
+Commands get executed immediately (once you press ENTER);
+表达式的值将立即得到计算，而 Python Shell 将输出结果
+
+2 is the result of evaluating this expression.
+2 是该表达式的计算结果
+
+As it happens, 1 + 1 is a valid Python expression.
+事实上，1 + 1 是一个有效的 Python 不等式
+
+The result, of course, is 2.
+结果，当然，是 2 
+
+Let’s try another one.
+让我们尝试下另一个例子.
+
+Pretty simple, no?
+很简单，不是吗
+
+But there’s lots more you can do in the Python shell.
+但你在 Python shell 中可完成的工作要多得多
+
+If you ever get stuck — you can’t remember a command, or you can’t remember the proper arguments to pass a certain function — you can get interactive help in the Python Shell.
+如果您被困住了——无法想起某个命令，或者无法想起如何正确给某个函数传递参数——您可寻求 Python Shell 的交互式帮助
+
+Just type help and press ENTER.
+只需输入 help 并按下 回车键 
+
+There are two modes of help.
+有两种帮助模式
+
+You can get help about a single object, which just prints out the documentation and returns you to the Python Shell prompt.
+您可以获得某个对象的帮助，这样将只打印出文档并返回 Python Shell 提示符
+
+You can also enter help mode, where instead of evaluating Python expressions, you just type keywords or command names and it will print out whatever it knows about that command.
+您也可以输入 help mode，系统将不会计算 Python 表达式，您只需输入关键字或命令名称，系统将会输出关于该命令它所知道的内容
+
+To enter the interactive help mode, type help() and press ENTER.
+要进入交互帮助模式，仅需输入 help() 并按下 回车键
+
+Note how the prompt changes from >>> to help>.
+请注意提示符是如何从 >>> 改变为 help> 的
+
+This reminds you that you’re in the interactive help mode.
+该提示符提醒您目前正处于交互式帮助模式
+
+Now you can enter any keyword, command, module name, function name — pretty much anything Python understands — and read documentation on it.
+现在您可以输入任何关键字、命令、模块名称、函数名称 — 几乎任何 Python 能够理解的一切  — 然后阅读其文档
+
+To get documentation on the print() function, just type print and press ENTER.
+要获取 print() 函数的文档，仅需输入 print 然后按下 回车键 
+
+The interactive help mode will display something akin to a man page: the function name, a brief synopsis, the function’s arguments and their default values, and so on.
+该交互式帮助模式将会显示类似 man 页面的内容：函数名称、简要内容、函数的参数及缺省值等等
+
+If the documentation seems opaque to you, don’t panic.
+如果文档看起来很难懂，千万别慌
+
+You’ll learn more about all these concepts in the next few chapters.
+您将在后面不远的章节中学到关于这些概念的更多内容
+
+Of course, the interactive help mode doesn’t know everything.
+当然，交互式帮助模式并不知道一切
+
+If you type something that isn’t a Python command, module, function, or other built-in keyword, the interactive help mode will just shrug its virtual shoulders.
+如果您所输入的不是 Python 的命令、模块、函数或者其它内建关键字，交互式帮助模式将只能耸耸虚拟的肩膀
+
+To quit the interactive help mode, type quit and press ENTER.
+要退出交互帮助模式，仅需输入 quit() 并按下 回车键
+
+The prompt changes back to >>> to signal that you’ve left the interactive help mode and returned to the Python Shell.
+提示符将变回 >>> 以提示您已经离开交互帮助模式，并返回到了 Python Shell 
+
+IDLE, the graphical Python Shell, also includes a Python-aware text editor.
+图形化的 Python Shell —— IDLE,同样带有一个 Python 相关的文本编辑器
+
+Python Editors and IDEs
+Python 编辑器和集成开发环境
+
+IDLE is not the only game in town when it comes to writing programs in Python.
+如果要以 Python 编写程序，IDLE 并不是唯一的编辑器选择
+
+While it’s useful to get started with learning the language itself, many developers prefer other text editors or Integrated Development Environments (IDEs).
+尽管它对于初学该语言非常有帮助，但许多开发人员更喜欢其它文本编辑器或集成开发环境
+
+I won’t cover them here, but the Python community maintains a list of Python-aware editors that covers a wide range of supported platforms and software licenses.
+（IDEs）在此我不想展开阐述，Python 社区维护了一份 Python 相关编辑器的清单，涵盖了各种各样支持平台和软件许可协议
+
+You might also want to check out the list of Python-aware IDEs, although few of them support Python 3 yet.
+您可能也想查看一下这份 Python相关 IDEs 的清单，尽管其中还只有少数才支持 Python 3 
+
+One that does is PyDev, a plugin for Eclipse that turns Eclipse into a full-fledged Python IDE.
+其中之一是 PyDev，Eclipse 的一种插件，它将Eclipse 变成了一种成熟的 Python IDE
+
+Both Eclipse and PyDev are cross-platform and open source.
+Eclipse 和 PyDev 都是跨平台的开源软件
+
+On the commercial front, there is ActiveState’s Komodo IDE.
+在商业方面，有 ActiveState 公司的 Komodo IDE 
+
+It has per-user licensing, but students can get a discount, and a free time-limited trial version is available.
+它需要用户为单位的授权许可，但学生可以得到折扣，同时还有时间受限的免费试用版
+
+I’ve been programming in Python for nine years, and I edit my Python programs in GNU Emacs and debug them in the command-line Python Shell.
+在用 Python 编程的九年中，我使用 GNU Emacs 编辑 Python 程序，并在命令行 Python Shell 中进行调试
+
+There’s no right or wrong way to develop in Python.
+对于使用 Python 开发来说，编辑器之选没有绝对的正确和错误
+
+Find a way that works for you!
+重要的是找到适合自己的道路
+
+© 2001–11 Mark Pilgrim
+© 2001–9 Mark Pilgrim
+

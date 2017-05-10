@@ -1,0 +1,201 @@
+Django 1.5 documentation
+Django 1.5 documentation
+
+Writing your first Django app, part 3¶
+编写你的第一个 Django 程序 第3部分¶
+
+This tutorial begins where Tutorial 2 left off.
+本教程上接 教程 第2部分 
+
+We’re continuing the Web-poll application and will focus on creating the public interface – “views.”
+我们将继续 开发 Web-poll 应用并且专注在创建公共界面 – “视图 （views ）”
+
+Philosophy¶
+哲理¶
+
+A view is a “type” of Web page in your Django application that generally serves a specific function and has a specific template.
+在 Django 应用程序中，视图是一“类”具有特定功能和模板的网页
+
+For example, in a Weblog application, you might have the following views:
+ 例如，在一个博客应用程序中，你可能会有以下视图：
+
+In our poll application, we’ll have the following four views:
+在我们的 poll 应用程序中，将有以下四个视图：
+
+In Django, each view is represented by a simple Python function.
+在 Django 中，网页及其他内容是由视图来展现的
+
+Write your first view¶
+编写你的第一个视图¶
+
+A shortcut: render_to_response()¶
+快捷方式: render()¶
+
+It’s a very common idiom to load a template, fill a context and return an HttpResponse object with the result of the rendered template.
+这是一个非常常见的习惯用语，用于加载模板，填充上下文并返回一个含有模板渲染结果的 HttpResponse 对象
+
+Django provides a shortcut.
+ Django 提供了一种快捷方式
+
+Here’s the full index() view, rewritten:
+这里重写完整的 index() 视图
+
+Note that once we’ve done this in all these views, we no longer need to import loader, Context and HttpResponse.
+请注意，一旦我们在所有视图中都这样做了，我们就不再需要导入 loader ， Context 和 HttpResponse ( 如果你仍然保留了 detail,``resutls``, 和``vote`` 方法，你还是需要保留 HttpResponse ) 
+
+The render_to_response() function takes a template name as its first argument and a dictionary as its optional second argument.
+render() 函数中第一个参数是 request 对象，第二个参数是一个模板名称，第三个是一个字典类型的可选参数
+
+It returns an HttpResponse object of the given template rendered with the given context.
+ 它将返回一个包含有给定模板根据给定的上下文渲染结果的 HttpResponse 对象
+
+Raising 404¶
+抛出 404 异常¶
+
+Now, let’s tackle the poll detail view – the page that displays the question for a given poll.
+现在让我们解决 poll 的详细视图 – 该页显示一个给定 poll 的详细问题
+
+Here’s the view:
+ 视图代码如下所示：:
+
+The new concept here: The view raises the Http404 exception if a poll with the requested ID doesn’t exist.
+在这有个新概念：如果请求的 poll 的 ID 不存在，该视图将抛出 Http404 异常
+
+We’ll discuss what you could put in that polls/detail.html template a bit later, but if you’d like to quickly get the above example working, just:
+我们稍后讨论如何设置 polls/detail.html 模板，若是你想快速运行上面的例子， 在模板文件中添加如下代码：
+
+will get you started for now.
+现在你可以运行了
+
+A shortcut: get_object_or_404()¶
+快捷方式: get_object_or_404()¶
+
+It’s a very common idiom to use get() and raise Http404 if the object doesn’t exist.
+这很常见，当你使用 get() 获取对象时 对象却不存在时就会抛出 Http404 异常
+
+Django provides a shortcut.
+对此 Django 提供了一个快捷操作
+
+Here’s the detail() view, rewritten:
+如下所示重写 detail() 视图：
+
+The get_object_or_404() function takes a Django model as its first argument and an arbitrary number of keyword arguments, which it passes to the get() function of the model’s manager.
+get_object_or_404() 函数需要一个 Django 模型类作为第一个参数以及 一些关键字参数，它将这些参数传递给模型管理器中的 get() 函数
+
+It raises Http404 if the object doesn’t exist.
+ 若对象不存在时就抛出 Http404 异常
+
+Philosophy
+哲理
+
+Why do we use a helper function get_object_or_404() instead of automatically catching the ObjectDoesNotExist exceptions at a higher level, or having the model API raise Http404 instead of ObjectDoesNotExist?
+为什么我们要使用一个 get_object_or_404() 辅助函数 而不是在更高级别自动捕获 ObjectDoesNotExist 异常， 或者由模型 API 抛出 Http404 异常而不是 ObjectDoesNotExist 异常
+
+Because that would couple the model layer to the view layer.
+因为那样会使模型层与视图层耦合在一起
+
+One of the foremost design goals of Django is to maintain loose coupling.
+Django 最重要的设计目标之一 就是保持松耦合
+
+There’s also a get_list_or_404() function, which works just as get_object_or_404() – except using filter() instead of get().
+还有个 get_list_or_404() 函数，与 get_object_or_404() 一样 – 不过执行的是 filter() 而不是 get() 
+
+It raises Http404 if the list is empty.
+若返回的是空列表将抛出 Http404 异常
+
+Write a 404 (page not found) view¶
+编写一个 404 ( 页面未找到 ) 视图¶
+
+When you raise Http404 from within a view, Django will load a special view devoted to handling 404 errors.
+当你在视图中抛出 Http404 时，Django 将载入一个特定的视图来处理 404 错误
+
+It finds it by looking for the variable handler404 in your root URLconf (and only in your root URLconf;
+Django 会根据你的 root URLconf ( 仅在你的 root URLconf 中
+
+setting handler404 anywhere else will have no effect), which is a string in Python dotted syntax – the same format the normal URLconf callbacks use.
+在其他任何地方设置 handler404 都无效 ）中设置的 handler404 变量来查找该视图，这个变量是个 Python 包格式字符串 – 和标准 URLconf 中的回调函数格式是一样的
+
+A 404 view itself has nothing special: It’s just a normal view.
+ 404 视图本身没有什么特殊性：它就是一个普通的视图
+
+You normally won’t have to bother with writing 404 views.
+通常你不必费心去编写 404 视图
+
+If you don’t set handler404, the built-in view django.views.defaults.page_not_found() is used by default.
+若你没有设置 handler404 变量，默认情况下会使用内置的 django.views.defaults.page_not_found() 视图
+
+In this case, you still have one obligation: create a 404.html template in the root of your template directory.
+或者你可以在你的模板目录下的根目录中 创建一个 404.html 模板
+
+The default 404 view will use that template for all 404 errors.
+当 DEBUG 值是 False ( 在你的 settings 模块中 ) 时， 默认的 404 视图将使用此模板来显示所有的 404 错误
+
+If DEBUG is set to False (in your settings module) and if you didn’t create a 404.html file, an Http500 is raised instead.
+ 如果你创建了这个模板，至少添加些如“页面未找到” 的内容
+
+A couple more things to note about 404 views:
+一些有关 404 视图需要注意的事项 :
+
+Write a 500 (server error) view¶
+编写一个 500 ( 服务器错误 ) 视图¶
+
+Similarly, your root URLconf may define a handler500, which points to a view to call in case of server errors.
+类似的，你可以在 root URLconf 中定义 handler500 变量，在服务器发生错误时 调用它指向的视图
+
+Server errors happen when you have runtime errors in view code.
+服务器错误是指视图代码产生的运行时错误
+
+Use the template system¶
+使用模板系统¶
+
+Back to the detail() view for our poll application.
+回到我们 poll 应用的 detail() 视图中，指定 poll 变量后，``polls/detail.html`` 模板可能看起来这样 :
+
+The template system uses dot-lookup syntax to access variable attributes.
+模板系统使用了“变量.属性”的语法访问变量的属性值
+
+In the example of {{ poll.question }}, first Django does a dictionary lookup on the object poll.
+ 例如 {{ poll.question }} ， 首先 Django 对 poll 对象做字典查询
+
+Failing that, it tries an attribute lookup – which works, in this case.
+ 否则 Django 会尝试属性查询 – 在本例中属性查询成功了
+
+If attribute lookup had failed, it would’ve tried a list-index lookup.
+ 如果属性查询还是失败了，Django 将尝试 list-index 查询
+
+Method-calling happens in the {% for %} loop: poll.choice_set.all is interpreted as the Python code poll.choice_set.all(), which returns an iterable of Choice objects and is suitable for use in the {% for %} tag.
+在 {% for %} 循环中有方法调用: poll.choice_set.all 就是 Python 代码 poll.choice_set.all(),它将返回一组可迭代的 Choice 对象，可以用在 {% for %} 标签中
+
+See the template guide for more about templates.
+请参阅 模板指南 来了解模板的更多内容
+
+Simplifying the URLconfs¶
+移除模板中硬编码的 URLS¶
+
+When you’re comfortable with writing views, read part 4 of this tutorial to learn about simple form processing and generic views.
+当你编写视图熟练后，请阅读 教程 第4部分 来学习如何处理简单的表单和通用视图
+
+Table Of Contents
+Table Of Contents
+
+Browse
+Browse
+
+You are here:
+You are here:
+
+This Page
+This Page
+
+Quick search
+Quick search
+
+Enter search terms or a module, class or function name.
+Enter search terms or a module, class or function name.
+
+Last update:
+Last update:
+
+Oct 30, 2013
+Dec 02, 2013
+

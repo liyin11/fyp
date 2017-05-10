@@ -1,0 +1,1104 @@
+You are here: Home ‣ Dive Into Python 3 ‣
+你的位置: Home ‣ Dive Into Python 3 ‣
+
+Difficulty level: ♦♦♦♦♦
+难度等级: ♦♦♦♦♦
+
+Case Study: Porting chardet to Python 3
+案例研究:将chardet移植到Python 3
+
+❝ Words, words.
+❝ Words, words. They’re all we have to go on. ❞ — Rosencrantz and Guildenstern are Dead
+
+Diving In
+概述
+
+Question: what’s the #1 cause of gibberish text on the web, in your inbox, and across every computer system ever written?
+未知的或者不正确的字符编码是因特网上无效数据(gibberish text)的头号起因
+
+It’s character encoding.
+在第３章，我们讨论过字符编码的历史，还有Unicode的产生，“一个能处理所有情况的大块头
+
+In the Strings chapter, I talked about the history of character encoding and the creation of Unicode, the “one encoding to rule them all.” I’d love it if I never had to see a gibberish character on a web page again, because all authoring systems stored accurate encoding information, all transfer protocols were Unicode-aware, and every system that handled text maintained perfect fidelity when converting between encodings.
+”如果在网络上不再存在乱码这回事，我会爱上她的…因为所有的编辑系统(authoring system)保存有精确的编码信息，所有的传输协议都支持Unicode，所有处理文本的系统在执行编码间转换的时候都可以保持高度精确
+
+I’d also like a pony.
+我也会喜欢pony
+
+A Unicode pony.
+Unicode　pony
+
+A Unipony, as it were.
+Unipony也行
+
+I’ll settle for character encoding auto-detection.
+这一章我会处理编码的自动检测
+
+What is Character Encoding Auto-Detection?
+什么是字符编码自动检测
+
+It means taking a sequence of bytes in an unknown character encoding, and attempting to determine the encoding so you can read the text.
+它是指当面对一串不知道编码信息的字节流的时候，尝试着确定一种编码方式以使我们能够读懂其中的文本内容
+
+It’s like cracking a code when you don’t have the decryption key.
+它就像我们没有解密钥匙的时候，尝试破解出编码
+
+Isn’t That Impossible?
+那不是不可能的吗
+
+In general, yes.
+通常来说，是的，不可能
+
+However, some encodings are optimized for specific languages, and languages are not random.
+但是，有一些编码方式为特定的语言做了优化，而语言并非随机存在的
+
+Some character sequences pop up all the time, while other sequences make no sense.
+有一些字符序列在某种语言中总是会出现，而其他一些序列对该语言来说则毫无意义
+
+A person fluent in English who opens a newspaper and finds “txzqJv 2!dasd0a QqdKjvz” will instantly recognize that that isn’t English (even though it is composed entirely of English letters).
+一个熟练掌握英语的人翻开报纸，然后发现“txzqJv 2!dasd0a QqdKjvz”这样一些序列，他会马上意识到这不是英语（即使它完全由英语中的字母组成）
+
+By studying lots of “typical” text, a computer algorithm can simulate this kind of fluency and make an educated guess about a text’s language.
+通过研究许多具有“代表性(typical)”的文本，计算机算法可以模拟人的这种对语言的感知，并且对一段文本的语言做出启发性的猜测
+
+In other words, encoding detection is really language detection, combined with knowledge of which languages tend to use which character encodings.
+换句话说就是，检测编码信息就是检测语言的类型，并辅之一些额外信息，比如每种语言通常会使用哪些编码方式
+
+Does Such An Algorithm Exist?
+这样的算法存在吗
+
+As it turns out, yes.
+结果证明，是的，它存在
+
+All major browsers have character encoding auto-detection, because the web is full of pages that have no encoding information whatsoever.
+所有主流的浏览器都有字符编码自动检测的功能，因为因特网上总是充斥着大量缺乏编码信息的页面
+
+Mozilla Firefox contains an encoding auto-detection library which is open source.
+Mozilla Firefox包含有一个自动检测字符编码的库，它是开源的
+
+I ported the library to Python 2 and dubbed it the chardet module.
+我将它导入到了Python 2，并且取绰号为chardet模块
+
+This chapter will take you step-by-step through the process of porting the chardet module from Python 2 to Python 3.
+这一章中，我会带领你一步一步地将chardet模块从Python 2移植到Python 3
+
+Introducing The chardet Module
+介绍chardet模块
+
+Before we set off porting the code, it would help if you understood how the code worked!
+在开始代码移植之前，如果我们能理解代码是如何工作的这将非常有帮助
+
+This is a brief guide to navigating the code itself.
+以下是一个简明地关于chardet模块代码结构的手册
+
+The chardet library is too large to include inline here, but you can download it from chardet.feedparser.org.
+chardet库太大，不可能都放在这儿，但是你可以从chardet.feedparser.org下载它
+
+The main entry point for the detection algorithm is universaldetector.py, which has one class, UniversalDetector.
+universaldetector.py是检测算法的主入口点，它包含一个类，即UniversalDetector
+
+(You might think the main entry point is the detect function in chardet/__init__.py, but that’s really just a convenience function that creates a UniversalDetector object, calls it, and returns its result.)
+（可能你会认为入口点是chardet/__init__.py中的detect函数，但是它只是一个便捷的包装方法，它会创建UniversalDetector对象，调用对象的方法，然后返回其结果
+
+There are 5 categories of encodings that UniversalDetector handles:
+UniversalDetector共处理５类编码方式：
+
+UTF-n with a Byte Order Mark (BOM).
+包含字节顺序标记(BOM)的UTF-n
+
+This includes UTF-8, both Big-Endian and Little-Endian variants of UTF-16, and all 4 byte-order variants of UTF-32.
+它包括UTF-8，大尾端和小尾端的UTF-16，还有所有４字节顺序的UTF-32的变体
+
+Escaped encodings, which are entirely 7-bit ASCII compatible, where non-ASCII characters start with an escape sequence.
+转义编码，它们与７字节的ASCII编码兼容，非ASCII编码的字符会以一个转义序列打头
+
+Examples: ISO-2022-JP (Japanese) and HZ-GB-2312 (Chinese).
+比如：ISO-2022-JP(日文)和HZ-GB-2312(中文).
+
+Multi-byte encodings, where each character is represented by a variable number of bytes.
+多字节编码，在这种编码方式中，每个字符使用可变长度的字节表示
+
+Examples: Big5 (Chinese), SHIFT_JIS (Japanese), EUC-KR (Korean), and UTF-8 without a BOM.
+比如：Big5(中文)，SHIFT_JIS(日文)，EUC-KR(韩文)和缺少BOM标记的UTF-8
+
+Single-byte encodings, where each character is represented by one byte.
+单字节编码，这种编码方式中，每个字符使用一个字节编码
+
+Examples: KOI8-R (Russian), windows-1255 (Hebrew), and TIS-620 (Thai).
+例如：KOI8-R(俄语)，windows-1255(希伯来语)和TIS-620(泰国语)
+
+windows-1252, which is used primarily on Microsoft Windows by middle managers who wouldn’t know a character encoding from a hole in the ground.
+windows-1252，它主要被根本不知道字符编码的中层管理人员(middle manager)在Microsoft Windows上使用
+
+UTF-n With A BOM
+有BOM标记的UTF-n
+
+If the text starts with a BOM, we can reasonably assume that the text is encoded in UTF-8, UTF-16, or UTF-32.
+如果文本以BOM标记打头，我们可以合理地假设它使用了UTF-8，UTF-16或者UTF-32编码
+
+(The BOM will tell us exactly which one;
+（BOM会告诉我们是其中哪一种，这就是它的功能
+
+that’s what it’s for.) This is handled inline in UniversalDetector, which returns the result immediately without any further processing.
+）这个过程在UniversalDetector中完成，并且不需要深入处理，会非常快地返回其结果
+
+Escaped Encodings
+转义编码
+
+If the text contains a recognizable escape sequence that might indicate an escaped encoding, UniversalDetector creates an EscCharSetProber (defined in escprober.py) and feeds it the text.
+如果文本包含有可识别的能指示出某种转义编码的转义序列，UniversalDetector会创建一个EscCharSetProber对象（在escprober.py中定义），然后以该文本调用它
+
+EscCharSetProber creates a series of state machines, based on models of HZ-GB-2312, ISO-2022-CN, ISO-2022-JP, and ISO-2022-KR (defined in escsm.py).
+EscCharSetProber会根据HZ-GB-2312，ISO-2022-CN，ISO-2022-JP，和ISO-2022-KR(在escsm.py中定义)来创建一系列的状态机(state machine)
+
+EscCharSetProber feeds the text to each of these state machines, one byte at a time.
+EscCharSetProber将文本一次一个字节地输入到这些状态机中
+
+If any state machine ends up uniquely identifying the encoding, EscCharSetProber immediately returns the positive result to UniversalDetector, which returns it to the caller.
+如果某一个状态机最终唯一地确定了字符编码，EscCharSetProber迅速地将该有效结果返回给UniversalDetector，然后UniversalDetector将其返回给调用者
+
+If any state machine hits an illegal sequence, it is dropped and processing continues with the other state machines.
+如果某一状态机进入了非法序列，它会被放弃，然后使用其他的状态机继续处理
+
+Multi-Byte Encodings
+多字节编码
+
+Assuming no BOM, UniversalDetector checks whether the text contains any high-bit characters.
+假设没有BOM标记，UniversalDetector会检测该文本是否包含任何高位字符(high-bit character)
+
+If so, it creates a series of “probers” for detecting multi-byte encodings, single-byte encodings, and as a last resort, windows-1252.
+如果有的话，它会创建一系列的“探测器(probers)”，检测这段广西是否使用多字节编码，单字节编码，或者作为最后的手段，是否为windows-1252编码
+
+The multi-byte encoding prober, MBCSGroupProber (defined in mbcsgroupprober.py), is really just a shell that manages a group of other probers, one for each multi-byte encoding: Big5, GB2312, EUC-TW, EUC-KR, EUC-JP, SHIFT_JIS, and UTF-8.
+这里的多字节编码探测器，即MBCSGroupProber（在mbcsgroupprober.py中定义），实际上是一个管理一组其他探测器的shell，它用来处理每种多字节编码：Big5，GB2312，EUC-TW，EUC-KR，EUC-JP，SHIFT_JIS和UTF-8
+
+MBCSGroupProber feeds the text to each of these encoding-specific probers and checks the results.
+MBCSGroupProber将文本作为每一个特定编码探测器的输入，并且检测其结果
+
+If a prober reports that it has found an illegal byte sequence, it is dropped from further processing (so that, for instance, any subsequent calls to UniversalDetector.feed() will skip that prober).
+如果某个探测器报告说它发现了一个非法的字节序列，那么该探测器则会被放弃，不再进一步处理（因此，换句话说就是，任何对UniversalDetector.feed()的子调用都会忽略那个探测器）
+
+If a prober reports that it is reasonably confident that it has detected the encoding, MBCSGroupProber reports this positive result to UniversalDetector, which reports the result to the caller.
+如果某一探测器报告说它有足够理由确信找到了正确的字符编码，那么MBCSGroupProber会将这个好消息传递给UniversalDetector，然后UniversalDetector将结果返回给调用者
+
+Most of the multi-byte encoding probers are inherited from MultiByteCharSetProber (defined in mbcharsetprober.py), and simply hook up the appropriate state machine and distribution analyzer and let MultiByteCharSetProber do the rest of the work.
+大多数的多字节编码探测器从类MultiByteCharSetProber(定义在mbcharsetprober.py中)继承而来，简单地挂上合适的状态机和分布分析器(distribution analyzer)，然后让MultiByteCharSetProber做剩余的工作
+
+MultiByteCharSetProber runs the text through the encoding-specific state machine, one byte at a time, to look for byte sequences that would indicate a conclusive positive or negative result.
+MultiByteCharSetProber将文本作为特定编码状态机的输入，每次一个字节，寻找能够指示出一个确定的正面或者负面结果的字节序列
+
+At the same time, MultiByteCharSetProber feeds the text to an encoding-specific distribution analyzer.
+同时，MultiByteCharSetProber会将文本作为特定编码分布分析机的输入
+
+The distribution analyzers (each defined in chardistribution.py) use language-specific models of which characters are used most frequently.
+分布分析机（在chardistribution.py中定义）使用特定语言的模型，此模型中的字符在该语言被使用得最频繁
+
+Once MultiByteCharSetProber has fed enough text to the distribution analyzer, it calculates a confidence rating based on the number of frequently-used characters, the total number of characters, and a language-specific distribution ratio.
+一旦MultiByteCharSetProber把足够的文本给了分布分析机，它会根据其中频繁使用字符的数目，字符的总数和特定语言的分配比(distribution ratio)，来计算置信度(confidence rating)
+
+If the confidence is high enough, MultiByteCharSetProber returns the result to MBCSGroupProber, which returns it to UniversalDetector, which returns it to the caller.
+如果置信度足够高，MultiByteCharSetProber会将结果返回给MBCSGroupProber，然后由MBCSGroupProber返回给UniversalDetector，最后UniversalDetector将其返回给调用者
+
+The case of Japanese is more difficult.
+对于日语来说检测会更加困难
+
+Single-character distribution analysis is not always sufficient to distinguish between EUC-JP and SHIFT_JIS, so the SJISProber (defined in sjisprober.py) also uses 2-character distribution analysis.
+单字符的分布分析并不总能区别出EUC-JP和SHIFT_JIS，所以SJISProber（在sjisprober.py中定义）也使用双字符的分布分析
+
+SJISContextAnalysis and EUCJPContextAnalysis (both defined in jpcntx.py and both inheriting from a common JapaneseContextAnalysis class) check the frequency of Hiragana syllabary characters within the text.
+SJISContextAnalysis和EUCJPContextAnalysis(都定义在jpcntx.py中，并且都从类JapaneseContextAnalysis中继承）检测文本中的平假名音节字符(Hiragana syllabary characher)的出现次数
+
+Once enough text has been processed, they return a confidence level to SJISProber, which checks both analyzers and returns the higher confidence level to MBCSGroupProber.
+一旦处理了足够量的文本，它会返回一个置信度给SJISProber，SJISProber检查两个分析器的结果，然后将置信度高的那个返回给MBCSGroupProber
+
+Single-Byte Encodings
+单字节编码
+
+The single-byte encoding prober, SBCSGroupProber (defined in sbcsgroupprober.py), is also just a shell that manages a group of other probers, one for each combination of single-byte encoding and language: windows-1251, KOI8-R, ISO-8859-5, MacCyrillic, IBM855, and IBM866 (Russian);
+单字节编码的探测器，即SBCSGroupProber（定义在sbcsgroupprober.py中），也是一个管理一组其他探测器的shell，它会尝试单字节编码和语言的每种组合：windows-1251，KOI8-R，ISO-8859-5，MacCyrillic，IBM855，and IBM866(俄语)
+
+ISO-8859-7 and windows-1253 (Greek);
+ISO-8859-7和windows-1253(希腊语)
+
+ISO-8859-5 and windows-1251 (Bulgarian);
+ISO-8859-5和windows-1251(保加利亚语)
+
+ISO-8859-2 and windows-1250 (Hungarian);
+ISO-8859-2和windows-1250(匈牙利语)
+
+TIS-620 (Thai);
+TIS-620(泰国语)
+
+windows-1255 and ISO-8859-8 (Hebrew).
+windows-1255和ISO-8859-8(希伯来语)
+
+SBCSGroupProber feeds the text to each of these encoding+language-specific probers and checks the results.
+SBCSGroupProber将文本输入给这些特定编码+语言的探测器，然后检测它们的返回值
+
+These probers are all implemented as a single class, SingleByteCharSetProber (defined in sbcharsetprober.py), which takes a language model as an argument.
+这些探测器的实现为某一个类，即SingleByteCharSetProber(在sbcharsetprober.py中定义)，它使用语言模型(language model)作为其参数
+
+The language model defines how frequently different 2-character sequences appear in typical text.
+语言模型定义了典型文本中不同双字符序列出现的频度
+
+SingleByteCharSetProber processes the text and tallies the most frequently used 2-character sequences.
+SingleByteCharSetProber处理文本，统计出使用得最频繁的双字符序列
+
+Once enough text has been processed, it calculates a confidence level based on the number of frequently-used sequences, the total number of characters, and a language-specific distribution ratio.
+一旦处理了足够多的文本，它会根据频繁使用的序列的数目，字符总数和特定语言的分布系数来计算其置信度
+
+Hebrew is handled as a special case.
+希伯来语被作为一种特殊的情况处理
+
+If the text appears to be Hebrew based on 2-character distribution analysis, HebrewProber (defined in hebrewprober.py) tries to distinguish between Visual Hebrew (where the source text actually stored “backwards” line-by-line, and then displayed verbatim so it can be read from right to left) and Logical Hebrew (where the source text is stored in reading order and then rendered right-to-left by the client).
+如果在双字符分布分析中，文本被认定为是希伯来语，HebrewProber(在hebrewprober.py中定义)会尝试将其从Visual Hebrew（源文本一行一行地被“反向”存储，然后一字不差地显示出来，这样就能从右到左的阅读）和Logical Hebrew（源文本以阅读的顺序保存，在客户端从右到左进行渲染）区别开来
+
+Because certain characters are encoded differently based on whether they appear in the middle of or at the end of a word, we can make a reasonable guess about direction of the source text, and return the appropriate encoding (windows-1255 for Logical Hebrew, or ISO-8859-8 for Visual Hebrew).
+因为有一些字符在两种希伯来语中会以不同的方式编码，这依赖于它们是出现在单词的中间或者末尾，这样我们可以合理的猜测源文本的存储方向，然后返回合适的编码方式(windows-1255对应Logical Hebrew，或者ISO-8859-8对应Visual Hebrew)
+
+windows-1252
+windows-1252
+
+If UniversalDetector detects a high-bit character in the text, but none of the other multi-byte or single-byte encoding probers return a confident result, it creates a Latin1Prober (defined in latin1prober.py) to try to detect English text in a windows-1252 encoding.
+如果UniversalDetector在文本中检测到一个高位字符，但是其他的多字节编码探测器或者单字节编码探测器都没有返回一个足够可靠的结果，它就会创建一个Latin1Prober对象(在latin1prober.py中定义)，尝试从中检测以windows-1252方式编码的英文文本
+
+This detection is inherently unreliable, because English letters are encoded in the same way in many different encodings.
+这种检测存在其固有的不可靠性，因为在不同的编码中，英文字符通常使用了相同的编码方式
+
+The only way to distinguish windows-1252 is through commonly used symbols like smart quotes, curly apostrophes, copyright symbols, and the like.
+唯一一种区别能出windows-1252的方法是通过检测常用的符号，比如弯引号(smart quotes)，撇号(curly apostrophes)，版权符号(copyright symbol)等这一类的符号
+
+Latin1Prober automatically reduces its confidence rating to allow more accurate probers to win if at all possible.
+如果可能Latin1Prober会自动降低其置信度以使其他更精确的探测器检出结果
+
+Running 2to3
+运行2to3
+
+We’re going to migrate the chardet module from Python 2 to Python 3.
+我们将要开始移植chardet模块到Python 3了
+
+Python 3 comes with a utility script called 2to3, which takes your actual Python 2 source code as input and auto-converts as much as it can to Python 3.
+Python 3自带了一个叫做2to3的实用脚本，它使用Python 2的源代码作为输入，然后尽其可能地将其转换到Python 3的规范
+
+In some cases this is easy — a function was renamed or moved to a different module — but in other cases it can get pretty complex.
+某些情况下这很简单 — 一个被重命名或者被移动到其他模块中的函数 — 但是有些情况下，这个过程会变得非常复杂
+
+To get a sense of all that it can do, refer to the appendix, Porting code to Python 3 with 2to3.
+想要了解所有它能做的事情，请参考附录，使用2to3将代码移植到Python 3
+
+In this chapter, we’ll start by running 2to3 on the chardet package, but as you’ll see, there will still be a lot of work to do after the automated tools have performed their magic.
+接下来，我们会首先运行一次2to3，将它作用在chardet模块上，但是就如你即将看到的，在该自动化工具完成它的魔法表演后，仍然存在许多工作需要我们来收拾
+
+The main chardet package is split across several different files, all in the same directory.
+chardet包被分割为一些不同的文件，它们都放在同一个目录下
+
+The 2to3 script makes it easy to convert multiple files at once: just pass a directory as a command line argument, and 2to3 will convert each of the files in turn.
+2to3能够立即处理多个文件：只需要将目录名作为命令行参数传递给2to3，然后它会轮流处理每个文件
+
+Now run the 2to3 script on the testing harness, test.py.
+现在我们对测试工具 — test.py — 应用2to3脚本
+
+Well, that wasn’t so hard.
+看吧，还不算太难
+
+Just a few imports and print statements to convert.
+只是转换了一些impor和print语句
+
+Speaking of which, what was the problem with all those import statements?
+说到这儿，那些import语句原来到底存在什么问题呢
+
+To answer that, you need to understand how the chardet module is split into multiple files.
+为了回答这个问题，你需要知道chardet是如果被分割到多个文件的
+
+A Short Digression Into Multi-File Modules
+题外话，关于多文件模块
+
+chardet is a multi-file module.
+chardet是一个多文件模块
+
+I could have chosen to put all the code in one file (named chardet.py), but I didn’t.
+我也可以将所有的代码都放在一个文件里(并命名为chardet.py)，但是我没有
+
+Instead, I made a directory (named chardet), then I made an __init__.py file in that directory.
+我创建了一个目录(叫做chardet)，然后我在那个目录里创建了一个__init__.py文件
+
+If Python sees an __init__.py file in a directory, it assumes that all of the files in that directory are part of the same module.
+如果Python看到目录里有一个__init__.py文件，它会假设该目录里的所有文件都是同一个模块的某部分
+
+The module’s name is the name of the directory.
+模块名为目录的名字
+
+Files within the directory can reference other files within the same directory, or even within subdirectories.
+目录中的文件可以引用目录中的其他文件，甚至子目录中的也行
+
+(More on that in a minute.) But the entire collection of files is presented to other Python code as a single module — as if all the functions and classes were in a single .py file.
+（再讲一分钟这个
+
+What goes in the __init__.py file?
+在__init__.py中到底有些什么
+
+Nothing.
+什么也没有
+
+Everything.
+一切
+
+Something in between.
+界于两者之间
+
+The __init__.py file doesn’t need to define anything;
+__init__.py文件不需要定义任何东西
+
+it can literally be an empty file.
+它确实可以是一个空文件
+
+Or you can use it to define your main entry point functions.
+或者也可以使用它来定义我们的主入口函数
+
+Or you put all your functions in it.
+或者把我们所有的函数都放进去
+
+Or all but one.
+或者其他函数都放，单单不放某一个函数…
+
+☞A directory with an __init__.py file is always treated as a multi-file module.
+☞包含有__init__.py文件的目录总是被看作一个多文件的模块
+
+Without an __init__.py file, a directory is just a directory of unrelated .py files.
+没有__init__.py文件的目录中，那些.py文件是不相关的
+
+Let’s see how that works in practice.
+我们来看看它实际上是怎样工作的
+
+Other than the usual class attributes, the only thing in the chardet module is a detect() function.
+除了常见的类属性，在chardet模块中只多了一个detect()函数
+
+Here’s your first clue that the chardet module is more than just a file: the “module” is listed as the __init__.py file within the chardet/ directory.
+这是我们发觉chardet模块不只是一个文件的第一个线索：“module”被当作文件chardet/目录中的__init__.py文件列出来
+
+Let’s take a peek in that __init__.py file.
+我们再来瞟一眼__init__.py文件
+
+The __init__.py file defines the detect() function, which is the main entry point into the chardet library.
+__init__.py文件定义了detect()函数，它是chardet库的主入口点
+
+But the detect() function hardly has any code!
+但是detect()函数没有任何实际的代码
+
+In fact, all it really does is import the universaldetector module and start using it.
+事实上，它所做的事情只是导入了universaldetector模块然后开始调用它
+
+But where is universaldetector defined?
+但是universaldetector定义在哪儿
+
+The answer lies in that odd-looking import statement:
+答案就在那行古怪的import语句中：
+
+Translated into English, that means “import the universaldetector module;
+翻译成中文就是，“导入universaldetector模块
+
+that’s in the same directory I am,” where “I” is the chardet/__init__.py file.
+它跟我在同一目录，”这里的我即指文件chardet/__init__.py
+
+This is called a relative import.
+这是一种提供给多文件模块中文件之间互相引用的方法，不需要担心它会与已经安装的搜索路径中的模块发生命名冲突
+
+It’s a way for the files within a multi-file module to reference each other, without worrying about naming conflicts with other modules you may have installed in your import search path.
+该条import语句只会在chardet/目录中查找universaldetector模块
+
+These two concepts — __init__.py and relative imports — mean that you can break up your module into as many pieces as you like.
+这两条概念 — __init__.py和相对导入 — 意味着我们可以将模块分割为任意多个块
+
+The chardet module comprises 36 .py files — 36!
+chardet模块由36个.py文件组成 — 36
+
+Yet all you need to do to start using it is import chardet, then you can call the main chardet.detect() function.
+但我们所需要做的只是使用chardet/__init__.py文件中定义的某个函数
+
+Unbeknownst to your code, the detect() function is actually defined in the chardet/__init__.py file.
+还有一件事情没有告诉你，detect()使用了相对导入来引用了chardet/universaldetector.py中定义的一个类，然后这个类又使用了相对导入引用了其他5个文件的内容，它们都在chardet/目录中
+
+☞If you ever find yourself writing a large library in Python (or more likely, when you realize that your small library has grown into a large one), take the time to refactor it into a multi-file module.
+☞如果你发现自己正在用Python写一个大型的库（或者更可能的情况是，当你意识到你的小模块已经变得很大的时候），最好花一些时间将它重构为一个多文件模块
+
+It’s one of the many things Python is good at, so take advantage of it.
+这是Python所擅长的许多事情之一，那就利用一下这个优势吧
+
+Fixing What 2to3 Can’t
+修复2to3脚本所不能做的
+
+False is invalid syntax
+False is invalid syntax
+
+Now for the real test: running the test harness against the test suite.
+现在开始真正的测试：使用测试集运行测试工具
+
+Since the test suite is designed to cover all the possible code paths, it’s a good way to test our ported code to make sure there aren’t any bugs lurking anywhere.
+由于测试集被设计成可以覆盖所有可能的代码路径，它是用来测试移植后的代码，保证bug不会埋伏在某个地方的一种不错的办法
+
+Hmm, a small snag.
+唔，一个小麻烦
+
+In Python 3, False is a reserved word, so you can’t use it as a variable name.
+在Python 3中，False是一个保留字，所以不能把它用作变量名
+
+Let’s look at constants.py to see where it’s defined.
+我们来看一看constants.py来确定这是在哪儿定义的
+
+Here’s the original version from constants.py, before the 2to3 script changed it:
+以下是constants.py在执行2to3脚本之前原来的版本
+
+This piece of code is designed to allow this library to run under older versions of Python 2.
+这一段代码用来允许库在低版本的Python 2中运行，在Python 2.3以前，Python没有内置的bool类型
+
+Prior to Python 2.3, Python had no built-in bool type.
+这段代码检测内置的True和False常量是否缺失，如果必要的话则定义它们
+
+However, Python 3 will always have a bool type, so this entire code snippet is unnecessary.
+但是，Python 3总是有bool类型的，所以整个这片代码都没有必要
+
+The simplest solution is to replace all instances of constants.True and constants.False with True and False, respectively, then delete this dead code from constants.py.
+最简单的方法是将所有的constants.True和constants.False都分别替换成True和False，然后将这段死代码从constants.py中移除
+
+So this line in universaldetector.py:
+所以universaldetector.py中的以下行：
+
+Becomes
+变成了
+
+Ah, wasn’t that satisfying?
+啊哈，是不是很有满足感
+
+The code is shorter and more readable already.
+代码不仅更短了，而且更具可读性
+
+No module named constants
+No module named constants
+
+Time to run test.py again and see how far it gets.
+是时候再运行一次test.py了，看看它能走多远
+
+What’s that you say?
+说什么了
+
+No module named constants?
+不存在叫做constants的模块
+
+Of course there’s a module named constants.
+可是当然有constants这个模块了
+
+It’s right there, in chardet/constants.py.
+它就在chardet/constants.py中
+
+Remember when the 2to3 script fixed up all those import statements?
+还记得什么时候2to3脚本会修复所有那些导入语句吗
+
+This library has a lot of relative imports — that is, modules that import other modules within the same library — but the logic behind relative imports has changed in Python 3.
+这个包内有许多的相对导入 — 即，在同一个库中，导入其他模块的模块 — 但是在Python 3中相对导入的逻辑已经变了
+
+In Python 2, you could just import constants and it would look in the chardet/ directory first.
+在Python 2中，我们只需要import constants，然后它就会首先在chardet/目录中查找
+
+In Python 3, all import statements are absolute by default.
+在Python 3中，所有的导入语句默认使用绝对路径
+
+If you want to do a relative import in Python 3, you need to be explicit about it:
+如果想要在Python 3中使用相对导入，你需要显式地说明：
+
+But wait.
+但是
+
+Wasn’t the 2to3 script supposed to take care of these for you?
+2to3脚本难道不是要自动修复这些的吗
+
+Well, it did, but this particular import statement combines two different types of imports into one line: a relative import of the constants module within the library, and an absolute import of the sys module that is pre-installed in the Python standard library.
+好吧，它确实这样做了，但是该条导入语句在同一行组合了两种不同的导入类型：库内部对constants的相对导入，还有就是对sys模块的绝对导入，sys模块已经预装在了Python的标准库里
+
+In Python 2, you could combine these into one import statement.
+在Python 2里，我们可以将其组合到一条导入语句中
+
+In Python 3, you can’t, and the 2to3 script is not smart enough to split the import statement into two.
+在Python 3中，我们不能这样做，并且2to3脚本也不是那样聪明，它不能把这条导入语句分成两条
+
+The solution is to split the import statement manually.
+解决的办法是把这条导入语句手动的分成两条
+
+So this two-in-one import:
+所以这条二合一的导入语句：
+
+Needs to become two separate imports:
+需要变成两条分享的导入语句：
+
+There are variations of this problem scattered throughout the chardet library.
+在chardet库中还分散着许多这类问题的变体
+
+In some places it’s “import constants, sys”;
+某些地方它是“import constants, sys”
+
+in other places, it’s “import constants, re”.
+其他一些地方则是“import constants, re”
+
+The fix is the same: manually split the import statement into two lines, one for the relative import, the other for the absolute import.
+修改的方法是一样的：手工地将其分割为两条语句，一条为相对导入准备，另一条用于绝对导入
+
+Onward!
+前进
+
+Name 'file' is not defined
+Name 'file' is not defined
+
+And here we go again, running test.py to try to execute our test cases…
+再来一次，运行test.py来执行我们的测试样例…
+
+This one surprised me, because I’ve been using this idiom as long as I can remember.
+这一条也出乎我的意外，因为在记忆中我一直都在使用这种风格的代码
+
+In Python 2, the global file() function was an alias for the open() function, which was the standard way of opening text files for reading.
+在Python 2里，全局的file()函数是open()函数的一个别名，open()函数是打开文件用于读取的标准方法
+
+In Python 3, the global file() function no longer exists, but the open() function still exists.
+在Python 3中，全局的file()函数不再存在了，但是open()还保留着
+
+Thus, the simplest solution to the problem of the missing file() is to call the open() function instead:
+这样的话，最简单的解决办法就是将file()调用替换为对open()的调用：
+
+And that’s all I have to say about that.
+这即是我关于这个问题想要说的
+
+Can’t use a string pattern on a bytes-like object
+Can’t use a string pattern on a bytes-like object
+
+Now things are starting to get interesting.
+现在事情开始变得有趣了
+
+And by “interesting,” I mean “confusing as all hell.”
+对于“有趣，”我的意思是“跟地狱一样让人迷茫
+
+To debug this, let’s see what self._highBitDetector is.
+我们先来看看self._highBitDetector是什么，然后再来调试这个错误
+
+It’s defined in the __init__ method of the UniversalDetector class:
+它被定义在UniversalDetector类的__init__方法中
+
+This pre-compiles a regular expression designed to find non-ASCII characters in the range 128–255 (0x80–0xFF).
+这段代码预编译一条正则表达式，它用来查找在128–255 (0x80–0xFF)范围内的非ASCII字符
+
+Wait, that’s not quite right;
+等一下，这似乎不太准确
+
+I need to be more precise with my terminology.
+我需要对更精确的术语来描述它
+
+This pattern is designed to find non-ASCII bytes in the range 128-255.
+这个模式用来在128-255范围内查找非ASCII的bytes
+
+And therein lies the problem.
+问题就出在这儿了
+
+In Python 2, a string was an array of bytes whose character encoding was tracked separately.
+在Python 2中，字符串是一个字节数组，它的字符编码信息被分开记录着
+
+If you wanted Python 2 to keep track of the character encoding, you had to use a Unicode string (u'') instead.
+如果想要Python 2跟踪字符编码，你得使用Unicode编码的字符串(u'')
+
+But in Python 3, a string is always what Python 2 called a Unicode string — that is, an array of Unicode characters (of possibly varying byte lengths).
+但是在Python 3中，字符串永远都是Python 2中所谓的Unicode编码的字符串 — 即，Unicode字符数组（可能存在可变长字节）
+
+Since this regular expression is defined by a string pattern, it can only be used to search a string — again, an array of characters.
+由于这条正则表达式是使用字符串模式定义的，所以它只能用来搜索字符串 — 再强调一次，字符数组
+
+But what we’re searching is not a string, it’s a byte array.
+但是我们所搜索的并非字符串，它是一个字节数组
+
+Looking at the traceback, this error occurred in universaldetector.py:
+看一看traceback，该错误发生在universaldetector.py：
+
+And what is aBuf?
+aBuf是什么
+
+Let’s backtrack further to a place that calls UniversalDetector.feed().
+让我们原路回到调用UniversalDetector.feed()的地方
+
+One place that calls it is the test harness, test.py.
+有一处地方调用了它，是测试工具，test.py
+
+And here we find our answer: in the UniversalDetector.feed() method, aBuf is a line read from a file on disk.
+在此处我们找到了答案：UniversalDetector.feed()方法中，aBuf是从磁盘文件中读到的一行
+
+Look carefully at the parameters used to open the file: 'rb'.
+仔细看一看用来打开文件的参数：'rb'
+
+'r' is for “read”;
+'r'是用来读取的
+
+OK, big deal, we’re reading the file.
+OK，没什么了不起的，我们在读取文件
+
+Ah, but 'b' is for “binary.” Without the 'b' flag, this for loop would read the file, line by line, and convert each line into a string — an array of Unicode characters — according to the system default character encoding.
+啊，但是'b'是用以读取“二进制”数据的
+
+But with the 'b' flag, this for loop reads the file, line by line, and stores each line exactly as it appears in the file, as an array of bytes.
+如果没有标记'b'，for循环会一行一行地读取文件，然后将其转换为一个字符串 — Unicode编码的字符数组 — 根据系统默认的编码方式
+
+That byte array gets passed to UniversalDetector.feed(), and eventually gets passed to the pre-compiled regular expression, self._highBitDetector, to search for high-bit… characters.
+但是使用'b'标记后，for循环一行一行地读取文件，然后将其按原样存储为字节数组
+
+But we don’t have characters;
+该字节数组被传递给了 UniversalDetector.feed()方法，最后给了预编译好的正则表达式，self._highBitDetector，用来搜索高位…字符
+
+we have bytes.
+但是没有字符
+
+Oops.
+有的只是字节
+
+What we need this regular expression to search is not an array of characters, but an array of bytes.
+我们需要该正则表达式搜索的并不是字符数组，而是一个字节数组
+
+Once you realize that, the solution is not difficult.
+只要我们认识到了这一点，解决办法就有了
+
+Regular expressions defined with strings can search strings.
+使用字符串定义的正则表达式可以搜索字符串
+
+Regular expressions defined with byte arrays can search byte arrays.
+使用字节数组定义的正则表达式可以搜索字节数组
+
+To define a byte array pattern, we simply change the type of the argument we use to define the regular expression to a byte array.
+我们只需要改变用来定义正则表达式的参数的类型为字节数组，就可以定义一个字节数组模式
+
+(There is one other case of this same problem, on the very next line.)
+（还有另外一个该问题的实例，在下一行
+
+Searching the entire codebase for other uses of the re module turns up two more instances, in charsetprober.py.
+在整个代码库内搜索对re模块的使用发现了另外两个该类型问题的实例，出现在charsetprober.py文件中
+
+Again, the code is defining regular expressions as strings but executing them on aBuf, which is a byte array.
+再次，以上代码将正则表达式定义为字符串，但是却将它们作用在aBuf上，而aBuf是一个字节数组
+
+The solution is the same: define the regular expression patterns as byte arrays.
+解决方案还是一样的：将正则表达式模式定义为字节数组
+
+Can't convert 'bytes' object to str implicitly
+Can't convert 'bytes' object to str implicitly
+
+Curiouser and curiouser…
+奇怪，越来越不寻常了…
+
+There’s an unfortunate clash of coding style and Python interpreter here.
+在此存在一个Python解释器与代码风格之间的不协调
+
+The TypeError could be anywhere on that line, but the traceback doesn’t tell you exactly where it is.
+TypeError可以出现在那一行的任意地方，但是traceback不能明确定地指出错误的位置
+
+It could be in the first conditional or the second, and the traceback would look the same.
+可能是第一个或者第二个条件语句(conditional)，对traceback来说，它们是一样的
+
+To narrow it down, you should split the line in half, like this:
+为了缩小调试的范围，我们需要把这条代码分割成两行，像这样：
+
+And re-run the test:
+然后再运行测试工具：
+
+Aha!
+啊哈
+
+The problem was not in the first conditional (self._mInputState == ePureAscii) but in the second one.
+错误不在第一个条件语句上(self._mInputState == ePureAscii)，是第二个的问题
+
+So what could cause a TypeError there?
+但是，是什么引发了TypeError错误呢
+
+Perhaps you’re thinking that the search() method is expecting a value of a different type, but that wouldn’t generate this traceback.
+也许你会想search()方法需要另外一种类型的参数，但是那样的话，就不会产生当前这种traceback了
+
+Python functions can take any value;
+Python函数可以使用任何类型参数
+
+if you pass the right number of arguments, the function will execute.
+只要传递了正确数目的参数，函数就可以执行
+
+It may crash if you pass it a value of a different type than it’s expecting, but if that happened, the traceback would point to somewhere inside the function.
+如果我们给函数传递了类型不匹配的参数，代码可能就会崩溃，但是这样一来，traceback就会指向函数内部的某一代码块了
+
+But this traceback says it never got as far as calling the search() method.
+但是当前得到的traceback告诉我们，错误就出现在开始调用search()函数那儿
+
+So the problem must be in that + operation, as it’s trying to construct the value that it will eventually pass to the search() method.
+所以错误肯定就出在+操作符上，该操作用于构建最终会传递给search()方法的参数
+
+We know from previous debugging that aBuf is a byte array.
+从前一次调试的过程中，我们已经知道aBuf是一个字节数组
+
+So what is self._mLastChar?
+那么self._mLastChar又是什么呢
+
+It’s an instance variable, defined in the reset() method, which is actually called from the __init__() method.
+它是一个在reset()中定义的实例变量，而reset()方法刚好就是被__init__()调用的
+
+And now we have our answer.
+现在我们找到问题的症结所在了
+
+Do you see it?
+你发现了吗
+
+self._mLastChar is a string, but aBuf is a byte array.
+self._mLastChar是一个字符串，而aBuf是一个字节数组
+
+And you can’t concatenate a string to a byte array — not even a zero-length string.
+而我们不允许对字符串和字节数组做连接操作 — 即使是空串也不行
+
+So what is self._mLastChar anyway?
+那么，self._mLastChar到底是什么呢
+
+In the feed() method, just a few lines down from where the trackback occurred.
+在feed()方法中，在traceback报告的位置以下几行就是了
+
+The calling function calls this feed() method over and over again with a few bytes at a time.
+feed()方法被一次一次地调用，每次都传递给它几个字节
+
+The method processes the bytes it was given (passed in as aBuf), then stores the last byte in self._mLastChar in case it’s needed during the next call.
+该方法处理好它收到的字节（以aBuf传递进去的），然后将最后一个字节保存在self._mLastChar中，以便下次调用时还会用到
+
+(In a multi-byte encoding, the feed() method might get called with half of a character, then called again with the other half.) But because aBuf is now a byte array instead of a string, self._mLastChar needs to be a byte array as well.
+（在多字节编码中，feed()在调用的时候可能只收到了某个字符的一半，然后下次调用时另一半才被传到
+
+Thus:
+）但是因为aBuf已经变成了一个字节数组，所以self._mLastChar也需要与其匹配
+
+Searching the entire codebase for “mLastChar” turns up a similar problem in mbcharsetprober.py, but instead of tracking the last character, it tracks the last two characters.
+在代码库中搜索“mLastChar”，mbcharsetprober.py中也发现一个相似的问题，与之前不同的是，它记录的是最后2个字符
+
+The MultiByteCharSetProber class uses a list of 1-character strings to track the last two characters.
+MultiByteCharSetProber类使用一个单字符列表来记录末尾的两个字符
+
+In Python 3, it needs to use a list of integers, because it’s not really tracking characters, it’s tracking bytes.
+在Python 3中，这需要使用一个整数列表，因为实际上它记录的并不是是字符，而是字节对象
+
+(Bytes are just integers from 0-255.)
+（字节对象即范围在0-255内的整数
+
+Unsupported operand type(s) for +: 'int' and 'bytes'
+Unsupported operand type(s) for +: 'int' and 'bytes'
+
+I have good news, and I have bad news.
+有好消息，也有坏消息
+
+The good news is we’re making progress…
+好消息是我们一直在前进着…
+
+…The bad news is it doesn’t always feel like progress.
+…坏消息是，我们好像一直都在原地踏步
+
+But this is progress!
+但我们确实一直在取得进展
+
+Really!
+真的
+
+Even though the traceback calls out the same line of code, it’s a different error than it used to be.
+即使traceback在相同的地方再次出现，这一次的错误毕竟与上次不同
+
+Progress!
+前进
+
+So what’s the problem now?
+那么，这次又是什么错误呢
+
+The last time I checked, this line of code didn’t try to concatenate an int with a byte array (bytes).
+上一次我们确认过了，这一行代码不应该会再做连接int型和字节数组(bytes)的操作
+
+In fact, you just spent a lot of time ensuring that self._mLastChar was a byte array.
+事实上，我们刚刚花了相当长一段时间来保证self._mLastChar是一个字节数组
+
+How did it turn into an int?
+它怎么会变成int呢
+
+The answer lies not in the previous lines of code, but in the following lines.
+答案不在上几行代码中，而在以下几行
+
+This error doesn’t occur the first time the feed() method gets called;
+该错误没有发生在feed()方法第一次被调用的时候
+
+it occurs the second time, after self._mLastChar has been set to the last byte of aBuf.
+而是在第二次调用的过程中，在self._mLastChar被赋值为aBuf末尾的那个字节之后
+
+Well, what’s the problem with that?
+好吧，这又会有什么问题呢
+
+Getting a single element from a byte array yields an integer, not a byte array.
+因为获取字节数组中的单个元素会产生一个整数，而不是字节数组
+
+To see the difference, follow me to the interactive shell:
+它们之间的区别，请看以下在交互式shell中的操作：
+
+Define a byte array of length 3.
+定义一个长度为3的字节数组
+
+The last element of the byte array is 191.
+字节数组的最后一个元素为191
+
+That’s an integer.
+它是一个整数
+
+Concatenating an integer with a byte array doesn’t work.
+连接整数和字节数组的操作是不允许的
+
+You’ve now replicated the error you just found in universaldetector.py.
+我们重复了在universaldetector.py中发现的那个错误
+
+Ah, here’s the fix.
+啊，这就是解决办法了
+
+Instead of taking the last element of the byte array, use list slicing to create a new byte array containing just the last element.
+使用列表分片从数组的最后一个元素中创建一个新的字节数组，而不是直接获取这个元素
+
+That is, start with the last element and continue the slice until the end of the byte array.
+即，从最后一个元素开始切割，直到到达数组的末尾
+
+Now mLastChar is a byte array of length 1.
+当前mLastChar是一个长度为1的字节数组
+
+Concatenating a byte array of length 1 with a byte array of length 3 returns a new byte array of length 4.
+连接长度分别为1和3的字节数组，则会返回一个新的长度为4的字节数组
+
+So, to ensure that the feed() method in universaldetector.py continues to work no matter how often it’s called, you need to initialize self._mLastChar as a 0-length byte array, then make sure it stays a byte array.
+所以，为了保证universaldetector.py中的feed()方法不管被调用多少次都能够正常运行，我们需要将self._mLastChar实例化为一个长度为0的字节数组，并且保证它一直是一个字节数组
+
+ord() expected string of length 1, but int found
+ord() expected string of length 1, but int found
+
+Tired yet?
+困了吗
+
+You’re almost there…
+就要完成了…
+
+OK, so c is an int, but the ord() function was expecting a 1-character string.
+OK，因为c是int类型的，但是ord()需要一个长度为1的字符串
+
+Fair enough.
+就是这样了
+
+Where is c defined?
+c在哪儿定义的
+
+That’s no help;
+不是这儿
+
+it’s just passed into the function.
+ 此处c只是被传递给了next_state()函数
+
+Let’s pop the stack.
+我们再上一级看看
+
+Do you see it?
+看到了吗
+
+In Python 2, aBuf was a string, so c was a 1-character string.
+在Python 2中，aBuf是一个字符串，所以c就是一个长度为1的字符串
+
+(That’s what you get when you iterate over a string — all the characters, one by one.) But now, aBuf is a byte array, so c is an int, not a 1-character string.
+（那就是我们通过遍历字符串所得到的 — 所有的字符，一次一个
+
+In other words, there’s no need to call the ord() function because c is already an int!
+）因为现在aBuf是一个字节数组，所以c变成了int类型的，而不再是长度为1的字符串
+
+Thus:
+这样修改：
+
+Searching the entire codebase for instances of “ord(c)” uncovers similar problems in sbcharsetprober.py…
+在代码库中搜索“ord(c)”后，发现sbcharsetprober.py中也有相似的问题…
+
+…and latin1prober.py…
+…还有latin1prober.py…
+
+c is iterating over aBuf, which means it is an integer, not a 1-character string.
+c在aBuf中遍历，这就意味着它是一个整数，而非字符串
+
+The solution is the same: change ord(c) to just plain c.
+解决方案是相同的：把ord(c)就替换成c
+
+Unorderable types: int() >= str()
+Unorderable types: int() >= str()
+
+Let’s go again.
+继续我们的路吧
+
+So what’s this all about?
+这都是些什么
+
+“Unorderable types”?
+“Unorderable types”
+
+Once again, the difference between byte arrays and strings is rearing its ugly head.
+字节数组与字符串之间的差异引起的问题再一次出现了
+
+Take a look at the code:
+看一看以下代码：
+
+And where does aStr come from?
+aStr从何而来
+
+Let’s pop the stack:
+再深入栈内看一看：
+
+Oh look, it’s our old friend, aBuf.
+看，是aBuf，我们的老战友
+
+As you might have guessed from every other issue we’ve encountered in this chapter, aBuf is a byte array.
+从我们在这一章中所遇到的问题你也可以猜到了问题的关键了，因为aBuf是一个字节数组
+
+Here, the feed() method isn’t just passing it on wholesale;
+此处feed()方法并不是整个地将它传递出去
+
+it’s slicing it.
+而是先对它执行分片操作
+
+But as you saw earlier in this chapter, slicing a byte array returns a byte array, so the aStr parameter that gets passed to the get_order() method is still a byte array.
+就如你在这章前面看到的，对字节数组执行分片操作的返回值仍然为字节数组，所以传递给get_order()方法的aStr仍然是字节数组
+
+And what is this code trying to do with aStr?
+那么以下代码是怎样处理aStr的呢
+
+It’s taking the first element of the byte array and comparing it to a string of length 1.
+它将该字节第一个元素与长度为1的字符串进行比较操作
+
+In Python 2, that worked, because aStr and aBuf were strings, and aStr[0] would be a string, and you can compare strings for inequality.
+在Python 2，这是可以的，因为aStr和aBuf都是字符串，所以aStr[0]也是字符串，并且我们允许比较两个字符串的是否相等
+
+But in Python 3, aStr and aBuf are byte arrays, aStr[0] is an integer, and you can’t compare integers and strings for inequality without explicitly coercing one of them.
+但是在Python 3中，aStr和aBuf都是字节数组，而aStr[0]就成了一个整数，没有执行显式地强制转换的话，是不能对整数和字符串执行相等性比较的
+
+In this case, there’s no need to make the code more complicated by adding an explicit coercion.
+在当前情况下，没有必要添加强制转换，这会让代码变得更加复杂
+
+aStr[0] yields an integer;
+aStr[0]产生一个整数
+
+the things you’re comparing to are all constants.
+而我们所比较的对象都是常量(constant)
+
+Let’s change them from 1-character strings to integers.
+那就把长度为1的字符串换成整数吧
+
+And while we’re at it, let’s change aStr to aBuf, since it’s not actually a string.
+我们也顺便把aStr换成aBuf吧，因为aStr本来也不是一个字符串
+
+Searching the entire codebase for occurrences of the ord() function uncovers the same problem in chardistribution.py (specifically, in the EUCTWDistributionAnalysis, EUCKRDistributionAnalysis, GB2312DistributionAnalysis, Big5DistributionAnalysis, SJISDistributionAnalysis, and EUCJPDistributionAnalysis classes.
+在代码库中查找ord()函数，我们在chardistribution.py中也发现了同样的问题（更确切地说，在以下这些类中，EUCTWDistributionAnalysis，EUCKRDistributionAnalysis，GB2312DistributionAnalysis，Big5DistributionAnalysis，SJISDistributionAnalysis和EUCJPDistributionAnalysis）
+
+In each case, the fix is similar to the change we made to the EUCJPContextAnalysis and SJISContextAnalysis classes in jpcntx.py.
+对于它们存在的问题，解决办法与我们对jpcntx.py中的类EUCJPContextAnalysis和SJISContextAnalysis的做法相似
+
+Global name 'reduce' is not defined
+Global name 'reduce' is not defined
+
+Once more into the breach…
+再次陷入中断…
+
+According to the official What’s New In Python 3.0 guide, the reduce() function has been moved out of the global namespace and into the functools module.
+根据官方手册：What’s New In Python 3.0，函数reduce()已经从全局名字空间中移出，放到了functools模块中
+
+Quoting the guide: “Use functools.reduce() if you really need it;
+引用手册中的内容：“如果需要，请使用functools.reduce()，99％的情况下，显式的for循环使代码更有可读性
+
+however, 99 percent of the time an explicit for loop is more readable.” You can read more about the decision from Guido van Rossum’s weblog: The fate of reduce() in Python 3000.
+”你可以从Guido van Rossum的一篇日志中看到关于这项决策的更多细节：The fate of reduce() in Python 3000
+
+The reduce() function takes two arguments — a function and a list (strictly speaking, any iterable object will do) — and applies the function cumulatively to each item of the list.
+reduce()函数使用两个参数 — 一个函数，一个列表（更严格地说，可迭代的对象就行了） — 然后将函数增量式地作用在列表的每个元素上
+
+In other words, this is a fancy and roundabout way of adding up all the items in a list and returning the result.
+换句话说，这是一种良好而高效的用于综合(add up)列表所有元素并返回其结果的方法
+
+This monstrosity was so common that Python added a global sum() function.
+这种强大的技术使用如此频繁，所以Python就添加了一个全局的sum()函数
+
+Since you’re no longer using the operator module, you can remove that import from the top of the file as well.
+由于我们不再使用operator模块，所以可以在文件最上方移除那条import语句
+
+I CAN HAZ TESTZ?
+可以开始测试了吧
+
+Holy crap, it actually works!
+天哪，伙计，她真的欢快地跑起来了
+
+/me does a little dance
+/me does a little dance
+
+Summary
+总结
+
+What have we learned?
+我们学到了什么
+
+Porting any non-trivial amount of code from Python 2 to Python 3 is going to be a pain.
+尝试大批量地把代码从Python 2移植到Python 3上是一件让人头疼的工作
+
+There’s no way around it.
+没有捷径
+
+It’s hard.
+它确实很困难
+
+The automated 2to3 tool is helpful as far as it goes, but it will only do the easy parts — function renames, module renames, syntax changes.
+自动化的2to3脚本确实有用，但是它只能做一些简单的辅助工作 — 函数重命名，模块重命名，语法修改等
+
+It’s an impressive piece of engineering, but in the end it’s just an intelligent search-and-replace bot.
+之前，它被认为是一项会让人印象深刻的大工程，但是最后，实际上它只是一个能智能地执行查找替换机器人
+
+The #1 porting problem in this library was the difference between strings and bytes.
+在移植chardet库的时候遇到的头号问题就是：字符串和字节对象之间的差异
+
+In this case that seems obvious, since the whole point of the chardet library is to convert a stream of bytes into a string.
+在我们这个情况中，这种问题比较明显，因为整个chardet库就是一直在执行从字节流到字符串的转换
+
+But “a stream of bytes” comes up more often than you might think.
+但是“字节流”出现的方式会远超出你的想象
+
+Reading a file in “binary” mode?
+以“二进制”模式读取文件
+
+You’ll get a stream of bytes.
+我们会获得字节流
+
+Fetching a web page?
+获取一份web页面
+
+Calling a web API?
+调用web API
+
+They return a stream of bytes, too.
+这也会返回字节流
+
+You need to understand your program.
+你需要彻底地了解所面对的程序
+
+Thoroughly.
+如果那段程序是自己写自然非常好，但是至少，我们需要够理解所有晦涩难懂的细节
+
+Preferably because you wrote it, but at the very least, you need to be comfortable with all its quirks and musty corners.
+因为bug可能埋伏在任何地方
+
+Test cases are essential.
+测试样例是必要的
+
+Don’t port anything without them.
+没有它们的话不要尝试着移植代码
+
+The only reason I have any confidence that chardet works in Python 3 is that I started with a test suite that exercised all major code paths.
+我自信移植后的chardet模块能在Python 3中工作的唯一理由是，我一开始就使用了测试集合来检验所有主要的代码路径
+
+If you don’t have any tests, write some tests before you start porting to Python 3.
+如果你还没有任何测试集，在移植代码之前自己写一些吧
+
+If you have a few tests, write more.
+如果你的测试集合太小，那么请写全
+
+If you have a lot of tests, then the real fun can begin.
+如果测试集够了，那么，我们就又可以开始历险了
+
+© 2001–11 Mark Pilgrim
+© 2001–9 Mark Pilgrim
+

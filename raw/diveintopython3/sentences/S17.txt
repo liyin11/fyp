@@ -1,0 +1,759 @@
+You are here: Home ‣ Dive Into Python 3 ‣
+当前位置: 首页 ‣ 深入 Python 3 ‣
+
+Difficulty level: ♦♦♦♦♢
+难度级别： ♦♦♦♦♢
+
+Packaging Python Libraries
+打包 Python 类库
+
+❝ You’ll find the shame is like the pain;
+❝ You’ll find the shame is like the pain; you only feel it once. ❞ — Marquise de Merteuil, Dangerous Liaisons
+
+Diving In
+深入
+
+Real artists ship.
+读到这里，你可能是想要发布一个 Python 脚本，库，框架，或者应用程序
+
+Or so says Steve Jobs.
+太棒了
+
+Do you want to release a Python script, library, framework, or application?
+世界需要更多的Python代码
+
+All of these facets of Distutils center around the setup script, traditionally called setup.py.
+Python 3 自带一个名为 Distutils 的打包框架
+
+In fact, you’ve already seen several Distutils setup scripts in this book.
+Distutils 包含许多功能：构建工具（为你所准备），安装工具（为用户所准备），数据包格式（为搜索引擎所准备）等
+
+You used Distutils to install httplib2 in HTTP Web Services and again to install chardet in Case Study: Porting chardet to Python 3.
+它集成了 Python 安装包索引（“PyPI”），一个开源 Python 类库的中央资料库
+
+In this chapter, you’ll learn how the setup scripts for chardet and httplib2 work, and you’ll step through the process of releasing your own Python software.
+这些 Distutils 的不同功能以setup script为中心，一般被命名为 setup.py
+
+☞chardet and httplib2 are open source, but there’s no requirement that you release your own Python libraries under any particular license.
+在本章中，你将学习 chardet 和 httplib2 的安装脚本如何工作，并将逐步（学会）发布自己的 Python 软件
+
+Releasing your first Python package is a daunting process.
+发布第一个 Python 包是一项艰巨的过程
+
+(Releasing your second one is a little easier.) Distutils tries to automate as much of it as possible, but there are some things you simply must do yourself.
+（发布第二个相对容易一些
+
+Choose a license.
+选择一种许可协议 
+
+This is a complicated topic, fraught with politics and peril.
+. 这是一个复杂的话题，充满了派别斗争和危险
+
+If you wish to release your software as open source, I humbly offer five pieces of advice: Don’t write your own license.
+如果想将软件发布为开源软件，我冒昧地提出五点忠告： 不要撰写自己的许可证
+
+Don’t write your own license.
+ 不要撰写自己的许可证
+
+Don’t write your own license.
+ 不要撰写自己的许可证
+
+It doesn’t need to be GPL, but it needs to be GPL-compatible.
+ 许可证并不一定必须是 GPL ，但它需要与 GPL 兼容 
+
+Don’t write your own license.
+ 不要撰写自己的许可证
+
+Don’t write your own license.
+不要撰写自己的许可证
+
+Don’t write your own license.
+不要撰写自己的许可证
+
+Don’t write your own license.
+不要撰写自己的许可证
+
+It doesn’t need to be GPL, but it needs to be GPL-compatible.
+许可证并不一定必须是 GPL ，但它需要与 GPL 兼容 
+
+Don’t write your own license.
+不要撰写自己的许可证
+
+Classify your software using the PyPI classification system.
+使用 PyPI 分类系统对软件进行分类
+
+I’ll explain what this means later in this chapter.
+我将在本章后面的部分解释这是什么意思
+
+Write a “read me” file.
+写“自述”(read me)文件 
+
+Don’t skimp on this.
+不要在这一点吝惜精力投入
+
+At a minimum, it should give your users an overview of what your software does and how to install it.
+至少，它应该让你的用户了解你的软件可以干什么并知道如何安装它
+
+Directory Structure
+目录结构
+
+To start packaging your Python software, you need to get your files and directories in order.
+要开始打包 Python 软件，必须先将文件和目录安排好
+
+The httplib2 directory looks like this:
+ httplib2 的目录树如下：
+
+Make a root directory to hold everything.
+创建根目录来保存所有的目录和文件
+
+Give it the same name as your Python module.
+将其以 Python 模块的名字命名
+
+To accomodate Windows users, your “read me” file should include a .txt extension, and it should use Windows-style carriage returns.
+为了适应 Windows 用户，"自述"文件应包含 .txt 扩展名，而且它应该使用 Windows 风格回车符
+
+Just because you use a fancy text editor that runs from the command line and includes its own macro language, that doesn’t mean you need to make life difficult for your users.
+不能仅仅因为你使用了一个优秀的文本编辑器，它从命令行运行并包括它自己的宏语言，而需要让你的用户为难
+
+(Your users use Notepad.
+（你的用户使用记事本
+
+Sad but true.) Even if you’re on Linux or Mac OS X, your fancy text editor undoubtedly has an option to save files with Windows-style carriage returns.
+虽然可悲，但却是事实
+
+Your Distutils setup script should be named setup.py unless you have a good reason not to.
+Distutils 安装脚本应命名为 setup.py，除非你有一个很好的理由不这样做
+
+You do not have a good reason not to.
+但你并没有一个很好的理由不这样做
+
+If your Python software is a single .py file, you should put it in the root directory along with your “read me” file and your setup script.
+如果你的Python软件只包含一个单一的 .py 文件，你应该把它和"自述"文件以及安装脚本放到根目录下
+
+But httplib2 is not a single .py file;
+但 httplib2 并不是单一的 .py 文件，它是一个多文件模块 
+
+it’s a multi-file module.
+但是没关系
+
+But that’s OK!
+只需在根目录下放置 httplib2 目录，这样在 httplib2/ 根目录下就会有一个包含 __init__.py 文件的 httplib2/ 目录
+
+Just put the httplib2 directory in the root directory, so you have an __init__.py file within an httplib2/ directory within the httplib2/ root directory.
+这并不是一个难题，事实上，它可以简化打包过程
+
+The chardet directory looks slightly different.
+chardet 目录看起来有些不同
+
+Like httplib2, it’s a multi-file module, so there’s a chardet/ directory within the chardet/ root directory.
+像 httplib2 一样，它是一个多文件模块 ，所以在 chardet/ 根目录下有一个 chardet/ 目录
+
+In addition to the README.txt file, chardet has HTML-formatted documentation in the docs/ directory.
+除了 README.txt 文件，在 docs/ 目录下， chardet 还有 HTML ——格式化文档
+
+The docs/ directory contains several .html and .css files and an images/ subdirectory, which contains several .png and .gif files.
+该 docs/ 目录包含多个 .html 和.css 文件和 images/ 子目录，其中包含几个 .png 和 .gif 文件
+
+(This will be important later.) Also, in keeping with the convention for (L)GPL-licensed software, it has a separate file called COPYING.txt which contains the complete text of the LGPL.
+（稍后你会发现，这将是很重要的
+
+Writing Your Setup Script
+编写安装脚本
+
+The Distutils setup script is a Python script.
+Distutils 安装脚本是一份 Python 脚本
+
+In theory, it can do anything Python can do.
+从理论上讲，它可以做任何 Python 可以做的事情
+
+In practice, it should do as little as possible, in as standard a way as possible.
+在实践中，安装脚本应该做尽可能少的事情并尽可能按标准的方式做
+
+Setup scripts should be boring.
+安装脚本应该简单
+
+The more exotic your installation process is, the more exotic your bug reports will be.
+安装过程越奇异，错误报告也会更奇特
+
+The first line of every Distutils setup script is always the same:
+每个 Distutils 安装脚本的第一行总是相同的：
+
+This imports the setup() function, which is the main entry point into Distutils.
+该行导入 setup() 函数，这是 Distutils 的主入口点
+
+% of all Distutils setup scripts consist of a single call to setup() and nothing else.
+95％ 的 Distutils 安装脚本仅由一个对 setup() 方法的调用组成
+
+(I totally just made up that statistic, but if your Distutils setup script is doing more than calling the Distutils setup() function, you should have a good reason.
+（这完全是我臆造的统计，但如果你的 Distutils 安装脚本所做的比仅仅调用 setup() 方法更多，你会有一个好的理由
+
+Do you have a good reason?
+你有一个好的理由吗
+
+I didn’t think so.)
+我并不这么认为
+
+The setup() function can take dozens of parameters.
+setup() 方法可以有几十个参数 
+
+For the sanity of everyone involved, you must use named arguments for every parameter.
+为了使每个参与者都能清楚，你必须对每个参数使用命名变量 
+
+This is not merely a convention;
+这不只是一项约定，还是一项硬性要求
+
+it’s a hard requirement.
+如果尝试以非命名变量调用 setup() 方法，安装脚本会崩溃
+
+The following named arguments are required:
+下面的命名变量是必需的：
+
+name, the name of the package.
+name，安装包的名称
+
+version, the version number of the package.
+version，安装包的版本
+
+author, your full name.
+author，您的全名
+
+author_email, your email address.
+author_email，您的邮件地址
+
+url, the home page of your project.
+url，项目主页
+
+This can be your PyPI package page if you don’t have a separate project website.
+如果没有一个单独的项目网站，这里可以是安装包的 PyPI 的页面地址
+
+Although not required, I recommend that you also include the following in your setup script:
+虽然以下内容不是必须的，但我也建议你把他们包括在你的安装脚本里：
+
+description, a one-line summary of the project.
+description，在线的项目摘要
+
+long_description, a multi-line string in reStructuredText format.
+long_description，以 reStructuredText format 格式编写的多行字符串
+
+PyPI converts this to HTML and displays it on your package page.
+PyPI 将其转换为 HTML 并在安装包中显示它
+
+classifiers, a list of specially-formatted strings described in the next section.
+classifiers，下一节中将讲述的特别格式化字符串
+
+☞Setup script metadata is defined in PEP 314.
+☞安装脚本中用到的元数据具体定义在 PEP 314 中
+
+Now let’s look at the chardet setup script.
+现在让我们看看 chardet 的安装脚本
+
+It has all of these required and recommended parameters, plus one I haven’t mentioned yet: packages.
+它包含所有这些要求的和建议的参数，还有一个我没有提到： packages 
+
+The packages parameter highlights an unfortunate vocabulary overlap in the distribution process.
+在分发过程中，这个 packages 参数凸显出一个不幸的词汇表重叠
+
+We’ve been talking about the “package” as the thing you’re building (and potentially listing in The Python “Package” Index).
+我们一直在谈论正在构建的“安装包”（并将潜在地出现在Python包索引中）
+
+But that’s not what this packages parameter refers to.
+但是，这并不是 packages 参数所指代的
+
+It refers to the fact that the chardet module is a multi-file module, sometimes known as… a “package.” The packages parameter tells Distutils to include the chardet/ directory, its __init__.py file, and all the other .py files that constitute the chardet module.
+它指代的是 chardet 模块是一个多文件模块这一事实 ，有时也被称为...“包”
+
+That’s kind of important;
+packages 参数告诉 Distutils 去包含chardet/ 目录，它的 __init__.py 文件，以及所有其他构成 chardet 模块的 .py 文件
+
+all this happy talk about documentation and metadata is irrelevant if you forget to include the actual code!
+这还算比较重要
+
+Classifying Your Package
+将包分类
+
+The Python Package Index (“PyPI”) contains thousands of Python libraries.
+Python 包索引（“PyPI”）包含成千上万的 Python 库
+
+Proper classification metadata will allow people to find yours more easily.
+正确的分类数据将让人们更容易找到你的包
+
+PyPI lets you browse packages by classifier.
+PyPI 让你以类别的形式浏览包 
+
+You can even select multiple classifiers to narrow your search.
+你甚至可以选择多个类别来缩小搜索范围
+
+Classifiers are not invisible metadata that you can just ignore!
+分类不是你可以忽略的不可见的元数据
+
+To classify your software, pass a classifiers parameter to the Distutils setup() function.
+你可以通过传递 classifiers 参数给 Distutils 的 setup() 方法来给你的软件分类
+
+The classifiers parameter is a list of strings.
+classifers 参数是一个字符串列表
+
+These strings are not freeform.
+这些字符串不是任意形式的
+
+All classifier strings should come from this list on PyPI.
+所有的分类字符串应该来自 PyPI 上的列表 
+
+Classifiers are optional.
+分类是可选的
+
+You can write a Distutils setup script without any classifiers at all.
+你可以写一个不包含任何分类的 Distutils 安装脚本
+
+Don’t do that.
+不要这样做
+
+You should always include at least these classifiers:
+ 你应该总是至少包括以下分类：
+
+Programming Language.
+<b0编程语言. 特别的，你应该包括"Programming Language :: Python"和"Programming Language :: Python :: 3"
+
+In particular, you should include both "Programming Language :: Python" and "Programming Language :: Python :: 3".
+如果你不包括这些，你的包将不会出现在兼容Python 3的库列表中，它链接自每个pypi.python.org单页的侧边拦
+
+License.
+许可证. 当我评价一个第三方库的时候，这绝对是我寻找的第一个东西
+
+This is the absolute first thing I look for when I’m evaluating third-party libraries.
+不要让我（花太多时间）寻找这个重要的信息
+
+Don’t make me hunt for this vital information.
+不要包含一个以上的许可证分类，除非你的软件明确地在多许可证下分发
+
+Don’t include more than one license classifier unless your software is explicitly available under multiple licenses.
+（不要在多许可证下发布你的软件，除非你不得不这样做
+
+(And don’t release software under multiple licenses unless you’re forced to do so.
+不要强迫别人这样做
+
+And don’t force other people to do so.
+许可证已经足够让人头痛了，不要使情况变得更糟
+
+Licensing is enough of a headache;
+）
+
+Operating System.
+操作系统0. 如果你的软件只能运行于Windows（或Mac OS X或Linux），我想要尽早知道
+
+If your software only runs on Windows (or Mac OS X, or Linux), I want to know sooner rather than later.
+如果你的软件不包含任何特定平台的代码并可以在任何平台运行，请使用分类 "Operating System :: OS Independent"
+
+If your software runs anywhere without any platform-specific code, use the classifier "Operating System :: OS Independent".
+多操作系统 分类仅在你的软件在不同平台需要特别支持时使用
+
+Multiple Operating System classifiers are only necessary if your software requires specific support for each platform.
+（这并不常见
+
+(This is not common.)
+）
+
+I also recommend that you include the following classifiers:
+我还建议你包括以下分类：
+
+Development Status.
+开发状态. 你的软件品质适合beta发布么
+
+Is your software beta quality?
+适合Alpha发布么
+
+Alpha quality?
+还是Pre-alpha
+
+Pre-alpha?
+在这里面选择一个吧
+
+Pick one.
+要诚实点
+
+Intended Audience.
+目标用户. 谁会下载你的软件
+
+Who would download your software?
+最常见的选项包括： Developers、 End Users/Desktop、 Science/Research 和 System Administrators
+
+Framework.
+框架. 如果你的软件是像 Django 或 Zope 这样较大的框架的插件，请包含适当的 Framework 分类
+
+If your software is a plugin for a larger Python framework like Django or Zope, include the appropriate Framework classifier.
+如果不是，请忽略它
+
+Topic.
+主题. 有 大量的主题 可供选择 ，选择所有的适用项
+
+Examples of Good Package Classifiers
+包分类的优秀范例
+
+By way of example, here are the classifiers for Django, a production-ready, cross-platform, BSD-licensed web application framework that runs on your web server.
+作为例子，下面是 Django 的分类
+
+(Django is not yet compatible with Python 3, so the Programming Language :: Python :: 3 classifier is not listed.)
+它是一个运行在 Web 服务器上的，可用于生产环境的，跨平台的，使用 BSD 授权的 Web 应用程序框架
+
+Here are the classifiers for chardet, the character encoding detection library covered in Case Study: Porting chardet to Python 3.
+下面是 chardet 的分类
+
+chardet is beta quality, cross-platform, Python 3-compatible, LGPL-licensed, and intended for developers to integrate into their own products.
+它就是在《案例研究：将 chardet 移植到 Python 3》一章提到的字符编码检测库
+
+And here are the classifiers for httplib2, the library featured in the HTTP Web Services chapter.
+以下是在本章开头我提到的 httplib2 模块——HTTP 的分类
+
+httplib2 is beta quality, cross-platform, MIT-licensed, and intended for Python developers.
+httplib2 是一个测试品质的，跨平台的，MIT 许可证授权的，为 Python 开发者准备的模块
+
+Specifying Additional Files With A Manifest
+通过清单指定附加文件
+
+By default, Distutils will include the following files in your release package:
+默认情况下，Distutils 将把下列文件包含在你的发布包中：
+
+README.txt
+README.txt
+
+setup.py
+setup.py
+
+The .py files needed by the multi-file modules listed in the packages parameter
+由列在 packages 参数中的多模块文件所需的 .py 文件
+
+The individual .py files listed in the py_modules parameter
+在 py_modules 参数中列出的单独 .py 文件
+
+That will cover all the files in the httplib2 project.
+这将覆盖httplib2 项目的所有文件
+
+But for the chardet project, we also want to include the COPYING.txt license file and the entire docs/ directory that contains images and HTML files.
+但对于 chardet 项目，我们还希望包含 COPYING.txt 许可文件和含有图像与 HTML 文件的整个 docs/ 目录
+
+To tell Distutils to include these additional files and directories when it builds the chardet release package, you need a manifest file.
+要让 Distutils 在构建 chardet 发布包时包含这些额外的文件和目录，你需要创建一个 manifest file 
+
+A manifest file is a text file called MANIFEST.in.
+清单文件是一个名为 MANIFEST.in 的文本文件
+
+Place it in the project’s root directory, next to README.txt and setup.py.
+将它放置在项目的根目录下，同 README.txt 和 setup.py 一起
+
+Manifest files are not Python scripts;
+清单文件并不是 Python 脚本，它是文本文件，其中包含一系列 Distutils 定义格式的命令
+
+they are text files that contain a series of “commands” in a Distutils-defined format.
+清单命令允许你包含或排除特定的文件和目录
+
+This is the entire manifest file for the chardet project:
+以下是 chardet 项目的全部清单文件：
+
+The first line is self-explanatory: include the COPYING.txt file from the project’s root directory.
+第一行是不言自明的：包含项目根目录的 COPYING.txt 文件
+
+The second line is a bit more complicated.
+第二行有些复杂
+
+The recursive-include command takes a directory name and one or more filenames.
+recursive-include 命令需要一个目录名和至少一个文件名
+
+The filenames aren’t limited to specific files;
+文件名并不限于特定的文件，可以包含通配符
+
+they can include wildcards.
+这行的意思是“看到在项目根目录下的 docs/ 目录了吗
+
+This line means “See that docs/ directory in the project’s root directory?
+在该目录下（递归地）查找 .html、 .css、 .png 和 .gif 文件
+
+Look in there (recursively) for .html, .css, .png, and .gif files.
+我希望将他们都包含在我的发布包中
+
+I want all of them in my release package.”
+”
+
+All manifest commands preserve the directory structure that you set up in your project directory.
+所有的清单命令都将保持你在项目目录中所设置的目录结构
+
+That recursive-include command is not going to put a bunch of .html and .png files in the root directory of the release package.
+recursive-include 命令不会将一组 .html 和 .png 文件放置在你的发布包的根目录下
+
+It’s going to maintain the existing docs/ directory structure, but only include those files inside that directory that match the given wildcards.
+它将保持现有的 docs/ 目录结构，但只包含该目录内匹配给定的通配符的文件
+
+(I didn’t mention it earlier, but the chardet documentation is actually written in XML and converted to HTML by a separate script.
+（之前我并没有提到， chardet 的文档实际上由 XML 语言写成，并由一个单独的脚本转换为 HTML 
+
+I don’t want to include the XML files in the release package, just the HTML and the images.)
+我不想在发布包中包含XML 文件，只包含 HTML 文件和图像
+
+☞Manifest files have their own unique format.
+☞清单文件有自己独特的格式
+
+See Specifying the files to distribute and the manifest template commands for details.
+详见 分发指定文件 和清单文件命令
+
+To reiterate: you only need to create a manifest file if you want to include files that Distutils doesn’t include by default.
+重申：仅仅在你需要包含一些 Distutils 不会默认包含的文件时才创建清单文件
+
+If you do need a manifest file, it should only include the files and directories that Distutils wouldn’t otherwise find on its own.
+I如果你确实需要一个清单文件，它应该只包含那些Distutils不会自动包含的文件和目录
+
+Checking Your Setup Script for Errors
+检查安装脚本的错误
+
+There’s a lot to keep track of.
+有许多事情需要留意
+
+Distutils comes with a built-in validation command that checks that all the required metadata is present in your setup script.
+Distutils带有一个内置的验证命令，它检查是否所有必须的元数据都体现在你的安装脚本中
+
+For example, if you forget to include the version parameter, Distutils will remind you.
+例如，如果你忘记包含 version 参数，Distutils 会提醒你
+
+Once you include a version parameter (and all the other required bits of metadata), the check command will look like this:
+当你包含了 version 参数（和所有其他所需的元数据）时， check 命令将如下所示：
+
+Creating a Source Distribution
+创建发布源
+
+Distutils supports building multiple types of release packages.
+Distutils 支持构建多种类型的发布包
+
+At a minimum, you should build a “source distribution” that contains your source code, your Distutils setup script, your “read me” file, and whatever additional files you want to include.
+至少，你应该建立一个“源代码分发”，其中包含源代码，你的Distutils 安装脚本，“read me ”文件和你想要包含其他文件 
+
+To build a source distribution, pass the sdist command to your Distutils setup script.
+为了建立一个源代码分发，传递 sdist 命令给你的 Distutils 安装脚本
+
+Several things to note here:
+有几件事情需要注意：
+
+Distutils noticed the manifest file (MANIFEST.in).
+Distutils发现了清单文件( MANIFEST.in )
+
+Distutils successfully parsed the manifest file and added the additional files we wanted — COPYING.txt and the HTML and image files in the docs/ directory.
+Distutils 成功地解析了清单文件，并添加了我们所需要的文件—— COPYING.txt 和在 docs/ 目录下的 HTML 与图像文件
+
+If you look in your project directory, you’ll see that Distutils created a dist/ directory.
+如果你进入你的项目目录，你会看到 Distutils 创建了一个 dist/ 目录
+
+Within the dist/ directory the .zip file that you can distribute.
+你可以分发在 dist/ 目录中的 .zip 文件
+
+Creating a Graphical Installer
+创建图形化安装程序
+
+In my opinion, every Python library deserves a graphical installer for Windows users.
+在我看来，每一个 Python 库都应该为 Windows 用户提供图形安装程序
+
+It’s easy to make (even if you don’t run Windows yourself), and Windows users appreciate it.
+这很容易做（即使你并没有运行 Windows ），而且 Windows 用户会对此表示感激
+
+Distutils can create a graphical Windows installer for you, by passing the bdist_wininst command to your Distutils setup script.
+通过传递 bdist_wininst 命令到你的 Distutils 安装脚本，它可以为你创建一个图形化的 Windows 安装程序 
+
+Building Installable Packages for Other Operating Systems
+为其它操作系统编译安装包
+
+Distutils can help you build installable packages for Linux users.
+Distutils 可以帮助你为 Linux 用户构建可安装包 
+
+In my opinion, this probably isn’t worth your time.
+我认为，这可能不值得你浪费时间
+
+If you want your software distributed for Linux, your time would be better spent working with community members who specialize in packaging software for major Linux distributions.
+如果你希望在 Linux 中分发你的软件，你最好将时间花在与那些社区成员进行交流上，他们专门为主流 Linux 发行版打包软件
+
+For example, my chardet library is in the Debian GNU/Linux repositories (and therefore in the Ubuntu repositories as well).
+例如，我的 chardet 库包含在 Debian GNU/Linux 软件仓库中（因而也包含在 Ubuntu 的软件仓库中）
+
+I had nothing to do with this;
+我不曾做任何事情，我只在那里将安装包展示了一天
+
+the packages just showed up there one day.
+Debian 社区拥有他们自己的关于打包 Python 库的政策，并且Debian 的 python-chardet 包被设计为遵循这些公约
+
+The Debian community has their own policies for packaging Python libraries, and the Debian python-chardet package is designed to follow these conventions.
+由于这个包存在在 Debian 的软件仓库中，依赖于 Debian 用户所选择的管理自己计算机的系统设置，他们会收到该包的安全更新和（或）新版本
+
+The Linux packages that Distutils builds offer none of these advantages.
+Distutils构建的包不具有Linux包所提供的任何优势
+
+Your time is better spent elsewhere.
+你的时间最好花在其他地方
+
+Adding Your Software to The Python Package Index
+将软件添加到 Python 安装包列表
+
+Uploading software to the Python Package Index is a three step process.
+上传软件到 Python 包索引需要三个步骤
+
+Register yourself
+注册你自己
+
+Register your software
+注册你的软件
+
+Upload the packages you created with setup.py sdist and setup.py bdist_*
+上传你通过 setup.py sdist 和 setup.py bdist_* 创建的包
+
+To register yourself, go to the PyPI user registration page.
+要注册自己，访问 PyPI用户注册页面
+
+Enter your desired username and password, provide a valid email address, and click the Register button.
+输入你想要的用户名和密码，提供一个有效的电子邮件地址，然后点击 Register 按钮
+
+(If you have a PGP or GPG key, you can also provide that.
+（如果你有一个 PGP 或 GPG 密钥，你也可以提供
+
+If you don’t have one or don’t know what that means, don’t worry about it.) Check your email;
+如果你没有或者不知道这是什么意思，不用担心
+
+within a few minutes, you should receive a message from PyPI with a validation link.
+）检查你的电子邮件，在几分钟之内，你应该会收到一封来自 PyPI 的包含验证链接的邮件
+
+Click the link to complete the registration process.
+点击链接以完成注册过程
+
+Now you need to register your software with PyPI and upload it.
+现在，你需要在PyPI注册你的软件并上传它
+
+You can do this all in one step.
+你可以用一步完成
+
+When you release your project for the first time, Distutils will add your software to the Python Package Index and give it its own URL.
+当你第一次发布你的项目时，Distutils 会将你的软件加入到Python包索引中并给出它的 URL
+
+Every time after that, it will simply update the project metadata with any changes you may have made in your setup.py parameters.
+在这之后，它只会用你在 setup.py 参数所做的任何改变来更新项目的元数据
+
+Next, it builds a source distribution (sdist) and a Windows installer (bdist_wininst), then uploads them to PyPI (upload).
+之后，它构建一个源代码发布 (sdist) 和一个 Windows 安装程序 (bdist_wininst) 并把他们上传到PyPI (upload)
+
+Type 1 or just press ENTER to select “use your existing login.”
+键入 1 或 ENTER 选择“ 使用已有的账户登录【use your existing login.】”
+
+Enter the username and password you selected on the the PyPI user registration page.
+输入你在 PyPI 用户注册页面所选择的用户名和密码
+
+Distuils will not echo your password;
+Distuils不会回显你的密码，它甚至不会在相应的位置显示星号
+
+it will not even echo asterisks in place of characters.
+只需输入你的密码，然后按 回车键 
+
+Distutils registers your package with the Python Package Index…
+Distutils 在 Python 包索引注册你的包……
+
+…builds your source distribution…
+……构建源代码分发……
+
+…builds your Windows installer…
+……构建Windows安装程序……
+
+…and uploads them both to the Python Package Index.
+……并把它们上传至 Python 包索引
+
+If you want to automate the process of releasing new versions, you need to save your PyPI credentials in a local file.
+如果你想自动完成发布新版本的过程，你需要将你的PyPI凭据保存在一个本地文件中
+
+This is completely insecure and completely optional.
+这完全是不安全的而且是完全可选的
+
+Congratulations, you now have your own page on the Python Package Index!
+恭喜你，现在，在Python包索引中有你自己的页面了
+
+The address is http://pypi.python.org/pypi/NAME, where NAME is the string you passed in the name parameter in your setup.py file.
+地址是 http://pypi.python.org/pypi/NAME，其中 NAME 是你在 setup.py 文件中 name 参数所传递的字符串
+
+If you want to release a new version, just update your setup.py with the new version number, then run the same upload command again:
+如果你想发布一个新版本，只需以新的版本号更新 setup.py 文件，然后再一次运行相同的上传命令:
+
+The Many Possible Futures of Python Packaging
+Python 打包工具的一些可能的将来
+
+Distutils is not the be-all and end-all of Python packaging, but as of this writing (August 2009), it’s the only packaging framework that works in Python 3.
+Distutils并非是一个代替所有并终结所有的 Python 打包，但在写本书时（2009年8月），它是唯一可以工作在 Python 3 下的打包框架
+
+There are a number of other frameworks for Python 2;
+对于Python 2，还有许多其他的框架，有的重在安装，有的重在测试，还有的重在部署
+
+some focus on installation, others on testing and deployment.
+在未来，它们中的一部分或全体都将移植到Python 3
+
+These frameworks focus on installation:
+以下框架重在安装：
+
+Setuptools
+Setuptools
+
+Pip
+Pip
+
+Distribute
+Distribute
+
+These focus on testing and deployment:
+以下框架重在测试和部署：
+
+virtualenv
+virtualenv
+
+zc.buildout
+zc.buildout
+
+Paver
+Paver
+
+Fabric
+Fabric
+
+py2exe
+py2exe
+
+Further Reading
+深入阅读
+
+On Distutils:
+关于 Distutils：
+
+Distributing Python Modules with Distutils
+通过 Distutils 发布 Python 模块
+
+Core Distutils functionality lists all the possible arguments to the setup() function
+核心发布功能 列出了 setup() 函数的所有可能参数
+
+Distutils Cookbook
+Distutils 食谱
+
+PEP 370: Per user site-packages directory
+PEP 370: 每用户 site-packages 目录
+
+PEP 370 and “environment stew”
+PEP 370 和 “environment stew”
+
+On other packaging frameworks:
+其它打包框架：
+
+The Python packaging ecosystem
+Python 打包生态系统
+
+On packaging
+关于打包
+
+A few corrections to “On packaging”
+对 “关于打包” 的几点纠错
+
+Why I like Pip
+我为什么喜欢 Pip
+
+Python packaging: a few observations
+Python 打包：几点看法
+
+Nobody expects Python packaging!
+没有人期望 Python 打包
+
+© 2001–11 Mark Pilgrim
+© 2001–9 Mark Pilgrim
+

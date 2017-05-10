@@ -1,0 +1,123 @@
+You are here: Home ‣ Dive Into Python 3 ‣
+当前位置: 首页 ‣ 深入 Python 3 ‣
+
+Where To Go From Here
+接下来阅读什么
+
+❝ Go forth on your path, as it exists only through your walking.
+❝ Go forth on your path, as it exists only through your walking. ❞ — St. Augustine of Hippo (attributed)
+
+Things to Read
+要阅读的对象
+
+Unfortunately, I can not write cover every facet of Python 3 in this book.
+鉴于一些主题有免费的教程，因此我决定不在本书中加以阐述
+
+Decorators:
+修饰器：
+
+Function Decorators by Ariel Ortiz
+函数修饰器 作者： Ariel Ortiz
+
+More on Function Decorators by Ariel Ortiz
+关于函数修饰器的更多讨论 作者： Ariel Ortiz
+
+Charming Python: Decorators make magic easy by David Mertz
+可爱的 Python：修饰器使魔法更轻松 作者： David Mertz
+
+Function Definitions in the official Python documentation
+官方 Python 文档中的 函数定义
+
+Properties:
+属性：
+
+The Python property builtin by Adam Gomaa
+Python 内建 属性 作者： Adam Gomaa
+
+Getters/Setters/Fuxors by Ryan Tomayko
+Getters/Setters/Fuxors 作者： Ryan Tomayko
+
+property() function in the official Python documentation
+官方 Python 文档中的 property() 函数
+
+Descriptors:
+描述符：
+
+How-To Guide For Descriptors by Raymond Hettinger
+描述符的 How-To 指南 作者: Raymond Hettinger
+
+Charming Python: Python elegance and warts, Part 2 by David Mertz
+可爱的 Python: Python 的简洁与累赘，第二部分 作者： David Mertz
+
+Python Descriptors by Mark Summerfield
+Python 描述符 作者： Mark Summerfield
+
+Invoking Descriptors in the official Python documentation
+Python 官方文档中的 调用描述符
+
+Threading & multiprocessing:
+线程 & 多进程:
+
+threading module
+threading 模块
+
+threading — Manage concurrent threads
+线程 — 管理并发线程
+
+multiprocessing module
+multiprocessing 模块
+
+multiprocessing — Manage processes like threads
+多进程 — 像管理线程那样管理进程
+
+Python threads and the Global Interpreter Lock by Jesse Noller
+Python 线程和全局解释器锁 作者： Jesse Noller
+
+Inside the Python GIL (video) by David Beazley
+Python GIL 揭密（视频） 作者： David Beazley
+
+Metaclasses:
+元类
+
+Metaclass programming in Python by David Mertz and Michele Simionato
+Python 中的元类编程 作者： David Mertz 和 Michele Simionato
+
+Metaclass programming in Python, Part 2 by David Mertz and Michele Simionato
+Python 中的元类编程，第二部分 作者： David Mertz 和 Michele Simionato
+
+Metaclass programming in Python, Part 3 by David Mertz and Michele Simionato
+Python 中的元类编程，第三部分 作者： David Mertz 和 Michele Simionato
+
+In addition, Doug Hellman’s Python Module of the Week is a fantastic guide to many of the modules in the Python standard library.
+此外，Doug Hellman 之 本周 Python 模块 是对Python 标准类库模块的极好指南
+
+Where To Look For Python 3-Compatible Code
+到哪里找与 Python 3-兼容的代码
+
+As Python 3 is relatively new, there is a dearth of compatible libraries.
+由于 Python 3 相对较新，其非常缺乏兼容类库
+
+Here are some of the places to look for code that works with Python 3.
+以下地方可用于查找在 Python 3 之下能够正常运作的代码：
+
+Python Package Index: list of Python 3 packages
+Python 安装包索引：Python 3 安装包清单
+
+Python Cookbook: list of Python 3 recipes
+Python 食谱：标记了 “python3”的内容清单
+
+Google Project Hosting: list of projects tagged “python3”
+以 Google 为宿主的项目：标记为 “python3”的项目清单
+
+SourceForge: list of projects matching “Python 3”
+SourceForge: 符合 “Python 3”的项目清单
+
+GitHub: list of projects matching “python3” (also, list of projects matching “python 3”)
+GitHub: 符合 “python3”的项目清单 (以及 符合 “python 3”的项目清单)
+
+BitBucket: list of projects matching “python3” (and those matching “python 3”)
+BitBucket: 符合 “python3”的项目清单 (以及 符合 “python 3”的项目清单)
+
+© 2001–11 Mark Pilgrim
+© 2001–9 Mark Pilgrim
+

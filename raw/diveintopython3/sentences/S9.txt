@@ -1,0 +1,768 @@
+You are here: Home ‣ Dive Into Python 3 ‣
+您在这里: 主页 ‣ 深入Python 3 ‣
+
+Difficulty level: ♦♦♦♦♢
+难度等级: ♦♦♦♦♢
+
+Advanced Iterators
+高级迭代器
+
+❝ Great fleas have little fleas upon their backs to bite ’em, And little fleas have lesser fleas, and so ad infinitum.
+❝ Great fleas have little fleas upon their backs to bite ’em, And little fleas have lesser fleas, and so ad infinitum. ❞ — Augustus De Morgan
+
+Diving In
+深入
+
+Just as regular expressions put strings on steroids, the itertools module puts iterators on steroids.
+HAWAII + IDAHO + IOWA + OHIO == STATES. 或者，换个说法, 510199 + 98153 + 9301 + 3593 == 621246. 我在说是方言吗
+
+But first, I want to show you a classic puzzle.
+不，这只是一个谜题
+
+Puzzles like this are called cryptarithms or alphametics.
+像这样的谜题被称为cryptarithms 或者 字母算术(alphametics)
+
+The letters spell out actual words, but if you replace each letter with a digit from 0–9, it also “spells” an arithmetic equation.
+字母可以拼出实际的单词，而如果你把每一个字母都用0–9中的某一个数字代替后, 也同样可以#8220;拼出” 一个算术等式
+
+The trick is to figure out which letter maps to each digit.
+关键的地方是找出每个字母都映射到了哪个数字
+
+All the occurrences of each letter must map to the same digit, no digit can be repeated, and no “word” can start with the digit 0.
+每个字母所有出现的地方都必须映射到同一个数字，数字不能重复, 并且“单词”不能以0开始
+
+In this chapter, we’ll dive into an incredible Python program originally written by Raymond Hettinger.
+在这一章中，我们将深入一个最初由Raymond Hettinger编写的难以置信的Python 程序
+
+This program solves alphametic puzzles in just 14 lines of code.
+这个程序只用14行代码来解决字母算术谜题
+
+[download alphametics.py]
+[下载 alphametics.py]
+
+You can run the program from the command line.
+你可以从命令行运行这个程序
+
+On Linux, it would look like this.
+在Linux上, 运行情况看起来是这样的
+
+(These may take some time, depending on the speed of your computer, and there is no progress bar.
+(取决于你机器的速度，计算可能要花一些时间，而且不会有进度条
+
+Just be patient!)
+耐心等待就好了
+
+Finding all occurrences of a pattern
+找到一个模式所有出现的地方
+
+The first thing this alphametics solver does is find all the letters (A–Z) in the puzzle.
+字母算术谜题解决者做的第一件事是找到谜题中所有的字母(A–Z)
+
+The re module is Python’s implementation of regular expressions.
+re 模块是正则表达式的Python实现
+
+It has a nifty function called findall() which takes a regular expression pattern and a string, and finds all occurrences of the pattern within the string.
+它有一个漂亮的函数findall()，接受一个正则表达式和一个字符串作为参数，然后找出字符串中出现该模式的所有地方
+
+In this case, the pattern matches sequences of numbers.
+在这个例子里，模式匹配的是数字序列
+
+The findall() function returns a list of all the substrings that matched the pattern.
+findall()函数返回所有匹配该模式的子字符串的列表
+
+Here the regular expression pattern matches sequences of letters.
+这里正则表达式匹配的是字母序列
+
+Again, the return value is a list, and each item in the list is a string that matched the regular expression pattern.
+再一次，返回值是一个列表，其中的每一个元素是匹配该正则表达式的字符串
+
+Here’s another example that will stretch your brain a little.
+这是另外一个稍微复杂一点的例子
+
+Surprised?
+很惊奇
+
+The regular expression looks for a space, an s, and then the shortest possible series of any character (.*?), then a space, then another s.
+这个正则表达式寻找一个空格，一个 s, 然后是最短的任何字符构成的序列(.*
+
+Well, looking at that input string, I see five matches:
+), 然后是一个空格, 然后是另一个s
+
+The sixth sick sheikh's sixth sheep's sick.
+The sixth sick sheikh's sixth sheep's sick.
+
+The sixth sick sheikh's sixth sheep's sick.
+The sixth sick sheikh's sixth sheep's sick.
+
+The sixth sick sheikh's sixth sheep's sick.
+The sixth sick sheikh's sixth sheep's sick.
+
+The sixth sick sheikh's sixth sheep's sick.
+The sixth sick sheikh's sixth sheep's sick.
+
+The sixth sick sheikh's sixth sheep's sick.
+The sixth sick sheikh's sixth sheep's sick.
+
+But the re.findall() function only returned three matches.
+但是re.findall()函数值只返回了3个匹配
+
+Specifically, it returned the first, the third, and the fifth.
+准确的说，它返回了第一，第三和第五个
+
+Why is that?
+为什么呢
+
+Because it doesn’t return overlapping matches.
+因为它不会返回重叠的匹配
+
+The first match overlaps with the second, so the first is returned and the second is skipped.
+第一个匹配和第二个匹配是重叠的，所以第一个被返回了，第二个被跳过了
+
+Then the third overlaps with the fourth, so the third is returned and the fourth is skipped.
+然后第三个和第四个重叠，所以第三个被返回了，第四个被跳过了
+
+Finally, the fifth is returned.
+最后，第五个被返回了
+
+Three matches, not five.
+三个匹配，不是五个
+
+This has nothing to do with the alphametics solver;
+这和字母算术解决者没有任何关系
+
+I just thought it was interesting.
+我只是觉得这很有趣
+
+Finding the unique items in a sequence
+在序列中寻找不同的元素
+
+Sets make it trivial to find the unique items in a sequence.
+Sets 使得在序列中查找不同的元素变得很简单
+
+Given a list of several strings, the set() function will return a set of unique strings from the list.
+给出一个有若干字符串组成的列表，set()函数返回列表中不同的字符串组成的集合
+
+This makes sense if you think of it like a for loop.
+把它想象成一个for循环可以帮助理解
+
+Take the first item from the list, put it in the set.
+从列表出拿出第一个元素，放到集合
+
+Second.
+第二个
+
+Third.
+第三个
+
+Fourth.
+第四个
+
+Fifth — wait, that’s in the set already, so it only gets listed once, because Python sets don’t allow duplicates.
+第五个，等等, 它已经在集合里面了，因为Python 集合不允许重复，所以它只被列出了一次
+
+Sixth.
+第六个
+
+Seventh — again, a duplicate, so it only gets listed once.
+第七个又是一个重复的，所以它只被列出了一次
+
+The end result?
+原来的列表甚至不需要事先排好序
+
+The same technique works with strings, since a string is just a sequence of characters.
+同样的技术也适用于字符串，因为一个字符串就是一个字符序列
+
+Given a list of strings, ''.join(a_list) concatenates all the strings together into one.
+给出一个字符串列表, ''.join(a_list)将所有的字符串拼接成一个
+
+So, given a list of strings, this line of code returns all the unique characters across all the strings, with no duplicates.
+所以，给出一个字符串列表，这行代码返回这些字符串中出现过的不重复的字符
+
+The alphametics solver uses this technique to build a set of all the unique characters in the puzzle.
+字母算术解决者通过这个技术来建立谜题中出现的不同字符的集合
+
+This list is later used to assign digits to characters as the solver iterates through the possible solutions.
+这个列表在接下来迭代可能的解法的时候将被用来将数字分配给字符
+
+Making assertions
+作出断言
+
+Like many programming languages, Python has an assert statement.
+和很多编程语言一样，Python 有一个assert语句
+
+Here’s how it works.
+这是它的用法
+
+The assert statement is followed by any valid Python expression.
+assert 语句后面跟任何合法的Python 表达式
+
+In this case, the expression 1 + 1 == 2 evaluates to True, so the assert statement does nothing.
+在这个例子里, 表达式 1 + 1 == 2 的求值结果为 True, 所以 assert 语句没有做任何事情
+
+However, if the Python expression evaluates to False, the assert statement will raise an AssertionError.
+然而, 如果Python 表达式求值结果为 False, assert 语句会抛出一个 AssertionError.
+
+You can also include a human-readable message that is printed if the AssertionError is raised.
+你可以提供一个人类可读的消息，AssertionError异常被抛出的时候它可以被用于打印输出
+
+Therefore, this line of code:
+因此, 这行代码:
+
+…is equivalent to this:
+…等价于:
+
+The alphametics solver uses this exact assert statement to bail out early if the puzzle contains more than ten unique letters.
+字母算术谜题使用这个assert 语句来排除谜题包含多于10个的不同的字母的情况
+
+Since each letter is assigned a unique digit, and there are only ten digits, a puzzle with more than ten unique letters can not possibly have a solution.
+因为每个不同的字母对应一个不同的数字，而数子只有10个,含有多于10个的不同的字母的谜题是不可能有解的
+
+Generator expressions
+生成器表达式
+
+A generator expression is like a generator function without the function.
+生成表达式类似生成器函数，只不过它不是函数
+
+A generator expression is like an anonymous function that yields values.
+生成器表达式类似一个yield值的匿名函数
+
+The expression itself looks like a list comprehension, but it’s wrapped in parentheses instead of square brackets.
+表达式本身看起来像列表解析, 但不是用方括号而是用圆括号包围起来
+
+The generator expression returns… an iterator.
+生成器表达式返回迭代器
+
+Calling next(gen) returns the next value from the iterator.
+调用 next(gen) 返回迭代器的下一个值
+
+If you like, you can iterate through all the possible values and return a tuple, list, or set, by passing the generator expression to tuple(), list(), or set().
+如果你愿意，你可以将生成器表达式传给tuple(), list(), 或者 set()来迭代所有的值并且返回元组，列表或者集合
+
+In these cases, you don’t need an extra set of parentheses — just pass the “bare” expression ord(c) for c in unique_characters to the tuple() function, and Python figures out that it’s a generator expression.
+在这种情况下，你不需要一对额外的括号 — 将生成器表达式ord(c) for c in unique_characters 传给 tuple() 函数就可以了, Python 会推断出它是一个生成器表达式
+
+☞Using a generator expression instead of a list comprehension can save both CPU and RAM.
+☞使用生成器表达式取代列表解析可以同时节省CPU 和 内存(RAM)
+
+If you’re building an list just to throw it away (e.g.
+如果你构造一个列表的目的仅仅是传递给别的函数，(比如 传递给tuple() 或者 set()), 用生成器表达式替代吧!
+
+Here’s another way to accomplish the same thing, using a generator function:
+这里是到达同样目的的另一个方法, 使用生成器函数:
+
+The generator expression is more compact but functionally equivalent.
+生成器表达式功能相同但更紧凑
+
+Calculating Permutations… The Lazy Way!
+计算排列… 懒惰的方法!
+
+First of all, what the heck are permutations?
+首先, 排列到底是个什么东西
+
+Permutations are a mathematical concept.
+ 排列是一个数学概念
+
+(There are actually several definitions, depending on what kind of math you’re doing.
+(取决于你在处理哪种数学，排列有好几个定义
+
+Here I’m talking about combinatorics, but if that doesn’t mean anything to you, don’t worry about it.
+在这里我们说的是组合数学, 如果你完全不知道组合数学是什么也不用担心
+
+As always, Wikipedia is your friend.)
+同往常一样, 维基百科是你的朋友
+
+The idea is that you take a list of things (could be numbers, could be letters, could be dancing bears) and find all the possible ways to split them up into smaller lists.
+想法是这样的，你有某物件(可以是数字，可以是字母，也可以是跳舞的熊)的一个列表，接着找出将它们拆开然后组合成小一点的列表的所有可能
+
+All the smaller lists have the same size, which can be as small as 1 and as large as the total number of items.
+所有的小列表的大小必须一致，最小是1，最大是元素的总数目
+
+Oh, and nothing can be repeated.
+哦，也不能有重复
+
+Mathematicians say things like “let’s find the permutations of 3 different items taken 2 at a time,” which means you have a sequence of 3 items and you want to find all the possible ordered pairs.
+数学家说“让我们找出3个元素取2个的排列,” 意思是你有一个3个元素的序列，然后你找出所有可能的有序对
+
+The itertools module has all kinds of fun stuff in it, including a permutations() function that does all the hard work of finding permutations.
+itertools模块里有各种各样的有趣的东西，包括permutations()函数，它把查找排列的所有辛苦的工作的做了
+
+The permutations() function takes a sequence (here a list of three integers) and a number, which is the number of items you want in each smaller group.
+permutations() 函数接受一个序列(这里是3个数字组成的列表) 和一个表示你要的排列的元素的数目的数字
+
+The function returns an iterator, which you can use in a for loop or any old place that iterates.
+函数返回迭代器，你可以在for 循环或其他老地方使用它
+
+Here I’ll step through the iterator manually to show all the values.
+这里我遍历迭代器来显示所有的值
+
+The first permutation of [1, 2, 3] taken 2 at a time is (1, 2).
+[1, 2, 3]取2个的第一个排列是(1, 2)
+
+Note that permutations are ordered: (2, 1) is different than (1, 2).
+记住排列是有序的: (2, 1) 和 (1, 2)是不同的
+
+That’s it!
+这就是了
+
+Those are all the permutations of [1, 2, 3] taken 2 at a time.
+这些就是[1, 2, 3]取两个的所有排列
+
+Pairs like (1, 1) and (2, 2) never show up, because they contain repeats so they aren’t valid permutations.
+像(1, 1) 或者 (2, 2)这样的元素对没有出现，因为它们包含重复导致它们不是合法的排列
+
+When there are no more permutations, the iterator raises a StopIteration exception.
+当没有更多排列的时候，迭代器抛出一个StopIteration异常
+
+The permutations() function doesn’t have to take a list.
+permutations()函数并不一定要接受列表
+
+It can take any sequence — even a string.
+它接受任何序列 — 甚至是字符串
+
+A string is just a sequence of characters.
+字符串就是一个字符序列
+
+For the purposes of finding permutations, the string 'ABC' is equivalent to the list ['A', 'B', 'C'].
+对于查找排列来说，字符串'ABC'和列表 ['A', 'B', 'C']是等价的
+
+The first permutation of the 3 items ['A', 'B', 'C'], taken 3 at a time, is ('A', 'B', 'C').
+['A', 'B', 'C']取3个的第一个排列是('A', 'B', 'C')
+
+There are five other permutations — the same three characters in every conceivable order.
+还有5个其他的排列 — 同样的3个字符，不同的顺序
+
+Since the permutations() function always returns an iterator, an easy way to debug permutations is to pass that iterator to the built-in list() function to see all the permutations immediately.
+由于permutations()函数总是返回迭代器，一个简单的调试排列的方法是将这个迭代器传给内建的list()函数来立刻看见所有的排列
+
+Other Fun Stuff in the itertools Module
+itertools模块中的其它有趣的东西
+
+The itertools.product() function returns an iterator containing the Cartesian product of two sequences.
+itertools.product()函数返回包含两个序列的笛卡尔乘积的迭代器
+
+The itertools.combinations() function returns an iterator containing all the possible combinations of the given sequence of the given length.
+itertools.combinations()函数返回包含给定序列的给定长度的所有组合的迭代器
+
+This is like the itertools.permutations() function, except combinations don’t include items that are duplicates of other items in a different order.
+这和itertools.permutations()函数很类似，除了不包含因为只有顺序不同而重复的情况
+
+So itertools.permutations('ABC', 2) will return both ('A', 'B') and ('B', 'A') (among others), but itertools.combinations('ABC', 2) will not return ('B', 'A') because it is a duplicate of ('A', 'B') in a different order.
+所以itertools.permutations('ABC', 2)同时返回('A', 'B') and ('B', 'A') (同其它的排列一起), itertools.combinations('ABC', 2) 不会返回('B', 'A') ，因为它和('A', 'B')是重复的，只是顺序不同而已
+
+[download favorite-people.txt]
+[下载 favorite-people.txt]
+
+This idiom returns a list of the lines in a text file.
+这个表达式将文本内容以一行一行组成的列表的形式返回
+
+Unfortunately (for this example), the list(open(filename)) idiom also includes the carriage returns at the end of each line.
+不幸的是，(对于这个例子来说), list(open(filename)) 表达式返回的每一行的末尾都包含回车
+
+This list comprehension uses the rstrip() string method to strip trailing whitespace from each line.
+这个列表解析使用rstrip() 字符串方法移除每一行尾部的空白
+
+(Strings also have an lstrip() method to strip leading whitespace, and a strip() method which strips both.)
+(字符串也有一个lstrip()方法移除头部的空白，以及strip()方法头尾都移除
+
+The sorted() function takes a list and returns it sorted.
+sorted() 函数接受一个列表并将它排序后返回
+
+By default, it sorts alphabetically.
+默认情况下，它按字母序排序
+
+But the sorted() function can also take a function as the key parameter, and it sorts by that key.
+然而，sorted()函数也接受一个函数作为key 参数, 并且使用key来排序
+
+In this case, the sort function is len(), so it sorts by len(each item).
+在这个例子里，排序函数是len(),所以它按len(each item)来排序
+
+Shorter names come first, then longer, then longest.
+短的名字排在前面，然后是稍长，接着是更长的
+
+What does this have to do with the itertools module?
+这和itertools模块有什么关系
+
+I’m glad you asked.
+ 很高兴你问了这个问题
+
+The itertools.groupby() function takes a sequence and a key function, and returns an iterator that generates pairs.
+itertools.groupby()函数接受一个序列和一个key 函数, 并且返回一个生成二元组的迭代器
+
+Each pair contains the result of key_function(each item) and another iterator containing all the items that shared that key result.
+每一个二元组包含key_function(each item)的结果和另一个包含着所有共享这个key结果的元素的迭代器
+
+Calling the list() function “exhausted” the iterator, i.e.
+调用list() 函数会“耗尽”这个迭代器, 也就是说 你生成了迭代器中所有元素才创造了这个列表
+
+you’ve already generated every item in the iterator to make the list.
+迭代器没有“重置”按钮
+
+There’s no “reset” button on an iterator;
+你一旦耗尽了它，你没法重新开始
+
+you can’t just start over once you’ve exhausted it.
+如果你想要再循环一次(例如, 在接下去的for循环里面), 你得调用itertools.groupby()来创建一个新的迭代器
+
+In this example, given a list of names already sorted by length, itertools.groupby(names, len) will put all the 4-letter names in one iterator, all the 5-letter names in another iterator, and so on.
+在这个例子里，给出一个已经按长度排序的名字列表, itertools.groupby(names, len)将会将所有的4个字母的名字放在一个迭代器里面，所有的5个字母的名字放在另一个迭代器里，以此类推
+
+The groupby() function is completely generic;
+groupby()函数是完全通用的; 它可以将字符串按首字母，将数字按因子数目, 或者任何你能想到的key函数进行分组
+
+☞The itertools.groupby() function only works if the input sequence is already sorted by the grouping function.
+☞itertools.groupby()只有当输入序列已经按分组函数排过序才能正常工作
+
+In the example above, you grouped a list of names by the len() function.
+在上面的例子里面，你用len() 函数分组了名字列表
+
+That only worked because the input list was already sorted by length.
+这能工作是因为输入列表已经按长度排过序了
+
+Are you watching closely?
+Are you watching closely
+
+The itertools.chain() function takes two iterators and returns an iterator that contains all the items from the first iterator, followed by all the items from the second iterator.
+itertools.chain()函数接受两个迭代器，返回一个迭代器，它包含第一个迭代器的所有内容，以及跟在后面的来自第二个迭代器的所有内容
+
+(Actually, it can take any number of iterators, and it chains them all in the order they were passed to the function.)
+(实际上，它接受任何数目的迭代器，并把它们按传入顺序串在一起
+
+The zip() function does something prosaic that turns out to be extremely useful: it takes any number of sequences and returns an iterator which returns tuples of the first items of each sequence, then the second items of each, then the third, and so on.
+zip()函数的作用不是很常见，结果它却非常有用: 它接受任何数目的序列然后返回一个迭代器，其第一个元素是每个序列的第一个元素组成的元组，然后是每个序列的第二个元素（组成的元组），以此类推
+
+The zip() function stops at the end of the shortest sequence.
+zip() 在到达最短的序列结尾的时候停止
+
+range(10, 14) has 4 items (10, 11, 12, and 13), but range(0, 3) only has 3, so the zip() function returns an iterator of 3 items.
+range(10, 14) 有四个元素(10, 11, 12, 和 13), 但是 range(0, 3)只有3个, 所以 zip()函数返回包含3个元素的迭代器
+
+On the other hand, the itertools.zip_longest() function stops at the end of the longest sequence, inserting None values for items past the end of the shorter sequences.
+相反，itertools.zip_longest()函数在到达最长的序列的结尾的时候才停止, 对短序列结尾之后的元素填入None值.
+
+OK, that was all very interesting, but how does it relate to the alphametics solver?
+好吧，这些都很有趣，但是和字母算术谜题解决者有什么联系呢
+
+Here’s how:
+ 请看下面:
+
+Given a list of letters and a list of digits (each represented here as 1-character strings), the zip function will create a pairing of letters and digits, in order.
+给出一个字母列表和一个数字列表(两者的元素的形式都是1个字符的字符串), zip函数按顺序创建一组组字母，数字对
+
+Why is that cool?
+为什么这很酷
+
+Because that data structure happens to be exactly the right structure to pass to the dict() function to create a dictionary that uses letters as keys and their associated digits as values.
+因为这个数据结构正好可以用来传递给dict()函数来创建以字母为键，对应数字为值的字典
+
+(This isn’t the only way to do it, of course.
+(这不是实现这个目的唯一方法
+
+You could use a dictionary comprehension to create the dictionary directly).
+你当然可以使用字典解析来直接创建字典
+
+Although the printed representation of the dictionary lists the pairs in a different order (dictionaries have no “order” per se), you can see that each letter is associated with the digit, based on the ordering of the original characters and guess sequences.
+) 尽管字典的打印形式以另一个顺序列出了这些键值对(字典本身没有#8220;顺序” ), 但是你可以看见每一个字母都按characters 和 guess序列的原始顺序对应到了相应的数字
+
+The alphametics solver uses this technique to create a dictionary that maps letters in the puzzle to digits in the solution, for each possible solution.
+算术谜题解决者使用这个技术对每一个可能的解法创建一个将谜题中的字母映射到解法中的数字的字典
+
+But what is this translate() method?
+但是translate()方法是什么呢
+
+Ah, now you’re getting to the really fun part.
+ 啊哈, 我们现在到了真正有趣的部分了
+
+A New Kind Of String Manipulation
+一种新的操作字符串的方法
+
+Python strings have many methods.
+Python 字符串有很多方法
+
+You learned about some of those methods in the Strings chapter: lower(), count(), and format().
+我们在字符串章节中学习了其中一些: lower(), count(), 和 format()
+
+Now I want to introduce you to a powerful but little-known string manipulation technique: the translate() method.
+现在我要给你介绍一个强大但鲜为人知的操作字符串的技术: translate() 方法
+
+String translation starts with a translation table, which is just a dictionary that maps one character to another.
+字符串翻译从一个转换表开始, 转换表就是一个将一个字符映射到另一个字符的字典
+
+Actually, “character” is incorrect — the translation table really maps one byte to another.
+实际上，“字符” 是不正确的 — 转换表实际上是将一个 字节（byte)映射到另一个
+
+Remember, bytes in Python 3 are integers.
+记住，Python 3 中的字节是整形数
+
+The ord() function returns the ASCII value of a character, which, in the case of A–Z, is always a byte from 65 to 90.
+ord() 函数返回字符的ASCII码
+
+The translate() method on a string takes a translation table and runs the string through it.
+一个字符串的translate()方法接收一个转换表，并用它来转换该字符串
+
+That is, it replaces all occurrences of the keys of the translation table with the corresponding values.
+换句话说，它将出现在转换表的键中的字节替换为该键对应的值
+
+In this case, “translating” MARK to MORK.
+在这个例子里， 将MARK “翻译为” MORK.
+
+What does this have to do with solving alphametic puzzles?
+这和解决字母算术谜题有什么关系呢
+
+As it turns out, everything.
+实际上，关系大着呢
+
+Using a generator expression, we quickly compute the byte values for each character in a string.
+使用生成器表达式, 我们快速的计算出字符串中每个字符的字节值
+
+characters is an example of the value of sorted_characters in the alphametics.solve() function.
+characters是alphametics.solve()函数中的sorted_characters的示例值 .
+
+Using another generator expression, we quickly compute the byte values for each digit in this string.
+使用另一个生成器表达式，我们快速的计算出字符串中每个数字的字节值
+
+The result, guess, is of the form returned by the itertools.permutations() function in the alphametics.solve() function.
+计算结果guess, 正好是alphametics.solve()函数中的itertools.permutations()函数返回值的格式
+
+This translation table is generated by zipping characters and guess together and building a dictionary from the resulting sequence of pairs.
+通过将characters 和 guesszipping 出来的元素对序列构造出的字典来作为转换表
+
+This is exactly what the alphametics.solve() function does inside the for loop.
+这正是alphametics.solve() 在for 循环里面干的事情
+
+Finally, we pass this translation table to the translate() method of the original puzzle string.
+最后我们将转换表传递给原始字符串的translate()方法
+
+This converts each letter in the string to the corresponding digit (based on the letters in characters and the digits in guess).
+这会将字符串中的每个字母转化成相应的数字(基于characters中字母和guess中的数字)
+
+The result is a valid Python expression, as a string.
+结果是一个字符串形式的合法的Python表达式
+
+That’s pretty impressive.
+这相当令人难忘
+
+But what can you do with a string that happens to be a valid Python expression?
+但你能对正巧是一个合法Python 表达式的字符串干什么呢
+
+Evaluating Arbitrary Strings As Python Expressions
+将任何字符串作为Python表达式求值
+
+This is the final piece of the puzzle (or rather, the final piece of the puzzle solver).
+这是谜题的最后一部分(或者说, 谜题解决者的最后一部分)
+
+After all that fancy string manipulation, we’re left with a string like '9567 + 1085 == 10652'.
+经过华丽的字符串操作，我们得到了类似'9567 + 1085 == 10652'这样的一个字符串
+
+But that’s a string, and what good is a string?
+但那是一个字符串，字符串有什么好的
+
+Enter eval(), the universal Python evaluation tool.
+输入eval(), Python 通用求值工具
+
+But wait, there’s more!
+但是等一下，不止这些! eval() 并不限于布尔表达式
+
+The eval() function isn’t limited to boolean expressions.
+它能处理任何 Python 表达式并且返回任何数据类型
+
+But wait, that’s not all!
+等一下，还没完呢!
+
+The expression that eval() takes can reference global variables defined outside the eval().
+eval()接受的表达式可以引用在eval()之外定义的全局变量
+
+If called within a function, it can reference local variables too.
+如果(eval())在函数内被调用, 它也可以引用局部变量
+
+And functions.
+以及函数
+
+And modules.
+以及模块
+
+Hey, wait a minute…
+喂，等一下…
+
+The subprocess module allows you to run arbitrary shell commands and get the result as a Python string.
+subprocess 模块允许你执行任何shell命令并以字符串形式获得输出
+
+Arbitrary shell commands can have permanent consequences.
+执行任意的shell命令可能会导致永久的（不好的）后果
+
+It’s even worse than that, because there’s a global __import__() function that takes a module name as a string, imports the module, and returns a reference to it.
+更坏的是，由于存在全局函数__import__()，它接收字符串形式的模块名，导入模块，并返回模块的引用
+
+Combined with the power of eval(), you can construct a single expression that will wipe out all your files:
+和eval()的能力结合起来，你可以构造一个单独的表达式来删除你所有的文件:
+
+Now imagine the output of 'rm -rf ~'.
+现在想象一下'rm -rf ~'的输出
+
+Actually there wouldn’t be any output, but you wouldn’t have any files left either.
+实际上它不会有任何输出，但是你也不会有任何文件还留着
+
+eval() is EVIL
+eval() 是邪恶的
+
+Well, the evil part is evaluating arbitrary expressions from untrusted sources.
+好吧, 邪恶部分是对来自非信任源的表达式进行求值
+
+You should only use eval() on trusted input.
+你应该只在信任的输入上使用eval()
+
+Of course, the trick is figuring out what’s “trusted.” But here’s something I know for certain: you should NOT take this alphametics solver and put it on the internet as a fun little web service.
+当然，关键的部分是确定什么是“可信任的”
+
+Don’t make the mistake of thinking, “Gosh, the function does a lot of string manipulation before getting a string to evaluate;
+但有一点我敢肯定: 你不应该将这个字母算术表达式放到网上最为一个小的web服务
+
+I can’t imagine how someone could exploit that.” Someone WILL figure out how to sneak nasty executable code past all that string manipulation (stranger things have happened), and then you can kiss your server goodbye.
+不要错误的认为，“Gosh, 这个函数在求值以前做了那么多的字符串操作
+
+But surely there’s some way to evaluate expressions safely?
+但是肯定有某种办法可以安全的求值表达式吧
+
+To put eval() in a sandbox where it can’t access or harm the outside world?
+将eval()放到一个不能访问和伤害外部世界的沙盒里面
+
+Well, yes and no.
+嗯，对也不对
+
+The second and third parameters passed to the eval() function act as the global and local namespaces for evaluating the expression.
+传给eval()函数的第二和第三个函数担当了求值表达式是的全局和局部名字空间的角色
+
+In this case, they are both empty, which means that when the string "x * 5" is evaluated, there is no reference to x in either the global or local namespace, so eval() throws an exception.
+在这个例子里，它们都是空的，意味着当字符串"x * 5"被求值的时候, 在全局和本地的名字空间都没有变量x, 所以 eval()抛出了一个异常
+
+You can selectively include specific values in the global namespace by listing them individually.
+你可以通过一个个列出的方式选择性在全局名字空间里面包含一些值
+
+Then those — and only those — variables will be available during evaluation.
+这些 — 并且这有这些 — 变量在求值的时候可用
+
+Even though you just imported the math module, you didn’t include it in the namespace passed to the eval() function, so the evaluation failed.
+即使你刚刚导入了math模块, 你没有在传给eval()函数的名字空间里包含它，所以求值失败了
+
+Gee, that was easy.
+哎呀，这很简单
+
+Lemme make an alphametics web service now!
+ 让我来做一个字母算术谜题的Web服务吧
+
+Even though you’ve passed empty dictionaries for the global and local namespaces, all of Python’s built-in functions are still available during evaluation.
+即使你传入空的字典作为全局和局部名字空间，所有的Python 内建函数在求值时还是可用的
+
+So pow(5, 2) works, because 5 and 2 are literals, and pow() is a built-in function.
+所以pow(5, 2)可以工作, 因为 5 和 2是字面量，而pow()是内建函数
+
+Unfortunately (and if you don’t see why it’s unfortunate, read on), the __import__() function is also a built-in function, so it works too.
+很不幸 (如果你不明白为什么不幸，继续读
+
+Yeah, that means you can still do nasty things, even if you explicitly set the global and local namespaces to empty dictionaries when calling eval():
+是的，这意味着即使你在调用eval()的时候显式的将全局和局部名字空间设置为空字典，你仍然可以做坏事
+
+Oops.
+哎呀. 幸亏我没有做那个字母算术web服务
+
+I’m glad I didn’t make that alphametics web service.
+存在任何安全的使用 eval()的方法吗
+
+Is there any way to use eval() safely?
+ 嗯, 有也没有
+
+Be sure you’ve overridden __builtins__.
+请确保你覆盖的是__builtins__
+
+Not __builtin__, __built-ins__, or some other variation that will work just fine but expose you to catastrophic risks.
+ 不是__builtin__, __built-ins__, 或者其它某个变量，否则程序还是可以运行但是会有巨大的风险
+
+So eval() is safe now?
+那么eval()现在安全了
+
+Well, yes and no.
+ 嗯，是也不是
+
+Even without access to __builtins__, you can still launch a denial-of-service attack.
+即使不能访问到__builtins__, 你还是可以开启一个拒绝服务攻击
+
+For example, trying to raise 2 to the 2147483647th power will spike your server’s CPU utilization to 100% for quite some time.
+例如, 试图求2 的 2147483647次方会导致你的服务器的 CPU 利用率到达100% 一段时间
+
+(If you’re trying this in the interactive shell, press Ctrl-C a few times to break out of it.) Technically this expression will return a value eventually, but in the meantime your server will be doing a whole lot of nothing.
+(如果你在交互式shell中试验这个, 请多按几次 Ctrl-C来跳出来
+
+In the end, it is possible to safely evaluate untrusted Python expressions, for some definition of “safe” that turns out not to be terribly useful in real life.
+最后, Python 表达式的求值是可能达到某种意义的“安全”的, 但结果是在现实生活中没什么用
+
+It’s fine if you’re just playing around, and it’s fine if you only ever pass it trusted input.
+如果你只是玩玩没有问题，如果你只给它传递安全的输入也没有问题
+
+But anything else is just asking for trouble.
+但是其它的情况完全是自找麻烦
+
+Putting It All Together
+把所有东西放在一起
+
+To recap: this program solves alphametic puzzles by brute force, i.e.
+总的来说: 这个程序通过暴力解决字母算术谜题， 也就是通过穷举所有可能的解法
+
+through an exhaustive search of all possible solutions.
+为了达到目的，它
+
+Finds all the letters in the puzzle with the re.findall() function
+通过re.findall()函数找到谜题中的所有字母
+
+Find all the unique letters in the puzzle with sets and the set() function
+使用集合和set()函数找到谜题出现的所有不同的字母
+
+Checks if there are more than 10 unique letters (meaning the puzzle is definitely unsolvable) with an assert statement
+通过assert语句检查是否有超过10个的不同的字母 (意味着谜题无解)
+
+Converts the letters to their ASCII equivalents with a generator object
+通过一个生成器对象将字符转换成对应的ASCII码值
+
+Calculates all the possible solutions with the itertools.permutations() function
+使用itertools.permutations()函数计算所有可能的解法
+
+Converts each possible solution to a Python expression with the translate() string method
+使用translate()字符串方法将所有可能的解转换成Python表达式
+
+Tests each possible solution by evaluating the Python expression with the eval() function
+使用eval()函数通过求值Python 表达式来检验解法
+
+Returns the first solution that evaluates to True
+返回第一个求值结果为True的解法
+
+…in just 14 lines of code.
+…仅仅14行代码.
+
+Further Reading
+进一步阅读
+
+itertools module
+itertools 模块
+
+itertools — Iterator functions for efficient looping
+itertools — 用于高效循环的迭代器函数
+
+Watch Raymond Hettinger’s “Easy AI with Python” talk at PyCon 2009
+观看 Raymond Hettinger 在 PyCon 2009 上的 “Easy AI with Python” 演讲
+
+Recipe 576615: Alphametics solver, Raymond Hettinger’s original alphametics solver for Python 2
+Recipe 576615: Alphametics solver, Raymond Hettinger 的原始的适用于Python 2的算木谜题解决程序
+
+More of Raymond Hettinger’s recipes in the ActiveState Code repository
+More of Raymond Hettinger’s recipes in the ActiveState Code repository
+
+Alphametics on Wikipedia
+算木谜题在维基百科上的页面
+
+Alphametics Index, including lots of puzzles and a generator to make your own
+字母索引, 包含 很多谜题 以及 一个创建你自己的谜题的工具
+
+Many thanks to Raymond Hettinger for agreeing to relicense his code so I could port it to Python 3 and use it as the basis for this chapter.
+非常感谢Raymond Hettinger同意重现授权他的代码，因此我才能将它移植到Python 3 并作为本章的基础
+
+© 2001–11 Mark Pilgrim
+© 2001–9 Mark Pilgrim
+

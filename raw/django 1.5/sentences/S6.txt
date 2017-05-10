@@ -1,0 +1,165 @@
+Django 1.5 documentation
+Django 1.5 documentation
+
+Writing your first Django app, part 4¶
+编写你的第一个 Django 程序 第4部分¶
+
+This tutorial begins where Tutorial 3 left off.
+本教程上接 教程 第3部分 
+
+We’re continuing the Web-poll application and will focus on simple form processing and cutting down our code.
+我们将 继续开发 Web-poll 应用并且关注在处理简单的窗体和优化我们的代码
+
+Write a simple form¶
+编写一个简单的窗体¶
+
+Let’s update our poll detail template (“polls/detail.html”) from the last tutorial, so that the template contains an HTML  element:
+让我们把在上一篇教程中编写的 poll 的 detail 模板更新下，在模板中包含 HTML 的  组件:
+
+A quick rundown:
+简单的总结下:
+
+The {% csrf_token %} tag requires information from the request object, which is not normally accessible from within the template context.
+现在，让我们来创建一个 Django 视图来处理提交的数据
+
+To fix this, a small adjustment needs to be made to the detail view, so that it looks like the following:
+ 记得吗
+
+The details of how this works are explained in the documentation for RequestContext.
+我们还创建了一个虚拟实现的 vote() 函数
+
+Now, let’s create a Django view that handles the submitted data and does something with it.
+在这代码中有些内容还未在本教程中提到过:
+
+We also created a dummy implementation of the vote() function.
+request.POST 是一个类似字典的对象，可以让你 通过关键字名称来获取提交的数据
+
+Let’s create a real version.
+在本例中， request.POST['choice'] 返回了所选择的投票项目的 ID ，以字符串的形式
+
+Add the following to polls/views.py:
+ request.POST 的值永远是字符串形式的
+
+This code includes a few things we haven’t covered yet in this tutorial:
+请注意 Django 也同样的提供了通过 request.GET 获取 GET 数据的方法 – 但是在代码中我们明确的使用了 request.POST 方法，以确保数据是通过 POST 方法来修改的
+
+request.POST is a dictionary-like object that lets you access submitted data by key name.
+如果 choice 未在 POST 数据中提供 request.POST['choice'] 将抛出 KeyError 当未给定 choice 对象时上面的代码若检测到抛出的是 KeyError 异常就会向 poll 显示一条错误信息
+
+Note that Django also provides request.GET for accessing GET data in the same way – but we’re explicitly using request.POST in our code, to ensure that data is only altered via a POST call.
+在增加了投票选项的统计数后，代码返回一个 HttpResponseRedirect 对象而不是常见的 HttpResponse 对象
+
+request.POST['choice'] will raise KeyError if choice wasn’t provided in POST data.
+就像上面用 Python 作的注释那样，当成功的处理了 POST 数据后你应该总是返回一个 HttpResponseRedirect 对象
+
+The above code checks for KeyError and redisplays the poll form with an error message if choice isn’t given.
+ 这个技巧不是特定于 Django 的
+
+After incrementing the choice count, the code returns an HttpResponseRedirect rather than a normal HttpResponse.
+在本例中，我们在 HttpResponseRedirect 的构造方法中使用了 reverse() 函数
+
+HttpResponseRedirect takes a single argument: the URL to which the user will be redirected (see the following point for how we construct the URL in this case).
+ 此函数有助于避免在视图中硬编码 URL 的功能
+
+As the Python comment above points out, you should always return an HttpResponseRedirect after successfully dealing with POST data.
+... 在此 3 就是 p.id 的值
+
+This tip isn’t specific to Django;
+该重定向 URL 会调用 'results' 视图并显示最终页面
+
+We are using the reverse() function in the HttpResponseRedirect constructor in this example.
+正如在教程 第3部分提到的，``request`` 是一个 HttpRequest 对象
+
+This function helps avoid having to hardcode a URL in the view function.
+想了解 HttpRequest 对象更多的内容，请参阅 request 和 response 文档 
+
+...
+当有人投票后，``vote()`` 视图会重定向到投票结果页
+
+where the 3 is the value of p.id.
+让我们来编写这个视图
+
+As mentioned in Tutorial 3, request is a HttpRequest object.
+这几乎和 教程 第3部分 中的 detail() 视图完全一样
+
+For more on HttpRequest objects, see the request and response documentation.
+ 唯一的区别就是模板名称
+
+After somebody votes in a poll, the vote() view redirects to the results page for the poll.
+现在，创建一个 polls/results.html 模板:
+
+This is almost exactly the same as the detail() view from Tutorial 3.
+现在，在浏览器中访问 /polls/1/ 并完成投票
+
+The only difference is the template name.
+每次投票后你将会看到结果页数据都有更新
+
+We’ll fix this redundancy later.
+ 如果你没有选择投票选项就提交了，将会看到错误的信息
+
+These views represent a common case of basic Web development: getting data from the database according to a parameter passed in the URL, loading a template and returning the rendered template.
+这些视图代表了基本的 Web 开发中一种常见的问题： 根据 URL 中的参数从数据库中获取数据，加载模板并返回渲染后的内容
+
+Because this is so common, Django provides a shortcut, called the “generic views” system.
+由于这类现象很 常见，因此 Django 提供了一种快捷方式，被称之为“通用视图”系统
+
+Generic views abstract common patterns to the point where you don’t even need to write Python code to write an app.
+通用视图抽象了常见的模式，以至于你不需要编写 Python 代码来编写一个应用
+
+Let’s convert our poll app to use the generic views system, so we can delete a bunch of our own code.
+让我们把 poll 应用修改成使用通用视图系统的应用，这样我们就能删除删除一些我们自己的代码了
+
+We’ll just have to take a few steps to make the conversion.
+ 我们将采取以下步骤来进行修改：
+
+Read on for details.
+请继续阅读了解详细的信息
+
+Why the code-shuffle?
+为什么要重构代码
+
+Generally, when writing a Django app, you’ll evaluate whether generic views are a good fit for your problem, and you’ll use them from the beginning, rather than refactoring your code halfway through.
+通常情况下，当你编写一个 Django 应用时，你会评估下通用视图是否适合解决你的问题， 如果适合你就应该从一开始就使用它，而不是进行到一半才重构你的代码
+
+But this tutorial intentionally has focused on writing the views “the hard way” until now, to focus on core concepts.
+ 但是本教程直到现在都故意集中介绍“硬编码”视图，是为了专注于核心概念上
+
+You should know basic math before you start using a calculator.
+就像你在使用计算器前需要知道基本的数学知识一样
+
+We’re using two generic views here: ListView and DetailView.
+首先，打开 polls/urls.py 的 URLconf 配置文件并修改成如下所示样子
+
+In previous parts of the tutorial, the templates have been provided with a context that contains the poll and latest_poll_list context variables.
+在这我们将使用两个通用视图： ListView 和 DetailView 
+
+For DetailView the poll variable is provided automatically – since we’re using a Django model (Poll), Django is able to determine an appropriate name for the context variable.
+这两个视图分别用于显示两种抽象概念 “显示一系列对象的列表” 和 “显示一个特定类型的对象的详细信息页”
+
+You can now delete the index(), detail() and results() views from polls/views.py.
+默认情况下， DetailView 通用视图使用名为 <应用名>/<模型名>_detail.html 的模板
+
+We don’t need them anymore – they have been replaced by generic views.
+在我们的例子中，将使用名为 "polls/poll_detail.html" 的模板
+
+The last thing to do is fix the URL handling to account for the use of generic views.
+同样的，:class:~django.views.generic.list.ListView 通用视图使用的默认模板名为 <应用名>/<模型名>_list.html 
+
+In the vote view above, we used the reverse() function to avoid hard-coding our URLs.
+我们指定了 template_name 参数告诉 ListView 使用已经存在的 "polls/index.html" 模板
+
+Run the server, and use your new polling app based on generic views.
+在之前的教程中，模板提供的上下文中包含了 poll 和 latest_poll_list 上下文变量
+
+For full details on generic views, see the generic views documentation.
+现在你可以在 polls/views.py 中删除 index() ， detail() 和 results() 视图了
+
+In the meantime, you might want to check out some pointers on where to go from here
+有关通用视图的完整详细信息，请参阅 通用视图文档.
+
+You are here:
+Table Of Contents
+
+This Page
+Browse
+

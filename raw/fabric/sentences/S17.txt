@@ -1,0 +1,117 @@
+Utils¶
+实用工具¶
+
+Internal subroutines for e.g.
+内部的实用小程序
+
+aborting execution with an error message, or performing indenting on multiline output.
+
+
+Abort execution, print msg to stderr and exit with error status (1.)
+终止执行，向 stderr 输入错误信息 msg 并退出（错误状态 1）
+
+This function currently makes use of SystemExit in a manner that is similar to sys.exit (but which skips the automatic printing to stderr, allowing us to more tightly control it via settings).
+This function currently makes use of SystemExit in a manner that is similar to sys.exit (but which skips the automatic printing to stderr, allowing us to more tightly control it via settings).
+
+Therefore, it’s possible to detect and recover from inner calls to abort by using except SystemExit or similar.
+Therefore, it’s possible to detect and recover from inner calls to abort by using except SystemExit or similar.
+
+Call func with given error message.
+给定错误信息 message 以调用 func 
+
+If func is None (the default), the value of env.warn_only determines whether to call abort or warn.
+如果 func 为 None ，将根据 env.warn_only 来调用 abort 还是 warn 
+
+If exception is given, it is inspected to get a string message, which is printed alongside the user-generated message.
+如果 exception` 参数（应当是字符串类型）存在，将会在用户传入的 message 周围输出它
+
+If stdout and/or stderr are given, they are assumed to be strings to be printed.
+如果指定了 stdin 和/或者 stderr ，将作为打印输出的终端
+
+Print text immediately, without any prefix or line ending.
+立即打印 text 不添加任何前缀或后缀
+
+This function is simply an alias of puts with different default argument values, such that the text is printed without any embellishment and immediately flushed.
+该函数只是 puts 的别名，区别在参数的迷默认值不同， text 将会不加任何装饰地输出出去
+
+It is useful for any situation where you wish to print text which might otherwise get buffered by Python’s output buffering (such as within a processor intensive for loop).
+当你想要输出可能被 Python 输出所缓冲（比如在计算密集的 for 循环中）时会很需要它
+
+Since such use cases typically also require a lack of line endings (such as printing a series of dots to signify progress) it also omits the traditional newline by default.
+Since such use cases typically also require a lack of line endings (such as printing a series of dots to signify progress) it also omits the traditional newline by default.
+
+Note
+注解
+
+Since fastprint calls puts, it is likewise subject to the user output level.
+由于 fastprint 会调用 puts ，因此其 output level 也取决于 user 
+
+New in version 0.9.2.
+0.9.2 新版功能.
+
+See also
+参见
+
+puts
+puts
+
+Return text indented by the given number of spaces.
+根据给定空格数缩进 text 
+
+If text is not a string, it is assumed to be a list of lines and will be joined by \n prior to indenting.
+如果 text 并非字符串，将被当作单行输出的列表，并使用 \n 连接、排列
+
+When strip is True, a minimum amount of whitespace is removed from the left-hand side of the given string (so that relative indents are preserved, but otherwise things are left-stripped).
+若 strip 为 True ，a minimum amount of whitespace is removed from the left-hand side of the given string (so that relative indents are preserved, but otherwise things are left-stripped). 这样你就能有效地“规范化”某些输出前的缩进
+
+Check if a stream is a tty.
+检查输入输出流是否是 tty
+
+Not all file-like objects implement the isatty method.
+并非所有类文件对象都实现了 isatty 方法
+
+An alias for print whose output is managed by Fabric’s output controls.
+print 函数的别名，同样受 Fabric 管理输出
+
+In other words, this function simply prints to sys.stdout, but will hide its output if the user output level is set to False.
+换句话说，这个函数只是简单地将输出指向 sys.stdout` ，如果``user 将 output level 设置为 False 则隐藏输出
+
+If show_prefix=False, puts will omit the leading [hostname] which it tacks on by default.
+如果 show_prefix=False ， puts 将略过默认添加的输出头 [hostname] 
+
+(It will also omit this prefix if env.host_string is empty.)
+（如果 env.host_string 为空的话也能起到同样的效果
+
+Newlines may be disabled by setting end to the empty string ('').
+设置 end 为空字符串 '' 将不会在末尾输出换行
+
+(This intentionally mirrors Python 3’s print syntax.)
+（）
+
+You may force output flushing (e.g.
+你可以通过设置 flush=True 来强制立即输出（例如绕过输出缓冲）
+
+New in version 0.9.2.
+0.9.2 新版功能.
+
+See also
+参见
+
+fastprint
+fastprint
+
+Print warning message, but do not abort execution.
+打印警告信息，但不退出执行
+
+This function honors Fabric’s output controls and will print the given msg to stderr, provided that the warnings output level (which is active by default) is turned on.
+该函数遵循 Fabric output controls 如果已开启 warnings 等级（默认开启），将会向 stderr 打印 msg 
+
+Fabric
+Fabric
+
+Pythonic remote execution
+Pythonic remote execution
+
+Enter search terms or a module, class or function name.
+输入相关的术语，模块，类或者函数名称进行搜索
+

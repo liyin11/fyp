@@ -1,0 +1,972 @@
+You are here: Home ‣ Dive Into Python 3 ‣
+你的位置: Home ‣ Dive Into Python 3 ‣
+
+Difficulty level: ♦♦♦♢♢
+难度等级: ♦♦♦♢♢
+
+Strings
+字符串
+
+❝ I’m telling you this ’cause you’re one of my friends.
+❝ I’m telling you this ’cause you’re one of my friends. My alphabet starts where your alphabet ends! ❞ — Dr. Seuss, On Beyond Zebra!
+
+Some Boring Stuff You Need To Understand Before You Can Dive In
+在开始之前需要掌握的一些知识
+
+Few people think about it, but text is incredibly complicated.
+你是否知道 Bougainville 人有世界上最小的字母表
+
+Start with the alphabet.
+他们的 Rotokas 字母表只包含了12个字母： A, E, G, I, K, O, P, R, S, T, U, 和 V
+
+The people of Bougainville have the smallest alphabet in the world;
+另一方面，像汉语，日语和韩语这些语言，它们则有成千上万个字符
+
+their Rotokas alphabet is composed of only 12 letters: A, E, G, I, K, O, P, R, S, T, U, and V.
+当然啦，英语共有26个字母 — 如果把大写和小写分别计算的话，52个 — 外加少量的标点符号，比如!@#$%&
+
+When you talk about “text,” you’re probably thinking of “characters and symbols on my computer screen.” But computers don’t deal in characters and symbols;
+当人们说起“文本”，他们通常指显示在屏幕上的字符或者其他的记号
+
+they deal in bits and bytes.
+但是计算机不能直接处理这些字符和标记
+
+Every piece of text you’ve ever seen on a computer screen is actually stored in a particular character encoding.
+它们只认识位(bit)和字节(byte)
+
+Very roughly speaking, the character encoding provides a mapping between the stuff you see on your screen and the stuff your computer actually stores in memory and on disk.
+实际上，从屏幕上的每一块文本都是以某种字符编码(character encoding)的方式保存的
+
+There are many different character encodings, some optimized for particular languages like Russian or Chinese or English, and others that can be used for multiple languages.
+粗略地说就是，字符编码提供一种映射，使屏幕上显示的内容和内存、磁盘内存储的内容对应起来
+
+In reality, it’s more complicated than that.
+在实际操作中则会比上边描述的更复杂一些
+
+Many characters are common to multiple encodings, but each encoding may use a different sequence of bytes to actually store those characters in memory or on disk.
+许多字符在几种编码里是共用的，但是在实际的内存或者磁盘上，不同的编码方式可能会使用不同的字节序列来存储他们
+
+So you can think of the character encoding as a kind of decryption key.
+所以，你可以把字符编码当做一种解码密钥
+
+Whenever someone gives you a sequence of bytes — a file, a web page, whatever — and claims it’s “text,” you need to know what character encoding they used so you can decode the bytes into characters.
+当有人给你一个字节序列 — 文件，网页，或者别的什么 — 并且告诉你它们是“文本”时，就需要知道他们使用了何种编码方式，然后才能将这些字节序列解码成字符
+
+If they give you the wrong key or no key at all, you’re left with the unenviable task of cracking the code yourself.
+如果他们给的是错误的“密钥”或者根本没有给你“密钥”，那就得自己来破解这段编码，这可是一个艰难的任务
+
+Chances are you’ll get it wrong, and the result will be gibberish.
+有可能你使用了错误的解码方式，然后出现一些莫名其妙的结果
+
+Surely you’ve seen web pages like this, with strange question-mark-like characters where apostrophes should be.
+你肯定见过这样的网页，在撇号(')该出现的地方被奇怪的像问号的字符替代了
+
+That usually means the page author didn’t declare their character encoding correctly, your browser was left guessing, and the result was a mix of expected and unexpected characters.
+这种情况通常意味着页面的作者没有正确的声明其使用的编码方式，浏览器只能自己来猜测，结果就是一些正确的和意料之外的字符的混合体
+
+In English it’s merely annoying;
+如果原文是英语，那只是不方便阅读而已
+
+in other languages, the result can be completely unreadable.
+在其他的语言环境下，结果可能是完全不可读的
+
+There are character encodings for each major language in the world.
+现有的字符编码各类给世界上每种主要的语言都提供了编码方案
+
+Since each language is different, and memory and disk space have historically been expensive, each character encoding is optimized for a particular language.
+由于每种语言的各不相同，而且在以前内存和硬盘都很昂贵，所以每种字符编码都为特定的语言做了优化
+
+By that, I mean each encoding using the same numbers (0–255) to represent that language’s characters.
+上边这句话的意思是，每种编码都使用数字(0–255)来代表这种语言的字符
+
+For instance, you’re probably familiar with the ASCII encoding, which stores English characters as numbers ranging from 0 to 127.
+比如，你也许熟悉ASCII编码，它将英语中的字符都当做从0–127的数字来存储
+
+(65 is capital “A”, 97 is lowercase “a”, &c.) English has a very simple alphabet, so it can be completely expressed in less than 128 numbers.
+（65表示大写的“A”，97表示小写的“a”，&c
+
+For those of you who can count in base 2, that’s 7 out of the 8 bits in a byte.
+）英语的字母表很简单，所以它能用不到128个数字表达出来
+
+Western European languages like French, Spanish, and German have more letters than English.
+西欧的一些语言，比如法语，西班牙语和德语等，比英语有更多的字母
+
+Or, more precisely, they have letters combined with various diacritical marks, like the ñ character in Spanish.
+或者，更准确的说，这些语言含有与变音符号(diacritical marks)组合起来的字母，像西班牙语里的ñ
+
+The most common encoding for these languages is CP-1252, also called “windows-1252” because it is widely used on Microsoft Windows.
+这些语言最常用的编码方式是CP-1252，又叫做“windows-1252”，因为它在微软的视窗操作系统上被广泛使用
+
+The CP-1252 encoding shares characters with ASCII in the 0–127 range, but then extends into the 128–255 range for characters like n-with-a-tilde-over-it (241), u-with-two-dots-over-it (252), &c.
+CP-1252和ASCII在0–127这个范围内的字符是一样的，但是CP-1252为ñ(n-with-a-tilde-over-it, 241)，Ü(u-with-two-dots-over-it, 252)这类字符而扩展到了128–255这个范围
+
+It’s still a single-byte encoding, though;
+然而，它仍然是一种单字节的编码方式
+
+the highest possible number, 255, still fits in one byte.
+可能的最大数字为255，这仍然可以用一个字节来表示
+
+Then there are languages like Chinese, Japanese, and Korean, which have so many characters that they require multiple-byte character sets.
+然而，像中文，日语和韩语等语言，他们的字符如此之多而不得不需要多字节编码的字符集
+
+That is, each “character” is represented by a two-byte number from 0–65535.
+即，使用两个字节的数字(0–255)代表每个“字符”
+
+But different multi-byte encodings still share the same problem as different single-byte encodings, namely that they each use the same numbers to mean different things.
+但是就跟不同的单字节编码方式一样，多字节编码方式之间也有同样的问题，即他们使用的数字是相同的，但是表达的内容却不同
+
+It’s just that the range of numbers is broader, because there are many more characters to represent.
+相对于单字节编码方式它们只是使用的数字范围更广一些，因为有更多的字符需要表示
+
+That was mostly OK in a non-networked world, where “text” was something you typed yourself and occasionally printed.
+在没有网络的时代，“文本”由自己输入，偶尔才会打印出来，大多数情况下使用以上的编码方案是可行的
+
+There wasn’t much “plain text”.
+那时没有太多的“纯文本”
+
+Source code was ASCII, and everyone else used word processors, which defined their own (non-text) formats that tracked character encoding information along with rich styling, &c.
+源代码使用ASCII编码，其他人也都使用字处理器，这些字处理器定义了他们自己的格式（非文本的），这些格式会连同字符编码信息和风格样式一起记录其中，&c
+
+People read these documents with the same word processing program as the original author, so everything worked, more or less.
+人们使用与原作者相同的字处理软件读取这些文档，所以或多或少地能够使用
+
+Now think about the rise of global networks like email and the web.
+现在，我们考虑一下像email和web这样的全球网络的出现
+
+Lots of “plain text” flying around the globe, being authored on one computer, transmitted through a second computer, and received and displayed by a third computer.
+大量的“纯文本”文件在全球范围内流转，它们在一台电脑上被撰写出来，通过第二台电脑进行传输，最后在另外一台电脑上显示
+
+Computers can only see numbers, but the numbers could mean different things.
+计算机只能识别数字，但是这些数字可能表达的是其他的东西
+
+Oh no!
+Oh no! 怎么办呢
+
+What to do?
+
+
+Well, systems had to be designed to carry encoding information along with every piece of “plain text.” Remember, it’s the decryption key that maps computer-readable numbers to human-readable characters.
+好吧，那么系统必须被设计成在每一段“纯文本”上都搭载编码信息
+
+A missing decryption key means garbled text, gibberish, or worse.
+记住，编码方式是将计算机可读的数字映射成人类可读的字符的解码密钥
+
+Now think about trying to store multiple pieces of text in the same place, like in the same database table that holds all the email you’ve ever received.
+现在我们考虑尝试把多段文本存储在同一个地方，比如放置所有收到邮件的数据库
+
+You still need to store the character encoding alongside each piece of text so you can display it properly.
+这仍然需要对每段文本存储其相关的字符编码信息，只有这样才能正确地显示它们
+
+Think that’s hard?
+这很困难吗
+
+Try searching your email database, which means converting between multiple encodings on the fly.
+试试搜索你的email数据库，这意味着需要在运行时进行编码之间的转换
+
+Doesn’t that sound fun?
+很有趣是吧…
+
+Now think about the possibility of multilingual documents, where characters from several languages are next to each other in the same document.
+现在我们来分析另外一种可能性，即多语言文档，同一篇文档里来自几种不同语言的字符混在一起
+
+(Hint: programs that tried to do this typically used escape codes to switch “modes.” Poof, you’re in Russian koi8-r mode, so 241 means Я;
+（提示：处理这样文档的程序通常使用转义符在不同的“模式(modes)”之间切换
+
+poof, now you’re in Mac Greek mode, so 241 means ώ.) And of course you’ll want to search those documents, too.
+噗
+
+Now cry a lot, because everything you thought you knew about strings is wrong, and there ain’t no such thing as “plain text.”
+现在，你就哭吧，因为以前所了解的关于字符串的知识都是错的，根本就没有所谓的“纯文本”
+
+Unicode
+Unicode
+
+Enter Unicode.
+Unicode入门
+
+Unicode is a system designed to represent every character from every language.
+Unicode编码系统为表达任意语言的任意字符而设计
+
+Unicode represents each letter, character, or ideograph as a 4-byte number.
+它使用4字节的数字来表达每个字母、符号，或者表意文字(ideograph)
+
+Each number represents a unique character used in at least one of the world’s languages.
+每个数字代表唯一的至少在某种语言中使用的符号
+
+(Not all the numbers are used, but more than 65535 of them are, so 2 bytes wouldn’t be sufficient.) Characters that are used in multiple languages generally have the same number, unless there is a good etymological reason not to.
+（并不是所有的数字都用上了，但是总数已经超过了65535，所以2个字节的数字是不够用的
+
+Regardless, there is exactly 1 number per character, and exactly 1 character per number.
+）被几种语言共用的字符通常使用相同的数字来编码，除非存在一个在理的语源学(etymological)理由使不这样做
+
+Every number always means just one thing;
+不考虑这种情况的话，每个字符对应一个数字，每个数字对应一个字符
+
+there are no “modes” to keep track of.
+即不存在二义性
+
+U+0041 is always 'A', even if your language doesn’t have an 'A' in it.
+不再需要记录“模式”了
+
+On the face of it, this seems like a great idea.
+初次面对这个创想，它看起来似乎很伟大
+
+One encoding to rule them all.
+一种编码方式即可解决所有问题
+
+Multiple languages per document.
+文档可包含多种语言
+
+No more “mode switching” to switch between encodings mid-stream.
+不再需要在各种编码方式之间进行“模式转换“
+
+But right away, the obvious question should leap out at you.
+但是很快，一个明显的问题跳到我们面前
+
+Four bytes?
+4个字节
+
+For every single character‽ That seems awfully wasteful, especially for languages like English and Spanish, which need less than one byte (256 numbers) to express every possible character.
+只为了单独一个字符‽ 这似乎太浪费了，特别是对像英语和西语这样的语言，他们只需要不到1个字节即可以表达所需的字符
+
+In fact, it’s wasteful even for ideograph-based languages (like Chinese), which never need more than two bytes per character.
+事实上，对于以象形为基础的语言（比如中文）这种方法也有浪费，因为这些语言的字符也从来不需要超过2个字节即可表达
+
+There is a Unicode encoding that uses four bytes per character.
+有一种Unicode编码方式每1个字符使用4个字节
+
+It’s called UTF-32, because 32 bits = 4 bytes.
+它叫做UTF-82，因为32位 = 4字节
+
+UTF-32 is a straightforward encoding;
+UTF-32是一种直观的编码方式
+
+it takes each Unicode character (a 4-byte number) and represents the character with that same number.
+它收录每一个Unicode字符（4字节数字）然后就以那个数字代表该字符
+
+This has some advantages, the most important being that you can find the Nth character of a string in constant time, because the Nth character starts at the 4×Nth byte.
+这种方法有其优点，最重要的一点就是可以在常数时间内定位字符串里的第N个字符，因为第N个字符从第4×Nth个字节开始
+
+It also has several disadvantages, the most obvious being that it takes four freaking bytes to store every freaking character.
+另外，它也有其缺点，最明显的就是它使用4个“诡异”的字节来存储每个“诡异”的字符…
+
+Even though there are a lot of Unicode characters, it turns out that most people will never use anything beyond the first 65535.
+尽管有Unicode字符非常多，但是实际上大多数人不会用到超过前65535个以外的字符
+
+Thus, there is another Unicode encoding, called UTF-16 (because 16 bits = 2 bytes).
+因此，就有了另外一种Unicode编码方式，叫做UTF-16(因为16位 = 2字节)
+
+UTF-16 encodes every character from 0–65535 as two bytes, then uses some dirty hacks if you actually need to represent the rarely-used “astral plane” Unicode characters beyond 65535.
+UTF-16将0–65535范围内的字符编码成2个字节，如果真的需要表达那些很少使用的“星芒层(astral plane)”内超过这65535范围的Unicode字符，则需要使用一些诡异的技巧来实现
+
+Most obvious advantage: UTF-16 is twice as space-efficient as UTF-32, because every character requires only two bytes to store instead of four bytes (except for the ones that don’t).
+UTF-16编码最明显的优点是它在空间效率上比UTF-32高两倍，因为每个字符只需要2个字节来存储（除去65535范围以外的），而不是UTF-32中的4个字节
+
+And you can still easily find the Nth character of a string in constant time, if you assume that the string doesn’t include any astral plane characters, which is a good assumption right up until the moment that it’s not.
+并且，如果我们假设某个字符串不包含任何星芒层中的字符，那么我们依然可以在常数时间内找到其中的第N个字符，直到它不成立为止这总是一个不错的推断…
+
+But there are also non-obvious disadvantages to both UTF-32 and UTF-16.
+但是对于UTF-32和UTF-16编码方式还有一些其他不明显的缺点
+
+Different computer systems store individual bytes in different ways.
+不同的计算机系统会以不同的顺序保存字节
+
+That means that the character U+4E2D could be stored in UTF-16 as either 4E 2D or 2D 4E, depending on whether the system is big-endian or little-endian.
+这意味着字符U+4E2D在UTF-16编码方式下可能被保存为4E 2D或者2D 4E，这取决于该系统使用的是大尾端(big-endian)还是小尾端(little-endian)
+
+(For UTF-32, there are even more possible byte orderings.) As long as your documents never leave your computer, you’re safe — different applications on the same computer will all use the same byte order.
+（对于UTF-32编码方式，则有更多种可能的字节排列
+
+But the minute you want to transfer documents between systems, perhaps on a world wide web of some sort, you’re going to need a way to indicate which order your bytes are stored.
+）只要文档没有离开你的计算机，它还是安全的 — 同一台电脑上的不同程序使用相同的字节顺序(byte order)
+
+Otherwise, the receiving system has no way of knowing whether the two-byte sequence 4E 2D means U+4E2D or U+2D4E.
+但是当我们需要在系统之间传输这个文档的时候，也许在万维网中，我们就需要一种方法来指示当前我们的字节是怎样存储的
+
+To solve this problem, the multi-byte Unicode encodings define a “Byte Order Mark,” which is a special non-printable character that you can include at the beginning of your document to indicate what order your bytes are in.
+为了解决这个问题，多字节的Unicode编码方式定义了一个“字节顺序标记(Byte Order Mark)”，它是一个特殊的非打印字符，你可以把它包含在文档的开头来指示你所使用的字节顺序
+
+For UTF-16, the Byte Order Mark is U+FEFF.
+对于UTF-16，字节顺序标记是U+FEFF
+
+If you receive a UTF-16 document that starts with the bytes FF FE, you know the byte ordering is one way;
+如果收到一个以字节FF FE开头的UTF-16编码的文档，你就能确定它的字节顺序是单向的(one way)的了
+
+if it starts with FE FF, you know the byte ordering is reversed.
+如果它以FE FF开头，则可以确定字节顺序反向了
+
+Still, UTF-16 isn’t exactly ideal, especially if you’re dealing with a lot of ASCII characters.
+不过，UTF-16还不够完美，特别是要处理许多ASCII字符时
+
+If you think about it, even a Chinese web page is going to contain a lot of ASCII characters — all the elements and attributes surrounding the printable Chinese characters.
+如果仔细想想的话，甚至一个中文网页也会包含许多的ASCII字符 — 所有包围在可打印中文字符周围的元素(element)和属性(attribute)
+
+Being able to find the Nth character in constant time is nice, but there’s still the nagging problem of those astral plane characters, which mean that you can’t guarantee that every character is exactly two bytes, so you can’t really find the Nth character in constant time unless you maintain a separate index.
+能够在常数时间内找到第Nth个字符当然非常好，但是依然存在着纠缠不休的星芒层字符的问题，这意味着你不能保证每个字符都是2个字节长，所以，除非你维护着另外一个索引，不然就不能真正意义上的在常数时间内定位第N个字符
+
+And boy, there sure is a lot of ASCII text in the world…
+另外，朋友，世界上肯定还存在很多的ASCII文本…
+
+Other people pondered these questions, and they came up with a solution:
+另外一些人琢磨着这些问题，他们找到了一种解决方法：
+
+UTF-8
+UTF-8 The range of integers used to code the abstract characters is called the codespace. A particular integer in this set is called a code point. When an abstract character is mapped or assigned to a particular code point in the codespace, it is then referred to as an encoded character. <-->
+
+UTF-8 is a variable-length encoding system for Unicode.
+UTF-8是一种为Unicode设计的变长(variable-length)编码系统
+
+That is, different characters take up a different number of bytes.
+即，不同的字符可使用不同数量的字节编码
+
+For ASCII characters (A-Z, &c.) UTF-8 uses just one byte per character.
+对于ASCII字符(A-Z, &c.)UTF-8仅使用1个字节来编码
+
+In fact, it uses the exact same bytes;
+事实上，UTF-8中前128个字符(0–127)使用的是跟ASCII一样的编码方式
+
+the first 128 characters (0–127) in UTF-8 are indistinguishable from ASCII.
+像ñ和ö这样的“扩展拉丁字符(Extended Latin)”则使用2个字节来编码
+
+“Extended Latin” characters like ñ and ö end up taking two bytes.
+（这里的字节并不是像UTF-16中那样简单的Unicode编码点(unicode code point)
+
+(The bytes are not simply the Unicode code point like they would be in UTF-16;
+它使用了一些位变换(bit-twiddling)
+
+there is some serious bit-twiddling involved.) Chinese characters like 中 end up taking three bytes.
+）中文字符比如“中”则占用了3个字节
+
+The rarely-used “astral plane” characters take four bytes.
+很少使用的“星芒层字符”则占用4个字节
+
+Disadvantages: because each character can take a different number of bytes, finding the Nth character is an O(N) operation — that is, the longer the string, the longer it takes to find a specific character.
+缺点：因为每个字符使用不同数量的字节编码，所以寻找串中第N个字符是一个O(N)复杂度的操作 — 即，串越长，则需要更多的时间来定位特定的字符
+
+Also, there is bit-twiddling involved to encode characters into bytes and decode bytes into characters.
+同时，还需要位变换来把字符编码成字节，把字节解码成字符
+
+Advantages: super-efficient encoding of common ASCII characters.
+优点：在处理经常会用到的ASCII字符方面非常有效
+
+No worse than UTF-16 for extended Latin characters.
+在处理扩展的拉丁字符集方面也不比UTF-16差
+
+Better than UTF-32 for Chinese characters.
+对于中文字符来说，比UTF-32要好
+
+Also (and you’ll have to trust me on this, because I’m not going to show you the math), due to the exact nature of the bit twiddling, there are no byte-ordering issues.
+同时，（在这一条上你得相信我，因为我不打算给你展示它的数学原理
+
+A document encoded in UTF-8 uses the exact same stream of bytes on any computer.
+）由位操作的天性使然，使用UTF-8不再存在字节顺序的问题了
+
+Diving In
+概述
+
+In Python 3, all strings are sequences of Unicode characters.
+在Python 3，所有的字符串都是使用Unicode编码的字符序列
+
+There is no such thing as a Python string encoded in UTF-8, or a Python string encoded as CP-1252.
+不再存在以UTF-8或者CP-1252编码的情况
+
+“Is this string UTF-8?” is an invalid question.
+也就是说，“这个字符串是以UTF-8编码的吗
+
+UTF-8 is a way of encoding characters as a sequence of bytes.
+不再是一个有效问题
+
+If you want to take a string and turn it into a sequence of bytes in a particular character encoding, Python 3 can help you with that.
+”UTF-8是一种将字符编码成字节序列的方式
+
+If you want to take a sequence of bytes and turn it into a string, Python 3 can help you with that too.
+如果需要将字符串转换成特定编码的字节序列，Python 3可以为你做到
+
+Bytes are not characters;
+如果需要将一个字节序列转换成字符串，Python 3也能为你做到
+
+bytes are bytes.
+字节即字节，并非字符
+
+Characters are an abstraction.
+字符在计算机内只是一种抽象
+
+A string is a sequence of those abstractions.
+字符串则是一种抽象的序列
+
+To create a string, enclose it in quotes.
+为了创建一个字符串，将其用引号包围
+
+Python strings can be defined with either single quotes (') or double quotes (").
+Python字符串可以通过单引号(')或者双引号(")来定义
+
+The built-in len() function returns the length of the string, i.e.
+内置函数len()可返回字符串的长度，即字符的个数
+
+the number of characters.
+这与获得列表，元组，集合或者字典的长度的函数是同一个
+
+This is the same function you use to find the length of a list, tuple, set, or dictionary.
+Python中，字符串可以想像成由字符组成的元组
+
+Just like getting individual items out of a list, you can get individual characters out of a string using index notation.
+Just like getting individual items out of a list, you can get individual characters out of a string using index notation. 与取得列表中的元素一样，也可以通过下标记号取得字符串中的某个字符
+
+Just like lists, you can concatenate strings using the + operator.
+类似列表，可以使用+操作符来连接(concatenate)字符串
+
+Formatting Strings
+格式化字符串
+
+Let’s take another look at humansize.py:
+我们再来看一看humansize.py：
+
+[download humansize.py]
+[download humansize.py]
+
+'KB', 'MB', 'GB'… those are each strings.
+'KB', 'MB', 'GB'… 这些是字符串
+
+Function docstrings are strings.
+函数的文档字符串(docstring)也是字符串
+
+This docstring spans multiple lines, so it uses three-in-a-row quotes to start and end the string.
+当前的文档字符串占用了多行，所以它使用了相邻的3个引号来标记字符串的起始和终止
+
+These three-in-a-row quotes end the docstring.
+这3个引号代表该文档字符串的终止
+
+There’s another string, being passed to the exception as a human-readable error message.
+这是另外一个字符串，作为一个可读的提示信息传递给异常
+
+There’s a… whoa, what the heck is that?
+瓦哦…那是什么
+
+Python 3 supports formatting values into strings.
+Python 3支持把值格式化(format)成字符串
+
+Although this can include very complicated expressions, the most basic usage is to insert a value into a string with a single placeholder.
+可以有非常复杂的表达式，最基本的用法是使用单个占位符(placeholder)将一个值插入字符串
+
+No, my password is not really PapayaWhip.
+不，PapayaWhip真的不是我的密码
+
+There’s a lot going on here.
+这里包含了很多知识
+
+First, that’s a method call on a string literal.
+首先，这里使用了一个字符串字面值的方法调用
+
+Strings are objects, and objects have methods.
+字符串也是对象，对象则有其方法
+
+Second, the whole expression evaluates to a string.
+其次，整个表达式返回一个字符串
+
+Third, {0} and {1} are replacement fields, which are replaced by the arguments passed to the format() method.
+最后，{0}和{1} 叫做替换字段(replacement field)，他们会被传递给format()方法的参数替换
+
+Compound Field Names
+复合字段名
+
+The previous example shows the simplest case, where the replacement fields are simply integers.
+在前一个例子中，替换字段只是简单的整数，这是最简单的用法
+
+Integer replacement fields are treated as positional indices into the argument list of the format() method.
+整型替换字段被当做传给format()方法的参数列表的位置索引
+
+That means that {0} is replaced by the first argument (username in this case), {1} is replaced by the second argument (password), &c.
+即，{0}会被第一个参数替换（在此例中即username），{1}被第二个参数替换（password），&c
+
+You can have as many positional indices as you have arguments, and you can have as many arguments as you want.
+可以有跟参数一样多的替换字段，同时你也可以使用任意多个参数来调用format()
+
+But replacement fields are much more powerful than that.
+但是替换字段远比这个强大
+
+Rather than calling any function in the humansize module, you’re just grabbing one of the data structures it defines: the list of “SI” (powers-of-1000) suffixes.
+不需要调用humansize模块定义的任何函数我们就可以抓取到其所定义的数据结构：国际单位制(SI, 来自法语Système International)的后缀列表（以1000为进制）
+
+This looks complicated, but it’s not.
+这一句看上去有些复杂，其实不是这样的
+
+{0} would refer to the first argument passed to the format() method, si_suffixes.
+{0}代表传递给format()方法的第一个参数，即si_suffixes
+
+But si_suffixes is a list.
+注意si_suffixes是一个列表
+
+So {0[0]} refers to the first item of the list which is the first argument passed to the format() method: 'KB'.
+所以{0[0]}指代si_suffixes的第一个元素，即'KB'
+
+Meanwhile, {0[1]} refers to the second item of the same list: 'MB'.
+同时，{0[1]}指代该列表的第二个元素，即：'MB'
+
+Everything outside the curly braces — including 1000, the equals sign, and the spaces — is untouched.
+大括号以外的内容 — 包括1000，等号，还有空格等 — 则按原样输出
+
+The final result is the string '1000KB = 1MB'.
+语句最后返回字符串为'1000KB = 1MB'
+
+What this example shows is that format specifiers can access items and properties of data structures using (almost) Python syntax.
+这个例子说明格式说明符可以通过利用（类似）Python的语法访问到对象的元素或属性
+
+This is called compound field names.
+这就叫做复合字段名(compound field names)
+
+The following compound field names “just work”:
+以下复合字段名都是“有效的”
+
+Passing a list, and accessing an item of the list by index (as in the previous example)
+使用列表作为参数，并且通过下标索引来访问其元素（跟上一例类似）
+
+Passing a dictionary, and accessing a value of the dictionary by key
+使用字典作为参数，并且通过键来访问其值
+
+Passing a module, and accessing its variables and functions by name
+使用模块作为参数，并且通过名字来访问其变量及函数
+
+Passing a class instance, and accessing its properties and methods by name
+使用类的实例作为参数，并且通过名字来访问其方法和属性
+
+Any combination of the above
+以上方法的任意组合
+
+Just to blow your mind, here’s an example that combines all of the above:
+为了使你确信的确如此，下面这个样例就组合使用了上面所有方法：
+
+Here’s how it works:
+下面是描述它如何工作的：
+
+The sys module holds information about the currently running Python instance.
+sys模块保存了当前正在运行的Python实例的信息
+
+Since you just imported it, you can pass the sys module itself as an argument to the format() method.
+由于已经导入了这个模块，因此可以将其作为format()方法的参数
+
+So the replacement field {0} refers to the sys module.
+所以替换域{0}指代sys模块
+
+sys.modules is a dictionary of all the modules that have been imported in this Python instance.
+sys.modules is a dictionary of all the modules that have been imported in this Python instance. The keys are the module names as strings; the values are the module objects themselves. So the replacement field {0.modules} refers to the dictionary of imported modules. sys.modules是一个保存当前Python实例中所有已经导入模块的字典
+
+The keys are the module names as strings;
+模块的名字作为字典的键
+
+the values are the module objects themselves.
+模块自身则是键所对应的值
+
+So the replacement field {0.modules} refers to the dictionary of imported modules.
+所以{0.modules}指代保存当前己被导入模块的字典
+
+sys.modules['humansize'] is the humansize module which you just imported.
+sys.modules['humansize']即刚才导入的humansize模块
+
+The replacement field {0.modules[humansize]} refers to the humansize module.
+所以替换域{0.modules[humansize]}指代humansize模块
+
+Note the slight difference in syntax here.
+请注意以上两句在语法上轻微的不同
+
+In real Python code, the keys of the sys.modules dictionary are strings;
+在实际的Python代码中，字典sys.modules的键是字符串类型的
+
+to refer to them, you need to put quotes around the module name (e.g.
+为了引用它们，我们需要在模块名周围放上引号（比如 'humansize'）
+
+'humansize').
+但是在使用替换域的时候，我们在省略了字典的键名周围的引号（比如 humansize）
+
+But within a replacement field, you skip the quotes around the dictionary key name (e.g.
+在此，我们引用PEP 3101：字符串格式化高级用法，“解析键名的规则非常简单
+
+humansize).
+如果名字以数字开头，则它被当作数字使用，其他情况则被认为是字符串
+
+To quote PEP 3101: Advanced String Formatting, “The rules for parsing an item key are very simple.
+”
+
+sys.modules['humansize'].SUFFIXES is the dictionary defined at the top of the humansize module.
+sys.modules['humansize'].SUFFIXES是在humansize模块的开头定义的一个字典对象
+
+The replacement field {0.modules[humansize].SUFFIXES} refers to that dictionary.
+ {0.modules[humansize].SUFFIXES}即指向该字典
+
+sys.modules['humansize'].SUFFIXES[1000] is a list of SI suffixes: ['KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'].
+sys.modules['humansize'].SUFFIXES[1000]是一个SI（国际单位制）后缀列表：['KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+
+So the replacement field {0.modules[humansize].SUFFIXES[1000]} refers to that list.
+所以替换域{0.modules[humansize].SUFFIXES[1000]}指向该列表
+
+sys.modules['humansize'].SUFFIXES[1000][0] is the first item of the list of SI suffixes: 'KB'.
+sys.modules['humansize'].SUFFIXES[1000][0]即SI后缀列表的第一个元素：'KB'
+
+Therefore, the complete replacement field {0.modules[humansize].SUFFIXES[1000][0]} is replaced by the two-character string KB.
+因此，整个替换域{0.modules[humansize].SUFFIXES[1000][0]}最后都被两个字符KB替换
+
+Format Specifiers
+格式说明符
+
+But wait!
+但是，还有一些问题我们没有讲到
+
+There’s more!
+再来看一看humansize.py中那一行奇怪的代码：
+
+{1} is replaced with the second argument passed to the format() method, which is suffix.
+{1}会被传递给format()方法的第二个参数替换，即suffix
+
+But what is {0:.1f}?
+但是{0:.1f}是什么意思呢
+
+It’s two things: {0}, which you recognize, and :.1f, which you don’t.
+它其实包含了两方面的内容：{0}你已经能理解，:.1f则不一定了
+
+The second half (including and after the colon) defines the format specifier, which further refines how the replaced variable should be formatted.
+第二部分（包括冒号及其后边的部分）即格式说明符(format specifier)，它进一步定义了被替换的变量应该如何被格式化
+
+☞Format specifiers allow you to munge the replacement text in a variety of useful ways, like the printf() function in C.
+☞格式说明符的允许你使用各种各种实用的方法来修饰被替换的文本，就像C语言中的printf()函数一样
+
+You can add zero- or space-padding, align strings, control decimal precision, and even convert numbers to hexadecimal.
+我们可以添加使用零填充(zero-padding)，衬距(space-padding)，对齐字符串(align strings)，控制10进制数输出精度，甚至将数字转换成16进制数输出
+
+Within a replacement field, a colon (:) marks the start of the format specifier.
+在替换域中，冒号(:)标示格式说明符的开始
+
+The format specifier “.1” means “round to the nearest tenth” (i.e.
+“.1”的意思是四舍五入到保留一们小数点
+
+display only one digit after the decimal point).
+“f”的意思是定点数（与指数标记法或者其他10进制数表示方法相对应）
+
+The format specifier “f” means “fixed-point number” (as opposed to exponential notation or some other decimal representation).
+因此，如果给定size为698.24，suffix为'GB'，那么格式化后的字符串将是'698.2 GB'，因为698.24被四舍五入到一位小数表示，然后后缀'GB'再被追加到这个串最后
+
+For all the gory details on format specifiers, consult the Format Specification Mini-Language in the official Python documentation.
+想了解格式说明符的复杂细节，请参阅Python官方文档关于格式化规范的迷你语言
+
+Other Common String Methods
+其他常用字符串方法
+
+Besides formatting, strings can do a number of other useful tricks.
+除了格式化，关于字符串还有许多其他实用的使用技巧
+
+You can input multiline strings in the Python interactive shell.
+我们可以在Python的交互式shell里输入多行(multiline)字符串
+
+Once you start a multiline string with triple quotation marks, just hit ENTER and the interactive shell will prompt you to continue the string.
+一旦我们以三个引号标记多行字符串的开始，按ENTER键，Python shell会提示你继续这个字符串的输入
+
+Typing the closing triple quotation marks ends the string, and the next ENTER will execute the command (in this case, assigning the string to s).
+连续输入三个结束引号以终止该字符串的输入，再敲ENTER键则会执行该条命令（在当前例子中，把这个字符串赋给变量s）
+
+The splitlines() method takes one multiline string and returns a list of strings, one for each line of the original.
+splitlines()方法以多行字符串作为输入，返回一个由字符串组成的列表，列表的元素即原来的单行字符串
+
+Note that the carriage returns at the end of each line are not included.
+请注意，每行行末的回车符没有被包括进去
+
+The lower() method converts the entire string to lowercase.
+lower()方法把整个字符串转换成小写的
+
+(Similarly, the upper() method converts a string to uppercase.)
+（类似地，upper()方法执行大写化转换操作
+
+The count() method counts the number of occurrences of a substring.
+count()方法对串中的指定的子串进行计数
+
+Yes, there really are six “f”s in that sentence!
+是的，在那一句中确实出现了6个字母“f”
+
+Here’s another common case.
+还有一种经常会遇到的情况
+
+Let’s say you have a list of key-value pairs in the form key1=value1&key2=value2, and you want to split them up and make a dictionary of the form {key1: value1, key2: value2}.
+比如有如下形式的键-值对列表 key1=value1&key2=value2，我们需要将其分离然后产生一个这样形式的字典{key1: value1, key2: value2}
+
+The split() string method has one required argument, a delimiter.
+split()方法使用一个参数，即指定的分隔符，然后根据这个分隔符将串分离成一个字符串列表
+
+The method splits a string into a list of strings based on the delimiter.
+此处，分隔符即字符“&”，它还可以是其他的内容
+
+Now we have a list of strings, each with a key, followed by an equals sign, followed by a value.
+现在我们有了一个字符串列表，其中的每个串由三部分组成：键，等号和值
+
+We can use a list comprehension to iterate over the entire list and split each string into two strings based on the first equals sign.
+我们可以使用列表解析来遍历整个列表，然后利用第一个等号标记将每个字符串再分离成两个子串
+
+The optional second argument to the split() method is the number of times you want to split.
+（理论上，值也可以包含等号标记，如果执行'key=value=foo'.split('=')，那么我们会得到一个三元素列表['key', 'value', 'foo']
+
+ means “only split once,” so the split() method will return a two-item list.
+）
+
+Finally, Python can turn that list-of-lists into a dictionary simply by passing it to the dict() function.
+最后，通过调用dict()函数Python会把那个包含列表的列表(list-of-lists)转换成字典对象
+
+☞The previous example looks a lot like parsing query parameters in a URL, but real-life URL parsing is actually more complicated than this.
+☞上一个例子跟解析URL的请求参数(query parameters)很相似，但是真实的URL解析实际上比这个复杂得多
+
+If you’re dealing with URL query parameters, you’re better off using the urllib.parse.parse_qs() function, which handles some non-obvious edge cases.
+如果需要处理URL请求参数，我们最好使用urllib.parse.parse_qs()函数，它可以处理一些不常见的边缘情况
+
+Slicing A String
+字符串的分片
+
+Once you’ve defined a string, you can get any part of it as a new string.
+定义一个字符串以后，我们可以截取其中的任意部分形成新串
+
+This is called slicing the string.
+这种操作被称作字符串的分片(slice)
+
+Slicing strings works exactly the same as slicing lists, which makes sense, because strings are just sequences of characters.
+字符串分片跟列表的分片(slicing lists)原理是一样的，从直观上也说得通，因为字符串本身就是一些字符序列
+
+You can get a part of a string, called a “slice”, by specifying two indices.
+我们可以通过指定两个索引值来获得原字符串的一个“slice”
+
+The return value is a new string containing all the characters of the string, in order, starting with the first slice index.
+该操作的返回值是一个新串，依次包含了从原串中第一个索引位置开始，直到但是不包含第二个索引位置之间的所有字符
+
+Like slicing lists, you can use negative indices to slice strings.
+就像给列表做分片一样，我们也可以使用负的索引值来分片字符串
+
+Strings are zero-based, so a_string[0:2] returns the first two items of the string, starting at a_string[0], up to but not including a_string[2].
+字符串的下标索引是从0开始的，所以a_string[0:2]会返回原字符串的前两个元素，从a_string[0]开始，直到但不包括a_string[2]
+
+If the left slice index is 0, you can leave it out, and 0 is implied.
+如果省略了第一个索引值，Python会默认它的值为0
+
+So a_string[:18] is the same as a_string[0:18], because the starting 0 is implied.
+所以a_string[:18]跟a_string[0:18]的效果是一样的，因为从0开始是被Python默认的
+
+Similarly, if the right slice index is the length of the string, you can leave it out.
+同样地，如果第2个索引值是原字符串的长度，那么我们也可以省略它
+
+So a_string[18:] is the same as a_string[18:44], because this string has 44 characters.
+所以，在此处a_string[18:]跟a_string[18:44]的结果是一样的，因为这个串的刚好有44个字符
+
+There is a pleasing symmetry here.
+这种规则存在某种有趣的对称性
+
+In this 44-character string, a_string[:18] returns the first 18 characters, and a_string[18:] returns everything but the first 18 characters.
+在这个由44个字符组成的串中，a_string[:18]会返回前18个字符，而a_string[18:]则会返回除了前18个字符以外字符串的剩余部分
+
+In fact, a_string[:n] will always return the first n characters, and a_string[n:] will return the rest, regardless of the length of the string.
+事实上a_string[:n]总是会返回串的前n个字符，而a_string[n:]则会返回其余的部分，这与串的长度无关
+
+Strings vs.
+String vs. Bytes
+
+Bytes are bytes;
+字节即字节
+
+characters are an abstraction.
+字符是一种抽象
+
+An immutable sequence of Unicode characters is called a string.
+一个不可变(immutable)的Unicode编码的字符序列叫做string
+
+An immutable sequence of numbers-between-0-and-255 is called a bytes object.
+一串由0到255之间的数字组成的序列叫做bytes对象
+
+To define a bytes object, use the b'' “byte literal” syntax.
+使用“byte字面值”语法b''来定义bytes对象
+
+Each byte within the byte literal can be an ASCII character or an encoded hexadecimal number from \x00 to \xff (0–255).
+byte字面值里的每个字节可以是ASCII字符或者是从\x00到\xff编码了的16进制数
+
+The type of a bytes object is bytes.
+bytes对象的类型是bytes
+
+Just like lists and strings, you can get the length of a bytes object with the built-in len() function.
+跟列表和字符串一样，我们可以通过内置函数len()来获得bytes对象的长度
+
+Just like lists and strings, you can use the + operator to concatenate bytes objects.
+使用+操作符可以连接bytes对象
+
+The result is a new bytes object.
+操作的结果是一个新的bytes对象
+
+Concatenating a 5-byte bytes object and a 1-byte bytes object gives you a 6-byte bytes object.
+连接5个字节的和1个字节的bytes对象会返回一个6字节的bytes对象
+
+Just like lists and strings, you can use index notation to get individual bytes in a bytes object.
+一如列表和字符串，可以使用下标记号来获取bytes对象中的单个字节
+
+The items of a string are strings;
+对字符串做这种操作获得的元素仍为字符串，而对bytes对象做这种操作的返回值则为整数
+
+the items of a bytes object are integers.
+确切地说，是0–255之间的整数
+
+A bytes object is immutable;
+bytes对象是不可变的
+
+you can not assign individual bytes.
+我们不可以给单个字节赋上新值
+
+If you need to change individual bytes, you can either use string slicing and concatenation operators (which work the same as strings), or you can convert the bytes object into a bytearray object.
+如果需要改变某个字节，可以组合使用字符串的切片和连接操作(效果跟字符串是一样的)，或者我们也可以将bytes对象转换为bytearray对象
+
+To convert a bytes object into a mutable bytearray object, use the built-in bytearray() function.
+使用内置函数bytearray()来完成从bytes对象到可变的bytearray对象的转换
+
+All the methods and operations you can do on a bytes object, you can do on a bytearray object too.
+所有对bytes对象的操作也可以用在bytearray对象上
+
+The one difference is that, with the bytearray object, you can assign individual bytes using index notation.
+有一点不同的就是，我们可以使用下标标记给bytearray对象的某个字节赋值
+
+The assigned value must be an integer between 0–255.
+并且，这个值必须是0–255之间的一个整数
+
+The one thing you can never do is mix bytes and strings.
+我们决不应该这样混用bytes和strings
+
+You can’t concatenate bytes and strings.
+不能连接bytes对象和字符串
+
+They are two different data types.
+他们两种不同的数据类型
+
+You can’t count the occurrences of bytes in a string, because there are no bytes in a string.
+也不允许针对字符串中bytes对象的出现次数进行计数，因为串里面根本没有bytes
+
+A string is a sequence of characters.
+字符串是一系列的字符序列
+
+Perhaps you meant “count the occurrences of the string that you would get after decoding this sequence of bytes in a particular character encoding”?
+也许你是想要先把这些字节序列通过某种编码方式进行解码获得字符串，然后对该字符串进行计数
+
+Well then, you’ll need to say that explicitly.
+可以，但是需要显式地指明它
+
+Python 3 won’t implicitly convert bytes to strings or strings to bytes.
+Python 3不会隐含地将bytes转换成字符串，或者进行相反的操作
+
+By an amazing coincidence, this line of code says “count the occurrences of the string that you would get after decoding this sequence of bytes in this particular character encoding.”
+好巧啊…这一行代码刚好给我们演示了使用特定编码方式将bytes对象转换成字符串后该串的出现次数
+
+And here is the link between strings and bytes: bytes objects have a decode() method that takes a character encoding and returns a string, and strings have an encode() method that takes a character encoding and returns a bytes object.
+所以，这就是字符串与字节数组之间的联系了：bytes对象有一个decode()方法，它使用某种字符编码作为参数，然后依照这种编码方式将bytes对象转换为字符串，对应地，字符串有一个encode()方法，它也使用某种字符编码作为参数，然后依照它将串转换为bytes对象
+
+In the previous example, the decoding was relatively straightforward — converting a sequence of bytes in the ASCII encoding into a string of characters.
+在上一个例子中，解码的过程相对直观一些 — 使用ASCII编码将一个字节序列转换为字符串
+
+But the same process works with any encoding that supports the characters of the string — even legacy (non-Unicode) encodings.
+同样的过程对其他的编码方式依然有效 — 传统的（非Unicode）编码方式也可以，只要它们能够编码串中的所有字符
+
+This is a string.
+a_string是一个字符串
+
+It has nine characters.
+它有9个字符
+
+This is a bytes object.
+by是一个bytes对象
+
+It has 13 bytes.
+它有13个字节
+
+It is the sequence of bytes you get when you take a_string and encode it in UTF-8.
+它是通过a_string使用UTF-8编码而得到的一串字节序列
+
+This is a bytes object.
+by还是一个bytes对象
+
+It has 11 bytes.
+它有11个字节
+
+It is the sequence of bytes you get when you take a_string and encode it in GB18030.
+它是通过a_string使用GB18030编码而得到的一串字节序列
+
+This is a bytes object.
+此时的by仍旧是一个bytes对象，由11个字节组成
+
+It has 11 bytes.
+它又是一种完全不同的字节序列，我们通过对a_string使用Big5编码得到
+
+This is a string.
+roundtrip是一个字符串，共有9个字符
+
+It has nine characters.
+它是通过对by使用Big5解码算法得到的一个字符序列
+
+It is the sequence of characters you get when you take by and decode it using the Big5 encoding algorithm.
+并且，从执行结果可以看出，roundtrip与a_string是完全一样的
+
+Postscript: Character Encoding Of Python Source Code
+补充内容：Python源码的编码方式
+
+Python 3 assumes that your source code — i.e.
+Python 3会假定我们的源码 — 即.py文件 — 使用的是UTF-8编码方式
+
+☞In Python 2, the default encoding for .py files was ASCII.
+☞Python 2里，.py文件默认的编码方式为ASCII
+
+In Python 3, the default encoding is UTF-8.
+Python 3的源码的默认编码方式为UTF-8
+
+If you would like to use a different encoding within your Python code, you can put an encoding declaration on the first line of each file.
+如果想使用一种不同的编码方式来保存Python代码，我们可以在每个文件的第一行放置编码声明(encoding declaration)
+
+This declaration defines a .py file to be windows-1252:
+以下声明定义.py文件使用windows-1252编码方式：
+
+Technically, the character encoding override can also be on the second line, if the first line is a UNIX-like hash-bang command.
+从技术上说，字符编码的重载声明也可以放在第二行，如果第一行被类UNIX系统中的hash-bang命令占用了
+
+For more information, consult PEP 263: Defining Python Source Code Encodings.
+了解更多信息，请参阅PEP 263: 指定Python源码的编码方式
+
+Further Reading
+进一步阅读
+
+On Unicode in Python:
+关于Python中的Unicode：
+
+Python Unicode HOWTO
+Python Unicode HOWTO
+
+What’s New In Python 3: Text vs.
+Python 3中的新鲜事: 文本 vs. 数据，而非 Unicode vs. 8-bit
+
+The Absolute Minimum Every Software Developer Absolutely, Positively Must Know About Unicode and Character Sets (No Excuses!)
+每个软件开发人员应该无条件、至少掌握的关于Unicode和字符集的知识
+
+On the Goodness of Unicode
+关于Unicode的优势
+
+On Character Strings
+关于字元字串(character string)
+
+Characters vs.
+字符 vs. 字节
+
+On character encoding in other formats:
+关于其他的编码方式：
+
+Character encoding in XML
+XML文档的编码方式
+
+Character encoding in HTML
+HTML文档的编码方式
+
+On strings and string formatting:
+关于字符串及其格式化：
+
+string — Common string operations
+string — 常用字符串操作
+
+Format String Syntax
+格式化字符串的语法
+
+Format Specification Mini-Language
+关于格式化规范的迷你语言
+
+PEP 3101: Advanced String Formatting
+PEP 3101: 字符串格式化高级应用
+
