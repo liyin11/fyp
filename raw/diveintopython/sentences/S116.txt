@@ -1,0 +1,138 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+18.3. Optimizing Regular Expressions
+18.3. 优化正则表达式
+
+The first thing the Soundex function checks is whether the input is a non-empty string of letters.
+Soundex 函数的第一件事是检查输入是否是一个空字符串
+
+What's the best way to do this?
+怎样做是最好的方法
+
+If you answered “regular expressions”, go sit in the corner and contemplate your bad instincts.
+如果你回答 “正则表达式”，坐在角落里反省你糟糕的直觉
+
+Regular expressions are almost never the right answer;
+正则表达式几乎永远不是最好的答案，而且应该被尽可能避开
+
+they should be avoided whenever possible.
+这不仅仅是基于性能考虑，而是因为调试和维护都很困难，当然性能也是个原因
+
+This code fragment from soundex/stage1/soundex1a.py checks whether the function argument source is a word made entirely of letters, with at least one letter (not the empty string):
+这是 soundex/stage1/soundex1a.py 检查 source 是否全部由字母构成的一段代码，至少是一个字母 (而不是空字符串)：
+
+How does soundex1a.py perform?
+soundex1a.py 表现如何
+
+For convenience, the __main__ section of the script contains this code that calls the timeit module, sets up a timing test with three different names, tests each name three times, and displays the minimum time for each:
+为了方便，__main__ 部分包含了一段代码：调用 timeit 模块，为三个不同名字分别建立测试，依次测试，并显示每个测试的最短耗时：
+
+So how does soundex1a.py perform with this regular expression?
+那么，应用正则表达式的 soundex1a.py 表现如何呢
+
+As you might expect, the algorithm takes significantly longer when called with longer names.
+正如你预料，名字越长，算法耗时就越长
+
+There will be a few things we can do to narrow that gap (make the function take less relative time for longer input), but the nature of the algorithm dictates that it will never run in constant time.
+有几个工作可以令我们减小这个差距 (使函数对于长输入花费较短的相对时间) 但是算法的本质决定它不可能每次运行时间都相同
+
+The other thing to keep in mind is that we are testing a representative sample of names.
+另一点应铭记于心的是，我们测试的是有代表性的名字样本
+
+Woo is a kind of trivial case, in that it gets shorted down to a single letter and then padded with zeros.
+Woo 是个被缩短到单字符并补零的小样本
+
+Pilgrim is a normal case, of average length and a mixture of significant and ignored letters.
+Pilgrim 是个夹带着特别字符和忽略字符的平均长度的正常样本
+
+Flingjingwaller is extraordinarily long and contains consecutive duplicates.
+Flingjingwaller 是一个包含连续重复字符并且特别长的样本
+
+Other tests might also be helpful, but this hits a good range of different cases.
+其它的测试可能同样有帮助，但它们已经很好地代表了不同的样本范围
+
+So what about that regular expression?
+那么那个正则表达式如何呢
+
+Well, it's inefficient.
+嗯，缺乏效率
+
+Since the expression is testing for ranges of characters (A-Z in uppercase, and a-z in lowercase), we can use a shorthand regular expression syntax.
+因为这个表达式测试不止一个范围的字符 (A-Z 的大写范围和 a-z 的小写字母范围)，我们可以使用一个正则表达式的缩写语法
+
+Here is soundex/stage1/soundex1b.py:
+这便是 soundex/stage1/soundex1b.py:
+
+timeit says soundex1b.py is slightly faster than soundex1a.py, but nothing to get terribly excited about:
+timeit 显示 soundex1b.py 比 soundex1a.py 稍微快一些，但是没什么令人激动的变化：
+
+We saw in Section 15.3, “Refactoring” that regular expressions can be compiled and reused for faster results.
+在 第 15.3 节 “重构” 中我们看到正则表达式可以被编译并在重用时以更快速度获得结果
+
+Since this regular expression never changes across function calls, we can compile it once and use the compiled version.
+因为这个正则表达式在函数中每次被调用时都不变化，我们可以编译它一次并使用被编译的版本
+
+Here is soundex/stage1/soundex1c.py:
+这便是 soundex/stage1/soundex1c.py：
+
+Using a compiled regular expression in soundex1c.py is significantly faster:
+soundex1c.py 中使用被编译的正则表达式产生了显著的提速：
+
+But is this the wrong path?
+但是这样的优化是正路吗
+
+The logic here is simple: the input source needs to be non-empty, and it needs to be composed entirely of letters.
+这里的逻辑很简单：输入 source 应该是非空，并且需要完全由字母构成
+
+Wouldn't it be faster to write a loop checking each character, and do away with regular expressions altogether?
+如果编写一个循环查看每个字符并且抛弃正则表达式，是否会更快些
+
+Here is soundex/stage1/soundex1d.py:
+这便是 soundex/stage1/soundex1d.py：
+
+It turns out that this technique in soundex1d.py is not faster than using a compiled regular expression (although it is faster than using a non-compiled regular expression):
+这个技术在 soundex1d.py 中恰好不及 编译后的正则表达式快 (尽管比使用未编译的正则表达式快[14])：
+
+Why isn't soundex1d.py faster?
+为什么 soundex1d.py 没能更快
+
+The answer lies in the interpreted nature of Python.
+答案来自 Python 的编译本质
+
+The regular expression engine is written in C, and compiled to run natively on your computer.
+正则表达式引擎以 C 语言编写，被编译后则能本能地在你的计算机上运行
+
+On the other hand, this loop is written in Python, and runs through the Python interpreter.
+另一方面，循环是以 Python 编写，要通过 Python 解释器
+
+Even though the loop is relatively simple, it's not simple enough to make up for the overhead of being interpreted.
+尽管循环相对简单，但没能简单到补偿花在代码解释上的时间
+
+Regular expressions are never the right answer...
+正则表达式永远不是正确答案……但例外还是存在的
+
+It turns out that Python offers an obscure string method.
+恰巧 Python 提供了一个晦涩的字符串方法
+
+You can be excused for not knowing about it, since it's never been mentioned in this book.
+你有理由不了解它，因为本书未曾提到它
+
+The method is called isalpha(), and it checks whether a string contains only letters.
+这个方法便是 isalpha()，它检查一个字符串是否只包含字母
+
+This is soundex/stage1/soundex1e.py:
+这便是 soundex/stage1/soundex1e.py：
+
+How much did we gain by using this specific method in soundex1e.py?
+在 soundex1e.py 中应用这个特殊方法我们能得到多少好处? 很多
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+[14] 注意 soundex1d.py 在后两个测试点上都比 soundex1b.py 慢，这点与作者所说的矛盾
+

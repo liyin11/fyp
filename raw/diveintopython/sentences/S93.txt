@@ -1,0 +1,42 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+14.2. roman.py, stage 2
+14.2. roman.py, 第 2 阶段
+
+Now that you have the framework of the roman module laid out, it's time to start writing code and passing test cases.
+现在你有了 roman 模块的大概框架，到了开始写代码以通过测试的时候了
+
+This file is available in py/roman/stage2/ in the examples directory.
+这个文件可以从 py/roman/stage2/ 目录中找到
+
+If you have not already done so, you can download this and other examples used in this book.
+如果您还没有下载本书附带的样例程序, 可以 下载本程序和其他样例程序
+
+If you're not clear how toRoman works, add a print statement to the end of the while loop:
+如果你不明了 toRoman 如何工作，在 while 循环的结尾添加一个 print 语句：
+
+So toRoman appears to work, at least in this manual spot check.
+看来 toRoman 可以运转了，至少手工测试可以
+
+But will it pass the unit testing?
+但能通过单元测试吗
+
+Well no, not entirely.
+啊哈，不，不完全可以
+
+Remember to run romantest2.py with the -v command-line flag to enable verbose mode.
+要记得用 -v 命令行选项运行 romantest2.py 开启详细信息模式
+
+Here's the rest of the output of the unit test, listing the details of all the failures.
+下面是单元测试结果的剩余部分，列出了所有失败的详细信息，你已经让它降到了 10 个
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

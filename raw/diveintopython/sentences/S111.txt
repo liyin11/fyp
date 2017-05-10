@@ -1,0 +1,48 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+17.5. plural.py, stage 4
+17.5. plural.py, 第 4 阶段
+
+Let's factor out the duplication in the code so that defining new rules can be easier.
+让我们精炼出代码中的重复之处，以便更容易地定义新规则
+
+If this is incredibly confusing (and it should be, this is weird stuff), it may become clearer when you see how to use it.
+如果这太费解 (它应该是这样，这是个怪异的东西)，可能需要通过了解它的使用来搞明白
+
+I swear I am not making this up: rules ends up with exactly the same list of functions as the previous example.
+我发誓这不是我信口雌黄：rules 被转换成了前面范例中相同的内容
+
+Unroll the rules definition, and you'll get this:
+剖析 rules 的定义，你看到的是：
+
+Just in case that wasn't mind-blowing enough, I must confess that there was a subtlety in the definition of buildMatchAndApplyFunctions that I skipped over.
+还不够兴奋吧
+
+Let's go back and take another look.
+我必须承认，在定义 buildMatchAndApplyFunctions 时我跳过了一个微妙之处
+
+Now let's go back and see why this auto-tuple-expansion trick was necessary.
+现在，让我们回过头看一看这个元组自动展开技巧的必要性
+
+patterns was a list of tuples, and each tuple had three elements.
+patterns 是一个元组列表，并且每个元组都有三个元素
+
+When you called map(buildMatchAndApplyFunctions, patterns), that means that buildMatchAndApplyFunctions is not getting called with three parameters.
+调用 map(buildMatchAndApplyFunctions, patterns)，这并不 意味着是以三个参数调用 buildMatchAndApplyFunctions
+
+Using map to map a single list onto a function always calls the function with a single parameter: each element of the list.
+使用 map 映射一个列表到函数时，通常使用单参数：列表中的每个元素
+
+In the case of patterns, each element of the list is a tuple, so buildMatchAndApplyFunctions always gets called with the tuple, and you use the auto-tuple-expansion trick in the definition of buildMatchAndApplyFunctions to assign the elements of that tuple to named variables that you can work with.
+就 patterns 而言，列表的每个元素都是一个元组，所以 buildMatchAndApplyFunctions 总是是以元组来调用，在 buildMatchAndApplyFunctions 中使用元组自动展开技巧将元素赋值给可以被使用的变量
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

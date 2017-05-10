@@ -1,0 +1,147 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+16.5. Data-centric programming
+16.5. 数据中心思想编程
+
+By now you're probably scratching your head wondering why this is better than using for loops and straight function calls.
+现在的你，可能正抓耳挠腮地狠想，为什么这样比使用 for 循环和直接调用函数好
+
+And that's a perfectly valid question.
+这是一个非常好的问题
+
+Mostly, it's a matter of perspective.
+通常这是一个程序观问题
+
+Using map and filter forces you to center your thinking around your data.
+使用 map 和 filter 强迫你围绕数据进行思考
+
+In this case, you started with no data at all;
+就此而言，你从没有数据开始，你所做的第一件事是获得当前脚本的目录路径，并获得该目录中的文件列表
+
+the first thing you did was get the directory path of the current script, and got a list of files in that directory.
+这就是关键的一步，使你有了待处理的真实数据：文件名列表
+
+However, you knew you didn't care about all of those files, only the ones that were actually test suites.
+当然，你知道你并不关心所有的文件，而只关心测试套件
+
+You had too much data, so you needed to filter it.
+你有太多数据，因此你需要过滤(filter)数据
+
+How did you know which data to keep?
+你如何知道哪些数据应该保留
+
+You needed a test to decide, so you defined one and passed it to the filter function.
+你需要一个测试来确定，因此你定义一个测试并把它传给 filter 函数
+
+In this case you used a regular expression to decide, but the concept would be the same regardless of how you constructed the test.
+这里你应用了一个正则表达式来确定，但无论如何构建测试，原则是一样的
+
+Now you had the filenames of each of the test suites (and only the test suites, since everything else had been filtered out), but you really wanted module names instead.
+现在你有了每个测试套件的文件名 (且局限于测试套件，因为所有其他内容都被过滤掉了)，但是你还需要以模块名来替代之
+
+You had the right amount of data, but it was in the wrong format.
+你有正确数量的数据，只是格式不正确
+
+So you defined a function that would transform a single filename into a module name, and you mapped that function onto the entire list.
+因此，你定义了一个函数来将文件名转换为模块名，并使用这个函数映射整个列表
+
+From one filename, you can get a module name;
+从一个文件名，你可以获得一个模块名，从一个文件名列表，你可以获得一个模块名列表
+
+Instead of filter, you could have used a for loop with an if statement.
+如果不应用 filter，你也可以使用 for 循环结合一个 if 语句的方法
+
+Instead of map, you could have used a for loop with a function call.
+map 的使用则可以由一个 for 循环和一个函数调用来取代
+
+But using for loops like that is busywork.
+但是 for 循环看起来像是个繁重的工作
+
+At best, it simply wastes time;
+至少，简单讲是在浪费时间，糟糕的话还会隐埋 Bug
+
+at worst, it introduces obscure bugs.
+例如，你需要弄清楚如何测试这样一个条件：“这个文件是测试套件吗
+
+For instance, you need to figure out how to test for the condition “is this file a test suite?” anyway;
+”这是应用特定的逻辑，没有哪个语言能自动为我们写出其代码
+
+that's the application-specific logic, and no language can write that for us.
+但是一旦你搞清楚了，你还需要费尽周折地定义一个新的空列表，写一个 for 循环以及一个 if 语句并手工地调用 append 将符合条件的元素一个个添加到新列表中，然后一路上注意区分哪个变量里放着过滤后的数据，哪个变量里放着未过滤的老数据
+
+But once you've figured that out, do you really want go to all the trouble of defining a new empty list and writing a for loop and an if statement and manually calling append to add each element to the new list if it passes the condition and then keeping track of which variable holds the new filtered data and which one holds the old unfiltered data?
+为什么不直接定义测试条件，然后由 Python 为你完成接下来的工作呢
+
+Oh sure, you could try to be fancy and delete elements in place without creating a new list.
+当然啦，你可以尝试眩一点的做法，去删除列表中的元素而不新建一个列表
+
+But you've been burned by that before.
+但是你以前吃过这样的亏
+
+Trying to modify a data structure that you're looping through can be tricky.
+试图在循环中改变数据结构是很容易出问题的
+
+You delete an element, then loop to the next element, and suddenly you've skipped one.
+Python 是一个这样工作的语言吗
+
+Is Python one of the languages that works that way?
+用多长时间你才能搞清这一点
+
+How long would it take you to figure it out?
+你能确定记得你第二次这样尝试的安全性
+
+Would you remember for certain whether it was safe the next time you tried?
+程序员在和这类纯技术课题较劲的过程中，花费了太多的时间，犯了太多的错误，却并没有什么意义
+
+Programmers spend so much time and make so many mistakes dealing with purely technical issues like this, and it's all pointless.
+这样并不可能令你的程序有所进步，只不过是费力不讨好
+
+I resisted list comprehensions when I first learned Python, and I resisted filter and map even longer.
+我在第一次学习 Python 时是抵触列表解析的，而且我抗拒 filter 和 map 的时间更长
+
+I insisted on making my life more difficult, sticking to the familiar way of for loops and if statements and step-by-step code-centric programming.
+我坚持着我更艰难的生活，固守着类似于 for 循环和 if 语句以及一步步地以代码为中心的编程方式
+
+And my Python programs looked a lot like Visual Basic programs, detailing every step of every operation in every function.
+而且我的 Python 程序看起来很像是 Visual Basic 程序，细化每一个函数中的每一个操作步骤
+
+And they had all the same types of little problems and obscure bugs.
+它们却有着同样的小错误和隐蔽的 Bug
+
+And it was all pointless.
+这一切其实都没有意义
+
+Let it all go.
+让这一切都远去吧
+
+Busywork code is not important.
+费力不讨好的编程不重要
+
+Data is important.
+数据重要
+
+And data is not difficult.
+并且数据并不麻烦
+
+It's only data.
+它们不过就是数据
+
+If you have too much, filter it.
+如果多了，就过滤
+
+If it's not what you want, map it.
+如果不是我们要的，就映射
+
+Focus on the data;
+聚焦在数据上，摒弃费力的劳作
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

@@ -1,0 +1,45 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+14.5. roman.py, stage 5
+14.5. roman.py, 第 5 阶段
+
+Now that fromRoman works properly with good input, it's time to fit in the last piece of the puzzle: making it work properly with bad input.
+现在 fromRoman 对于有效输入能够正常工作了，是揭开最后一个谜底的时候了：使它正常工作于无效输入的情况下
+
+That means finding a way to look at a string and determine if it's a valid Roman numeral.
+这意味着要找出一个方法检查一个字符串是不是有效的罗马数字
+
+This is inherently more difficult than validating numeric input in toRoman, but you have a powerful tool at your disposal: regular expressions.
+这比 toRoman 中验证有效的数字输入困难，但是你可以使用一个强大的工具：正则表达式
+
+If you're not familiar with regular expressions and didn't read Chapter 7, Regular Expressions, now would be a good time.
+如果你不熟悉正则表达式，并且没有读过 第 7 章 正则表达式，现在是该好好读读的时候了
+
+As you saw in Section 7.3, “Case Study: Roman Numerals”, there are several simple rules for constructing a Roman numeral, using the letters M, D, C, L, X, V, and I.
+如你在 第 7.3 节 “个案研究：罗马字母”中所见到的，构建罗马数字有几个简单的规则：使用字母 M, D, C, L, X, V 和 I
+
+Let's review the rules:
+让我们回顾一下：
+
+This file is available in py/roman/stage5/ in the examples directory.
+这个程序可以在例子目录下的py/roman/stage5/ 目录中找到
+
+If you have not already done so, you can download this and other examples used in this book.
+如果您还没有下载本书附带的样例程序, 可以 下载本程序和其他样例程序
+
+At this point, you are allowed to be skeptical that that big ugly regular expression could possibly catch all the types of invalid Roman numerals.
+这里你可能会怀疑，这个面目可憎的正则表达式是否真能查出错误的罗马字符表示
+
+But don't take my word for it, look at the results:
+没关系，不必完全听我的，不妨看看下面的结果：
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

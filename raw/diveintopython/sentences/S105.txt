@@ -1,0 +1,48 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+16.6. Dynamically importing modules
+16.6. 动态导入模块
+
+OK, enough philosophizing.
+好了，大道理谈够了
+
+Let's talk about dynamically importing modules.
+让我们谈谈动态导入模块吧
+
+First, let's look at how you normally import modules.
+首先，让我们看一看正常的模块导入
+
+The import module syntax looks in the search path for the named module and imports it by name.
+import module 语法查看搜索路径，根据给定的名字寻找模块并导入它们
+
+You can even import multiple modules at once this way, with a comma-separated list.
+你甚至可以这样做：以逗号分割同时导入多个模块，本章代码前几行就是这样做的
+
+Now let's do the same thing, but with dynamic imports.
+现在让我们用动态导入做同样的事
+
+So __import__ imports a module, but takes a string argument to do it.
+因此 __import__ 导入一个模块，但是是通过一个字符串参数来做到的
+
+In this case the module you imported was just a hard-coded string, but it could just as easily be a variable, or the result of a function call.
+依此处讲，你用以导入的仅仅是一个硬编码性的字符串，但它可以是一个变量，或者一个函数调用的结果
+
+And the variable that you assign the module to doesn't need to match the module name, either.
+并且你指向模块的变量也不必与模块名匹配
+
+You could import a series of modules and assign them to a list.
+你可以导入一系列模块并把它们指派给一个列表
+
+Now you should be able to put this all together and figure out what most of this chapter's code sample is doing.
+现在，你应该能够把这一切放在一起，并搞清楚本章大部分样例代码是做什么的
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

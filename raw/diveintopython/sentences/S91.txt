@@ -1,0 +1,36 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+13.5. Testing for failure
+13.5. 负面测试 (Testing for failure)
+
+It is not enough to test that functions succeed when given good input;
+使用有效输入确保函数成功通过测试还不够，你还需要测试无效输入导致函数失败的情形
+
+you must also test that they fail when given bad input.
+但并不是任何失败都可以，必须如你预期地失败
+
+Remember the other requirements for toRoman:
+还记得 toRoman 的其他要求吧：
+
+In Python, functions indicate failure by raising exceptions, and the unittest module provides methods for testing whether a function raises a particular exception when given bad input.
+在 Python 中，函数以引发异常的方式表示失败
+
+The next two requirements are similar to the first three, except they apply to fromRoman instead of toRoman:
+接下来的两个要求与前三个类似，不同点是他们所针对的是 fromRoman 而不是 toRoman：
+
+Requirement #4 is handled in the same way as requirement #1, iterating through a sampling of known values and testing each in turn.
+要求 #4 与要求 #1 的处理方法相同，即测试一个已知样本中的一个个数字对
+
+Requirement #5 is handled in the same way as requirements #2 and #3, by testing a series of bad inputs and making sure fromRoman raises the appropriate exception.
+要求 #5 与 #2 和 #3的处理方法相同，即通过无效输入确认 fromRoman 引发恰当的异常
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

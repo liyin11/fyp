@@ -1,0 +1,57 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+15.4. Postscript
+15.4. 后记
+
+A clever reader read the previous section and took it to the next level.
+聪明的读者在学习前一节时想得会更深入一层
+
+The biggest headache (and performance drain) in the program as it is currently written is the regular expression, which is required because you have no other way of breaking down a Roman numeral.
+现在写的这个程序中最令人头痛的性能负担是正则表达式，但它是必需的，因为没有其它方法来识别罗马数字
+
+But there's only 5000 of them;
+但是，它们只有 5000 个，为什么不一次性地构建一个查询表来读取
+
+why don't you just build a lookup table once, then simply read that?
+不必用正则表达式凸现了这个主意的好处
+
+This idea gets even better when you realize that you don't need to use regular expressions at all.
+你建立了整数到罗马数字查询表的时候，罗马数字到整数的逆向查询表也构建了
+
+And best of all, he already had a complete set of unit tests.
+更大的好处在于，你已经拥有一整套完全的单元测试
+
+He changed over half the code in the module, but the unit tests stayed the same, so he could prove that his code worked just as well as the original.
+你修改了多半的代码，但单元测试还是一样的，因此你可以确定你的新代码与来的代码一样可以正常工作
+
+This file is available in py/roman/stage9/ in the examples directory.
+这个文件可以在例子目录下的 py/roman/stage9/ 目录中找到
+
+If you have not already done so, you can download this and other examples used in this book.
+如果您还没有下载本书附带的样例程序, 可以 下载本程序和其他样例程序
+
+So how fast is it?
+这样有多快呢
+
+Remember, the best performance you ever got in the original version was 13 tests in 3.315 seconds.
+还记得吗
+
+Of course, it's not entirely a fair comparison, because this version will take longer to import (when it fills the lookup tables).
+你原有版本的最快速度是 13 个测试耗时 3.315 秒
+
+But since import is only done once, this is negligible in the long run.
+当然，这样的比较不完全公平，因为这个新版本需要更长的时间来导入 (当它填充查询表时)
+
+The moral of the story?
+这个重构的故事的寓意是什么
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

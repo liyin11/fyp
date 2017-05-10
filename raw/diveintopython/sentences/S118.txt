@@ -1,0 +1,108 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+18.5. Optimizing List Operations
+18.5. 优化列表操作
+
+The third step in the Soundex algorithm is eliminating consecutive duplicate digits.
+Soundex 算法的第三步是去除连续重复字符
+
+What's the best way to do this?
+怎样做是最佳方法
+
+Here's the code we have so far, in soundex/stage2/soundex2c.py:
+这里是我们目前在 soundex/stage2/soundex2c.py 中的代码：
+
+Here are the performance results for soundex2c.py:
+这里是 soundex2c.py 的性能表现：
+
+The first thing to consider is whether it's efficient to check digits[-1] each time through the loop.
+第一件事是考虑，考察在循环的每一轮都检查 digits[-1] 是否有效率
+
+Are list indexes expensive?
+列表索引代价大吗
+
+Would we be better off maintaining the last digit in a separate variable, and checking that instead?
+如果把上一个数字存在另外的变量中以便检查是否会获益
+
+To answer this question, here is soundex/stage3/soundex3a.py:
+这里的 soundex/stage3/soundex3a.py 将回答这个问题：
+
+soundex3a.py does not run any faster than soundex2c.py, and may even be slightly slower (although it's not enough of a difference to say for sure):
+soundex3a.py 并不比 soundex2c.py 运行得快多少，而且甚至可能更会慢些 (差异还没有大到可以确信这一点)：
+
+Why isn't soundex3a.py faster?
+为什么 soundex3a.py 不更快呢
+
+It turns out that list indexes in Python are extremely efficient.
+其实 Python 的索引功能恰恰很有效
+
+Repeatedly accessing digits2[-1] is no problem at all.
+重复使用 digits2[-1] 根本没什么问题
+
+On the other hand, manually maintaining the last seen digit in a separate variable means we have two variable assignments for each digit we're storing, which wipes out any small gains we might have gotten from eliminating the list lookup.
+另一方面，手工保留上一个数字意味着我们每存储一个数字都要为两个 变量赋值，这便抹杀了我们避开索引查找所带来的微小好处
+
+Let's try something radically different.
+让我们从本质上不同的方法来思考
+
+If it's possible to treat a string as a list of characters, it should be possible to use a list comprehension to iterate through the list.
+如果可以把字符串当作字符列表来对待，那么使用列表遍历遍寻列表便成为可能
+
+The problem is, the code needs access to the previous character in the list, and that's not easy to do with a straightforward list comprehension.
+问题是代码需要使用列表中的上一个字符，而且使用列表遍历做到这一点并不容易
+
+However, it is possible to create a list of index numbers using the built-in range() function, and use those index numbers to progressively search through the list and pull out each character that is different from the previous character.
+但是，使用内建的 range() 函数创建一个索引数字构成的列表是可以的
+
+That will give you a list of characters, and you can use the string method join() to reconstruct a string from that.
+使用这些索引数字一步步搜索列表并拿出与前面不同的字符
+
+Here is soundex/stage3/soundex3b.py:
+这便是 soundex/stage3/soundex3b.py：
+
+Is this faster?
+这样快了吗
+
+In a word, no.
+一个字，否
+
+It's possible that the techniques so far as have been “string-centric”.
+有可能因为目前的这些方法都是 “字符串中心化” 的
+
+Python can convert a string into a list of characters with a single command: list('abc') returns ['a', 'b', 'c'].
+Python 可以通过一个命令把一个字符串转化为一个字符列表：list('abc') 返回 ['a', 'b', 'c']
+
+Furthermore, lists can be modified in place very quickly.
+更进一步，列表可以被很快地就地 改变
+
+Instead of incrementally building a new list (or string) out of the source string, why not move elements around within a single list?
+与其一砖一瓦地建造一个新的列表 (或者字符串)，为什么不选择操作列表的元素呢
+
+Here is soundex/stage3/soundex3c.py, which modifies a list in place to remove consecutive duplicate elements:
+这便是 soundex/stage3/soundex3c.py，就地修改列表去除连续重复元素：
+
+Is this faster than soundex3a.py or soundex3b.py?
+这比 soundex3a.py 或 soundex3b.py 快吗
+
+No, in fact it's the slowest method yet:
+不，实际上这是目前最慢的一种方法[16]：
+
+We haven't made any progress here at all, except to try and rule out several “clever” techniques.
+我们在这儿除了试用了几种 “聪明” 的技术，根本没有什么进步
+
+The fastest code we've seen so far was the original, most straightforward method (soundex2c.py).
+到目前为止最快的方法就是最直接的原始方法 (soundex2c.py)
+
+Sometimes it doesn't pay to be clever.
+有时候聪明未必有回报
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+[16] soundex3c.py 比 soundex3b.py 快
+

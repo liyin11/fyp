@@ -1,0 +1,36 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+12.4. Debugging SOAP Web Services
+12.4.  SOAP 网络服务查错
+
+The SOAP libraries provide an easy way to see what's going on behind the scenes.
+SOAP 提供了一个很方便的方法用以查看背后的情形
+
+Turning on debugging is a simple matter of setting two flags in the SOAPProxy's configuration.
+SOAPProxy 的两个小设置就可以打开查错模式
+
+Most of the XML request document that gets sent to the server is just boilerplate.
+大部分 XML 请求文档都基于模板文件
+
+Ignore all the namespace declarations;
+忽略所有命名空间声明这些对于所有 SOAP 调用都一成不变的东西
+
+they're going to be the same (or similar) for all SOAP calls.
+这个 “函数调用” 的核心是 当中的部分：
+
+The XML return document is equally easy to understand, once you know what to ignore.
+返回的 XML 文档同样容易理解，重点在于知道应该忽略掉哪些内容
+
+Focus on this fragment within the :
+把注意力集中在  部分：
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

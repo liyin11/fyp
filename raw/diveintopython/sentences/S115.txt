@@ -1,0 +1,84 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+18.2. Using the timeit Module
+18.2. 使用 timeit 模块
+
+The most important thing you need to know about optimizing Python code is that you shouldn't write your own timing function.
+关于 Python 代码优化你需要知道的最重要问题是，决不要自己编写计时函数
+
+Timing short pieces of code is incredibly complex.
+为一个很短的代码计时都很复杂
+
+How much processor time is your computer devoting to running this code?
+处理器有多少时间用于运行这个代码
+
+Are there things running in the background?
+有什么在后台运行吗
+
+Are you sure?
+每个现代计算机都在后台运行持续或者间歇的程序
+
+Every modern computer has background processes running, some all the time, some intermittently.
+小小的疏忽可能破坏你的百年大计，后台服务偶尔被 “唤醒” 在最后千分之一秒做一些像查收信件，连接计时通信服务器，检查应用程序更新，扫描病毒，查看是否有磁盘被插入光驱之类很有意义的事
+
+Cron jobs fire off at consistent intervals;
+在开始计时测试之前，把一切都关掉，断开网络的连接
+
+background services occasionally “wake up” to do useful things like check for new mail, connect to instant messaging servers, check for application updates, scan for viruses, check whether a disk has been inserted into your CD drive in the last 100 nanoseconds, and so on.
+再次确定一切都关上后关掉那些不断查看网络是否恢复的服务等等
+
+And then there's the matter of the variations introduced by the timing framework itself.
+接下来是计时框架本身引入的变化因素
+
+Does the Python interpreter cache method name lookups?
+Python 解释器是否缓存了方法名的查找
+
+Does it cache code block compilations?
+是否缓存代码块的编译结果
+
+Regular expressions?
+正则表达式呢? 你的代码重复运行时有副作用吗
+
+Will your code have side effects if run more than once?
+不要忘记，你的工作结果将以比秒更小的单位呈现，你的计时框架中的小错误将会带来不可挽回的结果扭曲
+
+The Python community has a saying: “Python comes with batteries included.” Don't write your own timing framework.
+Python 社区有句俗语：“Python 自己带着电池
+
+Python 2.3 comes with a perfectly good one called timeit.
+” 别自己写计时框架
+
+If you have not already done so, you can download this and other examples used in this book.
+如果您还没有下载本书附带的样例程序, 可以 下载本程序和其他样例程序
+
+Note that repeat() returns a list of times.
+注意 repeat() 返回一个时间列表
+
+The times will almost never be identical, due to slight variations in how much processor time the Python interpreter is getting (and those pesky background processes that you can't get rid of).
+由于 Python 计时器使用的处理器时间的微小变化 (或者那些你没办法根除的可恶的后台进程)，这些时间中几乎不可能出现重复
+
+Your first thought might be to say “Let's take the average and call that The True Number.”
+你的第一想法也许是说：“让我们求平均值获得真实的数据
+
+In fact, that's almost certainly wrong.
+事实上，那几乎是确定错误的
+
+The tests that took longer didn't take longer because of variations in your code or in the Python interpreter;
+你的代码或者 Python 解释器的变化可能缩短耗时，那些没办法去除的可恶后台进程或者其他 Python 解释器以外的因素也许令耗时延长
+
+they took longer because of those pesky background processes, or other factors outside of the Python interpreter that you can't fully eliminate.
+如果计时结果之间的差异超过百分之几，太多的可变因素使你没法相信结果，如果不是这样则可以取最小值而丢弃其他结果
+
+Python has a handy min function that takes a list and returns the smallest value:
+Python 有一个方便的 min 函数返回输入列表中的最小值：
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

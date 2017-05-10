@@ -1,0 +1,93 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+15.3. Refactoring
+15.3. 重构
+
+The best thing about comprehensive unit testing is not the feeling you get when all your test cases finally pass, or even the feeling you get when someone else blames you for breaking their code and you can actually prove that you didn't.
+全面的单元测试带来的最大好处不是你的全部测试用例最终通过时的成就感
+
+The best thing about unit testing is that it gives you the freedom to refactor mercilessly.
+也不是被责怪破坏了别人的代码时能够证明 自己的自信
+
+Refactoring is the process of taking working code and making it work better.
+重构是在可运行代码的基础上使之工作得更好的过程
+
+Usually, “better” means “faster”, although it can also mean “using less memory”, or “using less disk space”, or simply “more elegantly”.
+通常，“更好”意味着“更快”，也可能意味着 “使用更少的内存”，或者 “使用更少的磁盘空间”，或者仅仅是“更优雅的代码”
+
+Whatever it means to you, to your project, in your environment, refactoring is important to the long-term health of any program.
+不管对你，对你的项目意味什么，在你的环境中，重构对任何程序的长期良性运转都是重要的
+
+Here, “better” means “faster”.
+这里，“更好” 意味着 “更快”
+
+Specifically, the fromRoman function is slower than it needs to be, because of that big nasty regular expression that you use to validate Roman numerals.
+更具体地说，fromRoman 函数可以更快，关键在于那个丑陋的、用于验证罗马数字有效性的正则表达式
+
+It's probably not worth trying to do away with the regular expression altogether (it would be difficult, and it might not end up any faster), but you can speed up the function by precompiling the regular expression.
+尝试不用正则表达式去解决是不值得的 (这样做很难，而且可能也快不了多少)，但可以通过预编译正则表达式使函数提速
+
+This file is available in py/roman/stage8/ in the examples directory.
+这个文件可以在例子目录下的 py/roman/stage8/ 目录中找到
+
+If you have not already done so, you can download this and other examples used in this book.
+如果您还没有下载本书附带的样例程序, 可以 下载本程序和其他样例程序
+
+So how much faster is it to compile regular expressions?
+那么编译正则表达式可以提速多少呢
+
+See for yourself:
+你自己来看吧：
+
+There is one other performance optimization that I want to try.
+我还想做另外一个性能优化工作
+
+Given the complexity of regular expression syntax, it should come as no surprise that there is frequently more than one way to write the same expression.
+就正则表达式语法的复杂性而言，通常有不止一种方法来构造相同的表达式是不会令人惊讶的
+
+After some discussion about this module on comp.lang.python, someone suggested that I try using the {m,n} syntax for the optional repeated characters.
+在 comp.lang.python 上对该模块进行一些讨论后，有人建议我使用 {m,n} 语法来查找可选重复字符
+
+This file is available in py/roman/stage8/ in the examples directory.
+这个文件可以在例子目录下的 py/roman/stage8/ 目录中找到
+
+If you have not already done so, you can download this and other examples used in this book.
+如果您还没有下载本书附带的样例程序, 可以 下载本程序和其他样例程序
+
+This form of the regular expression is a little shorter (though not any more readable).
+这样的正则表达简短一些 (虽然可读性不太好)
+
+The big question is, is it any faster?
+核心问题是，是否能加快速度
+
+One other tweak I would like to make, and then I promise I'll stop refactoring and put this module to bed.
+还有另外一个我想做的调整，我保证这是最后一个，之后我会停下来，让这个模块歇歇
+
+As you've seen repeatedly, regular expressions can get pretty hairy and unreadable pretty quickly.
+就像你多次看到的，正则表达式越晦涩难懂越快，我可不想在六个月内再回头试图维护它
+
+I wouldn't like to come back to this module in six months and try to maintain it.
+是呀
+
+Sure, the test cases pass, so I know that it works, but if I can't figure out how it works, it's still going to be difficult to add new features, fix new bugs, or otherwise maintain it.
+测试用例通过了，我便知道它工作正常，但如果我搞不懂它是如何 工作的，添加新功能、修正新 Bug，或者维护它都将变得很困难
+
+As you saw in Section 7.5, “Verbose Regular Expressions”, Python provides a way to document your logic line-by-line.
+正如你在 第 7.5 节 “松散正则表达式” 看到的，Python 提供了逐行注释你的逻辑的方法
+
+This file is available in py/roman/stage8/ in the examples directory.
+该文件可以在例子目录下的 py/roman/stage8/ 目录中找到
+
+If you have not already done so, you can download this and other examples used in this book.
+如果您还没有下载本书附带的样例程序, 可以 下载本程序和其他样例程序
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

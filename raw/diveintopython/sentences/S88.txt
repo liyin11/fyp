@@ -1,0 +1,36 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+13.2. Diving in
+13.2. 深入
+
+Now that you've completely defined the behavior you expect from your conversion functions, you're going to do something a little unexpected: you're going to write a test suite that puts these functions through their paces and makes sure that they behave the way you want them to.
+现在你已经定义了你的转换程序所应有的功能，下面一步会有点儿出乎你的意料：你将要开发一个测试组件 (test suite) 来测试你未来的函数以确保它们工作正常
+
+You read that right: you're going to write code that tests code that you haven't written yet.
+没错：你将为还未开发的程序开发测试代码
+
+This is called unit testing, since the set of two conversion functions can be written and tested as a unit, separate from any larger program they may become part of later.
+这就是所谓的单元测试，因为这两个转换函数可以被当作一个单元来开发和测试，不用考虑它们可能今后成为一个大程序的一部分
+
+Python has a framework for unit testing, the appropriately-named unittest module.
+Python 有一个单元测试框架，被恰如其分地称作 unittest 模块
+
+Unit testing is an important part of an overall testing-centric development strategy.
+单元测试是以测试为核心开发策略的重要组成部分
+
+If you write unit tests, it is important to write them early (preferably before writing the code that they test), and to keep them updated as code and requirements change.
+如果你要写单元测试代码，尽早 (最好是在被测试代码开发之前) 开发并根据代码开发和需求的变化不断更新是很重要的
+
+Unit testing is not a replacement for higher-level functional or system testing, but it is important in all phases of development:
+单元测试不能取代更高层面的功能和系统测试，但在开发的每个阶段都很重要：
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

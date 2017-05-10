@@ -1,0 +1,48 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+13.6. Testing for sanity
+13.6. 完备性检测 (Testing for sanity)
+
+Often, you will find that a unit of code contains a set of reciprocal functions, usually in the form of conversion functions where one converts A to B and the other converts B to A.
+你经常会发现一组代码中包含互逆的转换函数，一个把 A 转换为 B ，另一个把 B 转换为 A
+
+In these cases, it is useful to create a “sanity check” to make sure that you can convert A to B and back to A without losing precision, incurring rounding errors, or triggering any other sort of bug.
+在这种情况下，创建“完备性检测”可以使你在由 A 转 B 再转 A 的过程中不会出现丢失精度或取整等错误
+
+Consider this requirement:
+考虑这个要求：
+
+The last two requirements are different from the others because they seem both arbitrary and trivial:
+最后两个要求和其他的要求不同，似乎既武断而又微不足道：
+
+In fact, they are somewhat arbitrary.
+事实上，它们确实有点武断，譬如你完全可以让 fromRoman 接受小写和大小写混合的输入
+
+You could, for instance, have stipulated that fromRoman accept lowercase and mixed case input.
+但他们也不是完全武断
+
+But they are not completely arbitrary;
+如果 toRoman 总是返回大写的输出，那么 fromRoman 至少应该接受大写字母输入，不然 “完备性检测” (要求 #6) 就会失败
+
+if toRoman is always returning uppercase output, then fromRoman must at least accept uppercase input, or the “sanity check” (requirement #6) would fail.
+不管怎么说，只 接受大写输入还是武断的，但就像每个系统都会告诉你的那样，大小写总会出问题，因此事先规定这一点还是有必要的
+
+The fact that it only accepts uppercase input is arbitrary, but as any systems integrator will tell you, case always matters, so it's worth specifying the behavior up front.
+既然有必要规定，那么也就有必要测试
+
+In the next chapter, you'll see how to write code that passes these tests.
+在下一章中，你将看到如何编写可以通过这些测试的代码
+
+[6] “I can resist everything except temptation.” --Oscar Wilde
+[11] “除了诱惑什么我都能抗拒
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

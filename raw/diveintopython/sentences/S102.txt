@@ -1,0 +1,45 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+16.3. Filtering lists revisited
+16.3. 重识列表过滤
+
+You're already familiar with using list comprehensions to filter lists.
+你已经熟识了应用列表解析来过滤列表
+
+There is another way to accomplish this same thing, which some people feel is more expressive.
+这里介绍的是达到相同效果的另一种令很多人感觉清晰的实现方法
+
+Python has a built-in filter function which takes two arguments, a function and a list, and returns a list.[7] The function passed as the first argument to filter must itself take one argument, and the list that filter returns will contain all the elements from the list passed to filter for which the function passed to filter returns true.
+Python 有一个内建 filter 函数，它接受两个参数：一个函数和一个列表，返回一个列表
+
+Got all that?
+都明白了吗
+
+It's not as difficult as it sounds.
+并没有听起来那么难
+
+Historical note. Versions of Python prior to 2.0 did not have list comprehensions, so you couldn't filter using list comprehensions;
+历史注释. Python 2.0 早期的版本不包含 列表解析，因此不能 以列表解析方式过滤，filter 函数是当时唯一的方法
+
+the filter function was the only game in town.
+即便是在引入列表解析的 2.0 版，有些人仍然钟情于老派的 filter (和这章稍后将见到的它的伴侣函数 map )
+
+Even with the introduction of list comprehensions in 2.0, some people still prefer the old-style filter (and its companion function, map, which you'll see later in this chapter).
+两种方法并存于世，使用哪种方法只是风格问题，map 和 filter 将在未来的 Python 版本中被废止的讨论尚无定论
+
+[7] Technically, the second argument to filter can be any sequence, including lists, tuples, and custom classes that act like lists by defining the __getitem__ special method.
+[12] 从技术层面上讲，filter 的第二个参数可以是任意的序列，包括列表、元组以及定义了 __getitem__ 特殊方法而能像列表一样工作的自定义类
+
+If possible, filter will return the same datatype as you give it, so filtering a list returns a list, but filtering a tuple returns a tuple.
+在可能情况下，filter 会返回与输入相同的数据类型，也就是过滤一个列表返回一个列表，过滤一个元组返回一个元组
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

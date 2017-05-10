@@ -1,0 +1,84 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+12.5. Introducing WSDL
+12.5. WSDL 介绍
+
+The SOAPProxy class proxies local method calls and transparently turns then into invocations of remote SOAP methods.
+SOAPProxy 类本地方法调用并透明地转向到远程 SOAP 方法
+
+As you've seen, this is a lot of work, and SOAPProxy does it quickly and transparently.
+正如你所看到的，这是很多的工作，SOAPProxy 快速和透明地完成他们
+
+What it doesn't do is provide any means of method introspection.
+它没有做到的是提供方法自省的手段
+
+Consider this: the previous two sections showed an example of calling a simple remote SOAP method with one argument and one return value, both of simple data types.
+考虑一下：前面两部分所展现的调用只有一个参数和返回的简单远程 SOAP 方法
+
+This required knowing, and keeping track of, the service URL, the service namespace, the function name, the number of arguments, and the datatype of each argument.
+服务 URL 和一系列参数及它们的数据类型需要被知道并跟踪
+
+If any of these is missing or wrong, the whole thing falls apart.
+任何的缺失或错误都会导致整体的失败
+
+That shouldn't come as a big surprise.
+这并没有什么可惊讶的
+
+If I wanted to call a local function, I would need to know what package or module it was in (the equivalent of service URL and namespace).
+如果我要调用一个本地函数，我需要知道函数所在的包和模块名 (与之对应的则是服务 URL 和命名空间)
+
+I would need to know the correct function name and the correct number of arguments.
+我还需要知道正确的函数名以及其函数个数
+
+Python deftly handles datatyping without explicit types, but I would still need to know how many argument to pass, and how many return values to expect.
+Python 精妙地不需明示类型，但我还是需要知道有多少个参数需要传递，多少个值将被返回
+
+The big difference is introspection.
+最大的区别就在于内省
+
+As you saw in Chapter 4, Python excels at letting you discover things about modules and functions at runtime.
+就像你在 第 4 章 看到的那样，Python 擅长于让你实时地去探索模块和函数的情况
+
+You can list the available functions within a module, and with a little work, drill down to individual function declarations and arguments.
+你可以对一个模块中的所有函数进行列表，并不费吹灰之力地明了函数的声明和参数情况
+
+WSDL lets you do that with SOAP web services.
+WSDL 允许你对 SOAP 网络服务做相同的事情
+
+WSDL stands for “Web Services Description Language”.
+WSDL 是 “网络服务描述语言 (Web Services Description Language)”的缩写
+
+Although designed to be flexible enough to describe many types of web services, it is most often used to describe SOAP web services.
+它尽管是为自如地表述多种类型的网络服务而设定，却也经常用于描述 SOAP 网络服务
+
+A WSDL file is just that: a file.
+一个 WSDL 文件不过就是一个文件
+
+More specifically, it's an XML file.
+更具体地讲，是一个 XML 文件
+
+It usually lives on the same server you use to access the SOAP web services it describes, although there's nothing special about it.
+通常存储于你所访问的 SOAP 网络服务这个被描述对象所在的服务器上，并没有什么特殊之处
+
+Later in this chapter, we'll download the WSDL file for the Google API and use it locally.
+在本章稍后的位置，我们将下载 Google API 的 WSDL 文件并在本地使用它
+
+That doesn't mean we're calling Google locally;
+这并不意味着本地调用 Google，这个 WSDL 文件所描述的仍旧是 Google 服务器上的远程函数
+
+A WSDL file contains a description of everything involved in calling a SOAP web service:
+在 WSDL 文件中描述了调用相应的 SOAP 网络服务的一切：
+
+In other words, a WSDL file tells you everything you need to know to be able to call a SOAP web service.
+换言之，一个 WSDL 文件告诉你调用 SOAP 所需要知道的一切
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

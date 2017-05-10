@@ -1,0 +1,24 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+12.9. Summary
+12.9. 小结
+
+SOAP web services are very complicated.
+SOAP 网络服务是很复杂的，雄心勃勃的它试图涵盖网络服务的很多不同应用
+
+The specification is very ambitious and tries to cover many different use cases for web services.
+这一章我们接触了它的一个简单应用
+
+Before diving into the next chapter, make sure you're comfortable doing all of these things:
+在开始下一章的学习之前，确保你能自如地做如下工作：
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

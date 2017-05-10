@@ -1,0 +1,39 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+17.4. plural.py, stage 3
+17.4. plural.py, 第 3 阶段
+
+Defining separate named functions for each match and apply rule isn't really necessary.
+将每个匹配和规则应用分别制作成函数没有必要
+
+You never call them directly;
+你从来不会直接调用它们：你把它们定义于 rules 列表之中并从那里调用它们
+
+you define them in the rules list and call them through there.
+让我们隐去它们的函数名而抓住规则定义的主线
+
+Now to add a new rule, all you need to do is define the functions directly in the rules list itself: one match rule, and one apply rule.
+现在添加一条新的规则，所有你要做的就是直接在 rules 列表之中定义函数：一个匹配规则，一个应用规则
+
+But defining the rule functions inline like this makes it very clear that you have some unnecessary duplication here.
+这样内嵌的规则函数定义方法使得没必要的重复很容易被发现
+
+You have four pairs of functions, and they all follow the same pattern.
+你有四对函数，它们采用相同的模式
+
+The match function is a single call to re.search, and the apply function is a single call to re.sub.
+匹配函数就是调用 re.search，应用函数就是调用 re.sub
+
+Let's factor out these similarities.
+让我们提炼出这些共同点
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

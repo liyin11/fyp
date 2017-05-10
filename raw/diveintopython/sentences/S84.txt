@@ -1,0 +1,42 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+12.6. Introspecting SOAP Web Services with WSDL
+12.6. 以 WSDL 进行 SOAP 内省
+
+Like many things in the web services arena, WSDL has a long and checkered history, full of political strife and intrigue.
+就像网络服务舞台上的所有事物，WSDL 也经历了一个充满明争暗斗而且漫长多变的历史
+
+I will skip over this history entirely, since it bores me to tears.
+我不打算讲述这段令我伤心的历史
+
+There were other standards that tried to do similar things, but WSDL won, so let's learn how to use it.
+还有一些其他的标准提供相同的支持，但 WSDL 还是胜出，所以我们还是来学习一下如何使用它
+
+The most fundamental thing that WSDL allows you to do is discover the available methods offered by a SOAP server.
+WSDL 最基本的功能便是让你揭示 SOAP 服务器所提供的有效方法
+
+Okay, so you know that this SOAP server offers a single method: getTemp.
+好的，你知道这个 SOAP 服务器提供一个方法：getTemp
+
+But how do you call it?
+但是如何去调用它呢
+
+The WSDL proxy object can tell you that too.
+WSDL 也在这方面提供信息
+
+WSDL also lets you introspect into a function's return values.
+WSDL 还允许你自省函数的返回值
+
+Let's put it all together, and call a SOAP web service through a WSDL proxy.
+让我们整合一下，通过 WSDL proxy 调用一个 SOAP 网络服务
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

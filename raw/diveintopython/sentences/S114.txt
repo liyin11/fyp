@@ -1,0 +1,30 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+17.8. Summary
+17.8. 小结
+
+You talked about several different advanced techniques in this chapter.
+这一章中我们探讨了几个不同的高级技术
+
+Not all of them are appropriate for every situation.
+它们并不都适用于任何情况
+
+You should now be comfortable with all of these techniques:
+你现在应该能自如应用如下技术：
+
+Adding abstractions, building functions dynamically, building closures, and using generators can all make your code simpler, more readable, and more flexible.
+抽象化，动态构建函数，构建闭合以及应用生成器能够使你的代码更加简单化、可读化、灵活化
+
+But they can also end up making it more difficult to debug later.
+你需要在简洁和功能实现两方面进行平衡
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

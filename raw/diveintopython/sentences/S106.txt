@@ -1,0 +1,45 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+16.7. Putting it all together
+16.7. 全部放在一起
+
+You've learned enough now to deconstruct the first seven lines of this chapter's code sample: reading a directory and importing selected modules within it.
+你已经学习了足够的知识，现在来分析本章样例代码的前七行：读取一个目录并从中导入选定的模块
+
+Let's look at it line by line, interactively.
+让我们一行行交互地看
+
+Assume that the current directory is c:\diveintopython\py, which contains the examples that come with this book, including this chapter's script.
+假定当前目录是 c:\diveintopython\py，其中有包含本章脚本在内的本书众多样例
+
+As you saw in Section 16.2, “Finding the path”, the script directory will end up in the path variable, so let's start hard-code that and go from there.
+正如在 第 16.2 节 “找到路径” 中所见，脚本目录将存于 path 变量，因此让我们从这里开始以实打实的代码起步
+
+This introspection process is what the unittest module usually does for us.
+自省过程是 unittest 模块经常为我们做的一项工作
+
+Remember that magic-looking unittest.main() function that our individual test modules called to kick the whole thing off?
+还记得我们的独立测试模块仅仅调用了看似神奇的 unittest.main() 函数就大刀阔斧地完成了全部工作吗
+
+unittest.main() actually creates an instance of unittest.TestProgram, which in turn creates an instance of a unittest.defaultTestLoader and loads it up with the module that called it.
+unittest.main() 实际上创建了一个 unittest.TestProgram 的实例，而这个实例实际上创建了一个 unittest.defaultTestLoader 的实例并以调用它的模块启动它
+
+(How does it get a reference to the module that called it if you don't give it one?
+ (如果你不给出，如何知道调用它的模块是哪一个
+
+By using the equally-magic __import__('__main__') command, which dynamically imports the currently-running module.
+通过使用同样神奇的 __import__('__main__') 命令，动态导入正在运行的模块
+
+I could write a book on all the tricks and techniques used in the unittest module, but then I'd never finish this one.)
+我可以就 unittest 模块中使用的所有技巧和技术写一本书，但那样我就没法写完这本了
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

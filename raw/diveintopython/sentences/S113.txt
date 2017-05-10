@@ -1,0 +1,42 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+17.7. plural.py, stage 6
+17.7. plural.py, 第 6 阶段
+
+Now you're ready to talk about generators.
+现在你已准备好探讨生成器 (Generator) 了
+
+This uses a technique called generators, which I'm not even going to try to explain until you look at a simpler example first.
+这里使用了被称作生成器的技术，我不打算在你看过一个简单例子之前试图解释它
+
+So you have a function that spits out successive Fibonacci numbers.
+这样你就有了生成连续的 Fibonacci 数的函数了
+
+Sure, you could do that with recursion, but this way is easier to read.
+当然你也可以通过递归做到，但是这里的方法更加易读
+
+Also, it works well with for loops.
+并且也与 for 工作得很好
+
+OK, let's go back to the plural function and see how you're using this.
+好了，让我们回到 plural 函数看看如何可以把它用起来
+
+What have you gained over stage 5?
+你在第 5 阶段得到的是什么
+
+In stage 5, you read the entire rules file and built a list of all the possible rules before you even tried the first one.
+第 5 阶段中，你读取整个规则文件并在使用第一条规则之前构建一个所有规则组成的列表
+
+Now with generators, you can do everything lazily: you open the first and read the first rule and create a function to try it, but if that works you don't ever read the rest of the file or create any other functions.
+现在有了生成器，你可以更舒适地做到这一切：你打开并读取第一条规则，根据它创建函数并使用之，如果它适用则根本不去读取规则文件剩下的内容，也不去建立另外的函数
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

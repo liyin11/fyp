@@ -1,0 +1,39 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+16.4. Mapping lists revisited
+16.4. 重识列表映射
+
+You're already familiar with using list comprehensions to map one list into another.
+你对使用列表解析映射列表的做法已经熟知
+
+There is another way to accomplish the same thing, using the built-in map function.
+另一种方法可以完成同样的工作：使用内建 map 函数
+
+It works much the same way as the filter function.
+它的工作机理和 filter 函数类似
+
+All right, enough play time.
+好了，玩够了
+
+Let's look at some real code.
+让我们来看一些真实代码
+
+As you'll see in the rest of the chapter, you can extend this type of data-centric thinking all the way to the final goal, which is to define and execute a single test suite that contains the tests from all of those individual test suites.
+如你在本章剩余部分将看到的，你可以将这种数据中心思想扩展到定义和执行一个容纳来自很多单个测试套件的测试的一个测试套件的最终目标
+
+[8] Again, I should point out that map can take a list, a tuple, or any object that acts like a sequence.
+[13] 同前，我需要指出 map 可以接受一个列表、元组，或者一个像序列一样的对象
+
+See previous footnote about filter.
+参见前面的关于 filter 的脚注
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

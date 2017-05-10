@@ -1,0 +1,51 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+17.6. plural.py, stage 5
+17.6. plural.py, 第 5 阶段
+
+You've factored out all the duplicate code and added enough abstractions so that the pluralization rules are defined in a list of strings.
+你已经精炼了所有重复代码，也尽可能地把复数规则提炼到定义一个字符串列表
+
+The next logical step is to take these strings and put them in a separate file, where they can be maintained separately from the code that uses them.
+接下来的步骤是把这些字符串提出来放在另外的文件中，从而可以和使用它们的代码分开来维护
+
+First, let's create a text file that contains the rules you want.
+首先，让我们建立一个包含你需要的所有规则的文本文件
+
+No fancy data structures, just space- (or tab-)delimited strings in three columns.
+没有什么特别的结构，不过是以空格 (或者制表符) 把字符串列成三列
+
+You'll call it rules.en;
+你把它命名为 rules.en，“en” 是英语的意思
+
+“en” stands for English.
+这些是英语名词复数的规则，你以后可以为其它语言添加规则文件
+
+Now let's see how you can use this rules file.
+现在来看看如何使用规则文件
+
+So the improvement here is that you've completely separated the pluralization rules into an external file.
+这里的进步是你把复数规则完全分离到另外的文件中
+
+Not only can the file be maintained separately from the code, but you've set up a naming scheme where the same plural function can use different rule files, based on the language parameter.
+不但这个文件可以独立于代码单独维护，而且你建立了一个命名规划使 plural 函数可以根据 language 参数使用不同的规则文件
+
+The downside here is that you're reading that file every time you call the plural function.
+这里的缺陷是每次调用 plural 函数都需要去读取一次文件
+
+I thought I could get through this entire book without using the phrase “left as an exercise for the reader”, but here you go: building a caching mechanism for the language-specific rule files that auto-refreshes itself if the rule files change between calls is left as an exercise for the reader.
+我想我可以在整本书中都不使用 “留给读者去练习”，但是这里：为特定的语言规则文件建立一个缓存机制，并在调用期间规则文件改变时自动刷新留给读者作为练习
+
+Have fun.
+祝你顺利
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

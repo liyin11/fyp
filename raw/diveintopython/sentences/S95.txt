@@ -1,0 +1,30 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+14.4. roman.py, stage 4
+14.4. roman.py, 第 4 阶段
+
+Now that toRoman is done, it's time to start coding fromRoman.
+现在 toRoman 完成了，是开始编写 fromRoman 的时候了
+
+Thanks to the rich data structure that maps individual Roman numerals to integer values, this is no more difficult than the toRoman function.
+感谢那个将每个罗马数字和对应整数关连的完美数据结构，这个工作不比 toRoman 函数复杂
+
+This file is available in py/roman/stage4/ in the examples directory.
+这个文件可以在例子目录下的 py/roman/stage4/ 目录中找到
+
+If you have not already done so, you can download this and other examples used in this book.
+如果您还没有下载本书附带的样例程序, 可以 下载本程序和其他样例程序
+
+If you're not clear how fromRoman works, add a print statement to the end of the while loop:
+如果你不清楚 fromRoman 如何工作，在 while 结尾处添加一个 print 语句：
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

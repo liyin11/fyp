@@ -1,0 +1,42 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+18.7. Summary
+18.7. 小结
+
+This chapter has illustrated several important aspects of performance tuning in Python, and performance tuning in general.
+这一章展示了性能优化的几个重要方面，这里是就 Python 而言，但它们却普遍适用
+
+I can't emphasize that last point strongly enough.
+最后一点太重要了
+
+Over the course of this chapter, you made this function three times faster and saved 20 seconds over 1 million function calls.
+这章中你令这个程序提速三倍并且令百万次的调用节省 20 秒
+
+Great.
+太棒了
+
+Now think: over the course of those million function calls, how many seconds will your surrounding application wait for a database connection?
+现在思考一下：在那百万次的函数调用中，有多少秒花在周边应用程序等待数据库连接
+
+Or wait for disk I/O?
+花在磁盘输入/输出上
+
+Or wait for user input?
+花在等待用户输入上
+
+Don't spend too much time over-optimizing one algorithm, or you'll ignore obvious improvements somewhere else.
+不要在过度优化算法上花时间，从而忽略了其它地方可以做的明显改进
+
+Develop an instinct for the sort of code that Python runs well, correct obvious blunders if you find them, and leave the rest alone.
+开发你编写运行良好的 Python 代码的直觉，如果发现明显的失误则修正它们，并不对其它部分过分操作
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

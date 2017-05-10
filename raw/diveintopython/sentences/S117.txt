@@ -1,0 +1,120 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+18.4. Optimizing Dictionary Lookups
+18.4. 优化字典查找
+
+The second step of the Soundex algorithm is to convert characters to digits in a specific pattern.
+Soundex 算法的第二步是依照特定规则将字符转换为数字
+
+What's the best way to do this?
+做到这点最好的方法是什么
+
+The most obvious solution is to define a dictionary with individual characters as keys and their corresponding digits as values, and do dictionary lookups on each character.
+最明显的解决方案是定义一个以单字符为键并以所对应数字为值的字典，以字典查找每个字符
+
+This is what we have in soundex/stage1/soundex1c.py (the current best result so far):
+这便是 soundex/stage1/soundex1e.py 中使用的方法 (目前最好的结果)：
+
+You timed soundex1c.py already;
+你已经为 soundex1e.py 计时，这便是其表现：
+
+This code is straightforward, but is it the best solution?
+这段代码很直接，但它是最佳解决方案吗
+
+Calling upper() on each individual character seems inefficient;
+为每个字符分别调用 upper() 看起来不是很有效率，为整个字符串调用 upper() 一次可能会好些
+
+Then there's the matter of incrementally building the digits string.
+然后是一砖一瓦地建立 digits 字符串
+
+Incrementally building strings like this is horribly inefficient;
+一砖一瓦的建造好像非常欠缺效率
+
+internally, the Python interpreter needs to create a new string each time through the loop, then discard the old one.
+在 Python 内部，解释器需要在循环的每一轮创建一个新的字符串，然后丢弃旧的
+
+Python is good at lists, though.
+但是，Python 擅长于列表
+
+It can treat a string as a list of characters automatically.
+可以自动地将字符串作为列表来对待
+
+And lists are easy to combine into strings again, using the string method join().
+而且使用 join() 方法可以很容易地将列表合并成字符串
+
+Here is soundex/stage2/soundex2a.py, which converts letters to digits by using ↦ and lambda:
+这便是 soundex/stage2/soundex2a.py，通过 map 和 lambda 把所有字母转换为数字：
+
+Surprisingly, soundex2a.py is not faster:
+太震惊了，soundex2a.py 并不快：
+
+The overhead of the anonymous lambda function kills any performance you gain by dealing with the string as a list of characters.
+匿名 lambda 函数的使用耗费掉了从以字符列表替代字符串争取来的时间
+
+soundex/stage2/soundex2b.py uses a list comprehension instead of ↦ and lambda:
+soundex/stage2/soundex2b.py 使用了一个列表遍历来替代 map 和 lambda：
+
+Using a list comprehension in soundex2b.py is faster than using ↦ and lambda in soundex2a.py, but still not faster than the original code (incrementally building a string in soundex1c.py):
+在 soundex2b.py 中使用列表遍历比 soundex2a.py 中使用 map 和 lambda 快，但还没有最初的代码快 (soundex1e.py 中一砖一瓦的构建字符串[15])：
+
+It's time for a radically different approach.
+是时候从本质不同的方法来思考了
+
+Dictionary lookups are a general purpose tool.
+字典查找是一个普通目的实现工具
+
+Dictionary keys can be any length string (or many other data types), but in this case we are only dealing with single-character keys and single-character values.
+字典的键可以是任意长度的字符串 (或者很多其他数据类型) 但这里我们只和单字符键和 单字符值打交道
+
+It turns out that Python has a specialized function for handling exactly this situation: the string.maketrans function.
+恰巧 Python 有处理这种情况的特别函数：string.maketrans 函数
+
+This is soundex/stage2/soundex2c.py:
+这便是 soundex/stage2/soundex2c.py：
+
+What the heck is going on here?
+这儿在干什么
+
+string.maketrans creates a translation matrix between two strings: the first argument and the second argument.
+string.maketrans 创建一个两个字符串间的翻译矩阵：第一参数和第二参数
+
+In this case, the first argument is the string ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz, and the second argument is the string 9123912992245591262391929291239129922455912623919292.
+就此而言，第一个参数是字符串 ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz，第二个参数是字符串 9123912992245591262391929291239129922455912623919292
+
+See the pattern?
+看到其模式了
+
+It's the same conversion pattern we were setting up longhand with a dictionary.
+恰好与我们用冗长的字典构建的模式相同
+
+A maps to 9, B maps to 1, C maps to 2, and so forth.
+A 映射到 9，B 映射到 1，C 映射到 2 等等
+
+But it's not a dictionary;
+但它不是一个字典
+
+it's a specialized data structure that you can access using the string method translate, which translates each character into the corresponding digit, according to the matrix defined by string.maketrans.
+而是一个你可以通过字符串方法 translate 使用的特别数据结构
+
+timeit shows that soundex2c.py is significantly faster than defining a dictionary and looping through the input and building the output incrementally:
+timeit 显示 soundex2c.py 比定义字典并对输入进行循环一砖一瓦地构建输出快很多：
+
+You're not going to get much better than that.
+你不可能做得更多了
+
+Python has a specialized function that does exactly what you want to do;
+Python 有一个特殊函数，通过使用它做到了一个和你的工作差不多的事情
+
+use it and move on.
+就用它并继续吧
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+[15] 事实恰好相反，soundex2b.py 在每个点上都快于 soundex1e.py
+

@@ -1,0 +1,66 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+12.7. Searching Google
+12.7. 搜索 Google
+
+Let's finally turn to the sample code that you saw that the beginning of this chapter, which does something more useful and exciting than get the current temperature.
+让我们回到这章开始时你看到的那段代码，获得比当前气温更有价值和令人振奋的信息
+
+Google provides a SOAP API for programmatically accessing Google search results.
+Google 提供了一个 SOAP API，以便通过程序进行 Google 搜索
+
+To use it, you will need to sign up for Google Web Services.
+使用它的前提是，你注册了 Google 网络服务
+
+Go to http://www.google.com/apis/ and create a Google account.
+访问 http://www.google.com/apis/ 并创建一个账号
+
+This requires only an email address.
+唯一的需要是提供一个 E-mail 地址
+
+After you sign up you will receive your Google API license key by email.
+注册之后，你将通过 E-mail 收到你的 Google API 许可证 (license key)
+
+You will need this key to pass as a parameter whenever you call Google's search functions.
+你需要在调用 Google 搜索函数时使用这个许可证
+
+Also on http://www.google.com/apis/, download the Google Web APIs developer kit.
+还是在 http://www.google.com/apis/ 上，下载 Google 网络 APIs 开发工具包 (Google Web APIs developer kit)
+
+This includes some sample code in several programming languages (but not Python), and more importantly, it includes the WSDL file.
+它包含着包括 Python 在内的多种语言的样例代码，更重要的是它包含着 WSDL 文件
+
+Decompress the developer kit file and find GoogleSearch.wsdl.
+解压这个开发工具包并找到 GoogleSearch.wsdl
+
+Copy this file to some permanent location on your local drive.
+将这个文件拷贝到你本地驱动器的一个永久地址
+
+You will need it later in this chapter.
+在本章后面位置你会用到它
+
+Once you have your developer key and your Google WSDL file in a known place, you can start poking around with Google Web Services.
+你有了开发许可证和 Google WSDL 文件之后就可以和 Google 网络服务打交道了
+
+Here is a brief synopsis of all the parameters to the doGoogleSearch function:
+这里简要地列出了 doGoogleSearch 函数的所有参数：
+
+The results object contains more than the actual search results.
+results 对象中所加载的不仅仅是实际的搜索结果
+
+It also contains information about the search itself, such as how long it took and how many results were found (even though only 10 were returned).
+它也含有搜索行为自身的信息，比如耗时和总结果数等 (尽管只返回了10条结果)
+
+The Google web interface shows this information, and you can access it programmatically too.
+Google 网页界面中显示了这些信息，通过程序你也同样能获得它们
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

@@ -1,0 +1,30 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+13.4. Testing for success
+13.4. 正面测试 (Testing for success)
+
+The most fundamental part of unit testing is constructing individual test cases.
+单元测试的基础是构建独立的测试用例 (test case)
+
+A test case answers a single question about the code it is testing.
+一个测试用例只回答一个关于被测试代码的问题
+
+A test case should be able to...
+一个测试用例应该做到：
+
+Given that, let's build the first test case.
+基于如上原则，让我们构建第一个测试用例
+
+You have the following requirement:
+应符合如下要求：
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

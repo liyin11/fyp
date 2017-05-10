@@ -1,0 +1,36 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+17.2. plural.py, stage 1
+17.2. plural.py, 第 1 阶段
+
+So you're looking at words, which at least in English are strings of characters.
+你所针对的单词 (至少在英语中) 是字符串和字符
+
+And you have rules that say you need to find different combinations of characters, and then do different things to them.
+你还需要规则来找出不同的字符 (字母) 组合，并对它们进行不同的操作
+
+This sounds like a job for regular expressions.
+这听起来像是正则表达式的工作
+
+Regular expression substitutions are extremely powerful, and the \1 syntax makes them even more powerful.
+正则表达式替换非常强大，并且 \1 语法使之更加强大
+
+But combining the entire operation into one regular expression is also much harder to read, and it doesn't directly map to the way you first described the pluralizing rules.
+但是将整个操作放在一个正则表达式中仍然晦涩难懂，也不能与前面描述的复数规则直接呼应
+
+You originally laid out rules like “if the word ends in S, X, or Z, then add ES”.
+你原来列出的规则，比如 “如果单词以 S，X 或者 Z 结尾，结尾追加 ES”
+
+And if you look at this function, you have two lines of code that say “if the word ends in S, X, or Z, then add ES”.
+如果你在函数中看到两行代码描述 “如果单词以 S，X 或者 Z 结尾，结尾追加 ES”，更加直观些
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

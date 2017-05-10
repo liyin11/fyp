@@ -1,0 +1,117 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+18.6. Optimizing String Manipulation
+18.6. 优化字符串操作
+
+The final step of the Soundex algorithm is padding short results with zeros, and truncating long results.
+Soundex 算法的最后一步是对短结果补零和截短长结果
+
+What is the best way to do this?
+最佳的做法是什么
+
+This is what we have so far, taken from soundex/stage2/soundex2c.py:
+这是目前在 soundex/stage2/soundex2c.py 中的做法：
+
+These are the results for soundex2c.py:
+这里是 soundex2c.py 的表现：
+
+The first thing to consider is replacing that regular expression with a loop.
+思考的第一件事是以循环取代正则表达式
+
+This code is from soundex/stage4/soundex4a.py:
+这里的代码来自 soundex/stage4/soundex4a.py：
+
+Is soundex4a.py faster?
+soundex4a.py 快了吗
+
+Yes it is:
+是的：
+
+But wait a minute.
+但是，等一下
+
+A loop to remove characters from a string?
+一个从字符串去除字符的循环
+
+We can use a simple string method for that.
+我们可以用一个简单的字符串方法做到
+
+Here's soundex/stage4/soundex4b.py:
+这便是 soundex/stage4/soundex4b.py：
+
+Is soundex4b.py faster?
+soundex4b.py 快了吗
+
+That's an interesting question.
+这是个有趣的问题，它取决输入值：
+
+The string method in soundex4b.py is faster than the loop for most names, but it's actually slightly slower than soundex4a.py in the trivial case (of a very short name).
+soundex4b.py 中的字符串方法对于大多数名字比循环快，但是对于短小的情况 (很短的名字) 却比 soundex4a.py 略微慢些
+
+Performance optimizations aren't always uniform;
+性能优化并不总是一致的，对于一个情况快些，却可能对另外一些情况慢些
+
+tuning that makes one case faster can sometimes make other cases slower.
+就此而言，大多数情况将会从改变中获益，所以就改吧，但是别忘了原则
+
+Last but not least, let's examine the final two steps of the algorithm: padding short results with zeros, and truncating long results to four characters.
+最后仍很重要的是，让我们检测算法的最后两步：以零补齐短结果和截短超过四字符的长结果
+
+The code you see in soundex4b.py does just that, but it's horribly inefficient.
+你在 soundex4b.py 中看到的代码就是做这个工作的，但是太没效率了
+
+Take a look at soundex/stage4/soundex4c.py to see why:
+看一下 soundex/stage4/soundex4c.py 找出原因：
+
+Why do we need a while loop to pad out the result?
+我们为什么需要一个 while 循环来补齐结果
+
+We know in advance that we're going to truncate the result to four characters, and we know that we already have at least one character (the initial letter, which is passed unchanged from the original source variable).
+我们早就知道我们需要把结果截成四字符，并且我们知道我们已经有了至少一个字符 (直接从 source 中拿过来的起始字符)
+
+That means we can simply add three zeros to the output, then truncate it.
+这意味着我们可以仅仅在输出的结尾添加三个零，然后截断它
+
+Don't get stuck in a rut over the exact wording of the problem;
+不要害怕重新理解问题，从不太一样的角度看问题可以获得简单的解决方案
+
+How much speed do we gain in soundex4c.py by dropping the while loop?
+我们丢弃 while 循环后从 soundex4c.py 中获得怎样的速度
+
+It's significant:
+太明显了：
+
+Finally, there is still one more thing you can do to these three lines of code to make them faster: you can combine them into one line.
+最后，还有一件事可以令这三行运行得更快：你可以把它们合并为一行
+
+Take a look at soundex/stage4/soundex4d.py:
+看一眼 soundex/stage4/soundex4d.py：
+
+Putting all this code on one line in soundex4d.py is barely faster than soundex4c.py:
+在 soundex4d.py 中把所有代码放在一行可以比 soundex4c.py 稍微快那么一点：
+
+It is also significantly less readable, and for not much performance gain.
+它非常难懂，而且优化也不明显
+
+Is that worth it?
+这值得吗
+
+I hope you have good comments.
+我希望你有很好的见解
+
+Performance isn't everything.
+性能并不是一切
+
+Your optimization efforts must always be balanced against threats to your program's readability and maintainability.
+你在优化方面的努力应该与程序的可读性和可维护性相平衡
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

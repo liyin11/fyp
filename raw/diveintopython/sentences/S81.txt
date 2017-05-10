@@ -1,0 +1,30 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+12.3. First Steps with SOAP
+12.3. 步入 SOAP
+
+The heart of SOAP is the ability to call remote functions.
+调用远程函数是 SOAP 的核心功能
+
+There are a number of public access SOAP servers that provide simple functions for demonstration purposes.
+有很多提供公开 SOAP 访问的服务器提供用于展示的简单功能
+
+The most popular public access SOAP server is http://www.xmethods.net/.
+最受欢迎的 SOAP 公开访问服务器是 http://www.xmethods.net/
+
+This example uses a demonstration function that takes a United States zip code and returns the current temperature in that region.
+这个例子使用了一个展示函数，可以根据美国邮政编码返回当地气温
+
+Let's peek under those covers.
+让我们看一看这些背后的工作
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

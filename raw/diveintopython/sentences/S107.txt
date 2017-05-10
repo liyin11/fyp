@@ -1,0 +1,21 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+16.8. Summary
+16.8. 小结
+
+The regression.py program and its output should now make perfect sense.
+regression.py 程序及其输出到现在应该很清楚了
+
+You should now feel comfortable doing all of these things:
+你现在应该能够很自如地做到如下事情：
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

@@ -1,0 +1,66 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+17.3. plural.py, stage 2
+17.3. plural.py, 第 2 阶段
+
+Now you're going to add a level of abstraction.
+现在你将增加一个抽象过程
+
+You started by defining a list of rules: if this, then do that, otherwise go to the next rule.
+你从定义一个规则列表开始：如果这样，就做那个，否则判断下一规则
+
+Let's temporarily complicate part of the program so you can simplify another part.
+让我们暂时将程序一部分复杂化以便使另一部分简单化
+
+If this additional level of abstraction is confusing, try unrolling the function to see the equivalence.
+这个抽象过程有些令人迷惑，试着剖析函数看看实际的等价内容
+
+This for loop is equivalent to the following:
+这个 for 循环相当于：
+
+The benefit here is that that plural function is now simplified.
+这里的好处在于 plural 函数现在被简化了
+
+It takes a list of rules, defined elsewhere, and iterates through them in a generic fashion.
+它以普通的方法反复使用其它地方定义的规则
+
+Get a match rule;
+获得一个匹配规则，匹配吗
+
+does it match?
+调用并应用规则
+
+Then call the apply rule.
+规则可以在任意地方以任意方法定义，plural 函数对此并不关心
+
+Now, was adding this level of abstraction worth it?
+现在，添加这个抽象过程值得吗
+
+Well, not yet.
+嗯……还不值
+
+Let's consider what it would take to add a new rule to the function.
+让我们看看如何向函数添加一个新的规则
+
+Well, in the previous example, it would require adding an if statement to the plural function.
+啊哈，在先前的范例中，需要向 plural 函数添加一个 if 语句
+
+In this example, it would require adding two functions, match_foo and apply_foo, and then updating the rules list to specify where in the order the new match and apply functions should be called relative to the other rules.
+在这个例子中，需要增加两个函数：match_foo 和 apply_foo，然后更新 rules 列表指定在什么相对位置调用这个新匹配和新规则应用
+
+This is really just a stepping stone to the next section.
+这其实不过是步入下一节的一个基石
+
+Let's move on.
+让我们继续
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+
