@@ -1,0 +1,30 @@
+Templating
+Templating
+
+sphinx.ext.autodoc – Include documentation from docstrings
+Tutorial: Writing a simple extension
+
+Since many projects will need special features in their documentation, Sphinx allows to add “extensions” to the build process, each of which can modify almost any aspect of document processing.
+Since many projects will need special features in their documentation, Sphinx is designed to be extensible on several levels.
+
+This chapter describes the extensions bundled with Sphinx.
+This is what you can do in an extension: First, you can add new builders to support new output formats or actions on the parsed documents. Then, it is possible to register custom reStructuredText roles and directives, extending the markup. And finally, there are so-called “hook points” at strategic places throughout the build process, where an extension can register a hook and run specialized code.
+
+Third-party extensions¶
+Third-party extensions¶
+
+You can find several extensions contributed by users in the Sphinx Contrib repository.
+You can find several extensions contributed by users in the Sphinx Contrib repository. It is open for anyone who wants to maintain an extension publicly; just send a short message asking for write permissions.
+
+There are also several extensions hosted elsewhere.
+There are also several extensions hosted elsewhere. The Wiki at BitBucket maintains a list of those.
+
+If you write an extension that you think others will find useful or you think should be included as a part of Sphinx, please write to the project mailing list (join here).
+If you write an extension that you think others will find useful or you think should be included as a part of Sphinx, please write to the project mailing list (join here).
+
+Extensions local to a project should be put within the project’s directory structure.
+Extensions local to a project should be put within the project’s directory structure. Set Python’s module search path, sys.path, accordingly so that Sphinx can find them. E.g., if your extension foo.py lies in the exts subdirectory of the project root, put into conf.py:
+
+You can also install extensions anywhere else on sys.path, e.g.
+You can also install extensions anywhere else on sys.path, e.g. in the site-packages directory.
+

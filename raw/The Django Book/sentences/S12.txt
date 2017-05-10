@@ -1,0 +1,213 @@
+Chapter 13: Generating Non-HTML Content¶
+第十三章：输出非HTML内容
+
+The Sitemap Framework¶
+Sitemap 框架
+
+A sitemap is an XML file on your Web site that tells search engine indexers how frequently your pages change and how “important” certain pages are in relation to other pages on your site.
+sitemap 是你服务器上的一个XML文件，它告诉搜索引擎你的页面的更新频率和某些页面相对于其它页面的重要性
+
+This information helps search engines index your site.
+ 这个信息会帮助搜索引擎索引你的网站
+
+For example, here’s a piece of the sitemap for Django’s Web site (http://www.djangoproject.com/sitemap.xml):
+例如，这是 Django 网站(http://www.djangoproject.com/sitemap.xml)sitemap的一部分：
+
+For more on sitemaps, see http://www.sitemaps.org/.
+需要了解更多有关 sitemaps 的信息, 请参见 http://www.sitemaps.org/.
+
+The Django sitemap framework automates the creation of this XML file by letting you express this information in Python code.
+Django sitemap 框架允许你用 Python 代码来表述这些信息，从而自动创建这个XML文件
+
+To create a sitemap, you just need to write a Sitemap class and point to it in your URLconf.
+ 要创建一个站点地图，你只需要写一个Sitemap 类，并且在URLconf中指向它
+
+To install the sitemap application, follow these steps:
+要安装 sitemap 应用程序, 按下面的步骤进行:
+
+Add 'django.contrib.sitemaps' to your INSTALLED_APPS setting.
+将 'django.contrib.sitemaps' 添加到您的 INSTALLED_APPS 设置中.
+
+Make sure 'django.template.loaders.app_directories.load_template_source' is in your TEMPLATE_LOADERS setting.
+确保 'django.template.loaders.app_directories.load_template_source' 在您的 TEMPLATE_LOADERS 设置中
+
+It’s in there by default, so you’ll need to change this only if you’ve changed that setting.
+ 默认情况下它在那里, 所以, 如果你已经改变了那个设置的话, 只需要改回来即可
+
+Make sure you’ve installed the sites framework (see Chapter 16).
+确定您已经安装了 sites 框架 (参见第14章).
+
+Note
+Note
+
+The sitemap application doesn’t install any database tables.
+sitemap 应用程序没有安装任何数据库表. 它需要加入到 INSTALLED_APPS 中的唯一原因是: 这样load_template_source 模板加载器可以找到默认的模板. The only reason it needs to go intoINSTALLED_APPS is so the load_template_source template loader can find the default templates.
+
+To activate sitemap generation on your Django site, add this line to your URLconf:
+要在您的Django站点中激活sitemap生成, 请在您的 URLconf 中添加这一行:
+
+The name of the sitemap file is not important, but the location is.
+sitemap文件的名字无关紧要，但是它在服务器上的位置却很重要
+
+Search engines will only index links in your sitemap for the current URL level and below.
+ 搜索引擎只索引你的sitemap中当前URL级别及其以下级别的链接
+
+For instance, if sitemap.xml lives in your root directory, it may reference any URL in your site.
+ 用一个实例来说，如果 sitemap.xml 位于你的根目录，那么它将引用任何的URL
+
+However, if your sitemap lives at /content/sitemap.xml, it may only reference URLs that begin with /content/.
+ 然而，如果你的sitemap位于 /content/sitemap.xml ，那么它只引用以 /content/ 打头的URL
+
+The sitemap view takes an extra, required argument: {'sitemaps': sitemaps}.
+sitemap视图需要一个额外的必须的参数： {'sitemaps': sitemaps} . sitemaps should be a dictionary that maps a short section label (e.g., blog or news ) to its Sitemap class (e.g., BlogSitemap or NewsSitemap ). It may also map to an instance of a Sitemap class (e.g., BlogSitemap(some_var) ).
+
+A Sitemap class is a simple Python class that represents a “section” of entries in your sitemap.
+Sitemap 类展示了一个进入地图站点简单的Python类片断.例如,一个 Sitemap 类能展现所有日志入口，而另外一个能够调度所有的日历事件
+
+For example, one Sitemap class could represent all the entries of your weblog, while another could represent all of the events in your events calendar.
+ For example, one Sitemap class could represent all the entries of your weblog, while another could represent all of the events in your events calendar.
+
+In the simplest case, all these sections get lumped together into one sitemap.xml, but it’s also possible to use the framework to generate a sitemap index that references individual sitemap files, one per section (as described shortly).
+在最简单的例子中，所有部分可以全部包含在一个 sitemap.xml 中，也可以使用框架来产生一个站点地图，为每一个独立的部分产生一个单独的站点文件
+
+Sitemap classes must subclass django.contrib.sitemaps.Sitemap.
+Sitemap 类必须是 django.contrib.sitemaps.Sitemap 的子类. 他们可以存在于您的代码树的任何地方
+
+For example, let’s assume you have a blog system, with an Entry model, and you want your sitemap to include all the links to your individual blog entries.
+例如假设你有一个blog系统，有一个 Entry 的model，并且你希望你的站点地图包含所有连到你的blog入口的超链接
+
+Here’s how your Sitemap class might look:
+ 你的 Sitemap 类很可能是这样的：
+
+Declaring a Sitemap should look very similar to declaring a Feed.
+声明一个 Sitemap 和声明一个 Feed 看起来很类似
+
+That’s by design.
+这都是预先设计好的
+
+Like Feed classes, Sitemap members can be either methods or attributes.
+如同 Feed 类一样， Sitemap 成员也既可以是方法，也可以是属性
+
+See the steps in the earlier “A Complex Example” section for more about how this works.
+ 想要知道更详细的内容，请参见上文 《一个复杂的例子》章节
+
+A Sitemap class can define the following methods/attributes:
+一个 Sitemap 类可以定义如下 方法/属性:
+
+items (required): Provides list of objects.
+items (必需 )：提供对象列表
+
+The framework doesn’t care what type of objects they are;
+ 框架并不关心对象的 类型 
+
+all that matters is that these objects get passed to the location(), lastmod(), changefreq(), and priority() methods.
+唯一关心的是这些对象会传递给 location()， lastmod() ， changefreq() ，和 priority() 方法
+
+location (optional): Gives the absolute URL for a given object.
+location （可选）： 给定对象的绝对URL
+
+Here, “absolute URL” means a URL that doesn’t include the protocol or domain.
+ 绝对URL不包含协议名称和域名
+
+Here are some examples:
+ 下面是一些例子：
+
+If location isn’t provided, the framework will call the get_absolute_url() method on each object as returned by items().
+如果没有提供 location , 框架将会在每个 items() 返回的对象上调用 get_absolute_url() 方法.
+
+lastmod (optional): The object’s “last modification” date, as a Python datetime object.
+lastmod (可选): 对象的最后修改日期, 作为一个Python datetime 对象. The object’s last modification date, as a Python datetime object.
+
+changefreq (optional): How often the object changes.
+changefreq （可选）： 对象变更的频率
+
+Possible values (as given by the Sitemaps specification) are as follows:
+ 可选的值如下（详见Sitemaps文档）：
+
+priority (optional): A suggested indexing priority between 0.0 and 1.0.
+priority （可选）： 取值范围在 0.0 and 1.0 之间，用来表明优先级
+
+The sitemap framework provides a couple convenience classes for common cases.
+sitemap框架提供了一些常用的类
+
+These are described in the sections that follow.
+ 在下一部分中会看到
+
+The django.contrib.sitemaps.FlatPageSitemap class looks at all flat pages defined for the current site and creates an entry in the sitemap.
+django.contrib.sitemaps.FlatPageSitemap 类涉及到站点中所有的flat page，并在sitemap中建立一个入口
+
+These entries include only the location attribute – not lastmod, changefreq, or priority.
+ 但仅仅只包含 location 属性，不支持 lastmod ， changefreq ，或者 priority 
+
+See Chapter 16 for more about flat pages.
+参见第16章获取有关flat page的更多的内容.
+
+The GenericSitemap class works with any generic views (see Chapter 11) you already have.
+GenericSitemap 与所有的通用视图一同工作（详见第9章）
+
+To use it, create an instance, passing in the same info_dict you pass to the generic views.
+你可以如下使用它，创建一个实例，并通过 info_dict 传递给通用视图
+
+The only requirement is that the dictionary have a queryset entry.
+ 唯一的要求是字典包含 queryset 这一项
+
+It may also have a date_field entry that specifies a date field for objects retrieved from the queryset.
+ 也可以用 date_field 来指明从 queryset 中取回的对象的日期域
+
+This will be used for the lastmod attribute in the generated sitemap.
+ 这会被用作站点地图中的 lastmod属性
+
+Here’s an example of a URLconf using both FlatPageSitemap and GenericSiteMap (with the hypothetical Entry object from earlier):
+下面是一个使用 FlatPageSitemap and GenericSiteMap （包括前面所假定的 Entry 对象）的URLconf：
+
+The sitemap framework also has the ability to create a sitemap index that references individual sitemap files, one per each section defined in your sitemaps dictionary.
+sitemap框架同样可以根据 sitemaps 字典中定义的单独的sitemap文件来建立索引
+
+The only differences in usage are as follows:
+ 用法区别如下：
+
+You use two views in your URLconf: django.contrib.sitemaps.views.index and django.contrib.sitemaps.views.sitemap.
+您在您的URLconf 中使用了两个视图: django.contrib.sitemaps.views.index 和django.contrib.sitemaps.views.sitemap . django.contrib.sitemaps.views.index 和django.contrib.sitemaps.views.sitemap
+
+The django.contrib.sitemaps.views.sitemap view should take a section keyword argument.
+django.contrib.sitemaps.views.sitemap 视图需要带一个 section 关键字参数.
+
+Here is what the relevant URLconf lines would look like for the previous example:
+这里是前面的例子的相关的 URLconf 行看起来的样子:
+
+This will automatically generate a sitemap.xml file that references both sitemap-flatpages.xml and sitemap-blog.xml.
+这将自动生成一个 sitemap.xml 文件, 它同时引用 sitemap-flatpages.xml 和 sitemap-blog.xml . Sitemap 类和sitemaps 目录根本没有更改.
+
+You may want to “ping” Google when your sitemap changes, to let it know to reindex your site.
+当你的sitemap变化的时候，你会想通知Google，以便让它知道对你的站点进行重新索引
+
+The framework provides a function to do just that: django.contrib.sitemaps.ping_google().
+ 框架就提供了这样的一个函数： django.contrib.sitemaps.ping_google() 
+
+ping_google() takes an optional argument, sitemap_url, which should be the absolute URL of your site’s sitemap (e.g., '/sitemap.xml').
+ping_google() 有一个可选的参数 sitemap_url ，它应该是你的站点地图的URL绝对地址（例如：
+
+ping_google() raises the exception django.contrib.sitemaps.SitemapNotFound if it cannot determine your sitemap URL.
+如果不能够确定你的sitemap URL, ping_google() 会引发 django.contrib.sitemaps.SitemapNotFound 异常
+
+One useful way to call ping_google() is from a model’s save() method:
+我们可以通过模型中的 save() 方法来调用 ping_google() ：
+
+A more efficient solution, however, would be to call ping_google() from a cron script or some other scheduled task.
+一个更有效的解决方案是用 cron 脚本或任务调度表来调用 ping_google() ，该方法使用Http直接请求Google服务器，从而减少每次调用 save() 时占用的网络带宽
+
+The function makes an HTTP request to Google’s servers, so you may not want to introduce that network overhead each time you call save().
+ The function makes an HTTP request to Google’s servers, so you may not want to introduce that network overhead each time you call save().
+
+What’s Next?¶
+下一章
+
+Next, we’ll continue to dig deeper into the built-in tools Django gives you.
+下面, 我们要继续深入挖掘所有的Django给你的很好的内置工具
+
+Chapter 14 looks at all the tools you need to provide user-customized sites: sessions, users, and authentication.
+ 第十四章查看创建用户自定义站点需要的工具 sessions, users 和authentication.
+
+© Copyright 2012, Matt Behrens.
+www.shoucewang.com. All Rights Reserved. 手册网 版权所有
+

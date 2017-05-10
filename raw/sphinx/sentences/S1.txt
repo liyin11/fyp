@@ -1,0 +1,129 @@
+Introduction
+概述
+
+Invocation of sphinx-quickstart
+sphinx-build用法
+
+Install Sphinx, either from a distribution package or from PyPI with
+本文给出了Sphinx所有基本功能的快速教程
+
+There is also an automatic “API documentation” generator called sphinx-apidoc;
+一个文档集合的根目录被称为 源目录
+
+see Invocation of sphinx-apidoc for details.
+源目录 包含Sphinx配置文件 conf.py，在配置文件里面可以配置Sphinx如何读取源文件以及如何生成文件等等各方面
+
+reStructuredText directives
+接着回答问题
+
+toctree is a reStructuredText directive, a very versatile piece of markup.
+Sphinx提供的”API documentation”生成器称为 sphinx-apidoc
+
+Directives can have arguments, options and content.
+更详细的内容参看 调用sphinx-apidoc
+
+Content follows the options or arguments after a blank line.
+假设你已经执行了 sphinx-quickstart
+
+Each directive decides whether to allow content, and what to do with it.
+它创建了一个包含 conf.py 以及主文件 index.rst （如果你接受了默认选项）的文件夹
+
+A common gotcha with directives is that the first line of the content must be indented to the same level as the options are.
+连接多个文件到单个层次结构的文件的方式是Sphinx增强了reStructuredText的主要事情之一
+
+The toctree directive initially is empty, and looks like this:
+reStructuredText标识符（指令集）
+
+You add documents listing them in the content of the directive:
+toctree 是 reStructuredText的一个 指令（标识符），一个很神奇的标记
+
+This is exactly how the toctree for this documentation looks.
+参数 是直接跟在指令（标识）后的双冒号后面
+
+The documents to include are given as document names, which in short means that you leave off the file name extension and use slashes as directory separators.
+ 每个指令决定是否可以有参数，以及有多少
+
+You can now create the files you listed in the toctree and add content, and their section titles will be inserted (up to the “maxdepth” level) at the place where the toctree directive is placed.
+选项 是以一种“字段列表”形式跟随在参数后面
+
+Also, Sphinx now knows about the order and hierarchy of your documents.
+ maxdepth 就是 toctree 指令（标识符）的参数
+
+For an example, if you are viewing the HTML version you can look at the source for this document – use the “Show Source” link in the sidebar.
+内容与选项的首行需要缩进到同样的位置
+
+where sourcedir is the source directory, and builddir is the directory in which you want to place the built documentation.
+你可以添加文档列表在指令（标识符）中的*内容*位置:
+
+However, sphinx-quickstart script creates a Makefile and a make.bat which make life even easier for you: with them you only need to run
+上面就是包含toctree的文件实际的样子
+
+to build HTML docs in the build directory you chose.
+现在，您可以创建你列在toctree中的文件，并添加内容，章节的标题会被插入（至多到“最大深度”的层次）到toctree指令（标识符）标识的位置
+
+Execute make without an argument to see which targets are available.
+当然，Sphinx知道你的文件的顺序以及层级结构
+
+The most prominent domain is the Python domain.
+举个例子，如果您正在查看的HTML版本，你可以看看这个文件的源代码 - 在侧边栏使用“显示源代码”的链接
+
+The argument of the directive is the signature of the object you describe, the content is the documentation for it.
+现在，你已经添加了一些文件和内容，让我们来做第一个文件构建
+
+Multiple signatures can be given, each in its own line.
+构建是由 sphinx-build 程序开始的，像如下调用:
+
+The Python domain also happens to be the default domain, so you don’t need to prefix the markup with the domain name:
+上面提到的 sourcedir 是指 源目录，builddir 是指你想放置的生成文件的位置
+
+does the same job if you keep the default setting for the default domain.
+因为 sphinx-quickstart 生成了 Makefile 和 make.bat 文件，这些文件能够减少不少工作：有了它们你就可以运行
+
+There are several more directives for documenting other types of Python objects, for example py:class or py:method.
+生成HTML文件在制定的目录
+
+There is also a cross-referencing role for each of these object types.
+执行无参数的 make 可以看到哪些目标文件（makefile文件）可用
+
+And here is the proof: A link to enumerate().
+怎样生成PDF文件
+
+Again, the py: can be left out if the Python domain is the default one.
+make latexpdf 运行 LaTeX builder ，实际上是调用pdfTeX工具元件
+
+Earlier we mentioned that the conf.py file controls how Sphinx processes your documents.
+注：在这里domain翻译成域，可以理解成不同的编程语言的集合对象，像python domain, java domain, C/C++ domain等
+
+The config values that you probably want to change are already put into the conf.py by sphinx-quickstart and initially commented out (with standard Python syntax: a # comments the rest of the line).
+Sphinx一个主要目标是在任何 域 中简单的 objects 文档（从非常笼统的意义上说）
+
+To change the default value, remove the hash sign and modify the value.
+域 是指一个集合对象类型属于一个整体，完整的标记来创建和引用这些对象的描述
+
+Keep in mind that the file uses Python syntax for strings, numbers, lists and so on.
+Python是最突出的域
+
+The file is saved in UTF-8 by default, as indicated by the encoding declaration in the first line.
+如记录python的内建函数 enumerate()，你只需要添加如下的内容到源文件中:
+
+In order to use autodoc, you need to activate it in conf.py by putting the string 'sphinx.ext.autodoc' into the list assigned to the extensions config value.
+Return an iterator that yields tuples of an index and an item of the sequence. (And so on.)
+
+For example, to document the function io.open(), reading its signature and docstring from the source file, you’d write this:
+指令（标识符）的参数就是描述对象的 说明（签名），内容是它的文档
+
+You can also document whole classes or even modules automatically, using member options for the auto directives, like
+Python是默认的域，所以不需要在域名前标记前缀:
+
+autodoc needs to import your modules in order to extract the docstrings.
+做了同样的工作如果你保持默认的域以及它默认的设置
+
+Warning
+Sphinx提供了许多其他的指令（标识符）为了标识python对象的其他的类型，例如：py:class or py:method
+
+autodoc imports the modules to be documented.
+这就是结果: 链接到 enumerate().
+
+If you document scripts (as opposed to library modules), make sure their main routine is protected by a if __name__ == '__main__' condition.
+再次提醒，如果使用默认域，py: 是可以不用添加的
+

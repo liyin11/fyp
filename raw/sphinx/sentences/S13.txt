@@ -1,0 +1,93 @@
+Storage Backends
+Storage Backends
+
+Glossary
+术语
+
+Epub info¶
+我该怎么做...¶
+
+Try to minimize the markup.
+你可以定制化 layout.html 模版，像这样：
+
+Test the created epubs.
+epub生成器目前正处于测试阶段
+
+You can use several alternatives.
+仅仅完成与Sphinx文档本身的测试
+
+The ones I am aware of are Epubcheck, Calibre, FBreader (although it does not render the CSS), and Bookworm.
+如果你想要创建epubs，下面是一些提示：
+
+Large floating divs are not displayed properly.
+把文本分割到多个文件中
+
+If they cover more than one page, the div is only shown on the first page.
+单个的HTML文件越长，ebook阅读器处理的时间就越长
+
+In that case you can copy the epub.css from the sphinx/themes/epub/static/ directory to your local _static/ directory and remove the float settings.
+在极端情况下，阅读器需要花费一分钟来渲染
+
+Files that are inserted outside of the toctree directive must be manually included.
+应尽量减少的标记
+
+This sometimes applies to appendixes, e.g.
+这也花费的渲染时间
+
+The handling of the epub cover page differs from the reStructuredText procedure which automatically resolves image paths and puts the images into the _images directory.
+对于一些阅读器，你可以使用内嵌或者外部的字体使用 CSS @font-face 指令（标识符）
+
+For the epub cover page put the image in the html_static_path directory and reference it with its full path in the epub_cover config option.
+ 这对于代码是 极其 有用，它们经常被右边缘给截断
+
+One noticeable problem you may encounter with the generated Info files is how references are displayed.
+测试所创建的ePub文件
+
+If you read the source of an Info file, a reference to this section would look like:
+可以有多种选择
+
+In the stand-alone reader, info, references are displayed just as they appear in the source.
+大型浮动的div显示不正确
+
+Emacs, on the other-hand, will by default replace *note: with see and hide the target-id.
+如果覆盖多个页面，只显示在第一页的div
+
+For example:
+ 这种情况，你可以从 sphinx/themes/epub/static/ 拷贝 epub.css 到你本地的 _static/ 目录，并且删除浮动设置
+
+The exact behavior of how Emacs displays references is dependent on the variable Info-hide-note-references.
+在 toctree 指令（标识符）外的文件需要手动导入
+
+If set to the value of hide, Emacs will hide both the *note: part and the target-id.
+有时候这也适用于附录，例如词汇表
+
+This is generally the best way to view Sphinx-based documents since they often make frequent use of links and do not take this limitation into account.
+你也可以添加它们在 epub_post_files 选项
+
+Each section corresponds to a different node in the Info file.
+Texinfo生成器目前处于试验阶段，但已成功地用于构建Sphinx和Python的文档
+
+Colons (:) cannot be properly escaped in menu entries and xrefs.
+有两个主要的程序读取信息的文件：info 和GNU Emacs
+
+They will be replaced with semicolons (;).
+info 特点不多，但是适用大多数的Unix环境，并从终端可以快速访问
+
+Links to external Info files can be created using the somewhat official URI scheme info.
+如果你需要创建Texinfo文件，下面这些提示也许是有帮助的:
+
+which produces:
+每个部分对应于不同节点
+
+info:Texinfo#makeinfo_options
+冒号（:）不能正确被转义在菜单项和交叉引用中
+
+Inline markup
+在HTML和Tex的输出，see 会自动插入到所有的交叉引用的前面
+
+The standard formatting for *strong* and _emphasis_ can result in ambiguous output when used to markup parameter names and other values.
+外部信息文件的链接可以使用的一些官方的URI方案 info
+
+Since this is a fairly common practice, the default formatting has been changed so that emphasis and strong are now displayed like `literal's.
+例如:
+

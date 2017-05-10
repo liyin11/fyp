@@ -1,0 +1,66 @@
+Built-in services
+本章节记录了使用Scrapy的一些实践经验(common practices)
+
+All the rest
+除了常用的 scrapy crawl 来启动Scrapy，您也可以使用 API 在脚本中启动Scrapy
+
+Remember that Scrapy is built on top of the Twisted asynchronous networking library, so you need to run it inside the Twisted reactor.
+下面给出了如何实现的例子，使用 testspiders 项目作为例子
+
+The first utility you can use to run your spiders is scrapy.crawler.CrawlerProcess.
+Running spiders outside projects it’s not much different. You have to create a generic Settings object and populate it as needed (See 内置设定参考手册 for the available settings), instead of using the configuration returned by get_project_settings.
+
+Here’s an example showing how to run a single spider with it.
+Spiders can still be referenced by their name if SPIDER_MODULES is set with the modules where Scrapy should look for spiders. Otherwise, passing the spider class as first argument in the CrawlerRunner.crawl method is enough.
+
+Make sure to check CrawlerProcess documentation to get acquainted with its usage details.
+参见
+
+If you are inside a Scrapy project there are some additional helpers you can use to import those components within the project.
+Twisted Reactor Overview.
+
+Using this class the reactor should be explicitly run after scheduling your spiders.
+默认情况下，当您执行 scrapy crawl 时，Scrapy每个进程运行一个spider
+
+It’s recommended you use CrawlerRunner instead of CrawlerProcess if your application is already using Twisted and you want to run Scrapy in the same reactor.
+ 当然，Scrapy通过 内部(internal)API 也支持单进程多个spider
+
+Note that you will also have to shutdown the Twisted reactor yourself after the spider is finished.
+下面以 testspiders 作为例子来说明如何同时运行多个spider:
+
+Here’s an example of its usage, along with a callback to manually stop the reactor after MySpider has finished running.
+相同的例子，不过通过链接(chaining) deferred来线性运行spider:
+
+See also
+参见
+
+Twisted Reactor Overview.
+在脚本中运行Scrapy.
+
+Running multiple spiders in the same process¶
+分布式爬虫(Distributed crawls)¶
+
+By default, Scrapy runs a single spider per process when you run scrapy crawl.
+Scrapy并没有提供内置的机制支持分布式(多服务器)爬取
+
+However, Scrapy supports running multiple spiders per process using the internal API.
+不过还是有办法进行分布式爬取， 取决于您要怎么分布了
+
+Here is an example that runs multiple spiders simultaneously:
+如果您有很多spider，那分布负载最简单的办法就是启动多个Scrapyd，并分配到不同机器上
+
+Same example using CrawlerRunner:
+如果想要在多个机器上运行一个单独的spider，那您可以将要爬取的url进行分块，并发送给spider
+
+Same example but running the spiders sequentially by chaining the deferreds:
+首先，准备要爬取的url列表，并分配到不同的文件url里:
+
+See also
+接着在3个不同的Scrapd服务器中启动spider
+
+Scrapy doesn’t provide any built-in facility for running crawls in a distribute (multi-server) manner.
+有些网站实现了特定的机制，以一定规则来避免被爬虫爬取
+
+However, there are some ways to distribute crawls, which vary depending on how you plan to distribute them.
+ 与这些规则打交道并不容易，需要技巧，有时候也需要些特别的基础
+

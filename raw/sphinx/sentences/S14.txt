@@ -1,0 +1,57 @@
+Sphinx FAQ
+Sphinx FAQ
+
+Sphinx Developer’s Guide
+Enter search terms or a module, class or function name.
+
+Glossary¶
+术语¶
+
+A class (inheriting from Builder) that takes parsed documents and performs an action on them.
+一个解析文档并执行对它们的操作的类（继承自 Builder）
+
+Normally, builders translate the documents to an output format, but it is also possible to use the builder builders that e.g.
+通常，生成器把文档转换成输出的格式，不过，也能够使用生成器完成其他的事情：例如检查文档里的链接是否损坏，或者生成覆盖率信息
+
+See Available builders for an overview over Sphinx’s built-in builders.
+请看 Available builders 对Sphinx的内置的生成器有个更详细的了解
+
+A reStructuredText markup element that allows marking a block of content with special meaning.
+允许以特定含义标记内容块的reStructuredText标记元素
+
+Directives are supplied not only by docutils, but Sphinx and custom extensions can add their own.
+指令（标识符）不仅仅对docutils模块有用，而且Sphinx以及扩展也能够添加自己的指令（标识符）
+
+The basic directive syntax looks like this:
+最基本的指令（标识符）的格式如下：
+
+See Directives for more information.
+更加详细的信息请查看 指令（标识符） 
+
+Since reST source files can have different extensions (some people like .txt, some like .rst – the extension can be configured with source_suffix) and different OSes have different path separators, Sphinx abstracts them: document names are always relative to the source directory, the extension is stripped, and path separators are converted to slashes.
+因为reST源文件可以有不同的扩展名（有的喜欢 .txt，有的喜欢 .rst –扩展名能够通过 source_suffix 配置
+
+All values, parameters and such referring to “documents” expect such document names.
+），同样不同的操作系统有不同的路径分隔符，Sphinx能够转换分隔符：document names 总是相对于 source directory，文件扩展名被去除，路径分隔符被转换成斜线
+
+Examples for document names are index, library/zipfile, or reference/datamodel/types.
+index, library/zipfile, 或者 reference/datamodel/types 就是文件名的例子
+
+Note that there is no leading or trailing slash.
+请注意，没有开头或结尾的斜线
+
+A domain is a collection of markup (reStructuredText directives and roles) to describe and link to objects belonging together, e.g.
+域是标记的集合（reStructuredText directive 的以及 role 的），它是为了描述和链接到 object 的集合，比如程序语言的元素集
+
+elements of a programming language.
+指令（标识符）以及角色（role）在域（domain）中的名称像 domain:name ，比如 py:function
+
+Having domains means that there are no naming problems when one set of documentation wants to refer to e.g.
+域（domain）的存在意味着不存在命名的问题当一堆文件需要引用的时候：例如C++和Python的类
+
+C++ and Python classes.
+这也意味着，全新的语言支持文件的扩展，更容易编写
+
+It also means that extensions that support the documentation of whole new languages are much easier to write.
+关于域的更多的信息，请看章节 Sphinx Domains
+

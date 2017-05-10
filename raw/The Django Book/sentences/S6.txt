@@ -1,0 +1,819 @@
+Chapter 7: Forms¶
+第七章：表单
+
+HTML forms are the backbone of interactive Web sites, from the simplicity of Google’s single search box to ubiquitous blog comment-submission forms to complex custom data-entry interfaces.
+从Google的简朴的单个搜索框，到常见的Blog评论提交表单，再到复杂的自定义数据输入接口，HTML表单一直是交互性网站的支柱
+
+This chapter covers how you can use Django to access user-submitted form data, validate it and do something with it.
+ 本章介绍如何用Django对用户通过表单提交的数据进行访问、有效性检查以及其它处理
+
+Along the way, we’ll cover HttpRequest and Form objects.
+ 与此同时，我们将介绍HttpRequest对象和Form对象
+
+Getting Data From the Request Object¶
+从Request对象中获取数据
+
+We introduced HttpRequest objects in Chapter 3 when we first covered view functions, but we didn’t have much to say about them at the time.
+我们在第三章讲述View的函数时已经介绍过HttpRequest对象了，但当时并没有讲太多
+
+Recall that each view function takes an HttpRequest object as its first parameter, as in our hello() view:
+ 让我们回忆下：每个view函数的第一个参数是一个HttpRequest对象，就像下面这个hello()函数:
+
+HttpRequest objects, such as the variable request here, have a number of interesting attributes and methods that you should familiarize yourself with, so that you know what’s possible.
+HttpRequest对象，比如上面代码里的request变量，会有一些有趣的、你必须让自己熟悉的属性和方法，以便知道能拿它们来做些什么
+
+You can use these attributes to get information about the current request (i.e., the user/Web browser that’s loading the current page on your Django-powered site), at the time the view function is executed.
+ 在view函数的执行过程中，你可以用这些属性来获取当前request的一些信息（比如，你正在加载这个页面的用户是谁，或者用的是什么浏览器）
+
+HttpRequest objects contain several pieces of information about the currently requested URL:
+HttpRequest对象包含当前请求URL的一些信息：
+
+Always use these attributes/methods instead of hard-coding URLs in your views.
+在view函数里，要始终用这个属性或方法来得到URL，而不要手动输入
+
+This makes for more flexible code that can be reused in other places.
+ 这会使得代码更加灵活，以便在其它地方重用
+
+A simplistic example:
+ 下面是一个简单的例子：
+
+request.META is a Python dictionary containing all available HTTP headers for the given request – including the user’s IP address and user agent (generally the name and version of the Web browser).
+request.META 是一个Python字典，包含了所有本次HTTP请求的Header信息，比如用户IP地址和用户Agent（通常是浏览器的名称和版本号）
+
+Note that the full list of available headers depends on which headers the user sent and which headers your Web server sets.
+ 注意，Header信息的完整列表取决于用户所发送的Header信息和服务器端设置的Header信息
+
+Some commonly available keys in this dictionary are:
+ 这个字典中几个常见的键值有：
+
+Note that because request.META is just a basic Python dictionary, you’ll get a KeyError exception if you try to access a key that doesn’t exist.
+注意，因为 request.META 是一个普通的Python字典，因此当你试图访问一个不存在的键时，会触发一个KeyError异常
+
+(Because HTTP headers are external data – that is, they’re submitted by your users’ browsers – they shouldn’t be trusted, and you should always design your application to fail gracefully if a particular header is empty or doesn’t exist.) You should either use a try/except clause or the get() method to handle the case of undefined keys:
+ （HTTP header信息是由用户的浏览器所提交的、不应该给予信任的“额外”数据，因此你总是应该好好设计你的应用以便当一个特定的Header数据不存在时，给出一个优雅的回应
+
+We encourage you to write a small view that displays all of the request.META data so you can get to know what’s in there.
+我们鼓励你动手写一个简单的view函数来显示 request.META 的所有数据，这样你就知道里面有什么了
+
+Here’s what that view might look like:
+ 这个view函数可能是这样的：
+
+As an exercise, see whether you can convert this view to use Django’s template system instead of hard-coding the HTML.
+做为一个练习，看你自己能不能把上面这个view函数改用Django模板系统来实现，而不是上面这样来手动输入HTML代码
+
+Also try adding request.path and the other HttpRequest methods from the previous section.
+ 也可以试着把前面提到的 request.path 方法或 HttpRequest 对象的其它方法加进去
+
+Beyond basic metadata about the request, HttpRequest objects have two attributes that contain information submitted by the user: request.GET and request.POST.
+除了基本的元数据，HttpRequest对象还有两个属性包含了用户所提交的信息： request.GET 和 request.POST
+
+Both of these are dictionary-like objects that give you access to GET and POST data.
+二者都是类字典对象，你可以通过它们来访问GET和POST数据
+
+Dictionary-like objects
+类字典对象
+
+When we say request.GET and request.POST are “dictionary-like” objects, we mean that they behave like standard Python dictionaries but aren’t technically dictionaries under the hood.
+我们说“request.GET和request.POST是类字典对象”，意思是他们的行为像Python里标准的字典对象，但在技术底层上他们不是标准字典对象
+
+For example, request.GET and request.POST both have get(), keys() and values() methods, and you can iterate over the keys by doing for key in request.GET.
+ 比如说，request.GET和request.POST都有get()、keys()和values()方法，你可以用用 for key in request.GET 获取所有的键
+
+So why the distinction?
+那到底有什么区别呢
+
+Because both request.GET and request.POST have additional methods that normal dictionaries don’t have.
+ 因为request.GET和request.POST拥有一些普通的字典对象所没有的方法
+
+We’ll get into these in a short while.
+ 我们会稍后讲到
+
+You might have encountered the similar term “file-like objects” – Python objects that have a few basic methods, like read(), that let them act as stand-ins for “real” file objects.
+你可能以前遇到过相似的名字：类文件对象，这些Python对象有一些基本的方法，如read()，用来做真正的Python文件对象的代用品
+
+POST data generally is submitted from an HTML , while GET data can come from a  or the query string in the page’s URL.
+POST数据是来自HTML中的〈form〉标签提交的，而GET数据可能来自〈form〉提交也可能是URL中的查询字符串(the query string)
+
+A Simple Form-Handling Example¶
+一个简单的表单处理示例
+
+Continuing this book’s ongoing example of books, authors and publishers, let’s create a simple view that lets users search our book database by title.
+继续本书一直进行的关于书籍、作者、出版社的例子，我们现在来创建一个简单的view函数以便让用户可以通过书名从数据库中查找书籍
+
+Generally, there are two parts to developing a form: the HTML user interface and the backend view code that processes the submitted data.
+通常，表单开发分为两个部分： 前端HTML页面用户接口和后台view函数对所提交数据的处理过程
+
+The first part is easy;
+ 第一部分很简单
+
+let’s just set up a view that displays a search form:
+现在我们来建立个view来显示一个搜索表单：
+
+As we learned in Chapter 3, this view can live anywhere on your Python path.
+在第三章已经学过，这个view函数可以放到Python的搜索路径的任何位置
+
+For sake of argument, put it in books/views.py.
+ 为了便于讨论，咱们将它放在 books/views.py 里
+
+The accompanying template, search_form.html, could look like this:
+这个 search_form.html 模板，可能看起来是这样的：
+
+The URLpattern in urls.py could look like this:
+而 urls.py 中的 URLpattern 可能是这样的：
+
+(Note that we’re importing the views module directly, instead of something like from mysite.views import search_form, because the former is less verbose.
+（注意，我们直接将views模块import进来了，而不是用类似 from mysite.views import search_form 这样的语句，因为前者看起来更简洁
+
+We’ll cover this importing approach in more detail in Chapter 8.)
+ 我们将在第８章讲述更多的关于import的用法
+
+Now, if you run the runserver and visit http://127.0.0.1:8000/search-form/, you’ll see the search interface.
+现在，如果你运行 runserver 命令，然后访问http://127.0.0.1:8000/search-form/，你会看到搜索界面
+
+Simple enough.
+ 非常简单
+
+Try submitting the form, though, and you’ll get a Django 404 error.
+不过，当你通过这个form提交数据时，你会得到一个Django 404错误
+
+The form points to the URL /search/, which hasn’t yet been implemented.
+ 这个Form指向的URL /search/ 还没有被实现
+
+Let’s fix that with a second view function:
+ 让我们添加第二个视图函数并设置URL：
+
+For the moment, this merely displays the user’s search term, so we can make sure the data is being submitted to Django properly, and so you can get a feel for how the search term flows through the system.
+暂时先只显示用户搜索的字词，以确定搜索数据被正确地提交给了Django，这样你就会知道搜索数据是如何在这个系统中传递的
+
+In short:
+ 简而言之：
+
+The HTML  defines a variable q.
+在HTML里我们定义了一个变量q
+
+When it’s submitted, the value of q is sent via GET (method="get") to the URL /search/.
+当提交表单时，变量q的值通过GET(method=”get”)附加在URL /search/上
+
+The Django view that handles the URL /search/ (search()) has access to the q value in request.GET.
+处理/search/（search()）的视图通过request.GET来获取q的值
+
+An important thing to point out here is that we explicitly check that 'q' exists in request.GET.
+需要注意的是在这里明确地判断q是否包含在request.GET中
+
+As we pointed out in the request.META section above, you shouldn’t trust anything submitted by users or even assume that they’ve submitted anything in the first place.
+就像上面request.META小节里面提到，对于用户提交过来的数据，甚至是正确的数据，都需要进行过滤
+
+If we didn’t add this check, any submission of an empty form would raise KeyError in the view:
+ 在这里若没有进行检测，那么用户提交一个空的表单将引发KeyError异常：
+
+Query string parameters
+查询字符串参数
+
+Because GET data is passed in the query string (e.g., /search/?q=django), you can use request.GET to access query string variables.
+因为使用GET方法的数据是通过查询字符串的方式传递的（例如/search/
+
+In Chapter 3’s introduction of Django’s URLconf system, we compared Django’s pretty URLs to more traditional PHP/Java URLs such as /time/plus?hours=3 and said we’d show you how to do the latter in Chapter 7.
+q=django），所以我们可以使用requet.GET来获取这些数据
+
+Now you know how to access query string parameters in your views (like hours=3 in this example) – use request.GET.
+ 第三章介绍Django的URLconf系统时我们比较了Django的简洁的URL与PHP/Java传统的URL，我们提到将在第七章讲述如何使用传统的URL
+
+POST data works the same way as GET data – just use request.POST instead of request.GET.
+获取使用POST方法的数据与GET的相似，只是使用request.POST代替了request.GET
+
+What’s the difference between GET and POST?
+那么，POST与GET之间有什么不同
+
+Use GET when the act of submitting the form is just a request to “get” data.
+当我们提交表单仅仅需要获取数据时就可以用GET
+
+Use POST whenever the act of submitting the form will have some side effect – changing data, or sending an e-mail, or something else that’s beyond simple display of data.
+ 而当我们提交表单时需要更改服务器数据的状态，或者说发送e-mail，或者其他不仅仅是获取并显示数据的时候就使用POST
+
+In our book-search example, we’re using GET because the query doesn’t change any data on our server.
+ 在这个搜索书籍的例子里，我们使用GET，因为这个查询不会更改服务器数据的状态
+
+(See http://www.w3.org/2001/tag/doc/whenToUseGet.html if you want to learn more about GET and POST.)
+ (如果你有兴趣了解更多关于GET和POST的知识，可以参见http://www.w3.org/2001/tag/doc/whenToUseGet.html
+
+Now that we’ve verified request.GET is being passed in properly, let’s hook the user’s search query into our book database (again, in views.py):
+既然已经确认用户所提交的数据是有效的，那么接下来就可以从数据库中查询这个有效的数据（同样，在views.py里操作）：
+
+A couple of notes on what we did here:
+让我们来分析一下上面的代码：
+
+Aside from checking that 'q' exists in request.GET, we also make sure that request.GET['q'] is a non-empty value before passing it to the database query.
+除了检查q是否存在于request.GET之外，我们还检查来reuqest.GET[‘q’]的值是否为空
+
+We’re using Book.objects.filter(title__icontains=q) to query our book table for all books whose title includes the given submission.
+我们使用Book.objects.filter(title__icontains=q)获取数据库中标题包含q的书籍
+
+The icontains is a lookup type (as explained in Chapter 5 and Appendix B), and the statement can be roughly translated as “Get the books whose title contains q, without being case-sensitive.”
+ icontains是一个查询关键字（参看第五章和附录B）
+
+This is a very simple way to do a book search.
+这是实现书籍查询的一个很简单的方法
+
+We wouldn’t recommend using a simple icontains query on a large production database, as it can be slow.
+ 我们不推荐在一个包含大量产品的数据库中使用icontains查询，因为那会很慢
+
+(In the real world, you’d want to use a custom search system of some sort.
+ （在真实的案例中，我们可以使用以某种分类的自定义查询系统
+
+Search the Web for open-source full-text search to get an idea of the possibilities.)
+ 在网上搜索“开源 全文搜索”看看是否有好的方法）
+
+We pass books, a list of Book objects, to the template.
+最后，我们给模板传递来books，一个包含Book对象的列表
+
+The template code for search_results.html might include something like this:
+ 查询结果的显示模板search_results.html如下所示：
+
+Note usage of the pluralize template filter, which outputs an “s” if appropriate, based on the number of books found.
+注意这里pluralize的使用，这个过滤器在适当的时候会输出s（例如找到多本书籍）
+
+Improving Our Simple Form-Handling Example¶
+改进表单
+
+As in previous chapters, we’ve shown you the simplest thing that could possibly work.
+同上一章一样，我们先从最为简单、有效的例子开始
+
+Now we’ll point out some problems and show you how to improve it.
+ 现在我们再来找出这个简单的例子中的不足，然后改进他们
+
+First, our search() view’s handling of an empty query is poor – we’re just displaying a "Please submit a search term." message, requiring the user to hit the browser’s back button.
+首先，search()视图对于空字符串的处理相当薄弱——仅显示一条”Please submit a search term.”的提示信息
+
+This is horrid and unprofessional, and if you ever actually implement something like this in the wild, your Django privileges will be revoked.
+ 若用户要重新填写表单必须自行点击“后退”按钮， 这种做法既糟糕又不专业
+
+It would be much better to redisplay the form, with an error above it, so that the user can try again immediately.
+在检测到空字符串时更好的解决方法是重新显示表单，并在表单上面给出错误提示以便用户立刻重新填写
+
+The easiest way to do that would be to render the template again, like this:
+ 最简单的实现方法既是添加else分句重新显示表单，代码如下：
+
+(Note that we’ve included search_form() here so you can see both views in one place.)
+（注意，将search_form()视图也包含进来以便查看）
+
+Here, we’ve improved search() to render the search_form.html template again, if the query is empty.
+这段代码里，我们改进来search()视图：在字符串为空时重新显示search_form.html
+
+And because we need to display an error message in that template, we pass a template variable.
+ 并且给这个模板传递了一个变量error，记录着错误提示信息
+
+Now we can edit search_form.html to check for the error variable:
+ 现在我们编辑一下search_form.html，检测变量error：
+
+We can still use this template from our original view, search_form(), because search_form() doesn’t pass error to the template – so the error message won’t show up in that case.
+我们修改了search_form()视图所使用的模板，因为search_form()视图没有传递error变量，所以在条用search_form视图时不会显示错误信息
+
+With this change in place, it’s a better application, but it now begs the question: is a dedicated search_form() view really necessary?
+通过上面的一些修改，现在程序变的好多了，但是现在出现一个问题： 是否有必要专门编写search_form()来显示表单
+
+As it stands, a request to the URL /search/ (without any GET parameters) will display the empty form (but with an error).
+ 按实际情况来说，当一个请求发送至/search/（未包含GET的数据）后将会显示一个空的表单（带有错误信息）
+
+We can remove the search_form() view, along with its associated URLpattern, as long as we change search() to hide the error message when somebody visits /search/ with no GET parameters:
+ 所以，只要我们改变search()视图：当用户访问/search/并未提交任何数据时就隐藏错误信息，这样就移去search_form()视图以及对应的URLpattern
+
+In this updated view, if a user visits /search/ with no GET parameters, he’ll see the search form with no error message.
+在改进后的视图中，若用户访问/search/并且没有带有GET数据，那么他将看到一个没有错误信息的表单
+
+If a user submits the form with an empty value for 'q', he’ll see the search form with an error message.
+ 如果用户提交了一个空表单，那么它将看到错误提示信息，还有表单
+
+And, finally, if a user submits the form with a non-empty value for 'q', he’ll see the search results.
+ 最后，若用户提交了一个非空的值，那么他将看到搜索结果
+
+We can make one final improvement to this application, to remove a bit of redundancy.
+最后，我们再稍微改进一下这个表单，去掉冗余的部分
+
+Now that we’ve rolled the two views and URLs into one and /search/ handles both search-form display and result display, the HTML  in search_form.html doesn’t have to hard-code a URL.
+ 既然已经将两个视图与URLs合并起来，/search/视图管理着表单的显示以及结果的显示，那么在search_form.html里表单的action值就没有必要硬编码的指定URL
+
+Instead of this:
+ 原先的代码是这样：
+
+It can be changed to this:
+现在改成这样：
+
+The action="" means “Submit the form to the same URL as the current page.” With this change in place, you won’t have to remember to change the action if you ever hook the search() view to another URL.
+action=”“意味着表单将提交给与当前页面相同的URL
+
+Simple validation¶
+简单的验证
+
+Our search example is still reasonably simple, particularly in terms of its data validation;
+我们的搜索示例仍然相当地简单，特别从数据验证方面来讲
+
+we’re merely checking to make sure the search query isn’t empty.
+我们仅仅只验证搜索关键值是否为空
+
+Many HTML forms include a level of validation that’s more complex than making sure the value is non-empty.
+ 然后许多HTML表单包含着比检测值是否为空更为复杂的验证
+
+We’ve all seen the error messages on Web sites:
+ 我们都有在网站上见过类似以下的错误提示信息：
+
+A note on JavaScript validation
+关于JavaScript验证
+
+This is beyond the scope of this book, but you can use JavaScript to validate data on the client side, directly in the browser.
+可以使用Javascript在客户端浏览器里对数据进行验证，这些知识已超出本书范围
+
+But be warned: even if you do this, you must validate data on the server side, too.
+ 要注意： 即使在客户端已经做了验证，但是服务器端仍必须再验证一次
+
+Some people have JavaScript turned off, and some malicious users might submit raw, unvalidated data directly to your form handler to see whether they can cause mischief.
+ 因为有些用户会将JavaScript关闭掉，并且还有一些怀有恶意的用户会尝试提交非法的数据来探测是否有可以攻击的机会
+
+There’s nothing you can do about this, other than always validate user-submitted data server-side (i.e., in your Django views).
+除了在服务器端对用户提交的数据进行验证（例如在视图里验证），我们没有其他办法
+
+You should think of JavaScript validation as a bonus usability feature, not as your only means of validating.
+ JavaScript验证可以看作是额外的功能，但不能作为唯一的验证功能
+
+Let’s tweak our search() view so that it validates that the search term is less than or equal to 20 characters long.
+我们来调整一下search()视图，让她能够验证搜索关键词是否小于或等于20个字符
+
+(For sake of example, let’s say anything longer than that might make the query too slow.) How might we do that?
+ （为来让例子更为显著，我们假设如果关键词超过20个字符将导致查询十分缓慢）
+
+The simplest possible thing would be to embed the logic directly in the view, like this:
+那么该如何实现呢
+
+Now, if you try submitting a search query greater than 20 characters long, it won’t let you search;
+现在，如果尝试着提交一个超过20个字符的搜索关键词，系统不会执行搜索操作，而是显示一条错误提示信息
+
+you’ll get an error message.
+ 但是，search_form.html里的这条提示信息是：”Please submit a search term.”，这显然是错误的， 所以我们需要更精确的提示信息：
+
+There’s something ugly about this.
+但像这样修改之后仍有一些问题
+
+Our one-size-fits-all error message is potentially confusing.
+ 我们包含万象的提示信息很容易使人产生困惑： 提交一个空表单怎么会出现一个关于20个字符限制的提示
+
+Why should the error message for an empty form submission mention anything about a 20-character limit?
+ 所以，提示信息必须是详细的，明确的，不会产生疑议
+
+The problem is in the fact that we’re using a simple boolean value for error, whereas we should be using a list of error message strings.
+问题的实质在于我们只使用来一个布尔类型的变量来检测是否出错，而不是使用一个列表来记录相应的错误信息
+
+Here’s how we might fix that:
+ 我们需要做如下的调整：
+
+Then, we need make a small tweak to the search_form.html template to reflect that it’s now passed an errors list instead of an error boolean value:
+接着，我们要修改一下search_form.html模板，现在需要显示一个errors列表而不是一个布尔判断
+
+Making a Contact Form¶
+编写Contact表单
+
+Although we iterated over the book search form example several times and improved it nicely, it’s still fundamentally simple: just a single field, 'q'.
+虽然我们一直使用书籍搜索的示例表单，并将起改进的很完美，但是这还是相当的简陋： 只包含一个字段，q
+
+Because it’s so simple, we didn’t even use Django’s form library to deal with it.
+这简单的例子，我们不需要使用Django表单库来处理
+
+But more complex forms call for more complex treatment – and now we’ll develop something more complex: a site contact form.
+ 但是复杂一点的表单就需要多方面的处理，我们现在来一下一个较为复杂的例子： 站点联系表单
+
+This will be a form that lets site users submit a bit of feedback, along with an optional e-mail return address.
+这个表单包括用户提交的反馈信息，一个可选的e-mail回信地址
+
+After the form is submitted and the data is validated, we’ll automatically send the message via e-mail to the site staff.
+ 当这个表单提交并且数据通过验证后，系统将自动发送一封包含题用户提交的信息的e-mail给站点工作人员
+
+We’ll start with our template, contact_form.html.
+我们从contact_form.html模板入手：
+
+We’ve defined three fields: the subject, e-mail address and message.
+我们定义了三个字段： 主题，e-mail和反馈信息
+
+The second is optional, but the other two fields are required.
+ 除了e-mail字段为可选，其他两个字段都是必填项
+
+Note we’re using method="post" here instead of method="get" because this form submission has a side effect – it sends an e-mail.
+ 注意，这里我们使用method=”post”而非method=”get”，因为这个表单会有一个服务器端的操作：发送一封e-mail
+
+Also, we copied the error-displaying code from our previous template search_form.html.
+ 并且，我们复制了前一个模板search_form.html中错误信息显示的代码
+
+If we continue down the road established by our search() view from the previous section, a naive version of our contact() view might look like this:
+如果我们顺着上一节编写search()视图的思路，那么一个contact()视图代码应该像这样：
+
+(If you’re following along, you may be wondering whether to put this view in the books/views.py file.
+（如果按照书中的示例做下来，这这里可能乎产生一个疑问：contact()视图是否要放在books/views.py这个文件里
+
+It doesn’t have anything to do with the books application, so should it live elsewhere?
+ 但是contact()视图与books应用没有任何关联，那么这个视图应该可以放在别的地方
+
+It’s totally up to you;
+ 这毫无紧要，只要在URLconf里正确设置URL与视图之间的映射，Django会正确处理的
+
+Django doesn’t care, as long as you’re able to point to the view from your URLconf.
+ 笔者个人喜欢创建一个contact的文件夹，与books文件夹同级
+
+Our personal preference would be to create a separate directory, contact, at the same level in the directory tree as books.
+这个文件夹中包括空的init.py和views.py两个文件
+
+A couple of new things are happening here:
+现在来分析一下以上的代码：
+
+We’re checking that request.method is 'POST'.
+确认request.method的值是’POST’
+
+This will only be true in the case of a form submission;
+用户浏览表单时这个值并不存在，当且仅当表单被提交时这个值才出现
+
+it won’t be true if somebody is merely viewing the contact form.
+ （在后面的例子中，request.method将会设置为’GET’，因为在普通的网页浏览中，浏览器都使用GET，而非POST）
+
+(In the latter case, request.method will be set to 'GET', because in normal Web browsing, browsers use GET, not POST.) This makes it a nice way to isolate the “form display” case from the “form processing” case.
+判断request.method的值很好地帮助我们将表单显示与表单处理隔离开来
+
+Instead of request.GET, we’re using request.POST to access the submitted form data.
+我们使用request.POST代替request.GET来获取提交过来的数据
+
+This is necessary because the HTML  in contact_form.html uses method="post".
+ 这是必须的，因为contact_form.html里表单使用的是method=”post”
+
+If this view is accessed via POST, then request.GET will be empty.
+如果在视图里通过POST获取数据，那么request.GET将为空
+
+This time, we have two required fields, subject and message, so we have to validate both.
+这里，有两个必填项，subject 和 message，所以需要对这两个进行验证
+
+Note that we’re using request.POST.get() and providing a blank string as the default value;
+ 注意，我们使用request.POST.get()方法，并提供一个空的字符串作为默认值
+
+this is a nice, short way of handling both the cases of missing keys and missing data.
+这个方法很好的解决了键丢失与空数据问题
+
+Although the email field is not required, we still validate it if it is indeed submitted.
+虽然email非必填项，但如果有提交她的值则我们也需进行验证
+
+Our validation algorithm here is fragile – we’re just checking that the string contains an @ character.
+ 我们的验证算法相当的薄弱，仅验证值是否包含@字符
+
+In the real world, you’d want more robust validation (and Django provides it, which we’ll show you very shortly).
+ 在实际应用中，需要更为健壮的验证机制（Django提供这些验证机制，稍候我们就会看到）
+
+We’re using the function django.core.mail.send_mail to send an e-mail.
+我们使用了django.core.mail.send_mail函数来发送e-mail
+
+This function has four required arguments: the e-mail subject, the e-mail body, the “from” address, and a list of recipient addresses.
+ 这个函数有四个必选参数： 主题，正文，寄信人和收件人列表
+
+send_mail is a convenient wrapper around Django’s EmailMessage class, which provides advanced features such as attachments, multipart e-mails, and full control over e-mail headers.
+ send_mail是Django的EmailMessage类的一个方便的包装，EmailMessage类提供了更高级的方法，比如附件，多部分邮件，以及对于邮件头部的完整控制
+
+Note that in order to send e-mail using send_mail(), your server must be configured to send mail, and Django must be told about your outbound e-mail server.
+注意，若要使用send_mail()函数来发送邮件，那么服务器需要配置成能够对外发送邮件，并且在Django中设置出站服务器地址
+
+See http://docs.djangoproject.com/en/dev/topics/email/ for the specifics.
+ 参见规范：http://docs.djangoproject.com/en/dev/topics/email/
+
+After the e-mail is sent, we redirect to a “success” page by returning an HttpResponseRedirect object.
+当邮件发送成功之后，我们使用HttpResponseRedirect对象将网页重定向至一个包含成功信息的页面
+
+We’ll leave the implementation of that “success” page up to you (it’s a simple view/URLconf/template), but we should explain why we initiate a redirect instead of, for example, simply calling render() with a template right there.
+ 包含成功信息的页面这里留给读者去编写（很简单 一个视图/URL映射/一份模板即可），但是我们要解释一下为何重定向至新的页面，而不是在模板中直接调用render_to_response()来输出
+
+The reason: if a user hits “Refresh” on a page that was loaded via POST, that request will be repeated.
+原因就是： 若用户刷新一个包含POST表单的页面，那么请求将会重新发送造成重复
+
+This can often lead to undesired behavior, such as a duplicate record being added to the database – or, in our example, the e-mail being sent twice.
+ 这通常会造成非期望的结果，比如说重复的数据库记录
+
+If the user is redirected to another page after the POST, then there’s no chance of repeating the request.
+在我们的例子中，将导致发送两封同样的邮件
+
+You should always issue a redirect for successful POST requests.
+我们应每次都给成功的POST请求做重定向
+
+It’s a Web development best practice.
+ 这就是web开发的最佳实践
+
+This view works, but those validation functions are kind of crufty.
+contact()视图可以正常工作，但是她的验证功能有些复杂
+
+Imagine processing a form with a dozen fields;
+ 想象一下假如一个表单包含一打字段，我们真的将必须去编写每个域对应的if判断语句
+
+Another problem is form redisplay.
+另外一个问题是表单的重新显示
+
+In the case of validation errors, it’s best practice to redisplay the form with the previously submitted data already filled in, so the user can see what he did wrong (and also so the user doesn’t have to reenter data in fields that were submitted correctly).
+若数据验证失败后，返回客户端的表单中各字段最好是填有原来提交的数据，以便用户查看哪里出现错误（用户也不需再次填写正确的字段值）
+
+We could manually pass the POST data back to the template, but we’d have to edit each HTML field to insert the proper value in the proper place:
+ 我们可以手动地将原来的提交数据返回给模板，并且必须编辑HTML里的各字段来填充原来的值
+
+This is a lot of cruft, and it introduces a lot of opportunities for human error.
+这看起来杂乱，且写的时候容易出错
+
+We hope you’re starting to see the opportunity for some higher-level library that handles form- and validation-related tasks.
+ 希望你开始明白使用高级库的用意——负责处理表单及相关校验任务
+
+Your First Form Class¶
+第一个Form类
+
+Django comes with a form library, called django.forms, that handles many of the issues we’ve been exploring this chapter – from HTML form display to validation.
+Django带有一个form库，称为django.forms，这个库可以处理我们本章所提到的包括HTML表单显示以及验证
+
+Let’s dive in and rework our contact form application using the Django forms framework.
+ 接下来我们来深入了解一下form库，并使用她来重写contact表单应用
+
+Django’s “newforms” library
+Django的newforms库
+
+Throughout the Django community, you might see chatter about something called django.newforms.
+在Django社区上会经常看到django.newforms这个词语
+
+When people speak of django.newforms, they’re talking about what is now django.forms – the library covered by this chapter.
+当人们讨论django.newforms，其实就是我们本章里面介绍的django.forms
+
+The reason for this name change is historic.
+改名其实有历史原因的
+
+When Django was first released to the public, it had a complicated, confusing forms system, django.forms.
+ 当Django一次向公众发行时，它有一个复杂难懂的表单系统：django.forms
+
+It was completely rewritten, and the new version was called django.newforms so that people could still use the old system.
+后来它被完全重写了，新的版本改叫作：django.newforms，这样人们还可以通过名称，使用旧版本
+
+When Django 1.0 was released, the old django.forms went away, and django.newforms became django.forms.
+ 当Django 1.0发布时，旧版本django.forms就不再使用了，而django.newforms也终于可以名正言顺的叫做：django.forms
+
+The primary way to use the forms framework is to define a Form class for each HTML  you’re dealing with.
+表单框架最主要的用法是，为每一个将要处理的HTML的`` 定义一个Form类
+
+In our case, we only have one , so we’ll have one Form class.
+ 在这个例子中，我们只有一个 ，因此我们只需定义一个Form类
+
+This class can live anywhere you want – including directly in your views.py file – but community convention is to keep Form classes in a separate file called forms.py.
+ 这个类可以存在于任何地方，甚至直接写在 views.py文件里也行，但是社区的惯例是把Form类都放到一个文件中：forms.py
+
+Create this file in the same directory as your views.py, and enter the following:
+在存放 views.py`` 的目录中，创建这个文件，然后输入：
+
+This is pretty intuitive, and it’s similar to Django’s model syntax.
+这看上去简单易懂，并且很像在模块中使用的语法
+
+Each field in the form is represented by a type of Field class – CharField and EmailField are the only types of fields used here – as attributes of a Form class.
+ 表单中的每一个字段（域）作为Form类的属性，被展现成Field类
+
+Each field is required by default, so to make email optional, we specify required=False.
+这里只用到CharField和EmailField类型
+
+Let’s hop into the Python interactive interpreter and see what this class can do.
+让我们钻研到Python解释器里面看看这个类做了些什么
+
+The first thing it can do is display itself as HTML:
+ 它做的第一件事是将自己显示成HTML：
+
+Note that the opening and closing ,  and  tags aren’t included in the output, so that you can add any additional rows and customization if necessary.
+请注意，标签、、的开闭合标记没有包含于输出当中，这样你就可以添加额外的行或者自定义格式
+
+These methods are just shortcuts for the common case of “display the entire form.” You can also display the HTML for a particular field:
+这些类方法只是一般情况下用于快捷显示完整表单的方法
+
+The second thing Form objects can do is validate data.
+Form对象做的第二件事是校验数据
+
+To validate data, create a new Form object and pass it a dictionary of data that maps field names to data:
+ 为了校验数据，我们创建一个新的对Form象，并且传入一个与定义匹配的字典类型数据：
+
+Once you’ve associated data with a Form instance, you’ve created a “bound” form:
+一旦你对一个Form实体赋值，你就得到了一个绑定form：
+
+Call the is_valid() method on any bound Form to find out whether its data is valid.
+调用任何绑定form的is_valid()方法，就可以知道它的数据是否合法
+
+We’ve passed a valid value for each field, so the Form in its entirety is valid:
+ 我们已经为每个字段传入了值，因此整个Form是合法的：
+
+If we don’t pass the email field, it’s still valid, because we’ve specified required=False for that field:
+如果我们不传入email值，它依然是合法的
+
+But, if we leave off either subject or message, the Form is no longer valid:
+但是，如果留空subject或message，整个Form就不再合法了：
+
+You can drill down to get field-specific error messages:
+你可以逐一查看每个字段的出错消息：
+
+Each bound Form instance has an errors attribute that gives you a dictionary mapping field names to error-message lists:
+每一个邦定Form实体都有一个errors属性，它为你提供了一个字段与错误消息相映射的字典表
+
+Finally, for Form instances whose data has been found to be valid, a cleaned_data attribute is available.
+最终，如果一个Form实体的数据是合法的，它就会有一个可用的cleaned_data属性
+
+This is a dictionary of the submitted data, “cleaned up.” Django’s forms framework not only validates data, it cleans it up by converting values to the appropriate Python types.
+ 这是一个包含干净的提交数据的字典
+
+Our contact form only deals with strings, which are “cleaned” into Unicode objects – but if we were to use an IntegerField or DateField, the forms framework would ensure that cleaned_data used proper Python integers or datetime.date objects for the given fields.
+我们的contact form只涉及字符串类型，它们会被清理成Unicode对象
+
+Tying Form Objects Into Views¶
+在视图中使用Form对象
+
+With some basic knowledge about Form classes, you might see how we can use this infrastructure to replace some of the cruft in our contact() view.
+在学习了关于Form类的基本知识后，你会看到我们如何把它用到视图中，取代contact()代码中不整齐的部分
+
+Here’s how we can rewrite contact() to use the forms framework:
+ 一下示例说明了我们如何用forms框架重写contact()：
+
+Look at how much cruft we’ve been able to remove!
+看看，我们能移除这么多不整齐的代码
+
+Django’s forms framework handles the HTML display, the validation, data cleanup and form redisplay-with-errors.
+ Django的forms框架处理HTML显示、数据校验、数据清理和表单错误重现
+
+Try running this locally.
+尝试在本地运行
+
+Load the form, submit it with none of the fields filled out, submit it with an invalid e-mail address, then finally submit it with valid data.
+ 装载表单，先留空所有字段提交空表单
+
+(Of course, depending on your mail-server configuration, you might get an error when send_mail() is called, but that’s another issue.)
+继而填写一个错误的邮箱地址再尝试提交表单
+
+Changing How Fields Are Rendered¶
+改变字段显示
+
+Probably the first thing you’ll notice when you render this form locally is that the message field is displayed as an <input type="text">, and it ought to be a .
+你可能首先注意到：当你在本地显示这个表单的时，message字段被显示成input type=”text” ，而它应该被显示成
+
+We can fix that by setting the field’s widget:
+我们可以通过设置 widget 来修改它：
+
+The forms framework separates out the presentation logic for each field into a set of widgets.
+forms框架把每一个字段的显示逻辑分离到一组部件（widget）中
+
+Each field type has a default widget, but you can easily override the default, or provide a custom widget of your own.
+ 每一个字段类型都拥有一个默认的部件，我们也可以容易地替换掉默认的部件，或者提供一个自定义的部件
+
+Think of the Field classes as representing validation logic, while widgets represent presentation logic.
+考虑一下Field类表现 校验逻辑 ，而部件表现 显示逻辑 
+
+Setting a Maximum Length¶
+设置最大长度
+
+One of the most common validation needs is to check that a field is of a certain size.
+一个最经常使用的校验要求是检查字段长度
+
+For good measure, we should improve our ContactForm to limit the subject to 100 characters.
+ 另外，我们应该改进ContactForm，使subject限制在100个字符以内
+
+To do that, just supply a max_length to the CharField, like this:
+ 为此，仅需为CharField提供max_length参数，像这样：
+
+An optional min_length argument is also available.
+选项min_length参数同样可用
+
+Setting Initial Values¶
+设置初始值
+
+As an improvement to this form, let’s add an initial value for the subject field: "I love your site!" (A little power of suggestion can’t hurt.) To do this, we can use the initial argument when we create a Form instance:
+让我们再改进一下这个表单：为字subject段添加 初始值 ： "I love your site!" （一点建议，但没坏处
+
+Now, the subject field will be displayed prepopulated with that kind statement.
+现在，subject字段将被那个句子填充
+
+Note that there is a difference between passing initial data and passing data that binds the form.
+请注意，传入 初始值 数据和传入数据以 绑定 表单是有区别的
+
+The biggest difference is that if you’re just passing initial data, then the form will be unbound, which means it won’t have any error messages.
+ 最大的区别是，如果仅传入 初始值 数据，表单是_unbound_的，那意味着它没有错误消息
+
+Custom Validation Rules¶
+自定义校验规则
+
+Imagine we’ve launched our feedback form, and the e-mails have started tumbling in.
+假设我们已经发布了反馈页面了，email已经开始源源不断地涌入了
+
+There’s just one problem: some of the submitted messages are just one or two words, which isn’t long enough for us to make sense of.
+ 这里有一个问题： 一些提交的消息只有一两个字，我们无法得知详细的信息
+
+We decide to adopt a new validation policy: four words or more, please.
+ 所以我们决定增加一条新的校验： 来点专业精神，最起码写四个字，拜托
+
+There are a number of ways to hook custom validation into a Django form.
+我们有很多的方法把我们的自定义校验挂在Django的form上
+
+If our rule is something we will reuse again and again, we can create a custom field type.
+ 如果我们的规则会被一次又一次的使用，我们可以创建一个自定义的字段类型
+
+Most custom validations are one-off affairs, though, and can be tied directly to the Form class.
+ 大多数的自定义校验都是一次性的，可以直接绑定到form类.
+
+We want additional validation on the message field, so we add a clean_message() method to our Form class:
+我们希望message 字段有一个额外的校验，我们增加一个clean_message() 方法到Form 类：
+
+Django’s form system automatically looks for any method whose name starts with clean_ and ends with the name of a field.
+Django的form系统自动寻找匹配的函数方法，该方法名称以clean_开头，并以字段名称结束
+
+If any such method exists, it’s called during validation.
+ 如果有这样的方法，它将在校验时被调用
+
+Specifically, the clean_message() method will be called after the default validation logic for a given field (in this case, the validation logic for a required CharField).
+特别地，clean_message()方法将在指定字段的默认校验逻辑执行 之后 被调用
+
+Because the field data has already been partially processed, we pull it out of self.cleaned_data.
+（本例中，在必填CharField这个校验逻辑之后
+
+Also, we don’t have to worry about checking that the value exists and is non-empty;
+）因为字段数据已经被部分处理，所以它被从self.cleaned_data中提取出来了
+
+that’s done by the default validator.
+同样，我们不必担心数据是否为空，因为它已经被校验过了
+
+We naively use a combination of len() and split() to count the number of words.
+我们简单地使用了len()和split()的组合来计算单词的数量
+
+If the user has entered too few words, we raise a forms.ValidationError.
+ 如果用户输入字数不足，我们抛出一个forms.ValidationError型异常
+
+The string attached to this exception will be displayed to the user as an item in the error list.
+这个异常的描述会被作为错误列表中的一项显示给用户
+
+It’s important that we explicitly return the cleaned value for the field at the end of the method.
+在函数的末尾显式地返回字段的值非常重要
+
+This allows us to modify the value (or convert it to a different Python type) within our custom validation method.
+ 我们可以在我们自定义的校验方法中修改它的值（或者把它转换成另一种Python类型）
+
+If we forget the return statement, then None will be returned, and the original value will be lost.
+ 如果我们忘记了这一步，None值就会返回，原始的数据就丢失掉了
+
+Specifying labels¶
+指定标签
+
+By default, the labels on Django’s auto-generated form HTML are created by replacing underscores with spaces and capitalizing the first letter – so the label for the email field is "Email".
+HTML表单中自动生成的标签默认是按照规则生成的：用空格代替下划线，首字母大写
+
+(Sound familiar?
+如email的标签是"Email" 
+
+It’s the same simple algorithm that Django’s models use to calculate default verbose_name values for fields.
+（好像在哪听到过
+
+We covered this in Chapter 5.)
+ 是的，同样的逻辑被用于模块（model）中字段的verbose_name值
+
+But, as with Django’s models, we can customize the label for a given field.
+像在模块中做过的那样，我们同样可以自定义字段的标签
+
+Just use label, like so:
+ 仅需使用label，像这样：
+
+Customizing Form Design¶
+定制Form设计
+
+Our contact_form.html template uses {{ form.as_table }} to display the form, but we can display the form in other ways to get more granular control over display.
+在上面的contact_form.html 模板中我们使用{{form.as_table}} 显示表单，不过我们可以使用其他更精确控制表单显示的方法
+
+The quickest way to customize forms’ presentation is with CSS.
+修改form的显示的最快捷的方式是使用CSS
+
+Error lists, in particular, could do with some visual enhancement, and the auto-generated error lists use <ul class="errorlist"> precisely so that you can target them with CSS.
+ 尤其是错误列表，可以增强视觉效果
+
+The following CSS really makes our errors stand out:
+自动生成的错误列表精确的使用
+
+While it’s convenient to have our form’s HTML generated for us, in many cases you’ll want to override the default rendering.
+虽然，自动生成HTML是很方便的，但是在某些时候，你会想覆盖默认的显示
+
+{{ form.as_table }} and friends are useful shortcuts while you develop your application, but everything about the way a form is displayed can be overridden, mostly within the template itself, and you’ll probably find yourself doing this.
+ {{form.as_table}}和其它的方法在开发的时候是一个快捷的方式，form的显示方式也可以在form中被方便地重写
+
+Each field’s widget (<input type="text">, , , etc.) can be rendered individually by accessing {{ form.fieldname }} in the template, and any errors associated with a field are available as {{ form.fieldname.errors }}.
+每一个字段部件(, , , 或者类似)都可以通过访问{{form.字段名}}进行单独的渲染
+
+{{ form.message.errors }} displays a <ul class="errorlist"> if errors are present and a blank string if the field is valid (or the form is unbound).
+{{ form.message.errors }} 会在  class="errorlist"> 里面显示，如果字段是合法的，或者form没有被绑定，就显示一个空字符串
+
+We can also treat form.message.errors as a Boolean or even iterate over it as a list.
+ 我们还可以把 form.message.errors 当作一个布尔值或者当它是list在上面做迭代， 例如：
+
+In the case of validation errors, this will add an “errors” class to the containing  and display the list of errors in an unordered list.
+在校验失败的情况下, 这段代码会在包含错误字段的div的class属性中增加一个”errors”，在一个有序列表中显示错误信息
+
+What’s Next?¶
+下一章
+
+This chapter concludes the introductory material in this book – the so-called “core curriculum.” The next section of the book, Chapters 8 to 12, goes into more detail about advanced Django usage, including how to deploy a Django application (Chapter 12).
+这一章总结了本书的介绍材料，即所谓“核心教程”
+
+After these first seven chapters, you should know enough to start writing your own Django projects.
+在学习本书的前面七章后，我们终于对于使用Django构建自己的网站已经知道的够多了， 本书中剩余的材料将在你需要的时候帮助你补遗
+
+We’ll start in Chapter 8 by doubling back and taking a closer look at views and URLconfs (introduced first in Chapter 3).
+第八章我们将回头、并深入地讲解 视图和URLconfs（第三章已简单介绍）
+
+© Copyright 2012, Matt Behrens.
+www.shoucewang.com. All Rights Reserved. 手册网 版权所有
+

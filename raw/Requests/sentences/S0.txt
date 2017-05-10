@@ -1,0 +1,72 @@
+Introduction¶
+简介¶
+
+Philosophy¶
+开发哲学¶
+
+Requests was developed with a few PEP 20 idioms in mind.
+Requests 是以 PEP 20 的箴言为中心开发的
+
+All contributions to Requests should keep these important rules in mind.
+对于 Requests 所有的贡献都应牢记这些重要的准则
+
+Apache2 License¶
+Apache2 协议¶
+
+A large number of open source projects you find today are GPL Licensed.
+现在你找到的许多开源项目都是以 GPL 协议发布的
+
+While the GPL has its time and place, it should most certainly not be your go-to license for your next open source project.
+虽然 GPL 有它自己的一席之地， 但在开始你的下一个开源项目时，GPL 应该不再是你的默认选择
+
+A project that is released as GPL cannot be used in any commercial product without the product itself also being offered as open source.
+项目发行于 GPL 协议之后，就不能用于任何本身没开源的商业产品中
+
+The MIT, BSD, ISC, and Apache2 licenses are great alternatives to the GPL that allow your open-source software to be used freely in proprietary, closed-source software.
+MIT、BSD、ISC、Apache2 许可都是优秀的替代品，它们允许你的开源软件自由应用在私有闭源软件中
+
+Requests is released under terms of Apache2 License.
+Requests 的发布许可为 Apache2 License.
+
+Requests License¶
+Requests 协议¶
+
+Copyright 2016 Kenneth Reitz
+Copyright 2016 Kenneth Reitz
+
+Licensed under the Apache License, Version 2.0 (the "License");
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+
+Requests is an elegant and simple HTTP library for Python, built for human beings.
+Requests is an elegant and simple HTTP library for Python, built for human beings. You are currently looking at the documentation of the development release.
+
+Stay Informed
+Stay Informed
+
+Receive updates on new releases and upcoming projects.
+Receive updates on new releases and upcoming projects.
+
+Join Mailing List.
+Join Mailing List.
+
+If you enjoy using this project, Say Thanks!
+Follow @kennethreitz
+
+More Kenneth Reitz projects:
+More Kenneth Reitz projects:
+
+Translations
+Translations
+
+Table Of Contents
+內容目录
+
+Related Topics
+Related Topics
+
+Quick search
+快速搜索
+

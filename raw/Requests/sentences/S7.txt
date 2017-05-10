@@ -1,0 +1,51 @@
+Integrations¶
+Integrations¶
+
+Python for iOS¶
+Python for iOS¶
+
+Requests is built into the wonderful Python for iOS runtime!
+Requests is built into the wonderful Python for iOS runtime!
+
+To give it a try, simply:
+To give it a try, simply:
+
+Articles & Talks¶
+Articles & Talks¶
+
+Requests is an elegant and simple HTTP library for Python, built for human beings.
+Requests is an elegant and simple HTTP library for Python, built for human beings. You are currently looking at the documentation of the development release.
+
+Stay Informed
+Stay Informed
+
+Receive updates on new releases and upcoming projects.
+Receive updates on new releases and upcoming projects.
+
+Join Mailing List.
+Join Mailing List.
+
+Follow @kennethreitz
+Follow @kennethreitz
+
+Other Projects
+Other Projects
+
+More Kenneth Reitz projects:
+More Kenneth Reitz projects:
+
+Translations
+Translations
+
+Table Of Contents
+內容目录
+
+Related Topics
+Related Topics
+
+Quick search
+快速搜索
+
+Enter search terms or a module, class or function name.
+输入相关的术语，模块，类或者函数名称进行搜索
+

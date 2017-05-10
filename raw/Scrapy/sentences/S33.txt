@@ -1,0 +1,60 @@
+Architecture overview¶
+架构概览¶
+
+This document describes the architecture of Scrapy and how its components interact.
+本文档介绍了Scrapy架构及其组件之间的交互
+
+Overview¶
+概述¶
+
+The following diagram shows an overview of the Scrapy architecture with its components and an outline of the data flow that takes place inside the system (shown by the green arrows).
+接下来的图表展现了Scrapy的架构，包括组件及在系统中发生的数据流的概览(绿色箭头所示)
+
+A brief description of the components is included below with links for more detailed information about them.
+ 下面对每个组件都做了简单介绍，并给出了详细内容的链接
+
+The data flow is also described below.
+数据流如下所描述
+
+Data flow¶
+组件¶
+
+Scheduler¶
+调度器(Scheduler)¶
+
+The Scheduler receives requests from the engine and enqueues them for feeding them later (also to the engine) when the engine requests them.
+调度器从引擎接受request并将他们入队，以便之后引擎请求他们时提供给引擎
+
+Downloader¶
+下载器(Downloader)¶
+
+The Downloader is responsible for fetching web pages and feeding them to the engine which, in turn, feeds them to the spiders.
+下载器负责获取页面数据并提供给引擎，而后提供给spider
+
+Spiders¶
+Spiders¶
+
+Spiders are custom classes written by Scrapy users to parse responses and extract items (aka scraped items) from them or additional requests to follow.
+Spider是Scrapy用户编写用于分析response并提取item(即获取到的item)或额外跟进的URL的类
+
+For more information see Spiders.
+ 每个spider负责处理一个特定(或一些)网站
+
+Item Pipeline¶
+Item Pipeline¶
+
+The Item Pipeline is responsible for processing the items once they have been extracted (or scraped) by the spiders.
+Item Pipeline负责处理被spider提取出来的item
+
+Typical tasks include cleansing, validation and persistence (like storing the item in a database).
+典型的处理有清理、 验证及持久化(例如存取到数据库中)
+
+For more information see Item Pipeline.
+ 更多内容查看 Item Pipeline 
+
+Downloader middlewares¶
+下载器中间件(Downloader middlewares)¶
+
+Downloader middlewares are specific hooks that sit between the Engine and the Downloader and process requests when they pass from the Engine to the Downloader, and responses that pass from Downloader to the Engine.
+下载器中间件是在引擎及下载器之间的特定钩子(specific hook)，处理Downloader传递给引擎的response
+

@@ -1,0 +1,144 @@
+2.1.
+2.1. 调用 Python 解释器¶
+
+The Python interpreter is usually installed as /usr/local/bin/python3.5 on those machines where it is available;
+Python 解释器通常被安装在目标机器的 /usr/local/bin/python3.5 目录下
+
+putting /usr/local/bin in your Unix shell’s search path makes it possible to start it by typing the command:
+将 /usr/local/bin 目录包含进 Unix shell 的搜索路径里，以确保可以通过输入:
+
+to the shell.
+命令来启动他
+
+[1] Since the choice of the directory where the interpreter lives is an installation option, other places are possible;
+[1] 由于 Python 解释器的安装路径是可选的，这也可能是其它路径，你可以联系安装 Python 的用户或系统管理员确认（例如，/usr/local/python 就是一个常见的选择）
+
+On Windows machines, the Python installation is usually placed in C:\Python35, though you can change this when you’re running the installer.
+在 Windows 机器上，Python 通常安装在 C:\Python35 位置，当然你可以在运行安装向导时修改此值
+
+To add this directory to your path, you can type the following command into the command prompt in a DOS box:
+要想把此目录添加到你的 PATH 环境变量中，你可以在 DOS 窗口中输入以下命令:
+
+Typing an end-of-file character (Control-D on Unix, Control-Z on Windows) at the primary prompt causes the interpreter to exit with a zero exit status.
+通常你可以在主窗口输入一个文件结束符（Unix 系统是 Control-D，Windows 系统是 Control-Z）让解释器以 0 状态码退出
+
+If that doesn’t work, you can exit the interpreter by typing the following command: quit().
+如果那没有作用，你可以通过输入 quit() 命令退出解释器
+
+The interpreter’s line-editing features include interactive editing, history substitution and code completion on systems that support readline.
+Python 解释器具有简单的行编辑功能
+
+Perhaps the quickest check to see whether command line editing is supported is typing Control-P to the first Python prompt you get.
+在 Unix 系统上，任何 Python 解释器都可能已经添加了 GNU readline 库支持，这样就具备了精巧的交互编辑和历史记录等功能
+
+If it beeps, you have command line editing;
+在 Python 主窗口中输入 Control-P 可能是检查是否支持命令行编辑的最简单的方法
+
+see Appendix Interactive Input Editing and History Substitution for an introduction to the keys.
+如果发出嘟嘟声（计算机扬声器），则说明你可以使用命令行编辑功能
+
+If nothing appears to happen, or if ^P is echoed, command line editing isn’t available;
+更多快捷键的介绍请参考 交互式输入行编辑历史回溯
+
+you’ll only be able to use backspace to remove characters from the current line.
+如果没有任何声音，或者显示 ^P 字符，则说明命令行编辑功能不可用
+
+The interpreter operates somewhat like the Unix shell: when called with standard input connected to a tty device, it reads and executes commands interactively;
+Python 解释器有些操作类似 Unix shell：当使用终端设备（tty）作为标准输入调用时，它交互的解释并执行命令
+
+when called with a file name argument or with a file as standard input, it reads and executes a script from that file.
+当使用文件名参数或以文件作为标准输入调用时，它读取文件并将文件作为 脚本 执行
+
+A second way of starting the interpreter is python -c command [arg] ..., which executes the statement(s) in command, analogous to the shell’s -c option.
+第二种启动 Python 解释器的方法是 python -c command [arg] ...，这种方法可以在 命令行 执行 Python 语句，类似于 shell 中的 -c 选项
+
+Since Python statements often contain spaces or other characters that are special to the shell, it is usually advised to quote command in its entirety with single quotes.
+由于 Python 语句通常会包含空格或其他特殊 shell 字符，一般建议将 命令 用单引号包裹起来
+
+Some Python modules are also useful as scripts.
+有一些 Python 模块也可以当作脚本使用
+
+These can be invoked using python -m module [arg] ..., which executes the source file for module as if you had spelled out its full name on the command line.
+你可以使用 python -m module [arg] ... 命令调用它们，这类似在命令行中键入完整的路径名执行 模块 源文件一样
+
+When a script file is used, it is sometimes useful to be able to run the script and enter interactive mode afterwards.
+使用脚本文件时，经常会运行脚本然后进入交互模式
+
+This can be done by passing -i before the script.
+这也可以通过在脚本之前加上 -i 参数来实现
+
+When known to the interpreter, the script name and additional arguments thereafter are turned into a list of strings and assigned to the argv variable in the sys module.
+调用解释器时，脚本名和附加参数传入一个名为 sys.argv 的字符串列表
+
+You can access this list by executing import sys.
+你能够获取这个列表通过执行 import sys，列表的长度大于等于1
+
+The length of the list is at least one;
+没有给定脚本和参数时，它至少也有一个元素：sys.argv[0] 此时为空字符串
+
+when no script and no arguments are given, sys.argv[0] is an empty string.
+脚本名指定为 '-' （表示标准输入）时， sys.argv[0] 被设定为 '-'，使用 -c 指令 时，sys.argv[0] 被设定为 '-c'
+
+When the script name is given as '-' (meaning standard input), sys.argv[0] is set to '-'.
+使用 -m 模块 参数时，sys.argv[0] 被设定为指定模块的全名
+
+When -c command is used, sys.argv[0] is set to '-c'.
+-c 指令 或者 -m 模块 之后的参数不会被 Python 解释器的选项处理机制所截获，而是留在 sys.argv 中，供脚本命令操作
+
+2.1.2.
+2.1.2. 交互模式¶
+
+When commands are read from a tty, the interpreter is said to be in interactive mode.
+从 tty 读取命令时，我们称解释器工作于 交互模式
+
+In this mode it prompts for the next command with the primary prompt, usually three greater-than signs (>>>);
+这种模式下它根据主提示符来执行，主提示符通常标识为三个大于号(>>>)
+
+for continuation lines it prompts with the secondary prompt, by default three dots (...).
+继续的部分被称为 从属提示符，由三个点标识(...)
+
+The interpreter prints a welcome message stating its version number and a copyright notice before printing the first prompt:
+在第一行之前，解释器打印欢迎信息、版本号和授权提示:
+
+Continuation lines are needed when entering a multi-line construct.
+输入多行结构时需要从属提示符了，例如，下面这个 if 语句:
+
+For more on interactive mode, see Interactive Mode.
+关于交互模式更多的内容，请参见 交互模式
+
+2.2.
+2.2. 解释器及其环境¶
+
+2.2.1.
+2.2.1. 源程序编码¶
+
+By default, Python source files are treated as encoded in UTF-8.
+默认情况下，Python 源文件是 UTF-8 编码
+
+In that encoding, characters of most languages in the world can be used simultaneously in string literals, identifiers and comments — although the standard library only uses ASCII characters for identifiers, a convention that any portable code should follow.
+在此编码下，全世界大多数语言的字符可以同时用在字符串、标识符和注释中 — 尽管 Python 标准库仅使用 ASCII 字符做为标识符，这只是任何可移植代码应该遵守的约定
+
+To display all these characters properly, your editor must recognize that the file is UTF-8, and it must use a font that supports all the characters in the file.
+如果要正确的显示所有的字符，你的编辑器必须能识别出文件是 UTF-8 编码，并且它使用的字体能支持文件中所有的字符
+
+It is also possible to specify a different encoding for source files.
+你也可以为源文件指定不同的字符编码
+
+In order to do this, put one more special comment line right after the #!
+为此，在 #! 行（首行）后插入至少一行特殊的注释行来定义源文件的编码:
+
+With that declaration, everything in the source file will be treated as having the encoding encoding instead of UTF-8.
+通过此声明，源文件中所有的东西都会被当做用 encoding 指代的 UTF-8 编码对待
+
+The list of possible encodings can be found in the Python Library Reference, in the section on codecs.
+在 Python 库参考手册 codecs 一节中你可以找到一张可用的编码列表
+
+For example, if your editor of choice does not support UTF-8 encoded files and insists on using some other encoding, say Windows-1252, you can write:
+例如，如果你的编辑器不支持 UTF-8 编码的文件，但支持像 Windows-1252 的其他一些编码，你可以定义:
+
+and still use all characters in the Windows-1252 character set in the source files.
+这样就可以在源文件中使用 Windows-1252 字符集中的所有字符了
+
+The special encoding comment must be in the first or second line within the file.
+这个特殊的编码注释必须在文件中的 第一或第二 行定义
+

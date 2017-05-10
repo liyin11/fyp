@@ -1,0 +1,33 @@
+First Steps with Sphinx
+初入Sphinx
+
+Introduction¶
+概述¶
+
+This is the documentation for the Sphinx documentation builder.
+这是Sphinx文档生成器的说明书，Sphinx是一个工具，它能够把一组 reStructuredText 格式的文件转换成各种输出格式，而且自动地生成交叉引用，生成目录等
+
+Sphinx is a tool that translates a set of reStructuredText source files into various output formats, automatically producing cross-references, indices etc.
+也就是说，如果有一个目录，里面包含一堆reST格式的文档（可能子目录里面也同样存在reST格式的文档），Sphinx能够生成一个漂亮的组织结构以及便于浏览和导航的HTML 文件（这些文件在其他的文件夹中）
+
+That is, if you have a directory containing a bunch of reST-formatted documents (and possibly subdirectories of docs in there as well), Sphinx can generate a nicely-organized arrangement of HTML files (in some other directory) for easy browsing and navigation.
+当然对于同样的来源文件（reST格式），它也能够生成一个能够被编译（生成）PDF版本的LaTeX格式的文件，或者直接使用 rst2pdf 生成PDF文件
+
+The focus is on hand-written documentation, rather than auto-generated API docs.
+Sphinx注重的是人工的文档，而不是自动生成的API文档
+
+Though there is support for that kind of docs as well (which is intended to be freely mixed with hand-written content), if you need pure API docs have a look at Epydoc, which also understands reST.
+尽管Sphinx或多或少地也支持自动生成的API文档，如果需要纯粹的API文档，可以看看 Epydoc （Epydoc也支持reST格式）
+
+Prerequisites¶
+如何使用Sphinx¶
+
+Sphinx needs at least Python 2.6 or Python 3.3 to run, as well as the docutils and Jinja2 libraries.
+请参看 初入Sphinx
+
+Sphinx should work with docutils version 0.10 or some (not broken) SVN trunk snapshot.
+初入Sphinx 包含了手册里面很多高级的话题
+
+See First Steps with Sphinx for an introduction.
+京ICP备14002119号-1
+

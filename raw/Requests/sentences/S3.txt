@@ -1,0 +1,669 @@
+Advanced Usage¶
+高级用法¶
+
+This document covers some of Requests more advanced features.
+本篇文档涵盖了 Requests 的一些高级特性
+
+Session Objects¶
+会话对象¶
+
+The Session object allows you to persist certain parameters across requests.
+会话对象让你能够跨请求保持某些参数
+
+It also persists cookies across all requests made from the Session instance, and will use urllib3's connection pooling.
+它也会在同一个 Session 实例发出的所有请求之间保持 cookie， 期间使用 urllib3 的 connection pooling 功能
+
+So if you're making several requests to the same host, the underlying TCP connection will be reused, which can result in a significant performance increase (see HTTP persistent connection).
+所以如果你向同一主机发送多个请求，底层的 TCP 连接将会被重用，从而带来显著的性能提升
+
+A Session object has all the methods of the main Requests API.
+会话对象具有主要的 Requests API 的所有方法
+
+Let's persist some cookies across requests:
+我们来跨请求保持一些 cookie:
+
+Sessions can also be used to provide default data to the request methods.
+会话也可用来为请求方法提供缺省数据
+
+This is done by providing data to the properties on a Session object:
+这是通过为会话对象的属性提供数据来实现的：
+
+Any dictionaries that you pass to a request method will be merged with the session-level values that are set.
+任何你传递给请求方法的字典都会与已设置会话层数据合并
+
+The method-level parameters override session parameters.
+方法层的参数覆盖会话的参数
+
+Note, however, that method-level parameters will not be persisted across requests, even if using a session.
+不过需要注意，就算使用了会话，方法级别的参数也不会被跨请求保持
+
+This example will only send the cookies with the first request, but not the second:
+下面的例子只会和第一个请求发送 cookie ，而非第二个：
+
+If you want to manually add cookies to your session, use the Cookie utility functions to manipulate Session.cookies.
+如果你要手动为会话添加 cookie，就是用 Cookie utility 函数 来操纵 Session.cookies
+
+Sessions can also be used as context managers:
+会话还可以用作前后文管理器：
+
+This will make sure the session is closed as soon as the with block is exited, even if unhandled exceptions occurred.
+这样就能确保 with 区块退出后会话能被关闭，即使发生了异常也一样
+
+Remove a Value From a Dict Parameter
+从字典参数中移除一个值
+
+Sometimes you'll want to omit session-level keys from a dict parameter.
+有时你会想省略字典参数中一些会话层的键
+
+To do this, you simply set that key's value to None in the method-level parameter.
+要做到这一点，你只需简单地在方法层参数中将那个键的值设置为 None ，那个键就会被自动省略掉
+
+All values that are contained within a session are directly available to you.
+包含在一个会话中的所有数据你都可以直接使用
+
+See the Session API Docs to learn more.
+学习更多细节请阅读 会话 API 文档
+
+Request and Response Objects¶
+请求与响应对象¶
+
+Whenever a call is made to requests.get() and friends, you are doing two major things.
+任何时候调用 requests.*() 你都在做两件主要的事情
+
+First, you are constructing a Request object which will be sent off to a server to request or query some resource.
+其一，你在构建一个 Request 对象， 该对象将被发送到某个服务器请求或查询一些资源
+
+Second, a Response object is generated once Requests gets a response back from the server.
+其二，一旦 requests 得到一个从 服务器返回的响应就会产生一个 Response 对象
+
+The Response object contains all of the information returned by the server and also contains the Request object you created originally.
+该响应对象包含服务器返回的所有信息， 也包含你原来创建的 Request 对象
+
+Here is a simple request to get some very important information from Wikipedia's servers:
+如下是一个简单的请求，从 Wikipedia 的服务器得到 一些非常重要的信息：
+
+If we want to access the headers the server sent back to us, we do this:
+如果想访问服务器返回给我们的响应头部信息，可以这样做：
+
+However, if we want to get the headers we sent the server, we simply access the request, and then the request's headers:
+然而，如果想得到发送到服务器的请求的头部，我们可以简单地访问该请求，然后是该请求的头部：
+
+Prepared Requests¶
+准备的请求 （Prepared Request）¶
+
+Whenever you receive a Response object from an API call or a Session call, the request attribute is actually the PreparedRequest that was used.
+当你从 API 或者会话调用中收到一个 Response 对象时，request 属性其实是使用了 PreparedRequest
+
+In some cases you may wish to do some extra work to the body or headers (or anything else really) before sending a request.
+有时在发送请求之前，你需要对 body 或者 header （或者别的什么东西）做一些额外处理，下面演示了一个简单的做法：
+
+Since you are not doing anything special with the Request object, you prepare it immediately and modify the PreparedRequest object.
+由于你没有对 Request 对象做什么特殊事情，你立即准备和修改了 PreparedRequest 对象，然后把它和别的参数一起发送到 requests.* 或者 Session.*
+
+However, the above code will lose some of the advantages of having a Requests Session object.
+然而，上述代码会失去 Requests Session 对象的一些优势， 尤其 Session 级别的状态，例如 cookie 就不会被应用到你的请求上去
+
+In particular, Session-level state such as cookies will not get applied to your request.
+要获取一个带有状态的 PreparedRequest， 请用 Session.prepare_request() 取代 Request.prepare() 的调用，如下所示：
+
+SSL Cert Verification¶
+SSL 证书验证¶
+
+Requests verifies SSL certificates for HTTPS requests, just like a web browser.
+Requests 可以为 HTTPS 请求验证 SSL 证书，就像 web 浏览器一样
+
+By default, SSL verification is enabled, and Requests will throw a SSLError if it's unable to verify the certificate:
+要想检查某个主机的 SSL 证书，你可以使用 verify 参数:
+
+I don't have SSL setup on this domain, so it throws an exception.
+在该域名上我没有设置 SSL，所以失败了
+
+Excellent.
+但 Github 设置了 SSL:
+
+You can pass verify the path to a CA_BUNDLE file or directory with certificates of trusted CAs:
+对于私有证书，你也可以传递一个 CA_BUNDLE 文件的路径给 verify
+
+or persistent:
+如果你将 verify 设置为 False，Requests 也能忽略对 SSL 证书的验证
+
+Note
+默认情况下， verify 是设置为 True 的
+
+If verify is set to a path to a directory, the directory must have been processed using the c_rehash utility supplied with OpenSSL.
+你也可以指定一个本地证书用作客户端证书，可以是单个文件（包含密钥和证书）或一个包含两个文件路径的元组:
+
+This list of trusted CAs can also be specified through the REQUESTS_CA_BUNDLE environment variable.
+如果你指定了一个错误路径或一个无效的证书:
+
+Requests can also ignore verifying the SSL certificate if you set verify to False:
+警告
+
+By default, verify is set to True.
+本地证书的私有 key 必须是解密状态
+
+Option verify only applies to host certs.
+目前，Requests 不支持使用加密的 key
+
+If you specify a wrong path or an invalid cert, you'll get a SSLError:
+Requests 默认附带了一套它信任的根证书，来自于 Mozilla trust store
+
+Warning
+从 Requests 2.4.0 版之后，如果系统中装了 certifi 包，Requests 会试图使用它里边的 证书
+
+The private key to your local certificate must be unencrypted.
+为了安全起见，我们建议你经常更新 certifi
+
+CA Certificates¶
+响应体内容工作流¶
+
+By default, Requests bundles a set of root CAs that it trusts, sourced from the Mozilla trust store.
+默认情况下，当你进行网络请求后，响应体会立即被下载
+
+However, these are only updated once for each Requests version.
+你可以通过 stream 参数覆盖这个行为，推迟下载响应体直到访问 Response.content 属性：
+
+From Requests version 2.4.0 onwards, Requests will attempt to use certificates from certifi if it is present on the system.
+此时仅有响应头被下载下来了，连接保持打开状态，因此允许我们根据条件获取内容：
+
+For the sake of security we recommend upgrading certifi frequently!
+你可以进一步使用 Response.iter_content 和 Response.iter_lines 方法来控制工作流，或者以 Response.raw 从底层 urllib3 的 urllib3.HTTPResponse <urllib3.response.HTTPResponse 读取
+
+If you set stream to True when making a request, Requests cannot release the connection back to the pool unless you consume all the data or call Response.close.
+好消息——归功于 urllib3，同一会话内的持久连接是完全自动处理的
+
+This can lead to inefficiency with connections.
+同一会话内你发出的任何请求都会自动复用恰当的连接
+
+Requests supports streaming uploads, which allow you to send large streams or files without reading them into memory.
+Requests支持流式上传，这允许你发送大的数据流或文件而无需先把它们读入内存
+
+To stream and upload, simply provide a file-like object for your body:
+要使用流式上传，仅需为你的请求体提供一个类文件对象即可：
+
+Warning
+警告
+
+It is strongly recommended that you open files in binary mode.
+我们强烈建议你用二进制模式（binary mode）打开文件
+
+This is because Requests may attempt to provide the Content-Length header for you, and if it does this value will be set to the number of bytes in the file.
+这是因为 requests 可能会为你提供 header 中的 Content-Length，在这种情况下该值会被设为文件的字节数
+
+Errors may occur if you open the file in text mode.
+如果你用文本模式打开文件，就可能碰到错误
+
+Chunk-Encoded Requests¶
+块编码请求¶
+
+Requests also supports Chunked transfer encoding for outgoing and incoming requests.
+对于出去和进来的请求，Requests 也支持分块传输编码
+
+To send a chunk-encoded request, simply provide a generator (or any iterator without a length) for your body:
+要发送一个块编码的请求，仅需为你的请求体提供一个生成器（或任意没有具体长度的迭代器）：
+
+For chunked encoded responses, it's best to iterate over the data using Response.iter_content().
+对于分块的编码请求，我们最好使用 Response.iter_content() 对其数据进行迭代
+
+In an ideal situation you'll have set stream=True on the request, in which case you can iterate chunk-by-chunk by calling iter_content with a chunk_size parameter of None.
+在理想情况下，你的 request 会设置 stream=True，这样你就可以通过调用 iter_content 并将分块大小参数设为 None，从而进行分块的迭代
+
+If you want to set a maximum size of the chunk, you can set a chunk_size parameter to any integer.
+如果你要设置分块的最大体积，你可以把分块大小参数设为任意整数
+
+POST Multiple Multipart-Encoded Files¶
+POST 多个分块编码的文件¶
+
+You can send multiple files in one request.
+你可以在一个请求中发送多个文件
+
+For example, suppose you want to upload image files to an HTML form with a multiple file field 'images':
+例如，假设你要上传多个图像文件到一个 HTML 表单，使用一个多文件 field 叫做 "images":
+
+To do that, just set files to a list of tuples of (form_field_name, file_info):
+要实现，只要把文件设到一个元组的列表中，其中元组结构为 (form_field_name, file_info):
+
+Warning
+警告
+
+It is strongly recommended that you open files in binary mode.
+我们强烈建议你用二进制模式（binary mode）打开文件
+
+This is because Requests may attempt to provide the Content-Length header for you, and if it does this value will be set to the number of bytes in the file.
+这是因为 requests 可能会为你提供 header 中的 Content-Length，在这种情况下该值会被设为文件的字节数
+
+Errors may occur if you open the file in text mode.
+如果你用文本模式打开文件，就可能碰到错误
+
+Event Hooks¶
+事件挂钩¶
+
+Requests has a hook system that you can use to manipulate portions of the request process, or signal event handling.
+Requests有一个钩子系统，你可以用来操控部分请求过程，或信号事件处理
+
+Available hooks:
+可用的钩子:
+
+You can assign a hook function on a per-request basis by passing a {hook_name: callback_function} dictionary to the hooks request parameter:
+你可以通过传递一个 {hook_name: callback_function} 字典给 hooks 请求参数 为每个请求分配一个钩子函数：
+
+That callback_function will receive a chunk of data as its first argument.
+callback_function 会接受一个数据块作为它的第一个参数
+
+If an error occurs while executing your callback, a warning is given.
+若执行你的回调函数期间发生错误，系统会给出一个警告
+
+If the callback function returns a value, it is assumed that it is to replace the data that was passed in.
+若回调函数返回一个值，默认以该值替换传进来的数据
+
+If the function doesn't return anything, nothing else is effected.
+若函数未返回任何东西， 也没有什么其他的影响
+
+Let's print some request method arguments at runtime:
+我们来在运行期间打印一些请求方法的参数：
+
+Custom Authentication¶
+自定义身份验证¶
+
+Requests allows you to use specify your own authentication mechanism.
+Requests 允许你使用自己指定的身份验证机制
+
+Any callable which is passed as the auth argument to a request method will have the opportunity to modify the request before it is dispatched.
+任何传递给请求方法的 auth 参数的可调用对象，在请求发出之前都有机会修改请求
+
+Authentication implementations are subclasses of AuthBase, and are easy to define.
+自定义的身份验证机制是作为 requests.auth.AuthBase 的子类来实现的，也非常容易定义
+
+Requests provides two common authentication scheme implementations in requests.auth: HTTPBasicAuth and HTTPDigestAuth.
+Requests 在 requests.auth 中提供了两种常见的的身份验证方案： HTTPBasicAuth 和 HTTPDigestAuth 
+
+Let's pretend that we have a web service that will only respond if the X-Pizza header is set to a password value.
+假设我们有一个web服务，仅在 X-Pizza 头被设置为一个密码值的情况下才会有响应
+
+Unlikely, but just go with it.
+虽然这不太可能，但就以它为例好了
+
+Then, we can make a request using our Pizza Auth:
+然后就可以使用我们的PizzaAuth来进行网络请求:
+
+Streaming Requests¶
+流式请求¶
+
+With Response.iter_lines() you can easily iterate over streaming APIs such as the Twitter Streaming API.
+使用 requests.Response.iter_lines() 你可以很方便地对流式 API （例如 Twitter 的流式 API ） 进行迭代
+
+Simply set stream to True and iterate over the response with iter_lines:
+简单地设置 stream 为 True 便可以使用 iter_lines() 对相应进行迭代：
+
+When using decode_unicode=True with Response.iter_lines() or Response.iter_content(), you'll want to provide a fallback encoding in the event the server doesn't provide one:
+警告
+
+Warning
+iter_lines() 不保证重进入时的安全性
+
+If you need to use a proxy, you can configure individual requests with the proxies argument to any request method:
+如果需要使用代理，你可以通过为任意请求方法提供 proxies 参数来配置单个请求:
+
+You can also configure proxies by setting the environment variables HTTP_PROXY and HTTPS_PROXY.
+你也可以通过环境变量 HTTP_PROXY 和 HTTPS_PROXY 来配置代理
+
+To use HTTP Basic Auth with your proxy, use the http://user:password@host/ syntax:
+若你的代理需要使用HTTP Basic Auth，可以使用 http://user:password@host/ 语法：
+
+To give a proxy for a specific scheme and host, use the scheme://hostname form for the key.
+要为某个特定的连接方式或者主机设置代理，使用 scheme://hostname 作为 key， 它会针对指定的主机和连接方式进行匹配
+
+Note that proxy URLs must include the scheme.
+注意，代理 URL 必须包含连接方式
+
+SOCKS¶
+SOCKS¶
+
+New in version 2.10.0.
+2.10.0 新版功能.
+
+In addition to basic HTTP proxies, Requests also supports proxies using the SOCKS protocol.
+除了基本的 HTTP 代理，Request 还支持 SOCKS 协议的代理
+
+This is an optional feature that requires that additional third-party libraries be installed before use.
+这是一个可选功能，若要使用， 你需要安装第三方库
+
+You can get the dependencies for this feature from pip:
+你可以用 pip 获取依赖:
+
+Once you've installed those dependencies, using a SOCKS proxy is just as easy as using a HTTP one:
+安装好依赖以后，使用 SOCKS 代理和使用 HTTP 代理一样简单：
+
+Compliance¶
+合规性¶
+
+Requests is intended to be compliant with all relevant specifications and RFCs where that compliance will not cause difficulties for users.
+Requests 符合所有相关的规范和 RFC，这样不会为用户造成不必要的困难
+
+This attention to the specification can lead to some behaviour that may seem unusual to those not familiar with the relevant specification.
+但这种对规范的考虑导致一些行为对于不熟悉相关规范的人来说看似有点奇怪
+
+Encodings¶
+编码方式¶
+
+When you receive a response, Requests makes a guess at the encoding to use for decoding the response when you access the Response.text attribute.
+当你收到一个响应时，Requests 会猜测响应的编码方式，用于在你调用 Response.text 方法时对响应进行解码
+
+Requests will first check for an encoding in the HTTP header, and if none is present, will use chardet to attempt to guess the encoding.
+Requests 首先在 HTTP 头部检测是否存在指定的编码方式，如果不存在，则会使用 charade 来尝试猜测编码方式
+
+The only time Requests will not do this is if no explicit charset is present in the HTTP headers and the Content-Type header contains text.
+只有当 HTTP 头部不存在明确指定的字符集，并且 Content-Type 头部字段包含 text 值之时， Requests 才不去猜测编码方式
+
+In this situation, RFC 2616 specifies that the default charset must be ISO-8859-1.
+在这种情况下， RFC 2616 指定默认字符集必须是 ISO-8859-1 
+
+Requests follows the specification in this case.
+Requests 遵从这一规范
+
+If you require a different encoding, you can manually set the Response.encoding property, or use the raw Response.content.
+如果你需要一种不同的编码方式，你可以手动设置 Response.encoding 属性，或使用原始的 Response.content
+
+HTTP Verbs¶
+HTTP动词¶
+
+Requests provides access to almost the full range of HTTP verbs: GET, OPTIONS, HEAD, POST, PUT, PATCH and DELETE.
+Requests 提供了几乎所有HTTP动词的功能：GET、OPTIONS、HEAD、POST、PUT、PATCH、DELETE
+
+The following provides detailed examples of using these various verbs in Requests, using the GitHub API.
+以下内容为使用 Requests 中的这些动词以及 Github API 提供了详细示例
+
+We will begin with the verb most commonly used: GET.
+我将从最常使用的动词 GET 开始
+
+HTTP GET is an idempotent method that returns a resource from a given URL.
+HTTP GET 是一个幂等方法，从给定的 URL 返回一个资源
+
+As a result, it is the verb you ought to use when attempting to retrieve data from a web location.
+因而，当你试图从一个 web 位置获取数据之时，你应该使用这个动词
+
+An example usage would be attempting to get information about a specific commit from GitHub.
+一个使用示例是尝试从 Github 上获取关于一个特定 commit 的信息
+
+Suppose we wanted commit a050faf on Requests.
+假设我们想获取Requests的commit a050faf 的信息
+
+We would get it like so:
+我们可以这样去做：
+
+We should confirm that GitHub responded correctly.
+我们应该确认 GitHub 是否正确响应
+
+If it has, we want to work out what type of content it is.
+如果正确响应，我们想弄清响应内容是什么类型的
+
+Do this like so:
+像这样去做：
+
+So, GitHub returns JSON.
+可见，GitHub 返回了 JSON 数据，非常好，这样就可以使用 r.json 方法把这个返回的数据解析成 Python 对象
+
+So far, so simple.
+到目前为止，一切都非常简单
+
+Well, let's investigate the GitHub API a little bit.
+嗯，我们来研究一下 GitHub 的 API
+
+Now, we could look at the documentation, but we might have a little more fun if we use Requests instead.
+我们可以去看看文档，但如果使用 Requests 来研究也许会更有意思一点
+
+We can take advantage of the Requests OPTIONS verb to see what kinds of HTTP methods are supported on the url we just used.
+我们可以借助 Requests 的 OPTIONS 动词来看看我们刚使用过的 url 支持哪些 HTTP 方法
+
+Uh, what?
+额，这是怎么回事
+
+That's unhelpful!
+毫无帮助嘛
+
+Turns out GitHub, like many API providers, don't actually implement the OPTIONS method.
+原来 GitHub，与许多 API 提供方一样，实际上并未实现 OPTIONS 方法
+
+This is an annoying oversight, but it's OK, we can just use the boring documentation.
+这是一个恼人的疏忽，但没关系，那我们可以使用枯燥的文档
+
+If GitHub had correctly implemented OPTIONS, however, they should return the allowed methods in the headers, e.g.
+然而，如果 GitHub 正确实现了 OPTIONS，那么服务器应该在响应头中返回允许用户使用的 HTTP 方法，例如：
+
+Turning to the documentation, we see that the only other method allowed for commits is POST, which creates a new commit.
+转而去查看文档，我们看到对于提交信息，另一个允许的方法是 POST，它会创建一个新的提交
+
+As we're using the Requests repo, we should probably avoid making ham-handed POSTS to it.
+由于我们正在使用 Requests 代码库，我们应尽可能避免对它发送笨拙的 POST
+
+Instead, let's play with the Issues feature of GitHub.
+作为替代，我们来玩玩 GitHub 的 Issue 特性
+
+This documentation was added in response to Issue #482.
+本篇文档是回应 Issue #482 而添加的
+
+Given that this issue already exists, we will use it as an example.
+鉴于该问题已经存在，我们就以它为例
+
+Let's start by getting it.
+先获取它
+
+Cool, we have three comments.
+Cool，有 3 个评论
+
+Let's take a look at the last of them.
+我们来看一下最后一个评论
+
+Well, that seems like a silly place.
+嗯，那看起来似乎是个愚蠢之处
+
+Let's post a comment telling the poster that he's silly.
+我们发表个评论来告诉这个评论者他自己的愚蠢
+
+Who is the poster, anyway?
+那么，这个评论者是谁呢
+
+OK, so let's tell this Kenneth guy that we think this example should go in the quickstart guide instead.
+好，我们来告诉这个叫 Kenneth 的家伙，这个例子应该放在快速上手指南中
+
+According to the GitHub API doc, the way to do this is to POST to the thread.
+根据 GitHub API 文档，其方法是 POST 到该话题
+
+Let's do it.
+我们来试试看
+
+Huh, that's weird.
+额，这有点古怪哈
+
+We probably need to authenticate.
+可能我们需要验证身份
+
+That'll be a pain, right?
+那就有点纠结了，对吧
+
+Wrong.
+不对
+
+Requests makes it easy to use many forms of authentication, including the very common Basic Auth.
+Requests 简化了多种身份验证形式的使用，包括非常常见的 Basic Auth
+
+Brilliant.
+太棒了
+
+Oh, wait, no!
+噢，不
+
+I meant to add that it would take me a while, because I had to go feed my cat.
+我原本是想说等我一会，因为我得去喂我的猫
+
+If only I could edit this comment!
+如果我能够编辑这条评论那就好了
+
+Happily, GitHub allows us to use another HTTP verb, PATCH, to edit this comment.
+幸运的是，GitHub 允许我们使用另一个 HTTP 动词 PATCH 来编辑评论
+
+Let's do that.
+我们来试试
+
+Excellent.
+非常好
+
+Now, just to torture this Kenneth guy, I've decided to let him sweat and not tell him that I'm working on this.
+现在，我们来折磨一下这个叫 Kenneth 的家伙，我决定要让他急得团团转，也不告诉他是我在捣蛋
+
+That means I want to delete this comment.
+这意味着我想删除这条评论
+
+GitHub lets us delete comments using the incredibly aptly named DELETE method.
+GitHub 允许我们使用完全名副其实的 DELETE 方法来删除评论
+
+Let's get rid of it.
+我们来清除该评论
+
+Excellent.
+很好
+
+All gone.
+不见了
+
+The last thing I want to know is how much of my ratelimit I've used.
+最后一件我想知道的事情是我已经使用了多少限额（ratelimit）
+
+Let's find out.
+查查看，GitHub 在响应头部发送这个信息，因此不必下载整个网页，我将使用一个 HEAD 请求来获取响应头
+
+Excellent.
+很好
+
+Time to write a Python program that abuses the GitHub API in all kinds of exciting ways, 4995 more times.
+是时候写个 Python 程序以各种刺激的方式滥用 GitHub 的 API，还可以使用 4995 次呢
+
+Custom Verbs¶
+响应头链接字段¶
+
+From time to time you may be working with a server that, for whatever reason, allows use or even requires use of HTTP verbs not covered above.
+许多 HTTP API 都有响应头链接字段的特性，它们使得 API 能够更好地自我描述和自我显露
+
+Utilising this, you can make use of any method verb that your server allows.
+GitHub 在 API 中为 分页 使用这些特性，例如:
+
+Requests ships with a single Transport Adapter, the HTTPAdapter.
+Requests 自带了一个传输适配器，也就是 HTTPAdapter
+
+This adapter provides the default Requests interaction with HTTP and HTTPS using the powerful urllib3 library.
+ 这个适配器使用了强大的 urllib3，为 Requests 提供了默认的 HTTP 和 HTTPS 交互
+
+Whenever a Requests Session is initialized, one of these is attached to the Session object for HTTP, and one for HTTPS.
+每当 Session 被初始化，就会有适配器附着在 Session 上，其中一个供 HTTP 使用，另一个供 HTTPS 使用
+
+Requests enables users to create and use their own Transport Adapters that provide specific functionality.
+Request 允许用户创建和使用他们自己的传输适配器，实现他们需要的特殊功能
+
+Once created, a Transport Adapter can be mounted to a Session object, along with an indication of which web services it should apply to.
+创建好以后，传输适配器可以被加载到一个会话对象上，附带着一个说明，告诉会话适配器应该应用在哪个 web 服务上
+
+The mount call registers a specific instance of a Transport Adapter to a prefix.
+这个 mount 调用会注册一个传输适配器的特定实例到一个前缀上面
+
+Once mounted, any HTTP request made using that session whose URL starts with the given prefix will use the given Transport Adapter.
+加载以后，任何使用该会话的 HTTP 请求，只要其 URL 是以给定的前缀开头，该传输适配器就会被使用到
+
+Many of the details of implementing a Transport Adapter are beyond the scope of this documentation, but take a look at the next example for a simple SSL use- case.
+传输适配器的众多实现细节不在本文档的覆盖范围内，不过你可以看看接下来这个简单的 SSL 用例
+
+For more than that, you might look at subclassing the BaseAdapter.
+更多的用法，你也许该考虑为``requests.adapters.BaseAdapter`` 创建子类
+
+Example: Specific SSL Version¶
+示例: 指定的 SSL 版本¶
+
+The Requests team has made a specific choice to use whatever SSL version is default in the underlying library (urllib3).
+Requests 开发团队刻意指定了内部库（urllib3）的默认 SSL 版本
+
+Normally this is fine, but from time to time, you might find yourself needing to connect to a service-endpoint that uses a version that isn't compatible with the default.
+一般情况下这样做没有问题，不过是不是你可能会需要连接到一个服务节点，而该节点使用了和默认不同的 SSL 版本
+
+You can use Transport Adapters for this by taking most of the existing implementation of HTTPAdapter, and adding a parameter ssl_version that gets passed-through to urllib3.
+你可以使用传输适配器解决这个问题，通过利用 HTTPAdapter 现有的大部分实现，再加上一个 ssl_version 参数并将它传递到 urllib3 中
+
+We'll make a Transport Adapter that instructs the library to use SSLv3:
+我们会创建一个传输适配器，用来告诉 urllib3 让它使用 SSLv3：
+
+Blocking Or Non-Blocking?¶
+阻塞和非阻塞¶
+
+With the default Transport Adapter in place, Requests does not provide any kind of non-blocking IO.
+使用默认的传输适配器，Requests 不提供任何形式的非阻塞 IO
+
+The Response.content property will block until the entire response has been downloaded.
+ Response.content 属性会阻塞，直到整个响应下载完成
+
+If you require more granularity, the streaming features of the library (see Streaming Requests) allow you to retrieve smaller quantities of the response at a time.
+如果你需要更多精细控制，该库的数据流功能（见 流式请求） 允许你每次接受少量的一部分响应，不过这些调用依然是阻塞式的
+
+If you are concerned about the use of blocking IO, there are lots of projects out there that combine Requests with one of Python's asynchronicity frameworks.
+如果你对于阻塞式 IO 有所顾虑，还有很多项目可以供你使用，它们结合了 Requests 和 Python 的某个异步框架
+
+Two excellent examples are grequests and requests-futures.
+典型的优秀例子是 grequests 和 requests-futures
+
+Header Ordering¶
+Header 排序¶
+
+In unusual circumstances you may want to provide headers in an ordered manner.
+在某些特殊情况下你也许需要按照次序来提供 header，如果你向 headers 关键字参数传入一个 OrderedDict，就可以向提供一个带排序的 header
+
+If you pass an OrderedDict to the headers keyword argument, that will provide the headers with an ordering.
+然而，Requests 使用的默认 header 的次序会被优先选择，这意味着如果你在 headers 关键字参数中覆盖了默认 header，和关键字参数中别的 header 相比，它们也许看上去会是次序错误的
+
+If this is problematic, users should consider setting the default headers on a Session object, by setting Session to a custom OrderedDict.
+如果这个对你来说是个问题，那么用户应该考虑在 Session 对象上面设置默认 header，只要将 Session 设为一个定制的 OrderedDict 即可
+
+That ordering will always be preferred.
+这样就会让它成为优选的次序
+
+Timeouts¶
+超时（timeout）¶
+
+Most requests to external servers should have a timeout attached, in case the server is not responding in a timely manner.
+为防止服务器不能及时响应，大部分发至外部服务器的请求都应该带着 timeout 参数
+
+By default, requests do not time out unless a timeout value is set explicitly.
+如果没有 timeout，你的代码可能会挂起若干分钟甚至更长时间
+
+The connect timeout is the number of seconds Requests will wait for your client to establish a connection to a remote machine (corresponding to the connect()) call on the socket.
+连接超时指的是在你的客户端实现到远端机器端口的连接时（对应的是`connect()`_），Request 会等待的秒数
+
+It's a good practice to set connect timeouts to slightly larger than a multiple of 3, which is the default TCP packet retransmission window.
+一个很好的实践方法是把连接超时设为比 3 的倍数略大的一个数值，因为 TCP 数据包重传窗口 (TCP packet retransmission window) 的默认大小是 3
+
+Once your client has connected to the server and sent the HTTP request, the read timeout is the number of seconds the client will wait for the server to send a response.
+一旦你的客户端连接到了服务器并且发送了 HTTP 请求，读取超时指的就是客户端等待服务器发送请求的时间
+
+(Specifically, it's the number of seconds that the client will wait between bytes sent from the server.
+（特定地，它指的是客户端要等待服务器发送字节之间的时间
+
+In 99.9% of cases, this is the time before the server sends the first byte).
+在 99.9% 的情况下这指的是服务器发送第一个字节之前的时间）
+
+If you specify a single value for the timeout, like this:
+如果你制订了一个单一的值作为 timeout，如下所示：
+
+The timeout value will be applied to both the connect and the read timeouts.
+这一 timeout 值将会用作 connect 和 read 二者的 timeout
+
+Specify a tuple if you would like to set the values separately:
+如果要分别制定，就传入一个元组：
+
+If the remote server is very slow, you can tell Requests to wait forever for a response, by passing None as a timeout value and then retrieving a cup of coffee.
+如果远端服务器很慢，你可以让 Request 永远等待，传入一个 None 作为 timeout 值，然后就冲咖啡去吧
+
+Requests is an elegant and simple HTTP library for Python, built for human beings.
+Requests is an elegant and simple HTTP library for Python, built for human beings. You are currently looking at the documentation of the development release.
+
+Stay Informed
+Stay Informed
+
+Receive updates on new releases and upcoming projects.
+Receive updates on new releases and upcoming projects.
+

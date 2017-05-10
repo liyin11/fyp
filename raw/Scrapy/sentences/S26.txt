@@ -1,0 +1,93 @@
+Downloading and processing files and images¶
+下载项目图片¶
+
+Scrapy provides reusable item pipelines for downloading files attached to a particular item (for example, when you scrape products and also want to download their images locally).
+Scrapy提供了一个 item pipeline ，来下载属于某个特定项目的图片，比如，当你抓取产品时，也想把它们的图片下载到本地
+
+Both pipelines implement these features:
+这条管道，被称作图片管道，在 ImagesPipeline 类中实现，提供了一个方便并具有额外特性的方法，来下载并本地存储图片:
+
+The Images Pipeline has a few extra functions for processing images:
+这个管道也会为那些当前安排好要下载的图片保留一个内部队列，并将那些到达的包含相同图片的项目连接到那个队列中
+
+The pipelines also keep an internal queue of those media URLs which are currently being scheduled for download, and connect those responses that arrive containing the same media to that queue.
+Pillow 是用来生成缩略图，并将图片归一化为JPEG/RGB格式，因此为了使用图片管道，你需要安装这个库
+
+This avoids downloading the same media more than once when it’s shared by several items.
+ Python Imaging Library (PIL) 在大多数情况下是有效的，但众所周知，在一些设置里会出现问题，因此我们推荐使用 Pillow 而不是 PIL.
+
+Using the Files Pipeline¶
+使用图片管道¶
+
+The typical workflow, when using the FilesPipeline goes like this:
+当使用 ImagesPipeline ，典型的工作流程如下所示:
+
+Using the Images Pipeline¶
+使用样例¶
+
+Using the ImagesPipeline is a lot like using the FilesPipeline, except the default field names used are different: you use image_urls for the image URLs of an item and it will populate an images field for the information about the downloaded images.
+为了使用图片管道，你仅需要 启动它 并用 image_urls 和 images 定义一个项目:
+
+The advantage of using the ImagesPipeline for image files is that you can configure some extra functions like generating thumbnails and filtering the images based on their size.
+如果你需要更加复杂的功能，想重写定制图片管道行为，参见 实现定制图片管道 
+
+To enable your media pipeline you must first add it to your project ITEM_PIPELINES setting.
+为了开启你的图片管道，你首先需要在项目中添加它 ITEM_PIPELINES setting:
+
+For Images Pipeline, use:
+并将 IMAGES_STORE 设置为一个有效的文件夹，用来存储下载的图片
+
+For Files Pipeline, use:
+比如:
+
+Then, configure the target storage setting to a valid value that will be used for storing the downloaded images.
+文件系统是当前官方唯一支持的存储系统，但也支持（非公开的） Amazon S3 
+
+For example, the following image URL:
+它的 SHA1 hash 值为:
+
+Whose SHA1 hash is:
+将被下载并存为下面的文件:
+
+Will be downloaded and stored in the following file:
+其中:
+
+You can modify the Access Control List (ACL) policy used for the stored files, which is defined by the FILES_STORE_S3_ACL and IMAGES_STORE_S3_ACL settings.
+图像管道避免下载最近已经下载的图片
+
+By default, the ACL is set to private.
+使用 IMAGES_EXPIRES 设置可以调整失效期限，可以用天数来指定:
+
+In order to use a media pipeline first, enable it.
+图片管道可以自动创建下载图片的缩略图
+
+Then, if a spider returns a dict with the URLs key (file_urls or image_urls, for the Files or Images Pipeline respectively), the pipeline will put the results under respective key (files or images).
+为了使用这个特性，你需要设置 IMAGES_THUMBS 字典，其关键字为缩略图名字，值为它们的大小尺寸
+
+If you prefer to use Item, then define a custom item with the necessary fields, like in this example for Images Pipeline:
+比如:
+
+If you want to use another field name for the URLs key or for the results key, it is also possible to override it.
+当你使用这个特性时，图片管道将使用下面的格式来创建各个特定尺寸的缩略图:
+
+For the Files Pipeline, set FILES_URLS_FIELD and/or FILES_RESULT_FIELD settings:
+其中:
+
+For the Images Pipeline, set IMAGES_URLS_FIELD and/or IMAGES_RESULT_FIELD settings:
+例如使用 small 和 big 缩略图名字的图片文件:
+
+If you need something more complex and want to override the custom pipeline behaviour, see Extending the Media Pipelines.
+第一个是从网站下载的完整图片
+
+The default value for both settings is 90 days.
+比如:
+
+If you have pipeline that subclasses FilesPipeline and you’d like to have different setting for it you can set setting keys preceded by uppercase class name.
+注意：这些尺寸一点也不影响缩略图的生成
+
+and pipeline class MyPipeline will have expiration time set to 180.
+默认情况下，没有尺寸限制，因此所有图片都将处理
+
+In order use this feature, you must set IMAGES_THUMBS to a dictionary where the keys are the thumbnail names and the values are their dimensions.
+下面是你可以在定制的图片管道里重写的方法：
+

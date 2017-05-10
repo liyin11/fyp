@@ -1,0 +1,387 @@
+Chapter 11: Generic Views¶
+第十一章：通用视图
+
+Here again is a recurring theme of this book: at its worst, Web development is boring and monotonous.
+这里需要再次回到本书的主题： 在最坏的情况下， Web 开发是一项无聊而且单调的工作
+
+So far, we’ve covered how Django tries to take away some of that monotony at the model and template layers, but Web developers also experience this boredom at the view level.
+ 到目前为止，我们已经介绍了 Django 怎样在模型和模板的层面上减小开发的单调性，但是 Web 开发在视图的层面上，也经历着这种令人厌倦的事情
+
+Django’s generic views were developed to ease that pain.
+Django的通用视图 可以减少这些痛苦
+
+They take certain common idioms and patterns found in view development and abstract them so that you can quickly write common views of data without having to write too much code.
+ 它抽象出一些在视图开发中常用的代码和模式，这样就可以在无需编写大量代码的情况下，快速编写出常用的数据视图
+
+In fact, nearly every view example in the preceding chapters could be rewritten with the help of generic views.
+ 事实上，前面章节中的几乎所有视图的示例都可以在通用视图的帮助下重写
+
+Chapter 8 touched briefly on how you’d go about making a view “generic.” To review, we can recognize certain common tasks, like displaying a list of objects, and write code that displays a list of any object.
+在第八章简单的向大家介绍了怎样使视图更加的“通用”
+
+Then the model in question can be passed as an extra argument to the URLconf.
+ 回顾一下，我们会发现一些比较常见的任务，比如显示一系列对象，写一段代码来显示 任何 对象内容
+
+Django ships with generic views to do the following:
+Django内建通用视图可以实现如下功能：
+
+Perform common “simple” tasks: redirect to a different page, or render a given template.
+完成常用的简单任务： 重定向到另一个页面以及渲染一个指定的模板
+
+Display “list” and “detail” pages for a single object.
+显示列表和某个特定对象的详细内容页面
+
+The event_list and entry_list views from Chapter 8 are examples of list views.
+ 第8章中提到的 event_list 和 entry_list 视图就是列表视图的一个例子
+
+A single event page is an example of what we call a “detail” view.
+ 一个单一的 event 页面就是我们所说的详细内容页面
+
+Present date-based objects in year/month/day archive pages, associated detail, and “latest” pages.
+呈现基于日期的数据的年/月/日归档页面，关联的详情页面，最新页面
+
+The Django Weblog’s (http://www.djangoproject.com/weblog/) year, month, and day archives are built with these, as would be a typical newspaper’s archives.
+ Django Weblogs (http://www.djangoproject.com/weblog/)的年、月、日的归档就是使用通用视图 架构的，就像是典型的新闻报纸归档
+
+Taken together, these views provide easy interfaces to perform the most common tasks developers encounter.
+综上所述，这些视图为开发者日常开发中常见的任务提供了易用的接口
+
+Using Generic Views¶
+使用通用视图
+
+All of these views are used by creating configuration dictionaries in your URLconf files and passing those dictionaries as the third member of the URLconf tuple for a given pattern.
+使用通用视图的方法是在URLconf文件中创建配置字典，然后把这些字典作为URLconf元组的第三个成员
+
+(See “Passing Extra Options to View Functions” in Chapter 8 for an overview of this technique.)
+ （对于这个技巧的应用可以参看第八章向视图传递额外选项
+
+For example, here’s a simple URLconf you could use to present a static “about” page:
+例如，下面是一个呈现静态“关于”页面的URLconf：
+
+Though this might seem a bit “magical” at first glance – look, a view with no code!
+一眼看上去似乎有点不可思议，不需要编写代码的视图
+
+–, it’s actually exactly the same as the examples in Chapter 8: the direct_to_template view simply grabs information from the extra-parameters dictionary and uses that information when rendering the view.
+ 它和第八章中的例子完全一样：direct_to_template视图仅仅是直接从传递过来的额外参数获取信息并用于渲染视图
+
+Because this generic view – and all the others – is a regular view function like any other, we can reuse it inside our own views.
+因为通用视图都是标准的视图函数，我们可以在我们自己的视图中重用它
+
+As an example, let’s extend our “about” example to map URLs of the form /about// to statically rendered about/.html.
+ 例如，我们扩展 about例子，把映射的URL从 /about//修改到一个静态渲染 about/.html 
+
+We’ll do this by first modifying the URLconf to point to a view function:
+ 我们首先修改URL配置以指向新的视图函数：
+
+Next, we’ll write the about_pages view:
+接下来，我们编写 about_pages 视图的代码：
+
+Here we’re treating direct_to_template like any other function.
+在这里我们象使用其他函数一样使用 direct_to_template 
+
+Since it returns an HttpResponse, we can simply return it as-is.
+ 因为它返回一个HttpResponse对象，我们只需要简单的返回它就好了
+
+The only slightly tricky business here is dealing with missing templates.
+ 这里唯一有点棘手的事情是要处理找不到模板的情况
+
+We don’t want a nonexistent template to cause a server error, so we catch TemplateDoesNotExist exceptions and return 404 errors instead.
+ 我们不希望一个不存在的模板导致一个服务端错误，所以我们捕获TemplateDoesNotExist异常并且返回404错误来作为替代
+
+Is There a Security Vulnerability Here?
+这里有没有安全性问题
+
+Sharp-eyed readers may have noticed a possible security hole: we’re constructing the template name using interpolated content from the browser (template="about/%s.html" % page).
+眼尖的读者可能已经注意到一个可能的安全漏洞： 我们直接使用从客户端浏览器得到的数据构造模板名称(template="about/%s.html" % page )
+
+At first glance, this looks like a classic directory traversal vulnerability (discussed in detail in Chapter 20).
+乍看起来，这像是一个经典的 目录跨越（directory traversal） 攻击（详情请看第20章）
+
+But is it really?
+ 事实真是这样吗
+
+Not exactly.
+完全不是
+
+Yes, a maliciously crafted value of page could cause directory traversal, but although page is taken from the request URL, not every value will be accepted.
+ 是的，一个恶意的 page 值可以导致目录跨越，但是尽管 page 是 从请求的URL中获取的，但并不是所有的值都会被接受
+
+The key is in the URLconf: we’re using the regular expression \w+ to match the page part of the URL, and \w only accepts letters and numbers.
+ 这就是URL配置的关键所在： 我们使用正则表达式 \w+ 来从URL里匹配 page ，而 \w 只接受字符和数字
+
+Thus, any malicious characters (such as dots and slashes) will be rejected by the URL resolver before they reach the view itself.
+ 因此，任何恶意的字符 （例如在这里是点 . 和正斜线 / ）将在URL解析时被拒绝，根本不会传递给视图函数
+
+Generic Views of Objects¶
+对象的通用视图
+
+The direct_to_template view certainly is useful, but Django’s generic views really shine when it comes to presenting views on your database content.
+direct_to_template 毫无疑问是非常有用的，但Django通用视图最有用的地方是呈现数据库中的数据
+
+Because it’s such a common task, Django comes with a handful of built-in generic views that make generating list and detail views of objects incredibly easy.
+ 因为这个应用实在太普遍了，Django带有很多内建的通用视图来帮助你很容易 地生成对象的列表和明细视图
+
+Let’s take a look at one of these generic views: the “object list” view.
+让我们先看看其中的一个通用视图： 对象列表视图
+
+We’ll be using this Publisher object from Chapter 5:
+ 我们使用第五章中的 Publisher 来举例：
+
+To build a list page of all publishers, we’d use a URLconf along these lines:
+要为所有的出版商创建一个列表页面，我们使用下面的URL配置：
+
+That’s all the Python code we need to write.
+这就是所要编写的所有Python代码
+
+We still need to write a template, however.
+ 当然，我们还需要编写一个模板
+
+We can explicitly tell the object_list view which template to use by including a template_name key in the extra arguments dictionary:
+ 我们可以通过在额外参数字典中包含一个template_name键来显式地告诉object_list视图使用哪个模板：
+
+In the absence of template_name, though, the object_list generic view will infer one from the object’s name.
+在缺少template_name的情况下，object_list通用视图将自动使用一个对象名称
+
+In this case, the inferred template will be "books/publisher_list.html" – the “books” part comes from the name of the app that defines the model, while the “publisher” bit is just the lowercased version of the model’s name.
+ 在这个例子中，这个推导出的模板名称将是 "books/publisher_list.html" ，其中books部分是定义这个模型的app的名称， publisher部分是这个模型名称的小写
+
+This template will be rendered against a context containing a variable called object_list that contains all the publisher objects.
+这个模板将按照 context 中包含的变量 object_list 来渲染，这个变量包含所有的书籍对象
+
+A very simple template might look like the following:
+ 一个非常简单的模板看起来象下面这样：
+
+(Note that this assumes the existence of a base.html template, as we provided in an example in Chapter 4.)
+(注意，这里我们假定存在一个base.html模板，它和我们第四章中的一样
+
+That’s really all there is to it.
+这就是所有要做的事
+
+All the cool features of generic views come from changing the “info” dictionary passed to the generic view.
+ 要使用通用视图酷酷的特性只需要修改参数字典并传递给通用视图函数
+
+Appendix D documents all the generic views and all their options in detail;
+ 附录D是通用视图的完全参考资料
+
+the rest of this chapter will consider some of the common ways you might customize and extend generic views.
+本章接下来的章节将讲到自定义和扩展通用视图的一些方法
+
+Extending Generic Views¶
+扩展通用视图
+
+There’s no question that using generic views can speed up development substantially.
+毫无疑问，使用通用视图可以充分加快开发速度
+
+In most projects, however, there comes a moment when the generic views no longer suffice.
+ 然而，在多数的工程中，也会出现通用视图不能 满足需求的情况
+
+Indeed, one of the most common questions asked by new Django developers is how to make generic views handle a wider array of situations.
+ 实际上，刚接触Django的开发者最常见的问题就是怎样使用通用视图来处理更多的情况
+
+Luckily, in nearly every one of these cases, there are ways to simply extend generic views to handle a larger array of use cases.
+幸运的是，几乎每种情况都有相应的方法来简易地扩展通用视图以处理这些情况
+
+These situations usually fall into a handful of patterns dealt with in the sections that follow.
+ 这时总是使用下面的 这些方法
+
+You might have noticed that sample publisher list template stores all the books in a variable named object_list.
+你也许已经注意到范例中的出版商列表模板在变量 object_list 里保存所有的书籍
+
+While this works just fine, it isn’t all that “friendly” to template authors: they have to “just know” that they’re dealing with books here.
+这个方法工作的很好，只是对编写模板的人不太友好
+
+A better name for that variable would be publisher_list;
+ 他们必须知道这里正在处理的是书籍
+
+that variable’s content is pretty obvious.
+ 更好的变量名应该是publisher_list，这样变量所代表的内容就显而易见了
+
+We can change the name of that variable easily with the template_object_name argument:
+我们可以很容易地像下面这样修改 template_object_name 参数的名称：
+
+In the template, the generic view will append _list to the template_object_name to create the variable name representing the list of items.
+在模板中，通用视图会通过在template_object_name后追加一个_list的方式来创建一个表示列表项目的变量名
+
+Providing a useful template_object_name is always a good idea.
+使用有用的 template_object_name 总是个好想法
+
+Your coworkers who design templates will thank you.
+ 你的设计模板的合作伙伴会感谢你的
+
+Sometimes, you might need to present some extra information beyond that provided by the generic view.
+你常常需要呈现比通用视图提供的更多的额外信息
+
+For example, think of showing a list of all the other publishers on each publisher detail page.
+ 例如，考虑一下在每个出版商的详细页面显示所有其他出版商列表
+
+The object_detail generic view provides the publisher to the context, but it seems there’s no way to get a list of all publishers in that template.
+ object_detail 通用视图为context提供了出版商信息，但是看起来没有办法在模板中 获取 所有 出版商列表
+
+But there is: all generic views take an extra optional parameter, extra_context.
+这是解决方法： 所有的通用视图都有一个额外的可选参数 extra_context 
+
+This is a dictionary of extra objects that will be added to the template’s context.
+这个参数是一个字典数据类型，包含要添加到模板的context中的额外的对象
+
+So, to provide the list of all publishers on the detail view, we’d use an info dictionary like this:
+ 所以要给视图提供所有出版商的列表，我们就用这样的info字典：
+
+This would populate a {{ book_list }} variable in the template context.
+这样就把一个 {{ book_list }} 变量放到模板的context中
+
+This pattern can be used to pass any information down into the template for the generic view.
+ 这个方法可以用来传递任意数据 到通用视图模板中去，非常方便
+
+It’s very handy.
+ 这是非常方便的
+
+However, there’s actually a subtle bug here – can you spot it?
+不过，这里有一个很隐蔽的BUG，不知道你发现了没有
+
+The problem has to do with when the queries in extra_context are evaluated.
+我们现在来看一下， extra_context 里包含数据库查询的问题
+
+Because this example puts Book.objects.all() in the URLconf, it will be evaluated only once (when the URLconf is first loaded).
+ 因为在这个例子中，我们把Publisher.objects.all() 放在URLconf中，它只会执行一次（当URLconf第一次加载的时候）
+
+Once you add or remove publishers, you’ll notice that the generic view doesn’t reflect those changes until you reload the Web server (see “Caching and QuerySets” in Appendix C for more information about when QuerySet objects are cached and evaluated).
+ 当你添加或删除出版商，你会发现在重启Web服务器之前，通用视图不会反映出这些修改（有关QuerySet何时被缓存和赋值的更多信息请参考附录C中“缓存与查询集”一节）
+
+Note
+备注
+
+This problem doesn’t apply to the queryset generic view argument.
+这个问题不适用于通用视图的 queryset 参数
+
+Since Django knows that particular QuerySet should never be cached, the generic view takes care of clearing the cache when each view is rendered.
+ 因为Django知道有些特别的 QuerySet 永远不能 被缓存，通用视图在渲染前都做了缓存清除工作
+
+The solution is to use a callback in extra_context instead of a value.
+解决这个问题的办法是在 _extracontext 中用一个回调（callback）来代替使用一个变量
+
+Any callable (i.e., a function) that’s passed to extra_context will be evaluated when the view is rendered (instead of only once).
+ 任何传递给extra_context的可调用对象（例如一个函数）都会在每次视图渲染前执行（而不是只执行一次）
+
+You could do this with an explicitly defined function:
+ 你可以象这样定义一个函数：
+
+Or, you could use a less obvious but shorter version that relies on the fact that Book.objects.all is itself a callable:
+或者你可以使用另一个不是那么清晰但是很简短的方法，事实上 Publisher.objects.all 本身就是可以调用的：
+
+Notice the lack of parentheses after Book.objects.all.
+注意 Book.objects.all 后面没有括号
+
+This references the function without actually calling it (which the generic view will do later).
+这表示这是一个函数的引用，并没有真正调用它（通用视图将会在渲染时调用它）
+
+Now let’s take a closer look at this queryset key we’ve been using all along.
+现在让我们来仔细看看这个 queryset 
+
+Most generic views take one of these queryset arguments – it’s how the view knows which set of objects to display (see “Selecting Objects” in Chapter 5 for an introduction to QuerySet objects, and see Appendix B for the complete details).
+ 大多数通用视图有一个queryset参数，这个参数告诉视图要显示对象的集合 （有关QuerySet的解释请看第五章的 “选择对象”章节，详细资料请参看附录B）
+
+To pick a simple example, we might want to order a list of books by publication date, with the most recent first:
+举一个简单的例子，我们打算对书籍列表按出版日期排序，最近的排在最前：
+
+That’s a pretty simple example, but it illustrates the idea nicely.
+这是一个相当简单的例子，但是很说明问题
+
+Of course, you’ll usually want to do more than just reorder objects.
+ 当然，你通常还想做比重新排序更多的事
+
+If you want to present a list of books by a particular publisher, you can use the same technique:
+ 如果你想要呈现某个特定出版商出版的所有书籍列表，你可以使用同样的技术：
+
+Notice that along with a filtered queryset, we’re also using a custom template name.
+注意 在使用一个过滤的 queryset 的同时，我们还使用了一个自定义的模板名称
+
+If we didn’t, the generic view would use the same template as the “vanilla” object list, which might not be what we want.
+ 如果我们不这么做，通用视图就会用以前的模板，这可能不是我们想要的结果
+
+Also notice that this isn’t a very elegant way of doing publisher-specific books.
+同样要注意的是这并不是一个处理出版商相关书籍的最好方法
+
+If we want to add another publisher page, we’d need another handful of lines in the URLconf, and more than a few publishers would get unreasonable.
+ 如果我们想要添加另一个 出版商页面，我们就得在URL配置中写URL配置，如果有很多的出版商，这个方法就不能 接受了
+
+We’ll deal with this problem in the next section.
+ 在接下来的章节我们将来解决这个问题
+
+Another common need is to filter the objects given in a list page by some key in the URL.
+另一个常见的需求是按URL里的关键字来过滤数据对象
+
+Earlier we hard-coded the publisher’s name in the URLconf, but what if we wanted to write a view that displayed all the books by some arbitrary publisher?
+ 之前，我们在URLconf中硬编码了出版商的名字，但是如果我们想用一个视图就显示某个任意指定的出版商的所有书籍，那该怎么办呢
+
+The solution is to “wrap” the object_list generic view to avoid writing a lot of code by hand.
+ 我们可以通过对object_list 通用视图进行包装来避免 写一大堆的手工代码
+
+As usual, we’ll start by writing a URLconf:
+ 按惯例，我们先从写URL配置开始：
+
+Next, we’ll write the books_by_publisher view itself:
+接下来，我们写 books_by_publisher 这个视图：
+
+This works because there’s really nothing special about generic views – they’re just Python functions.
+这样写没问题，因为通用视图就是Python函数
+
+Like any view function, generic views expect a certain set of arguments and return HttpResponse objects.
+ 和其他的视图函数一样，通用视图也是接受一些 参数并返回HttpResponse 对象
+
+Thus, it’s incredibly easy to wrap a small function around a generic view that does additional work before (or after;
+ 因此，通过包装通用视图函数可以做更多的事
+
+Note
+注意
+
+Notice that in the preceding example we passed the current publisher being displayed in the extra_context.
+注意在前面这个例子中我们在 extra_context中传递了当前出版商这个参数
+
+The last common pattern we’ll look at involves doing some extra work before or after calling the generic view.
+我们再来看看最后一个常用模式：
+
+Imagine we had a last_accessed field on our Author object that we were using to keep track of the last time anybody looked at that author.
+想象一下我们在 Author 对象里有一个 last_accessed 字段，我们用这个字段来记录最近一次对author的访问
+
+The generic object_detail view, of course, wouldn’t know anything about this field, but once again we could easily write a custom view to keep that field updated.
+ 当然通用视图 object_detail 并不能处理这个问题，但是我们仍然可以很容易地编写一个自定义的视图来更新这个字段
+
+First, we’d need to add an author detail bit in the URLconf to point to a custom view:
+首先，我们需要在URL配置里设置指向到新的自定义视图：
+
+Then we’d write our wrapper function:
+接下来写包装函数：
+
+Note
+注意
+
+This code won’t actually work unless you add a last_accessed field to your Author model and create a books/author_detail.html template.
+除非你添加 last_accessed 字段到你的 Author 模型并创建 books/author_detail.html 模板，否则这段代码不能真正工作
+
+We can use a similar idiom to alter the response returned by the generic view.
+我们可以用同样的方法修改通用视图的返回值
+
+If we wanted to provide a downloadable plain-text version of the list of authors, we could use a view like this:
+ 如果我们想要提供一个供下载用的 纯文本版本的author列表，我们可以用下面这个视图：
+
+This works because the generic views return simple HttpResponse objects that can be treated like dictionaries to set HTTP headers.
+这个方法之所以工作是因为通用视图返回的 HttpResponse 对象可以象一个字典 一样的设置HTTP的头部
+
+This Content-Disposition business, by the way, instructs the browser to download and save the page instead of displaying it in the browser.
+ 随便说一下，这个 Content-Disposition 的含义是 告诉浏览器下载并保存这个页面，而不是在浏览器中显示它
+
+What’s Next?¶
+下一章
+
+In this chapter we looked at only a couple of the generic views Django ships with, but the general ideas presented here should apply pretty closely to any generic view.
+在这一章我们只讲了Django带的通用视图其中一部分，不过这些方法也适用于其他的 通用视图
+
+Appendix C covers all the available views in detail, and it’s recommended reading if you want to get the most out of this powerful feature.
+ 附录C详细地介绍了所有可用的视图，如果你想了解这些强大的特性，推荐你阅读一下
+
+This concludes the section of this book devoted to “advanced usage.” In the next chapter, we cover deployment of Django applications.
+这本书的高级语法部分到此结束
+
+© Copyright 2012, Matt Behrens.
+www.shoucewang.com. All Rights Reserved. 手册网 版权所有
+

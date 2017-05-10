@@ -1,0 +1,105 @@
+Sending e-mail¶
+发送email¶
+
+Although Python makes sending e-mails relatively easy via the smtplib library, Scrapy provides its own facility for sending e-mails which is very easy to use and it’s implemented using Twisted non-blocking IO, to avoid interfering with the non-blocking IO of the crawler.
+虽然Python通过 smtplib 库使得发送email变得很简单，Scrapy仍然提供了自己的实现
+
+It also provides a simple API for sending attachments and it’s very easy to configure, with a few settings.
+ 该功能十分易用，同时由于采用了 Twisted非阻塞式(non-blocking)IO ，其避免了对爬虫的非阻塞式IO的影响
+
+Quick example¶
+简单例子¶
+
+There are two ways to instantiate the mail sender.
+有两种方法可以创建邮件发送器(mail sender)
+
+You can instantiate it using the standard constructor:
+ 您可以通过标准构造器(constructor)创建:
+
+Or you can instantiate it passing a Scrapy settings object, which will respect the settings:
+或者您可以传递一个Scrapy设置对象，其会参考 settings:
+
+And here is how to use it to send an e-mail (without attachments):
+这是如何来发送邮件了(不包括附件):
+
+Instantiate using a Scrapy settings object, which will respect these Scrapy settings.
+使用Scrapy设置对象来初始化对象
+
+Send email to the given recipients.
+发送email到给定的接收者
+
+Mail settings¶
+Mail设置¶
+
+These settings define the default constructor values of the MailSender class, and can be used to configure e-mail notifications in your project without writing any code (for those extensions and code that uses MailSender).
+这些设置定义了 MailSender 构造器的默认值
+
+MAIL_FROM¶
+MAIL_FROM¶
+
+Default: 'scrapy@localhost'
+默认值: 'scrapy@localhost'
+
+Sender email to use (From: header) for sending emails.
+用于发送email的地址(address)(填入 From:) 
+
+MAIL_HOST¶
+MAIL_HOST¶
+
+Default: 'localhost'
+默认值: 'localhost'
+
+SMTP host to use for sending emails.
+发送email的SMTP主机(host)
+
+MAIL_PORT¶
+MAIL_PORT¶
+
+Default: 25
+默认值: 25
+
+SMTP port to use for sending emails.
+发用邮件的SMTP端口
+
+MAIL_USER¶
+MAIL_USER¶
+
+Default: None
+默认值: None
+
+User to use for SMTP authentication.
+SMTP用户
+
+If disabled no SMTP authentication will be performed.
+如果未给定，则将不会进行SMTP认证(authentication)
+
+MAIL_PASS¶
+MAIL_PASS¶
+
+Default: None
+默认值: None
+
+Password to use for SMTP authentication, along with MAIL_USER.
+用于SMTP认证，与 MAIL_USER 配套的密码
+
+MAIL_TLS¶
+MAIL_TLS¶
+
+Default: False
+默认值: False
+
+Enforce using STARTTLS.
+强制使用STARTTLS
+
+STARTTLS is a way to take an existing insecure connection, and upgrade it to a secure connection using SSL/TLS.
+STARTTLS能使得在已经存在的不安全连接上，通过使用SSL/TLS来实现安全连接
+
+MAIL_SSL¶
+MAIL_SSL¶
+
+Default: False
+默认值: False
+
+Enforce connecting using an SSL encrypted connection
+强制使用SSL加密连接
+

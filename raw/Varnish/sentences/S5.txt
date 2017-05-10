@@ -1,0 +1,165 @@
+Navigation
+Navigation
+
+index
+index
+
+next |
+next |
+
+previous |
+previous |
+
+Varnish version 2.1.5 documentation »
+varnish 1.0.1 documentation »
+
+Varnish Installation »
+Varnish安装 »
+
+Installing Varnish¶
+安装Varnish¶
+
+With open source software, you can choose to install binary packages or compile stuff from source-code.
+因为varnish是开源软件，你可以选择通过二进制包安装或者自己编译源代码安装
+
+To install a package or compile from source is a matter of personal taste.
+通过包安装或者编译源代码纯粹是个人喜好
+
+If you don’t know which method too choose read the whole document and choose the method you are most confortable with.
+ 如果你不知道如何选择哪种安装方式，我们建议你通读本节，然后选择适合你的安装方式
+
+Source or packages?¶
+源代码 或 安装包
+
+Installing Varnish on most relevant operating systems can usually be done with with the systems package manager, typical examples being:
+在绝大数操作系统上，通常可以通过对应的系统管理包安装
+
+FreeBSD¶
+FreeBSD¶
+
+CentOS/RedHat¶
+Red Hat / CentOS¶
+
+We try to keep the lastest version available as prebuildt RPMs (el4 & el5) on SourceForge.
+我们尽可能地保证最新版本的预编译RPM包(el5和el6)在`repo.varnish-cache.org <http://repo.varnish-cache.org/>`_.上可用
+
+Varnish is included in the EPEL repository.
+Varnish已存在`EPEL<http://fedoraproject.org/wiki/EPEL>`_ 库中, 但是由于新版本的Varnish有不兼容语法规则，库中只有老版本的Varnish可用
+
+EPEL6 should have Varnish 2.1 available once it releases.
+基于上述原因，我们推荐你直接通过我们的库安装最新版本
+
+Debian/Ubuntu¶
+Debian/Ubuntu¶
+
+Varnish is distributed with both Debian and Ubuntu.
+Varnish随Debian和Ubuntu发行
+
+In order to get Varnish up and running type sudo apt-get install varnish.
+通过执行``sudo apt-get install varnish``，就可以获得Varnish
+
+Please note that this might not be the latest version of Varnish.
+ 请注意那可能不是最新的版本
+
+Compiling Varnish from source¶
+从源代码中编译Varnish¶
+
+If there are no binary packages available for your system, or if you want to compile Varnish from source for other reasons, follow these steps:
+如果没有二进制包适合你的系统，或者你有其他原因想编译Varnish，参考下面的步骤：
+
+First get a copy of the sourcecode using the svn command.
+下载适合的Varnish的tarball，你可以在这里下载 http://repo.varnish-cache.org/source/ 
+
+To fetch the current (2.1) production branch:: To get the development source code::
+或者，如果你想研究Varnish，你可以通过下面命令克隆我们的git库：
+
+Build dependencies on Debian / Ubuntu¶
+在Debain / Ubuntu上构建依赖包¶
+
+In order to build Varnish from source you need a number of packages installed.
+为了从源代码上构建Varnish，你需要安装一些包
+
+On a Debian or Ubuntu system these are:
+在Deian或者Ubuntu上，需要安装下面的包：
+
+Configuring and compiling¶
+Build dependencies on Red Hat / CentOS 在Red Hat / CentOS上构建依赖包 ————————————–
+
+Next, configuration: The configuration will need the dependencies above satisfied.
+在Red Hat或者CentOS上构建Varnish，你需要下面安装下面的包：如果你需要从git上构建，你也需要下面的包：
+
+Before you install, you may want to run the regression tests, make a cup of tea while it runs, it takes some minutes:
+配置依赖需要上面合适包,请在确认一下:
+
+Don’t worry of a single or two tests fail, some of the tests are a bit too timing sensitive (Please tell us which so we can fix it) but if a lot of them fails, and in particular if the b00000.vtc test fails, something is horribly wrong, and you will get nowhere without figuring out what.
+`configure`脚本需要一些参数，不像其他参数从现在你可以忘记了，基本Varnish所有的东西都可以通过运行参数进行调整
+
+And finally, the true test of a brave heart:
+别担心一个或者两个测试失败，一些测试对时间太敏感（请告诉我们那些，我们好修复）,但是如果很多失败，特别`b00000.vtc`测试失败，问题相当严重
+
+You can now proceed to the Using Varnish.
+最后执行: sudo make install
+
+FreeBSD
+安装Varnish 源代码 或 安装包
+
+CentOS/RedHat
+源代码 或 安装包
+
+Debian/Ubuntu
+FreeBSD
+
+Other systems
+Red Hat / CentOS
+
+Compiling Varnish from source Build dependencies on Debian / Ubuntu Build dependencies on Red Hat / Centos Configuring and compiling Installing
+Debian/Ubuntu
+
+Build dependencies on Debian / Ubuntu
+从源代码中编译Varnish 在Debain / Ubuntu上构建依赖包 编译Varnish 安装
+
+Build dependencies on Red Hat / Centos
+在Debain / Ubuntu上构建依赖包
+
+Configuring and compiling
+编译Varnish
+
+Installing
+安装
+
+Prerequisites
+前提条件
+
+Getting hold of us
+Getting help
+
+This Page
+This Page
+
+Show Source
+Show Source
+
+Quick search
+Quick search
+
+Enter search terms or a module, class or function name.
+Enter search terms or a module, class or function name.
+
+Navigation
+Navigation
+
+index
+index
+
+next |
+next |
+
+previous |
+previous |
+
+Varnish version 2.1.5 documentation »
+varnish 1.0.1 documentation »
+
+Varnish Installation »
+Varnish安装 »
+

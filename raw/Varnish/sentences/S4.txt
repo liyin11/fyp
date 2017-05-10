@@ -1,0 +1,81 @@
+Navigation
+Navigation
+
+index
+index
+
+next |
+next |
+
+previous |
+previous |
+
+Varnish version 2.1.5 documentation »
+varnish 1.0.1 documentation »
+
+Varnish Installation »
+Varnish安装 »
+
+Prerequisites¶
+前提条件¶
+
+In order for you to install Varnish you must have the following:
+为了安装Varnish，你必须满足下面的要求：
+
+A fairly modern and 64 bit version of either - Linux - FreeBSD - Solaris
+一个较新的、最好是服务器级别的计算机
+
+root access to said system
+Root访问权限.
+
+Varnish can be installed on other UNIX systems as well, but it is not tested particularly well on these plattforms.
+Varnish也可以被安装在其他UNIX系统上，但是相比较上面的系统，Varnish在这些系统上没有被广泛、系统地测试
+
+Varnish is, from time to time, said to work on:
+ Varnish有时可以运行在：
+
+32 bit versions of the before-mentioned systems.
+32位版的上述系统,
+
+OS X
+OS X,
+
+NetBSD
+NetBSD,
+
+OpenBSD
+OpenBSD, 和
+
+Installing Varnish
+安装Varnish
+
+This Page
+This Page
+
+Show Source
+Show Source
+
+Quick search
+Quick search
+
+Enter search terms or a module, class or function name.
+Enter search terms or a module, class or function name.
+
+Navigation
+Navigation
+
+index
+index
+
+next |
+next |
+
+previous |
+previous |
+
+Varnish version 2.1.5 documentation »
+varnish 1.0.1 documentation »
+
+Varnish Installation »
+Varnish安装 »
+

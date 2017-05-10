@@ -1,0 +1,204 @@
+Sphinx Domains
+Sphinx Domains
+
+The build configuration file
+The build configuration file
+
+These are the built-in Sphinx builders.
+These are the built-in Sphinx builders. More builders can be added by extensions.
+
+The builder’s “name” must be given to the -b command-line option of sphinx-build to select a builder.
+The builder’s “name” must be given to the -b command-line option of sphinx-build to select a builder.
+
+This is the standard HTML builder.
+This is the standard HTML builder. Its output is a directory with HTML files, complete with style sheets and optionally the reST sources. There are quite a few configuration values that customize the output of this builder, see the chapter Options for HTML output for details.
+
+This is a subclass of the standard HTML builder.
+Its name is html.
+
+New in version 0.6.
+This is a subclass of the standard HTML builder. Its output is a directory with HTML files, where each file is called index.html and placed in a subdirectory named like its page name. For example, the document markup/rest.rst will not result in an output file markup/rest.html, but markup/rest/index.html. When generating links between pages, the index.html is omitted, so that the URL would look like markup/rest/.
+
+This is an HTML builder that combines the whole project in one output file.
+Its name is dirhtml.
+
+New in version 1.0.
+New in version 0.6.
+
+This builder produces the same output as the standalone HTML builder, but also generates HTML Help support files that allow the Microsoft HTML Help Workshop to compile them into a CHM file.
+This is an HTML builder that combines the whole project in one output file. (Obviously this only works with smaller projects.) The file is named like the master document. No indices will be generated.
+
+This builder produces the same output as the standalone HTML builder, but also generates Qt help collection support files that allow the Qt collection generator to compile them.
+Its name is singlehtml.
+
+This builder produces an Apple Help Book based on the same output as the standalone HTML builder.
+New in version 1.0.
+
+If the source directory contains any .lproj folders, the one corresponding to the selected language will have its contents merged with the generated output.
+This builder produces the same output as the standalone HTML builder, but also generates HTML Help support files that allow the Microsoft HTML Help Workshop to compile them into a CHM file.
+
+In order to generate a valid help book, this builder requires the command line tool hiutil, which is only available on Mac OS X 10.6 and above.
+Its name is htmlhelp.
+
+New in version 1.3.
+This builder produces the same output as the standalone HTML builder, but also generates Qt help collection support files that allow the Qt collection generator to compile them.
+
+This builder produces the same output as the standalone HTML builder, but also generates GNOME Devhelp support file that allows the GNOME Devhelp reader to view them.
+Its name is qthelp.
+
+This builder produces the same output as the standalone HTML builder, but also generates an epub file for ebook readers.
+This builder produces the same output as the standalone HTML builder, but also generates GNOME Devhelp support file that allows the GNOME Devhelp reader to view them.
+
+This builder produces the same output as the standalone HTML builder, but also generates an epub file for ebook readers.
+Its name is devhelp.
+
+This builder is still experimental because it can’t generate valid EPUB 3 files.
+This builder produces the same output as the standalone HTML builder, but also generates an epub file for ebook readers. See Epub信息 for details about it. For definition of the epub format, have a look at http://www.idpf.org/specs.htm or http://en.wikipedia.org/wiki/EPUB.
+
+New in version 1.4.
+Some ebook readers do not show the link targets of references. Therefore this builder adds the targets after the link when necessary. The display of the URLs can be customized by adding CSS rules for the class link-target.
+
+This builder produces a bunch of LaTeX files in the output directory.
+Its name is epub.
+
+Note
+This builder produces a bunch of LaTeX files in the output directory. You have to specify which documents are to be included in which LaTeX files via the latex_documents configuration value. There are a few configuration values that customize the output of this builder, see the chapter Options for LaTeX output for details.
+
+The produced LaTeX file uses several LaTeX packages that may not be present in a “minimal” TeX distribution installation.
+Note
+
+Note that a direct PDF builder using ReportLab is available in rst2pdf version 0.12 or greater.
+The produced LaTeX file uses several LaTeX packages that may not be present in a “minimal” TeX distribution installation. For TeXLive, the following packages need to be installed:
+
+This builder produces a text file for each reST file – this is almost the same as the reST source, but with much of the markup stripped for better readability.
+Its name is latex.
+
+New in version 0.4.
+Note that a direct PDF builder using ReportLab is available in rst2pdf version 0.12 or greater. You need to add 'rst2pdf.pdfbuilder' to your extensions to enable it, its name is pdf. Refer to the rst2pdf manual for details.
+
+This builder produces manual pages in the groff format.
+This builder produces a text file for each reST file – this is almost the same as the reST source, but with much of the markup stripped for better readability.
+
+New in version 1.0.
+Its name is text.
+
+This builder produces Texinfo files that can be processed into Info files by the makeinfo program.
+New in version 0.4.
+
+The Info format is the basis of the on-line help system used by GNU Emacs and the terminal-based program info.
+This builder produces manual pages in the groff format. You have to specify which documents are to be included in which manual pages via the man_pages configuration value.
+
+New in version 1.1.
+Its name is man.
+
+This builder uses a module that implements the Python serialization API (pickle, simplejson, phpserialize, and others) to dump the generated HTML documentation.
+Note
+
+A concrete subclass of this builder serializing to the PHP serialization format could look like this:
+This builder requires the docutils manual page writer, which is only available as of docutils 0.6.
+
+A module that implements dump(), load(), dumps() and loads() functions that conform to the functions with the same names from the pickle module.
+New in version 1.0.
+
+The suffix for all regular files.
+This builder produces Texinfo files that can be processed into Info files by the makeinfo program. You have to specify which documents are to be included in which Texinfo files via the texinfo_documents configuration value.
+
+The filename for the file that contains the “global context”.
+The Info format is the basis of the on-line help system used by GNU Emacs and the terminal-based program info. See Texinfo信息 for more details. The Texinfo format is the official documentation system used by the GNU project. More information on Texinfo can be found at http://www.gnu.org/software/texinfo/.
+
+The filename for the search index Sphinx generates.
+Its name is texinfo.
+
+See Serialization builder details for details about the output format.
+New in version 1.1.
+
+New in version 0.5.
+This builder uses a module that implements the Python serialization API (pickle, simplejson, phpserialize, and others) to dump the generated HTML documentation. The pickle builder is a subclass of it.
+
+This builder produces a directory with pickle files containing mostly HTML fragments and TOC information, for use of a web application (or custom postprocessing tool) that doesn’t use the standard HTML templates.
+A concrete subclass of this builder serializing to the PHP serialization format could look like this:
+
+See Serialization builder details for details about the output format.
+A module that implements dump(), load(), dumps() and loads() functions that conform to the functions with the same names from the pickle module. Known modules implementing this interface are simplejson (or json in Python 2.6), phpserialize, plistlib, and others.
+
+The old name web still works as well.
+The suffix for all regular files.
+
+The file suffix is .fpickle.
+The filename for the file that contains the “global context”. This is a dict with some general configuration values such as the name of the project.
+
+This builder produces a directory with JSON files containing mostly HTML fragments and TOC information, for use of a web application (or custom postprocessing tool) that doesn’t use the standard HTML templates.
+The filename for the search index Sphinx generates.
+
+See Serialization builder details for details about the output format.
+See Serialization builder details for details about the output format.
+
+The file suffix is .fjson.
+New in version 0.5.
+
+New in version 0.5.
+This builder produces a directory with pickle files containing mostly HTML fragments and TOC information, for use of a web application (or custom postprocessing tool) that doesn’t use the standard HTML templates.
+
+This builder produces gettext-style message catalogs.
+See Serialization builder details for details about the output format.
+
+See the documentation on Internationalization for further reference.
+Its name is pickle. (The old name web still works as well.)
+
+New in version 1.1.
+The file suffix is .fpickle. The global context is called globalcontext.pickle, the search index searchindex.pickle.
+
+This builder produces an HTML overview of all versionadded, versionchanged and deprecated directives for the current version.
+This builder produces a directory with JSON files containing mostly HTML fragments and TOC information, for use of a web application (or custom postprocessing tool) that doesn’t use the standard HTML templates.
+
+This builder produces no output.
+See Serialization builder details for details about the output format.
+
+New in version 1.4.
+Its name is json.
+
+This builder scans all documents for external links, tries to open them with urllib2, and writes an overview which ones are broken and redirected to standard output and to output.txt in the output directory.
+The file suffix is .fjson. The global context is called globalcontext.json, the search index searchindex.json.
+
+This builder produces Docutils-native XML files.
+New in version 0.5.
+
+New in version 1.2.
+This builder produces gettext-style message catalogs. Each top-level file or subdirectory grows a single .pot catalog template.
+
+This builder is used for debugging the Sphinx/Docutils “Reader to Transform to Writer” pipeline.
+See the documentation on Internationalization for further reference.
+
+New in version 1.2.
+Its name is gettext.
+
+Built-in Sphinx extensions that offer more builders are:
+New in version 1.1.
+
+All serialization builders outputs one file per source file and a few special files.
+This builder scans all documents for external links, tries to open them with urllib2, and writes an overview which ones are broken and redirected to standard output and to output.txt in the output directory.
+
+The PickleHTMLBuilder is a builtin subclass that implements the pickle serialization interface.
+Its name is linkcheck.
+
+The files per source file have the extensions of out_suffix, and are arranged in directories just as the source files are.
+Built-in Sphinx extensions that offer more builders are:
+
+A pickled dict with these keys:
+The PickleHTMLBuilder is a builtin subclass that implements the pickle serialization interface.
+
+An index that can be used for searching the documentation.
+The files per source file have the extensions of out_suffix, and are arranged in directories just as the source files are. They unserialize to a dictionary (or dictionary like structure) with these keys:
+
+The build environment.
+The special files are located in the root output directory. They are:
+
+Todo
+A pickled dict with these keys:
+
+Document common members.
+An index that can be used for searching the documentation. It is a pickled list with these entries:
+
+Unlike the other pickle files this pickle file requires that the sphinx package is available on unpickling.
+The build environment. This is always a pickle file, independent of the builder and a copy of the environment that was used when the builder was started.
+

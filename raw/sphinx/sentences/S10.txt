@@ -1,0 +1,222 @@
+HTML theming support
+HTML theming support
+
+Sphinx Extensions
+Sphinx Extensions
+
+Sphinx uses the Jinja templating engine for its HTML templates.
+Sphinx uses the Jinja templating engine for its HTML templates. Jinja is a text-based engine, and inspired by Django templates, so anyone having used Django will already be familiar with it. It also has excellent documentation for those who need to make themselves familiar with it.
+
+Do I need to use Sphinx’s templates to produce HTML?¶
+Do I need to use Sphinx’ templates to produce HTML
+
+No.
+No. You have several other options:
+
+Jinja/Sphinx Templating Primer¶
+Jinja/Sphinx Templating Primer¶
+
+The default templating language in Sphinx is Jinja.
+The default templating language in Sphinx is Jinja. It’s Django/Smarty inspired and easy to understand. The most important concept in Jinja is template inheritance, which means that you can overwrite only specific blocks within a template, customizing it while also keeping the changes at a minimum.
+
+To customize the output of your documentation you can override all the templates (both the layout templates and the child templates) by adding files with the same name as the original filename into the template directory of the structure the Sphinx quickstart generated for you.
+To customize the output of your documentation you can override all the templates (both the layout templates and the child templates) by adding files with the same name as the original filename into the template directory of the structure the Sphinx quickstart generated for you.
+
+Sphinx will look for templates in the folders of templates_path first, and if it can’t find the template it’s looking for there, it falls back to the selected theme’s templates.
+Sphinx will look for templates in the folders of templates_path first, and if it can’t find the template it’s looking for there, it falls back to the selected theme’s templates.
+
+A template contains variables, which are replaced with values when the template is evaluated, tags, which control the logic of the template and blocks which are used for template inheritance.
+A template contains variables, which are replaced with values when the template is evaluated, tags, which control the logic of the template and blocks which are used for template inheritance.
+
+Sphinx’s basic theme provides base templates with a couple of blocks it will fill with data.
+Sphinx’ basic theme provides base templates with a couple of blocks it will fill with data. These are located in the themes/basic subdirectory of the Sphinx installation directory, and used by all builtin Sphinx themes. Templates with the same name in the templates_path override templates supplied by the selected theme.
+
+For example, to add a new link to the template area containing related links all you have to do is to add a new template called layout.html with the following contents:
+For example, to add a new link to the template area containing related links all you have to do is to add a new template called layout.html with the following contents:
+
+By prefixing the name of the overridden template with an exclamation mark, Sphinx will load the layout template from the underlying HTML theme.
+By prefixing the name of the overridden template with an exclamation mark, Sphinx will load the layout template from the underlying HTML theme.
+
+Important: If you override a block, call {{ super() }} somewhere to render the block’s content in the extended template – unless you don’t want that content to show up.
+Important: If you override a block, call {{ super() }} somewhere to render the block’s content in the extended template – unless you don’t want that content to show up.
+
+Working with the builtin templates¶
+Working with the builtin templates¶
+
+The builtin basic theme supplies the templates that all builtin Sphinx themes are based on.
+The builtin basic theme supplies the templates that all builtin Sphinx themes are based on. It has the following elements you can override or use:
+
+The following blocks exist in the layout.html template:
+The following blocks exist in the layout.html template:
+
+This block contains the relation bar, the list of related links (the parent documents on the left, and the links to index, modules etc.
+This block contains the relation bar, the list of related links (the parent documents on the left, and the links to index, modules etc. on the right). relbar1 appears before the document, relbar2 after the document. By default, both blocks are filled; to show the relbar only before the document, you would override relbar2 like this:
+
+A possible location for a sidebar.
+A possible location for a sidebar. sidebar1 appears before the document and is empty by default, sidebar2 after the document and contains the default sidebar. If you want to swap the sidebar location override this and call the sidebar helper:
+
+(The sidebar2 location for the sidebar is needed by the sphinxdoc.css stylesheet, for example.)
+(The sidebar2 location for the sidebar is needed by the sphinxdoc.css stylesheet, for example.)
+
+The following four blocks are only used for pages that do not have assigned a list of custom sidebars in the html_sidebars config value.
+The following four blocks are only used for pages that do not have assigned a list of custom sidebars in the html_sidebars config value. Their use is deprecated in favor of separate sidebar templates, which can be included via html_sidebars.
+
+The table of contents within the sidebar.
+The table of contents within the sidebar.
+
+Deprecated since version 1.0.
+Deprecated since version 1.0.
+
+The relation links (previous, next document) within the sidebar.
+The relation links (previous, next document) within the sidebar.
+
+Deprecated since version 1.0.
+Deprecated since version 1.0.
+
+The “Show source” link within the sidebar (normally only shown if this is enabled by html_show_sourcelink).
+The “Show source” link within the sidebar (normally only shown if this is enabled by html_show_sourcelink).
+
+Deprecated since version 1.0.
+Deprecated since version 1.0.
+
+The search box within the sidebar.
+The search box within the sidebar. Override this if you want to place some content at the bottom of the sidebar.
+
+Deprecated since version 1.0.
+Deprecated since version 1.0.
+
+Inside templates you can set a couple of variables used by the layout template using the {% set %} tag:
+Inside templates you can set a couple of variables used by the layout template using the {% set %} tag:
+
+The delimiter for the items on the left side of the related bar.
+The delimiter for the items on the left side of the related bar. This defaults to ' &raquo;' Each item in the related bar ends with the value of this variable.
+
+The delimiter for the items on the right side of the related bar.
+The delimiter for the items on the right side of the related bar. This defaults to ' |'. Each item except of the last one in the related bar ends with the value of this variable.
+
+Overriding works like this:
+Overriding works like this:
+
+Add additional script files here, like this:
+Add additional script files here, like this:
+
+Similar to script_files, for CSS files.
+Similar to script_files, for CSS files.
+
+Sphinx provides various Jinja functions as helpers in the template.
+Sphinx provides various Jinja functions as helpers in the template. You can use them to generate links or output multiply used elements.
+
+Return the path to a Sphinx document as a URL.
+Return the path to a Sphinx document as a URL. Use this to refer to built documents.
+
+Return the path to a file which is a filename relative to the root of the generated output.
+Return the path to a file which is a filename relative to the root of the generated output. Use this to refer to static files.
+
+Check if a document with the name document exists.
+Check if a document with the name document exists.
+
+Return the rendered sidebar.
+Return the rendered sidebar.
+
+Return the rendered relation bar.
+Return the rendered relation bar.
+
+These global variables are available in every template and are safe to use.
+These global variables are available in every template and are safe to use. There are more, but most of them are an implementation detail and might change in the future.
+
+The name of the builder (e.g.
+The name of the builder (e.g. html or htmlhelp).
+
+The value of copyright.
+The value of copyright.
+
+The title of the documentation (the value of html_title), except when the “single-file” builder is used, when it is set to None.
+The title of the documentation (the value of html_title).
+
+True if the built HTML is meant to be embedded in some viewing application that handles navigation, not the web browser, such as for HTML help or Qt help formats.
+True if the built HTML is meant to be embedded in some viewing application that handles navigation, not the web browser, such as for HTML help or Qt help formats. In this case, the sidebar is not included.
+
+The path to the HTML favicon in the static path, or ''.
+The path to the HTML favicon in the static path, or ''.
+
+The value of the builder’s out_suffix attribute, i.e.
+The value of the builder’s out_suffix attribute, i.e. the file name extension that the output files will get. For a standard HTML builder, this is usually .html.
+
+True if the reST document sources are copied (if html_copy_source is True).
+True if the reST document sources are copied (if html_copy_source is true).
+
+The value of language.
+The build date.
+
+The build date.
+The path to the HTML logo image in the static path, or ''.
+
+The path to the HTML logo image in the static path, or ''.
+The value of master_doc, for usage with pathto().
+
+The value of master_doc, for usage with pathto().
+The next document for the navigation. This variable is either false or has two attributes link and title. The title contains HTML markup. For example, to generate a link to the next page, you can use this snippet:
+
+The next document for the navigation.
+The “page name” of the current file, i.e. either the document name if the file is generated from a reST source, or the equivalent hierarchical name relative to the output directory ([directory/]filename_without_extension).
+
+The “page name” of the current file, i.e.
+A list of parent documents for navigation, structured like the next item.
+
+A list of parent documents for navigation, structured like the next item.
+Like next, but for the previous page.
+
+Like next, but for the previous page.
+The value of project.
+
+The value of project.
+The value of release.
+
+The value of release.
+A list of links to put at the left side of the relbar, next to “next” and “prev”. This usually contains links to the general index and other indices, such as the Python module index. If you add something yourself, it must be a tuple (pagename, link title, accesskey, link text).
+
+A list of links to put at the left side of the relbar, next to “next” and “prev”.
+The value of html_short_title.
+
+The value of html_short_title.
+True if html_show_sourcelink is true.
+
+True if html_show_sourcelink is True.
+The version of Sphinx used to build.
+
+The version of Sphinx used to build.
+The name of the main stylesheet, as given by the theme or html_style.
+
+The name of the main stylesheet, as given by the theme or html_style.
+The title of the current document, as used in the  tag.
+
+The title of the current document, as used in the  tag.
+The value of html_use_opensearch.
+
+The value of html_use_opensearch.
+The value of version.
+
+The value of version.
+In addition to these values, there are also all theme options available (prefixed by theme_), as well as the values given by the user in html_context.
+
+In addition to these values, there are also all theme options available (prefixed by theme_), as well as the values given by the user in html_context.
+In documents that are created from source files (as opposed to automatically-generated files like the module index, or documents that already are in HTML form), these variables are also available:
+
+In documents that are created from source files (as opposed to automatically-generated files like the module index, or documents that already are in HTML form), these variables are also available:
+Document metadata (a dictionary), see File-wide metadata.
+
+Document metadata (a dictionary), see File-wide metadata.
+The name of the copied source file for the current document. This is only nonempty if the html_copy_source value is true.
+
+The name of the copied source file for the current document.
+The local table of contents for the current page, rendered as HTML bullet lists.
+
+The local table of contents for the current page, rendered as HTML bullet lists.
+A callable yielding the global TOC tree containing the current page, rendered as HTML bullet lists. Optional keyword arguments:
+
+A callable yielding the global TOC tree containing the current page, rendered as HTML bullet lists.
+© Copyright 2007-2011, Georg Brandl. Created using Sphinx 1.2.
+
+The suffix of the file that was rendered.
+京ICP备14002119号-1
+

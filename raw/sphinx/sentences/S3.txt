@@ -1,0 +1,144 @@
+Invocation of sphinx-quickstart
+sphinx-build用法
+
+Sphinx Markup Constructs
+Sphinx标记结构
+
+If asterisks or backquotes appear in running text and could be confused with inline markup delimiters, they have to be escaped with a backslash.
+权威的 reStructuredText用户文档
+
+reST also allows for custom “interpreted text roles”, which signify that the enclosed text should be interpreted in a specific way.
+段落(ref)是reST文档中最基本的块
+
+Sphinx uses this to provide semantic markup and cross-referencing of identifiers, as described in the appropriate section.
+段落是由一个或多个空白行分离的简单的文本块
+
+The general syntax is :rolename:`content`.
+在Python中，缩进在reST中是具有重要意义，所以同一段落的所有行必须左对齐而且是同一级缩进
+
+Nested lists are possible, but be aware that they must be separated from the parent list items by blank lines:
+标准的行内标记相当简单：使用
+
+Definition lists (ref) are created as follows:
+如果星号或反引号出​​现在文本会对行内标记分隔符引起混淆，他们必须用一个反斜杠进行转义
+
+Note that the term cannot have more than one line of text.
+注意行内标记一些限制:
+
+Quoted paragraphs (ref) are created by just indenting them more than the surrounding paragraphs.
+docutils以后的版本可能会取消上列出的这些限制
+
+Line blocks (ref) are a way of preserving line breaks:
+reST也允许自定义“文本解释role”，这就意味着所包含的文本应以一种特定的方式解释
+
+There are also several more special blocks available:
+标准的reST提供了如下些roles：
+
+Simple tables (ref) are easier to write, but limited: they must contain more than one row, and the first column cannot contain multiple lines.
+嵌套列表是可能的，但要知道，它们必须由空行从父列表中分隔:
+
+Important
+请注意，term 不能有一个以上的文本行
+
+There must be a space between the link text and the opening < for the URL.
+引用段落(ref) 可以通过比周围的段落更缩进来创建
+
+You can also separate the link and the target definition (ref), like this:
+行块元素 (ref) 是防止行被破坏的方式（保留行原样的方式）:
+
+Internal linking is done via a special reST role provided by Sphinx, see the section on specific markup, Cross-referencing arbitrary locations.
+还有其它几个特殊的功能块:
+
+Sections¶
+源代码¶
+
+Section headers (ref) are created by underlining (and optionally overlining) the section title with a punctuation character, at least as long as the text:
+文字代码块(ref)是在段尾加入特殊标记 :: 引入的
+
+Normally, there are no heading levels assigned to certain characters as the structure is determined from the succession of headings.
+:: 标记的处理非常聪明:
+
+Of course, you are free to use your own marker characters (see the reST documentation), and use a deeper nesting level, but keep in mind that most target formats (HTML, LaTeX) have a limited supported nesting depth.
+通过这种方式，上面第二句将呈现为 “The next paragraph is a code sample:”
+
+Explicit Markup¶
+表格¶
+
+“Explicit markup” (ref) is used in reST for most constructs that need special handling, such as footnotes, specially-highlighted paragraphs, comments, and generic directives.
+Sphinx支持两种表格形式
+
+An explicit markup block begins with a line starting with ..
+简单表格 (ref) 更容易书写，但是有限制：表格必须是两行以及以上，而且第一列不能包含多行
+
+followed by whitespace and is terminated by the next paragraph at the same level of indentation.
+它们看起来像这样:
+
+Directives¶
+超链接¶
+
+A directive (ref) is a generic block of explicit markup.
+使用 `Link text <http://example.com/>`_ 来实现内嵌的网页链接
+
+Besides roles, it is one of the extension mechanisms of reST, and Sphinx makes heavy use of it.
+如果链接文本是Web地址，你一点都不需要特殊标记，解析器可以识别在普通的文本的链接和邮件地址
+
+Docutils supports the following directives:
+你也可以把链接和目标定义(ref)分开，像这样:
+
+Admonitions: attention, caution, danger, error, hint, important, note, tip, warning and the generic admonition.
+内部链接是通过Sphinx提供的一个特殊的reST role来实现的，请看 Cross-referencing arbitrary locations.
+
+Special tables:
+章节头 (ref) 是用特殊的标点符作为章节标题的下划线来创建的（上划线是可选的），只要文字:
+
+Special directives:
+通常，没有特定的字符指定给标题级别，因为结构是用从继承的标题来确定的
+
+HTML specifics:
+当然，您可以自由使用自己的标记字符（参看reST文档），并使用一个更深层次的嵌套级别，但请记住，大多数的目标格式（HTML，LaTeX）有限地支持嵌套深度
+
+Do not use the directives sectnum, header and footer.
+“显式标记” (ref) 在reST中是用于需要进行特殊处理的结构，比如脚注，特别突出的段落，注释，和通用指令（标识符）
+
+Directives added by Sphinx are described in Sphinx Markup Constructs.
+显式标记块的第一行是以 .. 开始，接着是紧随着空格，被结束于同样层级缩进的下一段落
+
+The directive content follows after a blank line and is indented relative to the directive start.
+指令或者标识符（ref）是一个通用的显式标记块
+
+When used within Sphinx, the file name given (here gnu.png) must either be relative to the source file, or absolute which means that they are relative to the top source directory.
+请 不要 使用指令（标识符） sectnum， header 以及 footer
+
+Sphinx will automatically copy image files over to a subdirectory of the output directory on building (e.g.
+Sphinx自己增加的指令（标识符）是在 Sphinx标记结构 中描述的
+
+Interpretation of image size options (width and height) is as follows: if the size has no unit or the unit is pixels, the given size will only be respected for output channels that support pixels (i.e.
+基本上，指令（标识符）由一个名称，参数，选项和内容组成
+
+not in LaTeX output).
+（请记住这些术语，它被用来在接下来的章节描述了自定义指令或者标识符
+
+Other units (like pt for points) will be used for HTML and LaTeX output.
+）请看例子，:
+
+Sphinx extends the standard docutils behavior by allowing an asterisk for the extension:
+function 是指令（标识符）的名称
+
+Sphinx then searches for all images matching the provided pattern and determines their type.
+指令（标识符）的内容与选项之间空一行，需要相对于指令（标识符）的首行缩进（以指令的首行为缩进的对照点）
+
+Changed in version 0.6: Image paths can now be absolute.
+reST支持图片指令（标识符）(ref)，像这样使用:
+
+You can also explicitly number the footnotes ([1]_) or use auto-numbered footnotes without names ([#]_).
+Sphinx将会自动将图像文件拷贝到输出目录中（例如HTML格式输出，会拷贝到 _static 目录中
+
+Citation usage is similar to footnote usage, but with a label that is not numeric or begins with #.
+Sphinx扩展了标准的docutils的功能，允许文件扩展名为星号:
+
+or this:
+Changed in version 0.4: 增加了支持以星号结尾的文件名
+
+See the reST reference for substitutions for details.
+Changed in version 0.6: 图片的路径可以是绝对的
+

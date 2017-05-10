@@ -1,0 +1,27 @@
+Built-in services
+Link Extractors 是用于从网页(scrapy.http.Response )中抽取会被follow的链接的对象
+
+Solving specific problems
+Scrapy默认提供2种可用的 Link Extractor, 但你通过实现一个简单的接口创建自己定制的Link Extractor来满足需求｡ Scrapy 提供了 scrapy.contrib.linkextractors import LinkExtractor ， 不过您也可以通过实现一个简单的接口来创建您自己的Link Extractor，满足需求
+
+Extending Scrapy
+每个LinkExtractor有唯一的公共方法是 extract_links ，其接收 一个 Response 对象， 并返回 scrapy.link.Link 对象｡ Link Extractors只实例化一次，其 extract_links 方法会根据不同的response被调用多次来提取链接｡
+
+All the rest
+Link Extractors在 CrawlSpider 类(在Scrapy可用)中使用, 通过一套规则,但你也可以用它在你的Spider中,即使你不是从 CrawlSpider 继承的子类, 因为它的目的很简单: 提取链接｡
+
+There is scrapy.linkextractors import LinkExtractor available in Scrapy, but you can create your own custom Link Extractors to suit your needs by implementing a simple interface.
+Scrapy 自带的Link Extractors类在 scrapy.contrib.linkextractors 模块提供｡
+
+The only public method that every link extractor has is extract_links, which receives a Response object and returns a list of scrapy.link.Link objects.
+默认的link extractor 是 LinkExtractor ，其实就是 LxmlLinkExtractor:
+
+Link extractors are used in the CrawlSpider class (available in Scrapy), through a set of rules, but you can also use it in your spiders, even if you don’t subclass from CrawlSpider, as its purpose is very simple: to extract links.
+在以前版本的Scrapy版本中提供了其他的link extractor，不过都已经被废弃了
+
+The default link extractor is LinkExtractor, which is the same as LxmlLinkExtractor:
+LxmlLinkExtractor is the recommended link extractor with handy filtering options. It is implemented using lxml’s robust HTMLParser.
+
+There used to be other link extractor classes in previous Scrapy versions, but they are deprecated now.
+它接收来自扫描标签和属性提取每个值, 可以修改该值, 并返回一个新的, 或返回 None 完全忽略链接的功能｡如果没有给出, process_value 默认是 lambda x: x｡
+

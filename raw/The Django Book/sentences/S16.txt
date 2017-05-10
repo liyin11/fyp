@@ -1,0 +1,165 @@
+Chapter 17: Middleware¶
+第十七章：中间件
+
+On occasion, you’ll need to run a piece of code on each and every request that Django handles.
+在有些场合，需要对Django处理的每个request都执行某段代码
+
+This code might need to modify the request before the view handles it, it might need to log information about the request for debugging purposes, and so forth.
+ 这类代码可能是在view处理之前修改传入的request，或者记录日志信息以便于调试，等等
+
+You can do this with Django’s middleware framework, which is a set of hooks into Django’s request/response processing.
+这类功能可以用Django的中间件框架来实现，该框架由切入到Django的request/response处理过程中的钩子集合组成
+
+It’s a light, low-level “plug-in” system capable of globally altering both Django’s input and output.
+ 这个轻量级低层次的plug-in系统，能用于全面的修改Django的输入和输出
+
+Each middleware component is responsible for doing some specific function.
+每个中间件组件都用于某个特定的功能
+
+If you’re reading this book straight through, you’ve seen middleware a number of times already:
+ 如果你是顺着这本书读下来的话，你应该已经多次见到“中间件”了
+
+This chapter dives deeper into exactly what middleware is and how it works, and explains how you can write your own middleware.
+第12章中所有的session和user工具都籍由一小簇中间件实现(例如，由中间件设定view中可见的request.session 和 request.user )
+
+High-traffic sites often need to deploy Django behind a load-balancing proxy (see Chapter 12).
+这一章将深入到中间件及其工作机制中，并阐述如何自行编写中间件
+
+If this middleware is installed (see the next section), every request’s X-Forwarded-For value will be automatically inserted into request.META['REMOTE_ADDR'].
+我们从一个简单的例子开始
+
+In fact, this is a common enough need that this piece of middleware is a built-in part of Django.
+高流量的站点通常需要将Django部署在负载平衡proxy(参见第20章)之后
+
+It lives in django.middleware.http, and you can read a bit more about it later in this chapter.
+ 这种方式将带来一些复杂性，其一就是每个request中的远程IP地址(request.META["REMOTE_IP"])将指向该负载平衡proxy，而不是发起这个request的实际IP
+
+To activate a middleware component, add it to the MIDDLEWARE_CLASSES tuple in your settings module.
+(Note: Although the HTTP header is called X-Forwarded-For , Django makes it available asrequest.META['HTTP_X_FORWARDEDFOR'] . With the exception of content-length and content-type , any HTTP headers in the request are converted to request.META keys by converting all characters to uppercase, replacing any hyphens with underscores and adding an HTTP prefix to the name.)
+
+A Django installation doesn’t require any middleware – MIDDLEWARE_CLASSES can be empty, if you’d like – but we recommend that you activate CommonMiddleware, which we explain shortly.
+一旦安装了该中间件(参见下一节)，每个request中的 X-Forwarded-For 值都会被自动插入到request.META['REMOTE_ADDR'] 中
+
+The order is significant.
+实际上，为针对这个非常常见的情形，Django已将该中间件内置
+
+On the request and view phases, Django applies middleware in the order given in MIDDLEWARE_CLASSES, and on the response and exception phases, Django applies middleware in reverse order.
+ 它位于 django.middleware.http 中, 下一节将给出这个中间件相关的更多细节
+
+Middleware Methods¶
+安装中间件
+
+Now that you know what middleware is and how to install it, let’s take a look at all the available methods that middleware classes can define.
+如果按顺序阅读本书，应当已经看到涉及到中间件安装的多个示例,因为前面章节的许多例子都需要某些特定的中间件
+
+For performance reasons, each activated middleware class is instantiated only once per server process.
+Django项目的安装并不强制要求任何中间件，如果你愿意， MIDDLEWARE_CLASSES 可以为空
+
+A common reason to implement an __init__() method is to check whether the middleware is indeed needed.
+这里中间件出现的顺序非常重要
+
+If __init__() raises django.core.exceptions.MiddlewareNotUsed, then Django will remove the middleware from the middleware stack.
+ 在request和view的处理阶段，Django按照 MIDDLEWARE_CLASSES 中出现的顺序来应用中间件，而在response和异常处理阶段，Django则按逆序来调用它们
+
+You might use this feature to check for some piece of software that the middleware class requires, or check whether the server is running debug mode, or any other such environment situation.
+ 也就是说，Django将MIDDLEWARE_CLASSES 视为view函数外层的顺序包装子： 在request阶段按顺序从上到下穿过，而在response则反过来
+
+This method gets called as soon as the request has been received – before Django has parsed the URL to determine which view to execute.
+现在，我们已经知道什么是中间件和怎么安装它，下面将介绍中间件类中可以定义的所有方法
+
+process_request() should return either None or an HttpResponse object.
+在中间件类中， init() 方法用于执行系统范围的设置
+
+The arguments passed to this view are shown in Table 17-1.
+对一个middleware而言，定义 init() 方法的通常原因是检查自身的必要性
+
+Just like process_request(), process_view() should return either None or an HttpResponse object.
+在中间件中定义 init() 方法时，除了标准的 self 参数之外，不应定义任何其它参数
+
+The parameters should be pretty self-explanatory: request is the request object, and response is the response object returned from the view.
+process_request() 应当返回 None 或 HttpResponse 对象.
+
+Unlike the request and view preprocessors, which may return None, process_response() must return an HttpResponse object.
+如果返回 None , Django将继续处理这个request,执行后续的中间件， 然后调用相应的view.
+
+The parameters to this function are the same request object we’ve been dealing with all along, and exception, which is the actual Exception object raised by the view function.
+表15-1列出了传入到这个View预处理函数的参数
+
+process_exception() should return a either None or an HttpResponse object.
+Just like process_request() , process_view() should return either None or an HttpResponse object.
+
+Note
+If it returns None , Django will continue processing this request, executing any other middleware and then the appropriate view.
+
+Django ships with a number of middleware classes (discussed in the following section) that make good examples.
+这个方法的调用时机在Django执行view函数并生成response之后
+
+Reading the code for them should give you a good feel for the power of middleware.
+ Here, the processor can modify the content of a response. One obvious use case is content compression, such as gzipping of the request’s HTML.
+
+You can also find a number of community-contributed examples on Django’s wiki: http://code.djangoproject.com/wiki/ContributedMiddleware
+这个方法的参数相当直观: request 是request对象，而 response 则是从view中返回的response对象
+
+This middleware enables authentication support.
+这个函数的参数除了一贯的 request 对象之外，还包括view函数抛出的实际的异常对象 exception 
+
+See Chapter 14 for complete details.
+process_exception() 应当返回 None 或 HttpResponse 对象.
+
+This middleware adds a few conveniences for perfectionists:
+备注
+
+Forbids access to user agents in the ``DISALLOWED_USER_AGENTS`` setting: If provided, this setting should be a list of compiled regular expression objects that are matched against the user-agent header for each incoming request.
+Django自带了相当数量的中间件类(将在随后章节介绍)，它们都是相当好的范例
+
+Here’s an example snippet from a settings file:
+ 阅读这些代码将使你对中间件的强大有一个很好的认识
+
+Note the import re, because DISALLOWED_USER_AGENTS requires its values to be compiled regexes (i.e., the output of re.compile()).
+在Djangos wiki上也可以找到大量的社区贡献的中间件范例:http://code.djangoproject.com/wiki/ContributedMiddlewarehttp://code.djangoproject.com/wiki/ContributedMiddleware
+
+Both of these options are meant to normalize URLs.
+Django自带若干内置中间件以处理常见问题，将从下一节开始讨论
+
+Handles ETags based on the ``USE_ETAGS`` setting: ETags are an HTTP-level optimization for caching pages conditionally.
+中间件类: django.contrib.auth.middleware.AuthenticationMiddleware .django.contrib.auth.middleware.AuthenticationMiddleware .
+
+Note there is also a conditional GET middleware, covered shortly, which handles ETags and does a bit more.
+这个中间件激活认证支持功能. 它在每个传入的 HttpRequest 对象中添加代表当前登录用户的 request.user 属性
+
+This middleware automatically compresses content for browsers that understand gzip compression (all modern browsers).
+Middleware class: django.middleware.common.CommonMiddleware .
+
+We usually prefer speed over bandwidth, but if you prefer the reverse, just enable this middleware.
+这个中间件为完美主义者提供了一些便利:
+
+This middleware provides support for conditional GET operations.
+请注意 import re ,因为 DISALLOWED_USER_AGENTS 要求其值为已编译的正则表达式(也就是 re.compile()的返回值)
+
+It also removes the content from any response to a HEAD request and sets the Date and Content-Length response headers for all requests.
+_依据 APPEND_SLASH 和 PREPEND_WWW 的设置执行URL重写_ ：如果 APPEND_SLASH 为 True , 那些尾部没有斜杠的URL将被重定向到添加了斜杠的相应URL，除非path的最末组成部分包含点号
+
+This is the example we examined in the “What’s Middleware?” section earlier.
+这两个选项都是为了规范化URL
+
+It sets request.META['REMOTE_ADDR'] based on request.META['HTTP_X_FORWARDED_FOR'], if the latter is set.
+ 其后的哲学是每个URL都应且只应当存在于一处
+
+This is useful if you’re sitting behind a reverse proxy that causes each request’s REMOTE_ADDR to be set to 127.0.0.1.
+ 技术上来说，URLexample.com/bar 与 example.com/bar/ 及 www.example.com/bar/ 都互不相同
+
+Danger!
+_依据 USE_ETAGS 的设置处理Etag_ : ETags 是HTTP级别上按条件缓存页面的优化机制
+
+This middleware does not validate HTTP_X_FORWARDED_FOR.
+请注意，还有一个条件化的 GET 中间件, 处理Etags并干得更多，下面马上就会提及
+
+If you’re not behind a reverse proxy that sets HTTP_X_FORWARDED_FOR automatically, do not use this middleware.
+中间件类 django.middleware.gzip.GZipMiddleware .
+
+Only use this middleware when you can absolutely trust the value of HTTP_X_FORWARDED_FOR.
+这个中间件自动为能处理gzip压缩(包括所有的现代浏览器)的浏览器自动压缩返回]内容
+
+This middleware enables session support.
+Middleware class: django.middleware.http.ConditionalGetMiddleware .
+

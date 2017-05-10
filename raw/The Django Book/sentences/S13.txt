@@ -1,0 +1,852 @@
+Chapter 14: Sessions, Users, and Registration¶
+第十四章：会话、用户和注册
+
+It’s time for a confession: we’ve been deliberately ignoring an important aspect of Web development prior to this point.
+是时候承认了： 我们有意的避开了Web开发中极其重要的方面
+
+So far, we’ve thought of the traffic visiting our sites as some faceless, anonymous mass hurtling itself against our carefully designed pages.
+ 到目前为止，我们都在假定，网站流量是大量的匿名用户带来的
+
+This isn’t true, of course.
+这当然不对
+
+The browsers hitting our sites have real humans behind them (most of the time, at least).
+ 浏览器的背后都是活生生的人(至少某些时候是)
+
+That’s a big thing to ignore: the Internet is at its best when it serves to connect people, not machines.
+ 这忽略了重要的一点： 互联网服务于人而不是机器
+
+If we’re going to develop truly compelling sites, eventually we’re going to have to deal with the bodies behind the browsers.
+ 要开发一个真正令人心动的网站，我们必须面对浏览器后面活生生的人
+
+Unfortunately, it’s not all that easy.
+很不幸，这并不容易
+
+HTTP is designed to be stateless– that is, each and every request happens in a vacuum.
+ HTTP被设计为”无状态”，每次请求都处于相同的空间中
+
+There’s no persistence between one request and the next, and we can’t count on any aspects of a request (IP address, user agent, etc.) to consistently indicate successive requests from the same person.
+ 在一次请求和下一次请求之间没有任何状态保持，我们无法根据请求的任何方面(IP地址，用户代理等)来识别来自同一人的连续请求
+
+In this chapter you’ll learn how to handle this lack of state.
+在本章中你将学会如何搞定状态的问题
+
+We’ll start at the lowest level (cookies), and work up to the high-level tools for handling sessions, users and registration.
+ 好了，我们会从较低的层次(cookies)开始，然后过渡到用高层的工具来搞定会话，用户和注册的问题
+
+Cookies¶
+Cookies
+
+Browser developers long ago recognized that HTTP’s statelessness poses a huge problem for Web developers, and thus cookies were born.
+浏览器的开发者在很早的时候就已经意识到， HTTP’s 的无状态会对Web开发者带来很大的问题，于是(cookies)应运而生
+
+A cookie is a small piece of information that browsers store on behalf of Web servers.
+ cookies 是浏览器为 Web 服务器存储的一小段信息
+
+Every time a browser requests a page from a certain server, it gives back the cookie that it initially received.
+ 每次浏览器从某个服务器请求页面时，它向服务器回送之前收到的cookies
+
+Let’s take a look how this might work.
+来看看它是怎么工作的
+
+When you open your browser and type in google.com, your browser sends an HTTP request to Google that starts something like this:
+ 当你打开浏览器并访问 google.com ，你的浏览器会给Google发送一个HTTP请求，起始部分就象这样：
+
+When Google replies, the HTTP response looks something like the following:
+当 Google响应时，HTTP的响应是这样的：
+
+Notice the Set-Cookie header.
+注意 Set-Cookie 的头部
+
+Your browser will store that cookie value (PREF=ID=5b14f22bdaf1e81c:TM=1167000671:LM=1167000671) and serve it back to Google every time you access the site.
+ 你的浏览器会存储cookie值(PREF=ID=5b14f22bdaf1e81c:TM=1167000671:LM=1167000671 ) ，而且每次访问google 站点都会回送这个cookie值
+
+So the next time you access Google, your browser is going to send a request like this:
+ 因此当你下次访问Google时，你的浏览器会发送像这样的请求：
+
+Google then can use that Cookie value to know that you’re the same person who accessed the site earlier.
+于是 Cookies 的值会告诉Google，你就是早些时候访问过Google网站的人
+
+This value might, for example, be a key into a database that stores user information.
+ 这个值可能是数据库中存储用户信息的key，可以用它在页面上显示你的用户名
+
+Google could (and does) use it to display your account’s username on the page.
+ Google会（以及目前）使用它在网页上显示你账号的用户名
+
+When dealing with persistence in Django, most of the time you’ll want to use the higher-level session and/or user frameworks discussed a little later in this chapter.
+在Django中处理持久化，大部分时候你会更愿意用高层些的session 和/或 后面要讨论的user 框架
+
+However, first look at how to read and write cookies at a low level.
+ 但在此之前，我们需要停下来在底层看看如何读写cookies
+
+This should help you understand how the rest of the tools discussed in the chapter actually work, and it will come in handy if you ever need to play with cookies directly.
+ 这会帮助你理解本章节后面要讨论的工具是如何工作的，而且如果你需要自己操作cookies，这也会有所帮助
+
+Reading cookies that are already set is simple.
+读取已经设置好的cookies极其简单
+
+Every HttpRequest object has a COOKIES object that acts like a dictionary;
+ 每一个HttpRequest 对象都有一个COOKIES 对象，该对象的行为类似一个字典，你可以使用它读取任何浏览器发送给视图（view）的cookies
+
+Writing cookies is slightly more complicated.
+写cookies稍微复杂点
+
+You need to use the set_cookie() method on an HttpResponse object.
+ 你需要使用 HttpResponse对象的 set_cookie()方法
+
+Here’s an example that sets the favorite_color cookie based on a GET parameter:
+ 这儿有个基于 GET 参数来设置favorite_color
+
+You can also pass a number of optional arguments to response.set_cookie() that control aspects of the cookie, as shown in Table 14-1.
+你可以给 response.set_cookie() 传递一些可选的参数来控制cookie的行为，详见表14-1
+
+You might notice a number of potential problems with the way cookies work.
+也许你已经注意到了，cookies的工作方式可能导致的问题
+
+Let’s look at some of the more important ones:
+ 让我们看一下其中一些比较重要的问题：
+
+Storage of cookies is voluntary;
+cookie的存储是自愿的，一个客户端不一定要去接受或存储cookie
+
+a client does not have to accept or store cookies.
+ 事实上，所有的浏览器都让用户自己控制 是否接受cookies
+
+In fact, all browsers enable users to control the policy for accepting cookies.
+ 如果你想知道cookies对于Web应用有多重要，你可以试着打开这个浏览器的 选项：
+
+Despite their nearly universal use, cookies are still the definition of unreliability.
+尽管cookies广为使用，但仍被认为是不可靠的的
+
+This means that developers should check that a user actually accepts cookies before relying on them.
+ 这意味着，开发者使用cookies之前必须 检查用户是否可以接收cookie
+
+Cookies (especially those not sent over HTTPS) are not secure.
+Cookie(特别是那些没通过HTTPS传输的)是非常不安全的
+
+Because HTTP data is sent in cleartext, cookies are extremely vulnerable to snooping attacks.
+ 因为HTTP数据是以明文发送的，所以 特别容易受到嗅探攻击
+
+That is, an attacker snooping on the wire can intercept a cookie and read it.
+ 也就是说，嗅探攻击者可以在网络中拦截并读取cookies，因此你要 绝对避免在cookies中存储敏感信息
+
+This means you should never store sensitive information in a cookie.
+ 这就意味着您不应该使用cookie来在存储任何敏感信息
+
+There’s an even more insidious attack, known as a man-in-the-middle attack, wherein an attacker intercepts a cookie and uses it to pose as another user.
+还有一种被称为”中间人”的攻击更阴险，攻击者拦截一个cookie并将其用于另一个用户
+
+Chapter 20 discusses attacks of this nature in depth, as well as ways to prevent it.
+ 第19章将深入讨论这种攻击的本质以及如何避免
+
+Cookies aren’t even secure from their intended recipients.
+即使从预想中的接收者返回的cookie也是不安全的
+
+Most browsers provide easy ways to edit the content of individual cookies, and resourceful users can always use tools like mechanize (http://wwwsearch.sourceforge.net/mechanize/) to construct HTTP requests by hand.
+ 在大多数浏览器中您可以非常容易地修改cookies中的信息
+
+So you can’t store data in cookies that might be sensitive to tampering.
+因此不能在cookies中存储可能会被篡改的敏感数据
+
+The canonical mistake in this scenario is storing something like IsLoggedIn=1 in a cookie when a user logs in.
+ 在cookies中存储 IsLoggedIn=1 ，以标识用户已经登录
+
+You’d be amazed at the number of sites that make mistakes of this nature;
+ 犯这类错误的站点数量多的令人难以置信
+
+it takes only a second to fool these sites’ “security” systems.
+ 绕过这些网站的安全系统也是易如反掌
+
+Django’s Session Framework¶
+Django的 Session 框架
+
+With all of these limitations and potential security holes, it’s obvious that cookies and persistent sessions are examples of those “pain points” in Web development.
+由于存在的限制与安全漏洞，cookies和持续性会话已经成为Web开发中令人头疼的典范
+
+Of course, Django’s goal is to be an effective painkiller, so it comes with a session framework designed to smooth over these difficulties for you.
+ 好消息是，Django的目标正是高效的“头疼杀手”，它自带的session框架会帮你搞定这些问题
+
+This session framework lets you store and retrieve arbitrary data on a per-site visitor basis.
+你可以用session 框架来存取每个访问者任意数据， 这些数据在服务器端存储，并对cookie的收发进行了抽象
+
+It stores data on the server side and abstracts the sending and receiving of cookies.
+ Cookies只存储数据的哈希会话ID，而不是数据本身，从而避免了大部分的常见cookie问题
+
+Let’s look at how to enable sessions and use them in views.
+下面我们来看看如何打开session功能，并在视图中使用它
+
+Sessions are implemented via a piece of middleware (see Chapter 17) and a Django model.
+Sessions 功能是通过一个中间件(参见第17章)和一个模型(model)来实现的
+
+To enable sessions, you’ll need to follow these steps:
+ 要打开sessions功能，需要以下几步操作：
+
+Edit your MIDDLEWARE_CLASSES setting and make sure MIDDLEWARE_CLASSES contains 'django.contrib.sessions.middleware.SessionMiddleware'.
+编辑 MIDDLEWARE_CLASSES 配置，确保 MIDDLEWARE_CLASSES 中包含'django.contrib.sessions.middleware.SessionMiddleware'
+
+Make sure 'django.contrib.sessions' is in your INSTALLED_APPS setting (and run manage.py syncdb if you have to add it).
+确认 INSTALLED_APPS 中有 'django.contrib.sessions' (如果你是刚打开这个应用，别忘了运行manage.py syncdb )
+
+The default skeleton settings created by startproject have both of these bits already installed, so unless you’ve removed them, you probably don’t have to change anything to get sessions to work.
+如果项目是用 startproject 来创建的，配置文件中都已经安装了这些东西，除非你自己删除，正常情况下，你无需任何设置就可以使用session功能
+
+If you don’t want to use sessions, you might want to remove the SessionMiddleware line from MIDDLEWARE_CLASSES and 'django.contrib.sessions' from your INSTALLED_APPS.
+如果不需要session功能，你可以删除 MIDDLEWARE_CLASSES 设置中的 SessionMiddleware 和 INSTALLED_APPS 设置中的 'django.contrib.sessions' 
+
+It will save you only a small amount of overhead, but every little bit counts.
+虽然这只会节省很少的开销，但积少成多啊
+
+When SessionMiddleware is activated, each HttpRequest object – the first argument to any Django view function – will have a session attribute, which is a dictionary-like object.
+SessionMiddleware 激活后，每个传给视图(view)函数的第一个参数HttpRequest 对象都有一个 session 属性，这是一个字典型的对象
+
+You can read it and write to it in the same way you’d use a normal dictionary.
+ 你可以象用普通字典一样来用它
+
+For example, in a view you could do stuff like this:
+ 例如，在视图(view)中你可以这样用：
+
+You can also use other dictionary methods like keys() and items() on request.session.
+其他的映射方法，如 keys() 和 items() 对 request.session 同样有效：
+
+There are a couple of simple rules for using Django’s sessions effectively:
+下面是一些有效使用Django sessions的简单规则：
+
+Use normal Python strings as dictionary keys on request.session (as opposed to integers, objects, etc.).
+用正常的字符串作为key来访问字典 request.session ， 而不是整数、对象或其它什么的
+
+Session dictionary keys that begin with an underscore are reserved for internal use by Django.
+Session字典中以下划线开头的key值是Django内部保留key值
+
+In practice, the framework uses only a small number of underscore-prefixed session variables, but unless you know what they all are (and you are willing to keep up with any changes in Django itself), staying away from underscore prefixes will keep Django from interfering with your application.
+ 框架只会用很少的几个下划线 开头的session变量，除非你知道他们的具体含义，而且愿意跟上Django的变化，否则，最好 不要用这些下划线开头的变量，它们会让Django搅乱你的应用
+
+For example, don’t use a session key called _fav_color, like this:
+比如，不要象这样使用_fav_color 会话密钥(session key)：
+
+Don’t replace request.session with a new object, and don’t access or set its attributes.
+不要用一个新对象来替换掉 request.session ，也不要存取其属性
+
+Use it like a Python dictionary.
+ 可以像Python中的字典那样使用
+
+Examples:
+ 例如：
+
+Let’s take a look at a few quick examples.
+我们来看个简单的例子
+
+This simplistic view sets a has_commented variable to True after a user posts a comment.
+ 这是个简单到不能再简单的例子：在用户发了一次评论后将has_commented设置为True
+
+It’s a simple (if not particularly secure) way of preventing a user from posting more than one comment:
+ 这是个简单（但不很安全）的、防止用户多次评论的方法
+
+This simplistic view logs in a “member” of the site:
+下面是一个很简单的站点登录视图(view)：
+
+And this one logs out a member who has been logged in via login() above:
+下面的例子将登出一个在上面已通过login() 登录的用户：
+
+Note
+注意
+
+In practice, this is a lousy way of logging users in.
+在实践中，这是很烂的用户登录方式，稍后讨论的认证(authentication )框架会帮你以更健壮和有利的方式来处理这些问题
+
+The authentication framework discussed shortly handles this task for you in a much more robust and useful manner.
+ 这些非常简单的例子只是想让你知道这一切是如何工作的
+
+These examples are deliberately simplistic so that you can easily see what’s going on.
+ 这些实例尽量简单，这样你可以更容易看到发生了什么
+
+As mentioned above, you can’t rely on every browser accepting cookies.
+就像前面提到的，你不能指望所有的浏览器都可以接受cookie
+
+So, as a convenience, Django provides an easy way to test whether a user’s browser accepts cookies.
+ 因此，为了使用方便，Django提供了一个简单的方法来测试用户的浏览器是否接受cookie
+
+Just call request.session.set_test_cookie() in a view, and check request.session.test_cookie_worked() in a subsequent view – not in the same view call.
+ 你只需在视图(view)中调用 request.session.set_test_cookie()，并在后续的视图(view)、而不是当前的视图(view)中检查 request.session.test_cookie_worked() 
+
+This awkward split between set_test_cookie() and test_cookie_worked() is necessary due to the way cookies work.
+虽然把 set_test_cookie() 和 test_cookie_worked() 分开的做法看起来有些笨拙，但由于cookie的工作方式，这无可避免
+
+When you set a cookie, you can’t actually tell whether a browser accepted it until the browser’s next request.
+ 当设置一个cookie时候，只能等浏览器下次访问的时候，你才能知道浏览器是否接受cookie
+
+It’s good practice to use delete_test_cookie() to clean up after yourself.
+检查cookie是否可以正常工作后，你得自己用 delete_test_cookie() 来清除它，这是个好习惯
+
+Do this after you’ve verified that the test cookie worked.
+ 在你证实了测试cookie已工作了之后这样操作
+
+Here’s a typical usage example:
+这是个典型例子：
+
+Note
+注意
+
+Again, the built-in authentication functions handle this check for you.
+再次强调，内置的认证函数会帮你做检查的
+
+Internally, each session is just a normal Django model defined in django.contrib.sessions.models.
+从内部来看，每个session都只是一个普通的Django model（在 django.contrib.sessions.models 中定义)
+
+Each session is identified by a more-or-less random 32-character hash stored in a cookie.
+每个session都由一个随机的32字节哈希串来标识，并存储于cookie中
+
+Because it’s a normal model, you can access sessions using the normal Django database API:
+ 因为它是一个标准的模型，所以你可以使用Django数据库API来存取session
+
+You’ll need to call get_decoded() to get the actual session data.
+你需要使用get_decoded() 来读取实际的session数据
+
+This is necessary because the dictionary is stored in an encoded format:
+ 这是必需的，因为字典存储为一种特定的编码格式
+
+By default, Django only saves to the database if the session has been modified – that is, if any of its dictionary values have been assigned or deleted:
+缺省的情况下，Django只会在session发生变化的时候才会存入数据库，比如说，字典赋值或删除
+
+To change this default behavior, set SESSION_SAVE_EVERY_REQUEST to True.
+你可以设置 SESSION_SAVE_EVERY_REQUEST 为 True 来改变这一缺省行为
+
+If SESSION_SAVE_EVERY_REQUEST is True, Django will save the session to the database on every single request, even if it wasn’t changed.
+如果置为True的话，Django会在每次收到请求的时候保存session，即使没发生变化
+
+Note that the session cookie is sent only when a session has been created or modified.
+注意，会话cookie只会在创建和修改的时候才会送出
+
+If SESSION_SAVE_EVERY_REQUEST is True, the session cookie will be sent on every request.
+ 但如果 SESSION_SAVE_EVERY_REQUEST 设置为 True ，会话cookie在每次请求的时候都会送出
+
+Similarly, the expires part of a session cookie is updated each time the session cookie is sent.
+ 同时，每次会话cookie送出的时候，其 expires 参数都会更新
+
+You might have noticed that the cookie Google sent us at the beginning of this chapter contained expires=Sun, 17-Jan-2038 19:14:07 GMT;.
+你可能注意到了，Google给我们发送的cookie中有 expires=Sun, 17-Jan-2038 19:14:07 GMT; cookie可以有过期时间，这样浏览器就知道什么时候可以删除cookie了
+
+Cookies can optionally contain an expiration date that advises the browser on when to remove the cookie.
+ 如果cookie没有设置过期时间，当用户关闭浏览器的时候，cookie就自动过期了
+
+If a cookie doesn’t contain an expiration value, the browser will expire it when the user closes his or her browser window.
+ 你可以改变 SESSION_EXPIRE_AT_BROWSER_CLOSE 的设置来控制session框架的这一行为
+
+By default, SESSION_EXPIRE_AT_BROWSER_CLOSE is set to False, which means session cookies will be stored in users’ browsers for SESSION_COOKIE_AGE seconds (which defaults to two weeks, or 1,209,600 seconds).
+缺省情况下， SESSION_EXPIRE_AT_BROWSER_CLOSE 设置为 False ，这样，会话cookie可以在用户浏览器中保持有效达 SESSION_COOKIE_AGE 秒（缺省设置是两周，即1,209,600 秒）
+
+Use this if you don’t want people to have to log in every time they open a browser.
+ 如果你不想用户每次打开浏览器都必须重新登陆的话，用这个参数来帮你
+
+If SESSION_EXPIRE_AT_BROWSER_CLOSE is set to True, Django will use browser-length cookies.
+如果 SESSION_EXPIRE_AT_BROWSER_CLOSE 设置为 True ，当浏览器关闭时，Django会使cookie失效
+
+Besides the settings already mentioned, a few other settings influence how Django’s session framework uses cookies, as shown in Table 14-2.
+除了上面提到的设置，还有一些其他的设置可以影响Django session框架如何使用cookie，详见表 14-2.
+
+Technical Details
+技术细节
+
+For the curious, here are a few technical notes about the inner workings of the session framework:
+如果你还是好奇的话，下面是一些关于session框架内部工作方式的技术细节： session 字典接受任何支持序列化的Python对象
+
+Session data is stored in a database table named django_session.
+Session 数据存在数据库表 django_session 中
+
+Session data is fetched upon demand.
+Session 数据在需要的时候才会读取
+
+If you never access request.session, Django won’t hit that database table.
+ 如果你从不使用 request.session ， Django不会动相关数据库表的一根毛
+
+Django only sends a cookie if it needs to.
+Django 只在需要的时候才送出cookie
+
+If you don’t set any session data, it won’t send a session cookie (unless SESSION_SAVE_EVERY_REQUEST is set to True).
+ 如果你压根儿就没有设置任何会话数据，它不会 送出会话cookie(除非 SESSION_SAVE_EVERY_REQUEST 设置为 True )
+
+The Django sessions framework is entirely, and solely, cookie based.
+Django session 框架完全而且只能基于cookie
+
+It does not fall back to putting session IDs in URLs as a last resort, as some other tools (PHP, JSP) do.
+ 它不会后退到把会话ID编码在URL中（像某些工具(PHP,JSP)那样）
+
+This is an intentional design decision.
+这是一个有意而为之的设计
+
+Putting sessions in URLs don’t just make URLs ugly, but also make your site vulnerable to a certain form of session ID theft via the Referer header.
+ 把session放在URL中不只是难看，更重要的是这让你的站点 很容易受到攻击——通过 Referer header进行session ID”窃听”而实施的攻击
+
+If you’re still curious, the source is pretty straightforward;
+如果你还是好奇，阅读源代码是最直接办法，详见 django.contrib.sessions 
+
+Users and Authentication¶
+用户与Authentication
+
+Sessions give us a way of persisting data through multiple browser requests;
+通过session，我们可以在多次浏览器请求中保持数据， 接下来的部分就是用session来处理用户登录了
+
+the second part of the equation is using those sessions for user login.
+ 当然，不能仅凭用户的一面之词，我们就相信，所以我们需要认证
+
+Naturally, Django provides tools to handle this common task (and many others).
+当然了，Django 也提供了工具来处理这样的常见任务（就像其他常见任务一样）
+
+Django’s user authentication system handles user accounts, groups, permissions, and cookie-based user sessions.
+ Django 用户认证系统处理用户帐号，组，权限以及基于cookie的用户会话
+
+This system is often referred to as an auth/auth (authentication and authorization) system.
+ 这个系统一般被称为 auth/auth (认证与授权)系统
+
+That name recognizes that dealing with users is often a two-step process.
+ 这个系统的名称同时也表明了用户常见的两步处理
+
+We need to
+ 我们需要
+
+Verify (authenticate) that a user is who he or she claims to be (usually by checking a username and password against a database of users)
+验证 (认证) 用户是否是他所宣称的用户(一般通过查询数据库验证其用户名和密码)
+
+Verify that the user is authorized to perform some given operation (usually by checking against a table of permissions)
+验证用户是否拥有执行某种操作的 授权 (通常会通过检查一个权限表来确认)
+
+Following these needs, Django’s auth/auth system consists of a number of parts:
+根据这些需求，Django 认证/授权 系统会包含以下的部分：
+
+Users: People registered with your site
+用户 : 在网站注册的人
+
+Permissions: Binary (yes/no) flags designating whether a user may perform a certain task
+权限 : 用于标识用户是否可以执行某种操作的二进制(yes/no)标志
+
+Groups: A generic way of applying labels and permissions to more than one user
+组 :一种可以将标记和权限应用于多个用户的常用方法
+
+Messages: A simple way to queue and display system messages to users
+Messages : 向用户显示队列式的系统消息的常用方法
+
+If you’ve used the admin tool (discussed in Chapter 6), you’ve already seen many of these tools, and if you’ve edited users or groups in the admin tool, you’ve actually been editing data in the auth system’s database tables.
+如果你已经用了admin工具(详见第6章)，就会看见这些工具的大部分
+
+Like the session tools, authentication support is bundled as a Django application in django.contrib that needs to be installed.
+像session工具一样，认证支持也是一个Django应用，放在 django.contrib 中，所以也需要安装
+
+Also like the session tools, it’s also installed by default, but if you’ve removed it, you’ll need to follow these steps to install it:
+ 与session系统相似，它也是缺省安装的，但如果它已经被删除了，通过以下步骤也能重新安装上：
+
+Make sure the session framework is installed as described earlier in this chapter.
+根据本章早前的部分确认已经安装了session 框架
+
+Keeping track of users obviously requires cookies, and thus builds on the session framework.
+ 需要确认用户使用cookie，这样sesson 框架才能正常使用
+
+Put 'django.contrib.auth' in your INSTALLED_APPS setting and run manage.py syncdb to install the appropriate database tables.
+将 'django.contrib.auth' 放在你的 INSTALLED_APPS 设置中，然后运行 manage.py syncdb以创建对应的数据库表
+
+Make sure that 'django.contrib.auth.middleware.AuthenticationMiddleware' is in your MIDDLEWARE_CLASSES setting – after SessionMiddleware.
+确认 SessionMiddleware 后面的 MIDDLEWARE_CLASSES 设置中包含'django.contrib.auth.middleware.AuthenticationMiddleware' SessionMiddleware
+
+With that installation out of the way, we’re ready to deal with users in view functions.
+这样安装后，我们就可以在视图(view)的函数中处理user了
+
+The main interface you’ll use to access users within a view is request.user;
+ 在视图中存取users，主要用 request.user 
+
+this is an object that represents the currently logged-in user.
+这个对象表示当前已登录的用户
+
+If the user isn’t logged in, this will instead be an AnonymousUser object (see below for more details).
+ 如果用户还没登录，这就是一个AnonymousUser对象(细节见下)
+
+You can easily tell if a user is logged in with the is_authenticated() method:
+你可以很容易地通过 is_authenticated() 方法来判断一个用户是否已经登录了：
+
+Once you have a User – often from request.user, but possibly through one of the other methods discussed shortly – you have a number of fields and methods available on that object.
+User 实例一般从 request.user ，或是其他下面即将要讨论到的方法取得，它有很多属性和方法
+
+AnonymousUser objects emulate some of this interface, but not all of it, so you should always check user.is_authenticated() before assuming you’re dealing with a bona fide user object.
+AnonymousUser 对象模拟了 部分 的接口，但不是全部，在把它当成真正的user对象 使用前，你得检查一下user.is_authenticated() 表14-3和14-4分别列出了User 对象中的属性（fields)和方法
+
+Finally, User objects have two many-to-many fields: groups and permissions.
+最后，User 对象有两个many-to-many属性
+
+User objects can access their related objects in the same way as any other many-to-many field:
+ groups 和permissions 
+
+Django provides built-in view functions for handling logging in and out (and a few other nifty tricks), but before we get to those, let’s take a look at how to log users in and out “by hand.” Django provides two functions to perform these actions in django.contrib.auth: authenticate() and login().
+Django 提供内置的视图(view)函数用于处理登录和退出 (以及其他奇技淫巧)，但在开始前，我们来看看如何手工登录和退出
+
+To authenticate a given username and password, use authenticate().
+认证给出的用户名和密码，使用 authenticate() 函数
+
+It takes two keyword arguments, username and password, and it returns a User object if the password is valid for the given username.
+它接受两个参数，用户名 username 和 密码 password ，并在密码对给出的用户名合法的情况下返回一个 User 对象
+
+If the password is invalid, authenticate() returns None:
+ 如果密码不合法，authenticate()返回None
+
+authenticate() only verifies a user’s credentials.
+authenticate() 只是验证一个用户的证书而已
+
+To log in a user, use login().
+ 而要登录一个用户，使用 login() 
+
+It takes an HttpRequest object and a User object and saves the user’s ID in the session, using Django’s session framework.
+该函数接受一个HttpRequest 对象和一个 User 对象作为参数并使用Django的会话（ session ）框架把用户的ID保存在该会话中
+
+This example shows how you might use both authenticate() and login() within a view function:
+下面的例子演示了如何在一个视图中同时使用 authenticate() 和 login() 函数：
+
+To log out a user, use django.contrib.auth.logout() within your view.
+注销一个用户，在你的视图中使用 django.contrib.auth.logout() 
+
+It takes an HttpRequest object and has no return value:
+ 它接受一个HttpRequest对象并且没有返回值
+
+Note that auth.logout() doesn’t throw any errors if the user wasn’t logged in.
+注意，即使用户没有登录， logout() 也不会抛出任何异常
+
+In practice, you usually will not need to write your own login/logout functions;
+在实际中，你一般不需要自己写登录/登出的函数
+
+the authentication system comes with a set of views for generically handling logging in and out.
+认证系统提供了一系例视图用来处理登录和登出
+
+The first step in using these authentication views is to wire them up in your URLconf.
+ 使用认证视图的第一步是把它们写在你的URLconf中
+
+You’ll need to add this snippet:
+ 你需要这样写：
+
+/accounts/login/ and /accounts/logout/ are the default URLs that Django uses for these views.
+/accounts/login/ 和 /accounts/logout/ 是Django提供的视图的默认URL
+
+By default, the login view renders a template at registration/login.html (you can change this template name by passing an extra view argument ,``template_name``).
+缺省情况下， login 视图渲染 registragiton/login.html 模板(可以通过视图的额外参数 template_name 修改这个模板名称)
+
+This form needs to contain a username and a password field.
+ 这个表单必须包含 username 和 password 域
+
+A simple template might look like this:
+如下示例： 一个简单的 template 看起来是这样的
+
+If the user successfully logs in, he or she will be redirected to /accounts/profile/ by default.
+如果用户登录成功，缺省会重定向到 /accounts/profile 
+
+You can override this by providing a hidden field called next with the URL to redirect to after logging in.
+ 你可以提供一个保存登录后重定向URL的next隐藏域来重载它的行为
+
+You can also pass this value as a GET parameter to the login view and it will be automatically added to the context as a variable called next that you can insert into that hidden field.
+ 也可以把值以GET参数的形式发送给视图函数，它会以变量next的形式保存在上下文中，这样你就可以把它用在隐藏域上了
+
+The logout view works a little differently.
+logout视图有一些不同
+
+By default it renders a template at registration/logged_out.html (which usually contains a “You’ve successfully logged out” message).
+ 默认情况下它渲染 registration/logged_out.html 模板（这个视图一般包含你已经成功退出的信息）
+
+However, you can call the view with an extra argument, next_page, which will instruct the view to redirect after a logout.
+ 视图中还可以包含一个参数 next_page 用于退出后重定向
+
+Of course, the reason we’re going through all this trouble is so we can limit access to parts of our site.
+有很多原因需要控制用户访问站点的某部分
+
+The simple, raw way to limit access to pages is to check request.user.is_authenticated() and redirect to a login page:
+一个简单原始的限制方法是检查 request.user.is_authenticated() ,然后重定向到登陆页面：
+
+or perhaps display an error message:
+或者显示一个出错信息：
+
+As a shortcut, you can use the convenient login_required decorator:
+作为一个快捷方式, 你可以使用便捷的 login_required 修饰符:
+
+login_required does the following:
+login_required 做下面的事情:
+
+If the user isn’t logged in, redirect to /accounts/login/, passing the current URL path in the query string as next, for example: /accounts/login/?next=/polls/3/.
+如果用户没有登录, 重定向到 /accounts/login/ , 把当前绝对URL作为 next 在查询字符串中传递过去, 例如： /accounts/login/
+
+If the user is logged in, execute the view normally.
+如果用户已经登录, 正常地执行视图函数
+
+The view code can then assume that the user is logged in.
+ 视图代码就可以假定用户已经登录了
+
+Limiting access based on certain permissions or some other test, or providing a different location for the login view works essentially the same way.
+限制访问可以基于某种权限，某些检查或者为login视图提供不同的位置，这些实现方式大致相同
+
+The raw way is to run your test on request.user in the view directly.
+一般的方法是直接在视图的 request.user 上运行检查
+
+For example, this view checks to make sure the user is logged in and has the permission polls.can_vote (more about how permissions works follows):
+ 例如，下面视图确认用户登录并是否有polls.can_vote权限：
+
+Again, Django provides a shortcut called user_passes_test.
+并且Django有一个称为 user_passes_test 的简洁方式
+
+It takes arguments and generates a specialized decorator for your particular situation:
+它接受参数然后为你指定的情况生成装饰器
+
+user_passes_test takes one required argument: a callable that takes a User object and returns True if the user is allowed to view the page.
+user_passes_test 使用一个必需的参数： 一个可调用的方法，当存在 User 对象并当此用户允许查看该页面时返回True 
+
+Note that user_passes_test does not automatically check that the User is authenticated;
+ 注意 user_passes_test 不会自动检查 User是否认证，你应该自己做这件事
+
+In this example we’re also showing the second (optional) argument, login_url, which lets you specify the URL for your login page (/accounts/login/ by default).
+例子中我们也展示了第二个可选的参数 login_url ，它让你指定你的登录页面的URL（默认为/accounts/login/ ）
+
+If the user doesn’t pass the test, then the user_passes_test decorator will redirect the user to the login_url.
+ 如果用户没有通过测试，那么user_passes_test将把用户重定向到login_url
+
+Because it’s a relatively common task to check whether a user has a particular permission, Django provides a shortcut for that case: the permission_required() decorator.
+既然检查用户是否有一个特殊权限是相对常见的任务，Django为这种情形提供了一个捷径：permission_required() 装饰器
+
+Using this decorator, the earlier example can be written as follows:
+ 使用这个装饰器，前面的例子可以改写为：
+
+Note that permission_required() also takes an optional login_url parameter, which also defaults to '/accounts/login/'.
+注意, permission_required() 也有一个可选的 login_url 参数, 这个参数默认为 '/accounts/login/' 
+
+Limiting Access to Generic Views
+限制通用视图的访问
+
+One of the most frequently asked questions on the Django users list deals with limiting access to a generic view.
+在Django用户邮件列表中问到最多的问题是关于对通用视图的限制性访问
+
+To pull this off, you’ll need to write a thin wrapper around the view and point your URLconf to your wrapper instead of the generic view itself:
+ 为实现这个功能，你需要自己包装视图，并且在URLconf中，将你自己的版本替换通用视图：
+
+You can, of course, replace login_required with any of the other limiting decorators.
+当然, 你可以用任何其他限定修饰符来替换 login_required 
+
+The easiest way by far to manage the auth system is through the admin interface.
+管理认证系统最简单的方法是通过管理界面
+
+Chapter 6 discusses how to use Django’s admin site to edit users and control their permissions and access, and most of the time you’ll just use that interface.
+ 第六章讨论了怎样使用Django的管理界面来编辑用户和控制他们的权限和可访问性，并且大多数时间你使用这个界面就可以了
+
+However, there are low-level APIs you can dive into when you need absolute control, and we discuss these in the sections that follow.
+然而，当你需要绝对的控制权的时候，有一些低层 API 需要深入专研，我们将在下面的章节中讨论它们
+
+Create users with the create_user helper function:
+使用 create_user 辅助函数创建用户:
+
+At this point, user is a User instance ready to be saved to the database (create_user() doesn’t actually call save() itself).
+在这里， user 是 User 类的一个实例，准备用于向数据库中存储数据
+
+You can continue to change its attributes before saving, too:
+（create_user()实际上没有调用save()）
+
+You can change a password with set_password():
+你可以使用 set_password() 来修改密码：
+
+Don’t set the password attribute directly unless you know what you’re doing.
+除非你清楚的知道自己在做什么，否则不要直接修改 password 属性
+
+The password is actually stored as a salted hash and thus can’t be edited directly.
+ 其中保存的是密码的 加入salt的hash值，所以不能直接编辑
+
+More formally, the password attribute of a User object is a string in this format:
+一般来说， User 对象的 password 属性是一个字符串，格式如下：
+
+That’s a hash type, the salt, and the hash itself, separated by the dollar sign ($) character.
+这是哈希类型，salt和哈希本身，用美元符号（$）分隔
+
+hashtype is either sha1 (default) or md5, the algorithm used to perform a one-way hash of the password.
+hashtype 是 sha1 （默认）或者 md5 ，它是用来处理单向密码哈希的算法
+
+salt is a random string used to salt the raw password to create the hash, for example:
+ Salt是一个用来加密原始密码以创建哈希的随机字符串，例如:
+
+The User.set_password() and User.check_password() functions handle the setting and checking of these values behind the scenes.
+User.set_password() 和 User.check_password() 函数在后台处理和检查这些值
+
+Salted hashes
+salt化得哈希值
+
+A hash is a one-way cryptographic function – that is, you can easily compute the hash of a given value, but it’s nearly impossible to take a hash and reconstruct the original value.
+一次 哈希 是一次单向的加密过程，你能容易地计算出一个给定值的哈希码，但是几乎不可能从一个哈希码解出它的原值
+
+If we stored passwords as plain text, anyone who got their hands on the password database would instantly know everyone’s password.
+如果我们以普通文本存储密码,任何能进入数据库的人都能轻易的获取每个人的密码
+
+Storing passwords as hashes reduces the value of a compromised database.
+ 使用哈希方式来存储密码相应的减少了数据库泄露密码的可能
+
+However, an attacker with the password database could still run a brute- force attack, hashing millions of passwords and comparing those hashes against the stored values.
+然而，攻击者仍然可以使用 暴力破解 使用上百万个密码与存储的值对比来获取数据库密码
+
+This takes some time, but less than you might think.
+ 这需要花一些时间，但是智能电脑惊人的速度超出了你的想象
+
+Worse, there are publicly available rainbow tables, or databases of pre-computed hashes of millions of passwords.
+更糟糕的是我们可以公开地得到 rainbow tables （一种暴力密码破解表）或预备有上百万哈希密码值的数据库
+
+With a rainbow table, an experienced attacker could break most passwords in seconds.
+ 使用rainbow tables可以在几秒之内就能搞定最复杂的一个密码
+
+Adding a salt – basically an initial random value – to the stored hash adds another layer of difficulty to breaking passwords.
+在存储的hash值的基础上，加入 salt 值（一个随机值），增加了密码的强度，使得破解更加困难
+
+Because salts differ from password to password, they also prevent the use of a rainbow table, thus forcing attackers to fall back on a brute-force attack, itself made more difficult by the extra entropy added to the hash by the salt.
+ 因为每个密码的salt值都不相同，这也限制了rainbow table的使用，使得攻击者只能使用最原始的暴力破解方法
+
+While salted hashes aren’t absolutely the most secure way of storing passwords, they’re a good middle ground between security and convenience.
+加入salt值得hash并不是绝对安全的存储密码的方法，然而却是安全和方便之间很好的折衷
+
+We can use these low-level tools to create views that allow users to sign up for new accounts.
+我们可以使用这些底层工具来创建允许用户注册的视图
+
+Different developers implement registration differently, so Django leaves writing a registration view up to you.
+ 最近每个开发人员都希望实现各自不同的注册方法，所以Django把写注册视图的工作留给了你
+
+Luckily, it’s pretty easy.
+ 幸运的是，这很容易
+
+At its simplest, we could provide a small view that prompts for the required user information and creates those users.
+作为这个事情的最简化处理, 我们可以提供一个小视图, 提示一些必须的用户信息并创建这些用户
+
+Django provides a built-in form you can use for this purpose, which we’ll use in this example:
+ Django为此提供了可用的内置表单, 下面这个例子就使用了这个表单:
+
+This form assumes a template named registration/register.html.
+这个表单需要一个叫 registration/register.html 的模板
+
+Here’s an example of what that template might look like:
+这个模板可能是这样的：
+
+The current logged-in user and his or her permissions are made available in the template context when you use RequestContext (see Chapter 9).
+当前登入的用户以及他（她）的权限可以通过 RequestContext 在模板的context中使用（详见第9章）
+
+Note
+注意
+
+Technically, these variables are only made available in the template context if you use RequestContext and your TEMPLATE_CONTEXT_PROCESSORS setting contains "django.core.context_processors.auth", which is the default.
+从技术上来说，只有当你使用了 RequestContext这些变量才可用
+
+Again, see Chapter 9 for more information.
+ _并且_TEMPLATE_CONTEXT_PROCESSORS 设置包含了 “django.core.context_processors.auth” （默认情况就是如此）时，这些变量才能在模板context中使用
+
+When using RequestContext, the current user (either a User instance or an AnonymousUser instance) is stored in the template variable {{ user }}:
+当使用 RequestContext 时, 当前用户 (是一个 User 实例或一个 AnonymousUser 实例) 存储在模板变量{{ user }} 中:
+
+This user’s permissions are stored in the template variable {{ perms }}.
+这些用户的权限信息存储在 {{ perms }} 模板变量中
+
+There are two ways you can use this perms object.
+你有两种方式来使用 perms 对象
+
+You can use something like {% if perms.polls %} to check if the user has any permissions for some given application, or you can use something like {% if perms.polls.can_vote %} to check if the user has a specific permission.
+ 你可以使用类似于 {{ perms.polls }} 的形式来检查，对于某个特定的应用，一个用户是否具有 任意 权限
+
+Thus, you can check permissions in template {% if %} statements:
+这样你就可以在模板中的 {% if %} 语句中检查权限:
+
+Permissions, Groups and Messages¶
+权限、组和消息
+
+There are a few other bits of the authentication framework that we’ve only dealt with in passing.
+在认证框架中还有其他的一些功能
+
+We’ll take a closer look at them in the following sections.
+ 我们会在接下来的几个部分中进一步地了解它们
+
+Permissions are a simple way to “mark” users and groups as being able to perform some action.
+权限可以很方便地标识用户和用户组可以执行的操作
+
+They are usually used by the Django admin site, but you can easily use them in your own code.
+ 它们被Django的admin管理站点所使用，你也可以在你自己的代码中使用它们
+
+The Django admin site uses permissions as follows:
+Django的admin站点如下使用权限：
+
+Access to view the “add” form, and add an object is limited to users with the add permission for that type of object.
+只有设置了 add 权限的用户才能使用添加表单，添加对象的视图
+
+Access to view the change list, view the “change” form, and change an object is limited to users with the change permission for that type of object.
+只有设置了 change 权限的用户才能使用变更列表，变更表格，变更对象的视图
+
+Access to delete an object is limited to users with the delete permission for that type of object.
+只有设置了 delete 权限的用户才能删除一个对象
+
+Permissions are set globally per type of object, not per specific object instance.
+权限是根据每一个类型的对象而设置的，并不具体到对象的特定实例
+
+For example, it’s possible to say “Mary may change news stories,” but permissions don’t let you say “Mary may change news stories, but only the ones she created herself” or “Mary may only change news stories that have a certain status, publication date, or ID.”
+ 例如，我们可以允许Mary改变新故事，但是目前还不允许设置Mary只能改变自己创建的新故事，或者根据给定的状态，出版日期或者ID号来选择权限
+
+These three basic permissions – add, change, and delete – are automatically created for each Django model.
+会自动为每一个Django模型创建三个基本权限：增加、改变和删除
+
+Behind the scenes, these permissions are added to the auth_permission database table when you run manage.py syncdb.
+ 当你运行manage.py syncdb命令时，这些权限被添加到auth_permission数据库表中
+
+These permissions will be of the form "._<object_name>".
+权限以 "._" 的形式出现
+
+Just like users, permissions are implemented in a Django model that lives in django.contrib.auth.models.
+就跟用户一样，权限也就是Django模型中的 django.contrib.auth.models 
+
+This means that you can use Django’s database API to interact directly with permissions if you like.
+因此如果你愿意，你也可以通过Django的数据库API直接操作权限
+
+Groups are a generic way of categorizing users so you can apply permissions, or some other label, to those users.
+组提供了一种通用的方式来让你按照一定的权限规则和其他标签将用户分类
+
+A user can belong to any number of groups.
+ 一个用户可以隶属于任何数量的组
+
+A user in a group automatically has the permissions granted to that group.
+在一个组中的用户自动获得了赋予该组的权限
+
+For example, if the group Site editors has the permission can_edit_home_page, any user in that group will have that permission.
+ 例如， Site editors 组拥有 can_edit_home_page 权限，任何在该组中的用户都拥有这个权限
+
+Groups are also a convenient way to categorize users to give them some label, or extended functionality.
+组也可以通过给定一些用户特殊的标记，来扩展功能
+
+For example, you could create a group 'Special users', and you could write code that could, say, give those users access to a members-only portion of your site, or send them members-only e-mail messages.
+ 例如，你创建了一个 'Special users' 组，并且允许组中的用户访问站点的一些VIP部分，或者发送VIP的邮件消息
+
+Like users, the easiest way to manage groups is through the admin interface.
+和用户管理一样，admin接口是管理组的最简单的方法
+
+However, groups are also just Django models that live in django.contrib.auth.models, so once again you can always use Django’s database APIs to deal with groups at a low level.
+ 然而，组也就是Django模型django.contrib.auth.models ，因此你可以使用Django的数据库API，在底层访问这些组
+
+The message system is a lightweight way to queue messages for given users.
+消息系统会为给定的用户接收消息
+
+A message is associated with a User.
+ 每个消息都和一个 User 相关联
+
+Messages are used by the Django admin interface after successful actions.
+在每个成功的操作以后，Django的admin管理接口就会使用消息机制
+
+For example, when you create an object, you’ll notice a “The object was created successfully” message at the top of the admin page.
+ 例如，当你创建了一个对象，你会在admin页面的顶上看到 The object was created successfully 的消息
+
+You can use the same API to queue and display messages in your own application.
+你也可以使用相同的API在你自己的应用中排队接收和显示消息
+
+The API is simple:
+ API非常地简单：
+
+In this example view, the system saves a message for the user after creating a playlist:
+要创建一条新的消息，使用 user.message_set.create(message='message_text') 
+
+When you use RequestContext, the current logged-in user and his or her messages are made available in the template context as the template variable {{ messages }}.
+在例子视图中，系统在创建了播放单（playlist）以后，为用户保存了一条消息
+
+Note that RequestContext calls get_and_delete_messages behind the scenes, so any messages will be deleted even if you don’t display them.
+当使用 RequestContext ，当前登录的用户以及他（她）的消息，就会以模板变量 {{ messages }} 出现在模板的context中
+
+Finally, note that this messages framework only works with users in the user database.
+需要注意的是 RequestContext 会在后台调用 get_and_delete_messages ，因此即使你没有显示它们，它们也会被删除掉
+
+In the next chapter, we’ll take a look at Django’s caching infrastructure, which is a convenient way to improve the performance of your application.
+是的，会话和认证系统有太多的东西要学
+
+© Copyright 2012, Matt Behrens.
+www.shoucewang.com. All Rights Reserved. 手册网 版权所有
+

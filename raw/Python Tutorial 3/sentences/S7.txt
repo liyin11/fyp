@@ -1,0 +1,159 @@
+Until now error messages haven’t been more than mentioned, but if you have tried out the examples you have probably seen some.
+至今为止还没有进一步的谈论过错误信息，不过在你已经试验过的那些例子中，可能已经遇到过一些
+
+There are (at least) two distinguishable kinds of errors: syntax errors and exceptions.
+Python 中（至少）有两种错误：语法错误和异常（ syntax errors 和 exceptions ）
+
+8.1.
+8.1. 语法错误¶
+
+Syntax errors, also known as parsing errors, are perhaps the most common kind of complaint you get while you are still learning Python:
+语法错误，也被称作解析错误，也许是你学习 Python 过程中最常见抱怨:
+
+The parser repeats the offending line and displays a little ‘arrow’ pointing at the earliest point in the line where the error was detected.
+语法分析器指出错误行，并且在检测到错误的位置前面显示一个小“箭头”
+
+The error is caused by (or at least detected at) the token preceding the arrow: in the example, the error is detected at the function print(), since a colon (':') is missing before it.
+ 错误是由箭头 前面 的标记引起的（或者至少是这么检测的）： 这个例子中，函数 print() 被发现存在错误，因为它前面少了一个冒号（ ':' ）
+
+File name and line number are printed so you know where to look in case the input came from a script.
+ 错误会输出文件名和行号，所以如果是从脚本输入的你就知道去哪里检查错误了
+
+8.2.
+8.2. 异常¶
+
+Even if a statement or expression is syntactically correct, it may cause an error when an attempt is made to execute it.
+即使一条语句或表达式在语法上是正确的，当试图执行它时也可能会引发错误
+
+Errors detected during execution are called exceptions and are not unconditionally fatal: you will soon learn how to handle them in Python programs.
+运行期检测到的错误称为 异常，并且程序不会无条件的崩溃：很快，你将学到如何在 Python 程序中处理它们
+
+Most exceptions are not handled by programs, however, and result in error messages as shown here:
+然而，大多数异常都不会被程序处理，像这里展示的一样最终会产生一个错误信息:
+
+The last line of the error message indicates what happened.
+错误信息的最后一行指出发生了什么错误
+
+Exceptions come in different types, and the type is printed as part of the message: the types in the example are ZeroDivisionError, NameError and TypeError.
+异常也有不同的类型，异常类型做为错误信息的一部分显示出来：示例中的异常分别为 零除错误（ ZeroDivisionError ） ，命名错误（ NameError） 和 类型错误（ TypeError ）
+
+The string printed as the exception type is the name of the built-in exception that occurred.
+打印错误信息时，异常的类型作为异常的内置名显示
+
+This is true for all built-in exceptions, but need not be true for user-defined exceptions (although it is a useful convention).
+对于所有的内置异常都是如此，不过用户自定义异常就不一定了（尽管这是一个很有用的约定）
+
+Standard exception names are built-in identifiers (not reserved keywords).
+标准异常名是内置的标识（没有保留关键字）
+
+The rest of the line provides detail based on the type of exception and what caused it.
+这一行后一部分是关于该异常类型的详细说明，这意味着它的内容依赖于异常类型
+
+The preceding part of the error message shows the context where the exception happened, in the form of a stack traceback.
+错误信息的前半部分以堆栈的形式列出异常发生的位置
+
+In general it contains a stack traceback listing source lines;
+通常在堆栈中列出了源代码行，然而，来自标准输入的源码不会显示出来
+
+Built-in Exceptions lists the built-in exceptions and their meanings.
+内置的异常 列出了内置异常和它们的含义
+
+8.3.
+8.3. 异常处理¶
+
+It is possible to write programs that handle selected exceptions.
+通过编程处理选择的异常是可行的
+
+Look at the following example, which asks the user for input until a valid integer has been entered, but allows the user to interrupt the program (using Control-C or whatever the operating system supports);
+看一下下面的例子：它会一直要求用户输入，直到输入一个合法的整数为止，但允许用户中断这个程序（使用 Control-C 或系统支持的任何方法）
+
+note that a user-generated interruption is signalled by raising the KeyboardInterrupt exception.
+注意：用户产生的中断会引发一个 KeyboardInterrupt 异常
+
+The try statement works as follows.
+try 语句按如下方式工作
+
+A try statement may have more than one except clause, to specify handlers for different exceptions.
+首先，执行 try 子句 （在 try 和 except 关键字之间的部分）
+
+A class in an except clause is compatible with an exception if it is the same class or a base class thereof (but not the other way around — an except clause listing a derived class is not compatible with a base class).
+如果没有异常发生， except 子句 在 try 语句执行完毕后就被忽略了
+
+Note that if the except clauses were reversed (with except B first), it would have printed B, B, B — the first matching except clause is triggered.
+如果在 try 子句执行过程中发生了异常，那么该子句其余的部分就会被忽略
+
+The last except clause may omit the exception name(s), to serve as a wildcard.
+如果异常匹配于 except 关键字后面指定的异常类型，就执行对应的except子句
+
+Use this with extreme caution, since it is easy to mask a real programming error in this way!
+然后继续执行 try 语句之后的代码
+
+The try ...
+如果发生了一个异常，在 except 子句中没有与之匹配的分支，它就会传递到上一级 try 语句中
+
+The use of the else clause is better than adding additional code to the try clause because it avoids accidentally catching an exception that wasn’t raised by the code being protected by the try ...
+如果最终仍找不到对应的处理语句，它就成为一个 未处理异常，终止程序运行，显示提示信息
+
+When an exception occurs, it may have an associated value, also known as the exception’s argument.
+一个 try 语句可能包含多个 except 子句，分别指定处理不同的异常
+
+The presence and type of the argument depend on the exception type.
+至多只会有一个分支被执行
+
+The except clause may specify a variable after the exception name.
+最后一个 except 子句可以省略异常名称，以作为通配符使用
+
+The variable is bound to an exception instance with the arguments stored in instance.args.
+你需要慎用此法，因为它会轻易隐藏一个实际的程序错误
+
+For convenience, the exception instance defines __str__() so the arguments can be printed directly without having to reference .args.
+可以使用这种方法打印一条错误信息，然后重新抛出异常（允许调用者处理这个异常):
+
+If an exception has arguments, they are printed as the last part (‘detail’) of the message for unhandled exceptions.
+try ... except 语句可以带有一个 else子句，该子句只能出现在所有 except 子句之后
+
+Exception handlers don’t just handle exceptions if they occur immediately in the try clause, but also if they occur inside functions that are called (even indirectly) in the try clause.
+使用 else 子句比在 try 子句中附加代码要好，因为这样可以避免 try ... except 意外的截获本来不属于它们保护的那些代码抛出的异常
+
+The sole argument to raise indicates the exception to be raised.
+在异常名（列表）之后，也可以为 except 子句指定一个变量
+
+This must be either an exception instance or an exception class (a class that derives from Exception).
+这个变量绑定于一个异常实例，它存储在 instance.args 的参数中
+
+If an exception class is passed, it will be implicitly instantiated by calling its constructor with no arguments:
+为了方便起见，异常实例定义了 __str__() ，这样就可以直接访问过打印参数而不必引用 .args
+
+If you need to determine whether an exception was raised but don’t intend to handle it, a simpler form of the raise statement allows you to re-raise the exception:
+对于那些未处理的异常，如果一个它们带有参数，那么就会被作为异常信息的最后部分（“详情”）打印出来
+
+Many standard modules define their own exceptions to report errors that may occur in functions they define.
+raise 语句允许程序员强制抛出一个指定的异常
+
+More information on classes is presented in chapter Classes.
+例如:
+
+A finally clause is always executed before leaving the try statement, whether an exception has occurred or not.
+如果你需要明确一个异常是否抛出，但不想处理它，raise 语句可以让你很简单的重新抛出该异常:
+
+The problem with this code is that it leaves the file open for an indeterminate amount of time after this part of the code has finished executing.
+在这个例子中，Exception 默认的 __init__() 被覆盖
+
+This is not an issue in simple scripts, but can be a problem for larger applications.
+新的方式简单的创建 value 属性
+
+The with statement allows objects like files to be used in a way that ensures they are always cleaned up promptly and correctly.
+这就替换了原来创建 args 属性的方式
+
+After the statement is executed, the file f is always closed, even if a problem was encountered while processing the lines.
+异常类中可以定义任何其它类中可以定义的东西，但是通常为了保持简单，只在其中加入几个属性信息，以供异常处理句柄提取
+
+Objects which, like files, provide predefined clean-up actions will indicate this in their documentation.
+如果一个新创建的模块中需要抛出几种不同的错误时，一个通常的作法是为该模块定义一个异常基类，然后针对不同的错误类型派生出对应的异常子类:
+
+7.
+很多标准模块中都定义了自己的异常，用以报告在他们所定义的函数中可能发生的错误
+
+Input and Output
+关于类的进一步信息请参见 类 一章
+

@@ -1,0 +1,9 @@
+sphinx.ext.viewcode – Add links to highlighted source code
+sphinx.ext.oldcmarkup – Compatibility extension for old C markup
+
+Tutorial: Writing a simple extension
+Web Support Quick Start
+
+The configuration file itself can be treated as an extension if it contains a setup() function.
+New in version 1.1.
+

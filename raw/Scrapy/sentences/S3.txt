@@ -1,0 +1,30 @@
+Examples¶
+例子¶
+
+The best way to learn is with examples, and Scrapy is no exception.
+学习的最好方法就是参考例子，Scrapy也不例外
+
+For this reason, there is an example Scrapy project named quotesbot, that you can use to play and learn more about Scrapy.
+Scrapy提供了一个叫做 dirbot 的样例项目供您把玩学习
+
+It contains two spiders for http://quotes.toscrape.com, one using CSS selectors and another one using XPath expressions.
+其包含了在教程中介绍的dmoz spider
+
+The quotesbot project is available at: https://github.com/scrapy/quotesbot.
+您可以通过 https://github.com/scrapy/dirbot 找到 dirbot 
+
+You can find more information about it in the project’s README.
+其包含了README文件，详细介绍了项目的内容
+
+If you’re familiar with git, you can checkout the code.
+如果您熟悉git，您可以checkout代码
+
+Otherwise you can download the project as a zip file by clicking here.
+或者您可以点击 Downloads 来下载项目的tarball或者zip的压缩包
+
+© Copyright 2008-2016, Scrapy developers.
+Snipplr上的scrapy标签 是用来分享spider，middeware，extension或者script代码片段
+
+Revision a07400ce.
+欢迎(并鼓励)在那分享您的代码
+

@@ -1,0 +1,144 @@
+Integrating with a Legacy Database¶
+编程手册
+
+The inspectdb utility introspects the database pointed to by your settings file, determines a Django model representation for each of your tables, and prints the Python model code to standard output.
+Django最适合于所谓的green-field开发，即从头开始的一个项目，正如你在一块还长着青草的未开垦的土地上从零开始建造一栋建筑一般
+
+Edit the settings file in that project, mysite/settings.py, to tell Django what your database connection parameters are and what the name of the database is.
+Django的数据库层从Python代码生成SQL schemas—但是对于遗留数据库，你已经拥有SQL schemas. 这种情况,你需要为已经存在的数据表创建model. 为此,Django自带了一个可以通过读取您的数据表结构来生成model的工具. 该辅助工具称为inspectdb,你可以通过执行manage.py inspectdb来调用它.
+
+Create a Django application within your project by running python mysite/manage.py startapp myapp (where myapp is your application’s name).
+inspectdb工具自省你配置文件指向的数据库，针对每一个表生成一个Django模型，然后将这些Python模型的代码显示在系统的标准输出里面
+
+Run the command python mysite/manage.py inspectdb.
+下面是一个从头开始的针对一个典型的遗留数据库的整合过程
+
+This will examine the tables in the DATABASE_NAME database and print the generated model class for each table.
+ 两个前提条件是安装了Django和一个传统数据库
+
+Save the output to the models.py file within your application by using standard shell output redirection:
+通过运行django-admin.py startproject mysite (这里 mysite 是你的项目的名字)建立一个Django项目
+
+Edit the mysite/myapp/models.py file to clean up the generated models and make any necessary customizations.
+编辑项目中的配置文件, mysite/settings.py ,告诉Django你的数据库连接参数和数据库名
+
+We’ll give some hints for this in the next section.
+ 具体的说，要提供 DATABASE_NAME , DATABASE_ENGINE , DATABASE_USER , DATABASE_PASSWORD , DATABASE_HOST , 和DATABASE_PORT 这些配置信息.
+
+Each database table is converted to a model class (i.e., there is a one-to-one mapping between database tables and model classes).
+运行命令 python mysite/manage.py inspectdb
+
+This means that you’ll need to refactor the models for any many-to-many join tables into ManyToManyField objects.
+这将检查DATABASE_NAME 数据库中所有的表并打印出为每张表生成的模型类
+
+Each generated model has an attribute for every field, including id primary key fields.
+将标准shell的输出重定向，保存输出到你的应用的 models.py 文件里：
+
+Not only are these lines redundant, but also they can cause problems if your application will be adding new records to these tables.
+python mysite/manage.py inspectdb > mysite/myapp/models.py
+
+Each field’s type (e.g., CharField, DateField) is determined by looking at the database column type (e.g., VARCHAR, DATE).
+编辑 mysite/myapp/models.py 文件以清理生成的 models 并且做一些必要的自定义
+
+If inspectdb cannot map a column’s type to a model field type, it will use TextField and will insert the Python comment 'This field type is a guess.' next to the field in the generated model.
+ 针对这个，下一个节有些好的建议
+
+If a field in your database has no good Django equivalent, you can safely leave it off.
+如你可能会预料到的，数据库自省不是完美的，你需要对产生的模型代码做些许清理
+
+The Django model layer is not required to include every field in your table(s).
+ 这里提醒一点关于处理生成 models 的要点:
+
+If a database column name is a Python reserved word (such as pass, class, or for), inspectdb will append '_field' to the attribute name and set the db_column attribute to the real field name (e.g., pass, class, or for).
+数据库的每一个表都会被转化为一个model类 (也就是说，数据库的表和model 类之间是一对一的映射)
+
+For example, if a table has an INT column called for, the generated model will have a field like this:
+所生成的每一个model中的每个字段都拥有自己的属性，包括id主键字段
+
+inspectdb will insert the Python comment 'Field renamed because it was a Python reserved word.' next to the field.
+这样做并不是仅仅因为这些行是冗余的，而且如果当你的应用需要向这些表中增加新记录时，这些行会导致某些问题
+
+If your database contains tables that refer to other tables (as most databases do), you might need to rearrange the order of the generated models so that models that refer to other models are ordered properly.
+每一个字段类型，如CharField、DateField， 是通过查找数据库列类型如VARCHAR,DATE来确定的
+
+For example, if model Book has a ForeignKey to model Author, model Author should be defined before model Book.
+如果inspectdb无法把某个数据库字段映射到model字段上，它会使用TextField字段进行代替，并且会在所生成model字段后面加入Python注释“该字段类型是猜的”
+
+If you need to create a relationship on a model that has not yet been defined, you can use a string containing the name of the model, rather than the model object itself.
+ 对这要当心，如果必要的话，更改字段类型
+
+inspectdb detects primary keys for PostgreSQL, MySQL, and SQLite.
+如果你的数据库中的某个字段在Django中找不到合适的对应物，你可以放心的略过它
+
+That is, it inserts primary_key=True where appropriate.
+ Django模型层不要求必须导入你数据库表中的每个列
+
+Foreign-key detection only works with PostgreSQL and with certain types of MySQL tables.
+如果数据库中某个列的名字是Python的保留字（比如pass、class或者for等），inspectdb会在每个属性名后附加上_field，并将db_column属性设置为真实的字段名（也就是pass,class或者for等）
+
+For example, your company may already have an LDAP setup that stores a username and password for every employee.
+inspectdb 会在该字段后加注 ‘字段重命名，因为它是一个Python保留字’ 
+
+To handle situations like this, the Django authentication system lets you plug in other authentication sources.
+如果数据库中某张表引用了其他表（正如大多数数据库系统所做的那样），你需要适当的修改所生成model的顺序，以使得这种引用能够正确映射
+
+You can override Django’s default database-based scheme, or you can use the default system in tandem with other systems.
+ 例如，model Book拥有一个针对于model Author的外键，那么后者应该先于前者被定义
+
+The list of authentication backends to use is specified in the AUTHENTICATION_BACKENDS setting.
+外键检测仅对PostgreSQL，还有MySQL表中的某些特定类型生效
+
+This should be a tuple of Python path names that point to Python classes that know how to authenticate.
+ 至于其他数据库，外键字段将在假定其为INT列的情况下被自动生成为IntegerField
+
+The order of AUTHENTICATION_BACKENDS matters, so if the same username and password are valid in multiple backends, Django will stop processing at the first positive match.
+将Django与其他现有认证系统的用户名和密码或者认证方法进行整合是可以办到的
+
+The get_user method takes an id – which could be a username, database ID, or whatever – and returns a User object.
+为了解决这样的问题，Django认证系统能让您以插件方式与其他认证资源进行交互
+
+The authenticate method takes credentials as keyword arguments.
+在后台，Django维护了一个用于检查认证的后台列表
+
+Most of the time it looks like this:
+ 当某个人调用 django.contrib.auth.authenticate()(如14章中所述)时，Django会尝试对其认证后台进行遍历认证
+
+But it could also authenticate a token, like so:
+认证后台列表在AUTHENTICATION_BACKENDS设置中进行指定
+
+Either way, authenticate should check the credentials it gets, and it should return a User object that matches those credentials, if the credentials are valid.
+默认情况下，AUTHENTICATION_BACKENDS被设置为如下：
+
+The Django admin system is tightly coupled to Django’s own database-backed User object described in Chapter 14.
+那就是检测Django用户数据库的基本认证模式
+
+Here’s an example backend that authenticates against a username and password variable defined in your settings.py file and creates a Django User object the first time a user authenticates:
+AUTHENTICATION_BACKENDS的顺序很重要，如果用户名和密码在多个后台中都是有效的，那么Django将会在第一个正确匹配后停止进一步的处理
+
+For more on authentication backends, see the official Django documentation.
+一个认证后台其实就是一个实现了如下两个方法的类： get_user(id) 和 authenticate(**credentials) 
+
+The key is that Django will be activated for a particular URL pattern only if your httpd.conf file says so.
+方法 authenticate 使用证书作为关键参数
+
+The default deployment explained in Chapter 12 assumes you want Django to power every page on a particular domain:
+ 大多数情况下，该方法看起来如下：
+
+Here, the <Location "/"> line means “handle every URL, starting at the root,” with Django.
+但是有时候它也可以认证某个短语，例如：
+
+It’s perfectly fine to limit this  directive to a certain directory tree.
+每一个方法中， authenticate 都应该检测它所获取的证书，并且当证书有效时，返回一个匹配于该证书的User 对象，如果证书无效那么返回 None 
+
+For example, say you have a legacy PHP application that powers most pages on a domain and you want to install a Django admin site at /admin/ without disrupting the PHP code.
+ 如果它们不合法，就返回None
+
+With this in place, only the URLs that start with /admin/ will activate Django.
+如14章中所述，Django管理系统紧密连接于其自己后台数据库的 User 对象
+
+Any other page will use whatever infrastructure already existed.
+ 实现这个功能的最好办法就是为您的后台数据库（如LDAP目录，外部SQL数据库等）中的每个用户都创建一个对应的Django User对象
+
+Note that attaching Django to a qualified URL (such as /admin/ in this section’s example) does not affect the Django URL parsing.
+以下是一个示例后台程序，该后台用于认证定义在 setting.py 文件中的username和password变量，并且在该用户第一次认证的时候创建一个相应的Django User 对象
+

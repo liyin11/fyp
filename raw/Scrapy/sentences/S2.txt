@@ -1,0 +1,114 @@
+Scrapy Tutorial¶
+Scrapy入门教程¶
+
+In this tutorial, we’ll assume that Scrapy is already installed on your system.
+在本篇教程中，我们假定您已经安装好Scrapy
+
+If that’s not the case, see Installation guide.
+ 如若不然，请参考 安装指南 
+
+We are going to scrape quotes.toscrape.com, a website that lists quotes from famous authors.
+接下来以 Open Directory Project(dmoz) (dmoz) 为例来讲述爬取
+
+This tutorial will walk you through these tasks:
+本篇教程中将带您完成下列任务:
+
+Scrapy is written in Python.
+Scrapy由 Python 编写
+
+If you’re new to the language you might want to start by getting an idea of what the language is like, to get the most out of Scrapy.
+如果您刚接触并且好奇这门语言的特性以及Scrapy的详情， 对于已经熟悉其他语言并且想快速学习Python的编程老手， 我们推荐 Learn Python The Hard Way ， 对于想从Python开始学习的编程新手， 非程序员的Python学习资料列表 将是您的选择
+
+This will create a tutorial directory with the following contents:
+该命令将会创建包含下列内容的 tutorial 目录:
+
+This command runs the spider with name quotes that we’ve just added, that will send some requests for the quotes.toscrape.com domain.
+类似在ORM中做的一样，您可以通过创建一个 scrapy.Item 类， 并且定义类型为 scrapy.Field 的类属性来定义一个Item
+
+You will get an output similar to this:
+ (如果不了解ORM, 不用担心，您会发现这个步骤非常简单)
+
+Now, check the files in the current directory.
+首先根据需要从dmoz.org获取到的数据对item进行建模
+
+You should notice that two new files have been created: quotes-1.html and quotes-2.html, with the content for the respective URLs, as our parse method instructs.
+ 我们需要从dmoz中获取名字，url，以及网站的描述
+
+If you are wondering why we haven’t parsed the HTML yet, hold on, we will cover that soon.
+一开始这看起来可能有点复杂，但是通过定义item， 您可以很方便的使用Scrapy的其他方法
+
+The parse() method will be called to handle each of the requests for those URLs, even though we haven’t explicitly told Scrapy to do so.
+其包含了一个用于下载的初始URL，如何跟进网页中的链接以及如何分析页面中的内容， 提取生成 item 的方法
+
+Note
+以下为我们的第一个Spider代码，保存在 tutorial/spiders 目录下的 dmoz_spider.py 文件中:
+
+You will see something like:
+进入项目的根目录，执行下列命令启动spider:
+
+Using the shell, you can try selecting elements using CSS with the response object:
+crawl dmoz 启动用于爬取 dmoz.org 的spider，您将得到类似的输出:
+
+The result of running response.css('title') is a list-like object called SelectorList, which represents a list of Selector objects that wrap around XML/HTML elements and allow you to run further queries to fine-grain the selection or extract the data.
+查看包含 [dmoz] 的输出，可以看到输出的log中包含定义在 start_urls 的初始URL，并且与spider中是一一对应的
+
+To extract the text from the title above, you can do:
+除此之外，更有趣的事情发生了
+
+As an alternative, you could’ve written:
+Scrapy为Spider的 start_urls 属性中的每个URL创建了 scrapy.Request 对象，并将 parse 方法作为回调函数(callback)赋值给了Request
+
+However, using .extract_first() avoids an IndexError and returns None when it doesn’t find any element matching the selection.
+Request对象经过调度，执行生成 scrapy.http.Response 对象并送回给spider parse() 方法
+
+XPath expressions are very powerful, and are the foundation of Scrapy Selectors.
+这里给出XPath表达式的例子及对应的含义:
+
+While perhaps not as popular as CSS selectors, XPath expressions offer more power because besides navigating the structure, it can also look at the content.
+上边仅仅是几个简单的XPath例子，XPath实际上要比这远远强大的多
+
+Using XPath, you’re able to select things like: select the link that contains the text “Next Page”.
+ 如果您想了解的更多，我们推荐 这篇XPath教程 
+
+We won’t cover much of XPath here, but you can read more about using XPath with Scrapy Selectors here.
+为了配合XPath，Scrapy除了提供了 Selector 之外，还提供了方法来避免每次从response中提取数据时生成selector的麻烦
+
+We get a list of selectors for the quote HTML elements with:
+为了介绍Selector的使用方法，接下来我们将要使用内置的 Scrapy shell 
+
+Each of the selectors returned by the query above allows us to run further queries over their sub-elements.
+您需要进入项目的根目录，执行下列命令来启动shell:
+
+Now, let’s extract title, author and the tags from that quote using the quote object we just created:
+当您在终端运行Scrapy时，请一定记得给url地址加上引号，否则包含参数的url(例如 & 字符)会导致Scrapy运行失败
+
+Given that the tags are a list of strings, we can use the .extract() method to get all of them:
+shell的输出类似:
+
+Having figured out how to extract each bit, we can now iterate over all the quotes elements and put them together into a Python dictionary:
+当shell载入后，您将得到一个包含response数据的本地 response 变量
+
+A Scrapy spider typically generates many dictionaries containing the data extracted from the page.
+同时，shell根据response提前初始化了变量 sel 
+
+To do that, we use the yield Python keyword in the callback, as you can see below:
+该selector根据response的类型自动选择最合适的分析规则(XML vs HTML)
+
+If you run this spider, it will output the extracted data with the log:
+让我们来试试:
+
+That will generate an quotes.json file containing all scraped items, serialized in JSON.
+现在，我们来尝试从这些页面中提取些有用的数据
+
+For historic reasons, Scrapy appends to a given file instead of overwriting its contents.
+您可以在终端中输入 response.body 来观察HTML源码并确定合适的XPath表达式
+
+If you run this command twice without removing the file before the second time, you’ll end up with a broken JSON file.
+不过，这任务非常无聊且不易
+
+You can also used other formats, like JSON Lines:
+在查看了网页的源码后，您会发现网站的信息是被包含在 第二个  元素中
+
+The JSON Lines format is useful because it’s stream-like, you can easily append new records to it.
+我们可以通过这段代码选择该页面中网站列表里所有  元素:
+

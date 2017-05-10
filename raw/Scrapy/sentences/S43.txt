@@ -1,0 +1,174 @@
+Item Exporters¶
+Item Exporters¶
+
+Once you have scraped your items, you often want to persist or export those items, to use the data in some other application.
+当你抓取了你要的数据(Items)，你就会想要将他们持久化或导出它们，并应用在其他的程序
+
+That is, after all, the whole purpose of the scraping process.
+这是整个抓取过程的目的
+
+For this purpose Scrapy provides a collection of Item Exporters for different output formats, such as XML, CSV or JSON.
+为此，Scrapy提供了Item Exporters 来创建不同的输出格式，如XML，CSV或JSON
+
+Using Item Exporters¶
+使用 Item Exporter¶
+
+If you are in a hurry, and just want to use an Item Exporter to output scraped data see the Feed exports.
+如果你很忙，只想使用 Item Exporter 输出数据，请查看 Feed exports. 相反，如果你想知道Item Exporter 是如何工作的，或需要更多的自定义功能（不包括默认的 exports），请继续阅读下文
+
+In order to use an Item Exporter, you must instantiate it with its required args.
+为了使用 Item Exporter，你必须对 Item Exporter 及其参数 (args) 实例化
+
+Each Item Exporter requires different arguments, so check each exporter documentation to be sure, in Built-in Item Exporters reference.
+每个 Item Exporter 需要不同的参数，详细请查看 Item Exporters 参考资料 
+
+After you have instantiated your exporter, you have to:
+在实例化了 exporter 之后，你必须：
+
+1.
+这里，你可以看到一个 Item Pipeline ，它使用 Item Exporter 导出 items 到不同的文件，每个 spider 一个:
+
+2.
+序列化 item fields
+
+3.
+B默认情况下，该字段值将不变的传递到序列化库，如何对其进行序列化的决定被委托给每一个特定的序列化库
+
+Here you can see an Item Pipeline which uses an Item Exporter to export scraped items to different files, one per spider:
+但是，你可以自定义每个字段值如何序列化在它被传递到序列化库中之前
+
+Example:
+实例:
+
+2.
+2. 覆盖(overriding) serialize_field() 方法¶
+
+You can also override the serialize_field() method to customize how your field value will be exported.
+你可以覆盖 serialize_field() 方法来自定义如何输出你的数据
+
+Make sure you call the base class serialize_field() method after your custom code.
+在你的自定义代码后确保你调用父类的 serialize_field() 方法
+
+Example:
+实例:
+
+Built-in Item Exporters reference¶
+Item Exporters 参考资料¶
+
+Here is a list of the Item Exporters bundled with Scrapy.
+下面是一些Scrapy内置的 Item Exporters类. 其中一些包括了实例, 假设你要输出以下2个Items:
+
+BaseItemExporter¶
+BaseItemExporter¶
+
+This is the (abstract) base class for all Item Exporters.
+这是一个对所有 Item Exporters 的(抽象)父类
+
+It provides support for common features used by all (concrete) Item Exporters, such as defining what fields to export, whether to export empty fields, or which encoding to use.
+它对所有(具体) Item Exporters 提供基本属性，如定义export什么fields, 是否export空fields, 或是否进行编码
+
+These features can be configured through the constructor arguments which populate their respective instance attributes: fields_to_export, export_empty_fields, encoding.
+你可以在构造器中设置它们不同的属性值: fields_to_export , export_empty_fields, encoding.
+
+Exports the given item.
+输出给定item. 此方法必须在子类中实现.
+
+Return the serialized value for the given field.
+返回给定field的序列化值. 你可以覆盖此方法来控制序列化或输出指定的field.
+
+By default, this method looks for a serializer declared in the item field and returns the result of applying that serializer to the value.
+默认情况下, 此方法寻找一个 serializer 在 item field 中声明 并返回它的值. 如果没有发现 serializer, 则值不会改变，除非你使用 unicode 值并编码到 str， 编码可以在 encoding 属性中声明.
+
+Signal the beginning of the exporting process.
+表示exporting过程的开始. 一些exporters用于产生需要的头元素(例如 XmlItemExporter). 在实现exporting item前必须调用此方法.
+
+Signal the end of the exporting process.
+表示exporting过程的结束. 一些exporters用于产生需要的尾元素 (例如 XmlItemExporter). 在完成exporting item后必须调用此方法.
+
+A list with the name of the fields that will be exported, or None if you want to export all fields.
+列出export什么fields值, None表示export所有fields. 默认值为None.
+
+Some exporters (like CsvItemExporter) respect the order of the fields defined in this attribute.
+一些 exporters (例如 CsvItemExporter) 按照定义在属性中fields的次序依次输出.
+
+Some exporters may require fields_to_export list in order to export the data properly when spiders return dicts (not Item instances).
+是否在输出数据中包含为空的item fields. 默认值是 False. 一些 exporters (例如 CsvItemExporter) 会忽略此属性并输出所有fields.
+
+Whether to include empty/unpopulated item fields in the exported data.
+Encoding 属性将用于编码 unicode 值. (仅用于序列化字符串).其他值类型将不变的传递到指定的序列化库.
+
+The additional keyword arguments of this constructor are passed to the BaseItemExporter constructor.
+构造器额外的关键字参数将传给 BaseItemExporter 构造器.
+
+A typical output of this exporter would be:
+一个典型的 exporter 实例:
+
+Unless overridden in the serialize_field() method, multi-valued fields are exported by serializing each value inside a  element.
+除了覆盖 serialize_field() 方法, 多个值的 fields 会转化每个值到  元素.
+
+For example, the item:
+例如, item:
+
+Would be serialized as:
+将被转化为:
+
+CsvItemExporter¶
+CsvItemExporter¶
+
+Exports Items in CSV format to the given file-like object.
+输出 csv 文件格式. 如果添加 fields_to_export 属性, 它会按顺序定义CSV的列名. export_empty_fields 属性在此没有作用.
+
+The additional keyword arguments of this constructor are passed to the BaseItemExporter constructor, and the leftover arguments to the csv.writer constructor, so you can use any csv.writer constructor argument to customize this exporter.
+此构造器额外的关键字参数将传给 BaseItemExporter 构造器 , 其余的将传给 csv.writer 构造器, 以此来定制 exporter.
+
+A typical output of this exporter would be:
+一个典型的 exporter 实例:
+
+PickleItemExporter¶
+PickleItemExporter¶
+
+Exports Items in pickle format to the given file-like object.
+输出 pickle 文件格式.
+
+For more information, refer to the pickle module documentation.
+更多信息请看 pickle module documentation.
+
+The additional keyword arguments of this constructor are passed to the BaseItemExporter constructor.
+此构造器额外的关键字参数将传给 BaseItemExporter 构造器.
+
+Pickle isn’t a human readable format, so no output examples are provided.
+Pickle 不是可读的格式，这里不提供实例.
+
+PprintItemExporter¶
+PprintItemExporter¶
+
+Exports Items in pretty print format to the specified file object.
+输出整齐打印的文件格式.
+
+The additional keyword arguments of this constructor are passed to the BaseItemExporter constructor.
+此构造器额外的关键字参数将传给 BaseItemExporter 构造器.
+
+A typical output of this exporter would be:
+一个典型的 exporter 实例:
+
+Longer lines (when present) are pretty-formatted.
+此格式会根据行的长短进行调整.
+
+JsonItemExporter¶
+JsonItemExporter¶
+
+Exports Items in JSON format to the specified file-like object, writing all objects as a list of objects.
+输出 JSON 文件格式, 所有对象将写进一个对象的列表. 此构造器额外的关键字参数将传给 BaseItemExporter 构造器, 其余的将传给 JSONEncoder 构造器, 以此来定制 exporter.
+
+A typical output of this exporter would be:
+一个典型的 exporter 实例:
+
+Warning
+警告
+
+JSON is very simple and flexible serialization format, but it doesn’t scale well for large amounts of data since incremental (aka.
+JSON 是一个简单而有弹性的格式, 但对大量数据的扩展性不是很好，因为这里会将整个对象放入内存. 如果你要JSON既强大又简单,可以考虑 JsonLinesItemExporter , 或把输出对象分为多个块.
+
+JsonLinesItemExporter¶
+JsonLinesItemExporter¶
+

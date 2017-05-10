@@ -1,0 +1,1113 @@
+Chapter 9: Advanced Templates¶
+第九章：模版高级进阶
+
+Although most of your interactions with Django’s template language will be in the role of template author, you may want to customize and extend the template engine – either to make it do something it doesn’t already do, or to make your job easier in some other way.
+虽然大多数和Django模板语言的交互都是模板作者的工作，但你可能想定制和扩展模板引擎，让它做一些它不能做的事情，或者是以其他方式让你的工作更轻松
+
+This chapter delves deep into the guts of Django’s template system.
+本章深入探讨Django的模板系统
+
+It covers what you need to know if you plan to extend the system or if you’re just curious about how it works.
+ 如果你想扩展模板系统或者只是对它的工作原理感觉到好奇，本章涉及了你需要了解的东西
+
+It also covers the auto-escaping feature, a security measure you’ll no doubt notice over time as you continue to use Django.
+ 它也包含一个自动转意特征，如果你继续使用django，随着时间的推移你一定会注意这个安全考虑
+
+If you’re looking to use the Django template system as part of another application (i.e., without the rest of the framework), make sure to read the “Configuring the Template System in Standalone Mode” section later in the chapter.
+如果你想把Django的模版系统作为另外一个应用程序的一部分（就是说，仅使用Django的模板系统而不使用Django框架的其他部分），那你一定要读一下“配置独立模式下的模版系统”这一节
+
+Template Language Review¶
+模板语言回顾
+
+First, let’s quickly review a number of terms introduced in Chapter 4:
+首先，让我们快速回顾一下第四章介绍的若干专业术语：
+
+A template is a text document, or a normal Python string, that is marked up using the Django template language.
+模板 是一个纯文本文件，或是一个用Django模板语言标记过的普通的Python字符串
+
+A template can contain template tags and variables.
+ 模板可以包含模板标签和变量
+
+A template tag is a symbol within a template that does something.
+模板标签 是在一个模板里面起作用的的标记
+
+This definition is deliberately vague.
+ 这个定义故意搞得模糊不清
+
+For example, a template tag can produce content, serve as a control structure (an if statement or for loop), grab content from a database, or enable access to other template tags.
+ 例如，一个模版标签能够产生作为控制结构的内容（一个 if语句或for 循环), 可以获取数据库内容，或者访问其他的模板标签
+
+Template tags are surrounded by {% and %}:
+区块标签被 {% 和 %} 包围：
+
+A variable is a symbol within a template that outputs a value.
+变量 是一个在模板里用来输出值的标记
+
+Variable tags are surrounded by {{ and }}:
+变量标签被 {{ 和 }} 包围：
+
+A context is a name -> value mapping (similar to a Python dictionary) that is passed to a template.
+context 是一个传递给模板的名称到值的映射（类似Python字典）
+
+A template renders a context by replacing the variable “holes” with values from the context and executing all template tags.
+模板 渲染 就是是通过从context获取值来替换模板中变量并执行所有的模板标签
+
+For more details about the basics of these terms, refer back to Chapter 4.
+关于这些基本概念更详细的内容，请参考第四章
+
+The rest of this chapter discusses ways of extending the template engine.
+本章的其余部分讨论了扩展模板引擎的方法
+
+First, though, let’s take a quick look at a few internals left out of Chapter 4 for simplicity.
+ 首先，我们快速的看一下第四章遗留的内容
+
+RequestContext and Context Processors¶
+RequestContext和Context处理器
+
+When rendering a template, you need a context.
+你需要一段context来解析模板
+
+Usually this is an instance of django.template.Context, but Django also comes with a special subclass, django.template.RequestContext, that acts slightly differently.
+ 一般情况下，这是一个 django.template.Context 的实例，不过在Django中还可以用一个特殊的子类， django.template.RequestContext ，这个用起来稍微有些不同
+
+RequestContext adds a bunch of variables to your template context by default – things like the HttpRequest object or information about the currently logged-in user.
+ RequestContext默认地在模板context中加入了一些变量，如 HttpRequest 对象或当前登录用户的相关信息
+
+Use RequestContext when you don’t want to have to specify the same set of variables in a series of templates.
+当你不想在一系例模板中都明确指定一些相同的变量时，你应该使用 RequestContext 
+
+For example, consider these two views:
+ 例如，考虑这两个视图：
+
+(Note that we’re deliberately not using the render_to_response() shortcut in these examples – we’re manually loading the templates, constructing the context objects and rendering the templates.
+（注意，在这些例子中，我们故意 不 使用 render_to_response() 这个快捷方法，而选择手动载入模板，手动构造context对象然后渲染模板
+
+We’re “spelling out” all of the steps for the purpose of clarity.)
+ 是为了能够清晰的说明所有步骤
+
+Each view passes the same three variables – app, user and ip_address – to its template.
+每个视图都给模板传入了三个相同的变量：app、user和ip_address
+
+Wouldn’t it be nice if we could remove that redundancy?
+ 如果我们把这些冗余去掉会不会更好
+
+RequestContext and context processors were created to solve this problem.
+创建 RequestContext 和 context处理器 就是为了解决这个问题
+
+Context processors let you specify a number of variables that get set in each context automatically – without you having to specify the variables in each render_to_response() call.
+ Context处理器允许你设置一些变量，它们会在每个context中自动被设置好，而不必每次调用 render_to_response() 时都指定
+
+The catch is that you have to use RequestContext instead of Context when you render a template.
+ 要点就是，当你渲染模板时，你要用 RequestContext 而不是 Context 
+
+The most low-level way of using context processors is to create some processors and pass them to RequestContext.
+最直接的做法是用context处理器来创建一些处理器并传递给 RequestContext 
+
+Here’s how the above example could be written with context processors:
+上面的例子可以用context processors改写如下：
+
+Let’s step through this code:
+我们来通读一下代码：
+
+First, we define a function custom_proc.
+首先，我们定义一个函数 custom_proc 
+
+This is a context processor – it takes an HttpRequest object and returns a dictionary of variables to use in the template context.
+这是一个context处理器，它接收一个 HttpRequest 对象，然后返回一个字典，这个字典中包含了可以在模板context中使用的变量
+
+That’s all it does.
+ 它就做了这么多
+
+We’ve changed the two view functions to use RequestContext instead of Context.
+我们在这两个视图函数中用 RequestContext 代替了 Context 
+
+There are two differences in how the context is constructed.
+在context对象的构建上有两个不同点
+
+One, RequestContext requires the first argument to be an HttpRequest object – the one that was passed into the view function in the first place (request).
+ 一， RequestContext 的第一个参数需要传递一个 HttpRequest 对象，就是传递给视图函数的第一个参数（ request ）
+
+Two, RequestContext takes an optional processors argument, which is a list or tuple of context processor functions to use.
+二， RequestContext 有一个可选的参数 processors ，这是一个包含context处理器函数的列表或者元组
+
+Here, we pass in custom_proc, the custom processor we defined above.
+ 在这里，我们传递了我们之前定义的处理器函数 curstom_proc 
+
+Each view no longer has to include app, user or ip_address in its context construction, because those are provided by custom_proc.
+每个视图的context结构里不再包含 app 、 user 、 ip_address 等变量，因为这些由 custom_proc 函数提供了
+
+Each view still has the flexibility to introduce any custom template variables it might need.
+每个视图 仍然 具有很大的灵活性，可以引入我们需要的任何模板变量
+
+In this example, the message template variable is set differently in each view.
+ 在这个例子中， message 模板变量在每个视图中都不一样
+
+In Chapter 4, we introduced the render_to_response() shortcut, which saves you from having to call loader.get_template(), then create a Context, then call the render() method on the template.
+在第四章，我们介绍了 render_to_response() 这个快捷方式，它可以简化调用 loader.get_template() ,然后创建一个 Context 对象，最后再调用模板对象的 render()过程
+
+In order to demonstrate the lower-level workings of context processors, the above examples didn’t use render_to_response(), .
+ 为了讲解context处理器底层是如何工作的，在上面的例子中我们没有使用 render_to_response() 
+
+But it’s possible – and preferable – to use context processors with render_to_response().
+但是建议选择 render_to_response() 作为context的处理器
+
+Do this with the context_instance argument, like so:
+这就需要用到context_instance参数：
+
+Here, we’ve trimmed down each view’s template rendering code to a single (wrapped) line.
+在这，我们将每个视图的模板渲染代码写成了一个单行
+
+This is an improvement, but, evaluating the conciseness of this code, we have to admit we’re now almost overdosing on the other end of the spectrum.
+虽然这是一种改进，但是，请考虑一下这段代码的简洁性，我们现在不得不承认的是在 另外 一方面有些过分了
+
+We’ve removed redundancy in data (our template variables) at the cost of adding redundancy in code (in the processors call).
+ 我们以代码冗余（在 processors 调用中）的代价消除了数据上的冗余（我们的模板变量）
+
+Using context processors doesn’t save you much typing if you have to type processors all the time.
+ 由于你不得不一直键入 processors ，所以使用context处理器并没有减少太多的输入量
+
+For that reason, Django provides support for global context processors.
+Django因此提供对 全局 context处理器的支持
+
+The TEMPLATE_CONTEXT_PROCESSORS setting (in your settings.py) designates which context processors should always be applied to RequestContext.
+ TEMPLATE_CONTEXT_PROCESSORS 指定了哪些context processors_总是_默认被使用
+
+This removes the need to specify processors each time you use RequestContext.
+这样就省去了每次使用 RequestContext 都指定 processors 的麻烦
+
+By default, TEMPLATE_CONTEXT_PROCESSORS is set to the following:
+默认情况下， TEMPLATE_CONTEXT_PROCESSORS 设置如下：
+
+This setting is a tuple of callables that use the same interface as our custom_proc function above – functions that take a request object as their argument and return a dictionary of items to be merged into the context.
+这个设置项是一个可调用函数的元组，其中的每个函数使用了和上文中我们的 custom_proc 相同的接口，它们以request对象作为参数，返回一个会被合并传给context的字典： 接收一个request对象作为参数，返回一个包含了将被合并到context中的项的字典
+
+Each processor is applied in order.
+每个处理器将会按照顺序应用
+
+That is, if one processor adds a variable to the context and a second processor adds a variable with the same name, the second will override the first.
+ 也就是说如果你在第一个处理器里面向context添加了一个变量，而第二个处理器添加了同样名字的变量，那么第二个将会覆盖第一个
+
+Django provides a number of simple context processors, including the ones that are enabled by default:
+Django提供了几个简单的context处理器，有些在默认情况下被启用的
+
+If TEMPLATE_CONTEXT_PROCESSORS contains this processor, every RequestContext will contain these variables:
+如果 TEMPLATE_CONTEXT_PROCESSORS 包含了这个处理器，那么每个 RequestContext 将包含这些变量：
+
+user: A django.contrib.auth.models.User instance representing the current logged-in user (or an AnonymousUser instance, if the client isn’t logged in).
+user ：一个 django.contrib.auth.models.User 实例，描述了当前登录用户（或者一个 AnonymousUser 实例，如果客户端没有登录）
+
+messages: A list of messages (as strings) for the current logged-in user.
+messages ：一个当前登录用户的消息列表（字符串）
+
+Behind the scenes, this variable calls request.user.get_and_delete_messages() for every request.
+ 在后台，对每一个请求，这个变量都调用request.user.get_and_delete_messages() 方法
+
+That method collects the user’s messages and deletes them from the database.
+ 这个方法收集用户的消息然后把它们从数据库中删除
+
+perms: An instance of django.core.context_processors.PermWrapper, which represents the permissions the current logged-in user has.
+perms ： django.core.context_processors.PermWrapper 的一个实例，包含了当前登录用户有哪些权限
+
+See Chapter 14 for more information on users, permissions, and messages.
+关于users、permissions和messages的更多内容请参考第14章
+
+This processor pushes debugging information down to the template layer.
+这个处理器把调试信息发送到模板层
+
+If TEMPLATE_CONTEXT_PROCESSORS contains this processor, every RequestContext will contain these variables:
+ 如果TEMPLATE_CONTEXT_PROCESSORS包含这个处理器，每一个RequestContext将包含这些变量：
+
+debug: The value of your DEBUG setting (either True or False).
+debug ：你设置的 DEBUG 的值（ True 或 False ）
+
+You can use this variable in templates to test whether you’re in debug mode.
+你可以在模板里面用这个变量测试是否处在debug模式下
+
+sql_queries: A list of {'sql': ..., 'time': ...} dictionaries representing every SQL query that has happened so far during the request and how long it took.
+sql_queries ：包含类似于 ``{‘sql’: …, ‘time’: `` 的字典的一个列表， 记录了这个请求期间的每个SQL查询以及查询所耗费的时间
+
+The list is in the order in which the queries were issued.
+ 这个列表是按照请求顺序进行排列的
+
+Because debugging information is sensitive, this context processor will only add variables to the context if both of the following conditions are true:
+由于调试信息比较敏感，所以这个context处理器只有当同时满足下面两个条件的时候才有效：
+
+The DEBUG setting is True.
+DEBUG 参数设置为 True 
+
+The request came from an IP address in the INTERNAL_IPS setting.
+请求的ip应该包含在 INTERNAL_IPS 的设置里面
+
+Astute readers will notice that the debug template variable will never have the value False because, if DEBUG is False, then the debug template variable won’t be populated in the first place.
+细心的读者可能会注意到debug模板变量的值永远不可能为False，因为如果DEBUG是False，那么debug模板变量一开始就不会被RequestContext所包含
+
+If this processor is enabled, every RequestContext will contain these variables:
+如果这个处理器启用，每个 RequestContext 将包含下面的变量：
+
+LANGUAGES: The value of the LANGUAGES setting.
+LANGUAGES ： LANGUAGES 选项的值
+
+LANGUAGE_CODE: request.LANGUAGE_CODE if it exists;
+LANGUAGE_CODE ：如果 request.LANGUAGE_CODE 存在，就等于它
+
+otherwise, the value of the LANGUAGE_CODE setting.
+否则，等同于 LANGUAGE_CODE 设置
+
+Appendix D provides more information about these two settings.
+附录E提供了有关这两个设置的更多的信息
+
+If this processor is enabled, every RequestContext will contain a variable request, which is the current HttpRequest object.
+如果启用这个处理器，每个 RequestContext 将包含变量 request ， 也就是当前的 HttpRequest 对象
+
+Note that this processor is not enabled by default;
+ 注意这个处理器默认是不启用的，你需要激活它
+
+You might want to use this if you find your templates needing to access attributes of the current HttpRequest such as the IP address:
+如果你发现你的模板需要访问当前的HttpRequest你就需要使用它:
+
+Here are a few tips for rolling your own:
+编写处理器的一些建议：
+
+Make each context processor responsible for the smallest subset of functionality possible.
+使每个context处理器完成尽可能小的功能
+
+It’s easy to use multiple processors, so you might as well split functionality into logical pieces for future reuse.
+ 使用多个处理器是很容易的，所以你可以根据逻辑块来分解功能以便将来复用
+
+Keep in mind that any context processor in TEMPLATE_CONTEXT_PROCESSORS will be available in every template powered by that settings file, so try to pick variable names that are unlikely to conflict with variable names your templates might be using independently.
+要注意 TEMPLATE_CONTEXT_PROCESSORS 里的context processor 将会在基于这个settings.py的每个 模板中有效，所以变量的命名不要和模板的变量冲突
+
+As variable names are case-sensitive, it’s not a bad idea to use all caps for variables that a processor provides.
+ 变量名是大小写敏感的，所以processor的变量全用大写是个不错的主意
+
+It doesn’t matter where on the filesystem they live, as long as they’re on your Python path so you can point to them from the TEMPLATE_CONTEXT_PROCESSORS setting.
+不论它们存放在哪个物理路径下，只要在你的Python搜索路径中，你就可以在TEMPLATE_CONTEXT_PROCESSORS 设置里指向它们
+
+With that said, the convention is to save them in a file called context_processors.py within your app or project.
+ 建议你把它们放在应用或者工程目录下名为context_processors.py 的文件里
+
+Automatic HTML Escaping¶
+html自动转义
+
+When generating HTML from templates, there’s always a risk that a variable will include characters that affect the resulting HTML.
+从模板生成html的时候，总是有一个风险——变量包了含会影响结果html的字符
+
+For example, consider this template fragment:
+ 例如，考虑这个模板片段：
+
+At first, this seems like a harmless way to display a user’s name, but consider what would happen if the user entered his name as this:
+一开始，这看起来是显示用户名的一个无害的途径，但是考虑如果用户输入如下的名字将会发生什么：
+
+With this name value, the template would be rendered as:
+用这个用户名，模板将被渲染成：
+
+...which means the browser would pop-up a JavaScript alert box!
+这意味着浏览器将弹出JavaScript警告框
+
+Similarly, what if the name contained a '<' symbol, like this?
+类似的，如果用户名包含小于符号，就像这样：
+
+That would result in a rendered template like this:
+那样的话模板结果被翻译成这样：
+
+...which, in turn, would result in the remainder of the Web page being bolded!
+页面的剩余部分变成了粗体
+
+Clearly, user-submitted data shouldn’t be trusted blindly and inserted directly into your Web pages, because a malicious user could use this kind of hole to do potentially bad things.
+显然，用户提交的数据不应该被盲目信任，直接插入到你的页面中
+
+This type of security exploit is called a Cross Site Scripting (XSS) attack.
+因为一个潜在的恶意的用户能够利用这类漏洞做坏事
+
+(For more on security, see Chapter 20.)
+ 这类漏洞称为被跨域脚本 (XSS) 攻击
+
+To avoid this problem, you have two options:
+为了避免这个问题，你有两个选择：
+
+One, you can make sure to run each untrusted variable through the escape filter, which converts potentially harmful HTML characters to unharmful ones.
+一是你可以确保每一个不被信任的变量都被escape过滤器处理一遍，把潜在有害的html字符转换为无害的
+
+This was the default solution in Django for its first few years, but the problem is that it puts the onus on you, the developer / template author, to ensure you’re escaping everything.
+ 这是最初几年Django的默认方案，但是这样做的问题是它把责任推给你（开发者、模版作者）自己，来确保把所有东西转意
+
+It’s easy to forget to escape data.
+ 很容易就忘记转意数据
+
+Two, you can take advantage of Django’s automatic HTML escaping.
+二是，你可以利用Django的自动html转意
+
+The remainder of this section describes how auto-escaping works.
+ 这一章的剩余部分描述自动转意是如何工作的
+
+By default in Django, every template automatically escapes the output of every variable tag.
+在django里默认情况下，每一个模板自动转意每一个变量标签的输出
+
+Specifically, these five characters are escaped:
+ 尤其是这五个字符
+
+Again, we stress that this behavior is on by default.
+另外，我强调一下这个行为默认是开启的
+
+If you’re using Django’s template system, you’re protected.
+ 如果你正在使用django的模板系统，那么你是被保护的
+
+If you don’t want data to be auto-escaped, on a per-site, per-template level or per-variable level, you can turn it off in several ways.
+如果你不想数据被自动转意，在每一站点级别、每一模板级别或者每一变量级别你都有几种方法来关闭它
+
+Why would you want to turn it off?
+为什么要关闭它
+
+Because sometimes, template variables contain data that you intend to be rendered as raw HTML, in which case you don’t want their contents to be escaped.
+ 因为有时候模板变量包含了一些原始html数据，在这种情况下我们不想它们的内容被转意
+
+For example, you might store a blob of trusted HTML in your database and want to embed that directly into your template.
+ 例如，你可能在数据库里存储了一段被信任的html代码，并且你想直接把它嵌入到你的模板里
+
+Or, you might be using Django’s template system to produce text that is not HTML – like an e-mail message, for instance.
+ 或者，你可能正在使用Django的模板系统生成非html文本，比如一封e-mail
+
+To disable auto-escaping for an individual variable, use the safe filter:
+用safe过滤器为单独的变量关闭自动转意：
+
+Think of safe as shorthand for safe from further escaping or can be safely interpreted as HTML.
+你可以把_safe_当做_safe from further escaping_的简写，或者当做可以被直接译成HTML的内容
+
+In this example, if data contains '', the output will be:
+在这个例子里，如果数据包含''，那么输出会变成：
+
+To control auto-escaping for a template, wrap the template (or just a particular section of the template) in the autoescape tag, like so:
+为了控制模板的自动转意,用标签autoescape来包装整个模板(或者模板中常用的部分),就像这样：
+
+The autoescape tag takes either on or off as its argument.
+autoescape 标签有两个参数on和off 有时,你可能想阻止一部分自动转意,对另一部分自动转意
+
+At times, you might want to force auto-escaping when it would otherwise be disabled.
+ 这是一个模板的例子：
+
+The auto-escaping tag passes its effect on to templates that extend the current one as well as templates included via the include tag, just like all block tags.
+auto-escaping 标签的作用域不仅可以影响到当前模板还可以通过include标签作用到其他标签,就像block标签一样
+
+For example:
+ 例如：
+
+Because auto-escaping is turned off in the base template, it will also be turned off in the child template, resulting in the following rendered HTML when the greeting variable contains the string Hello!</b>:
+由于在base模板中自动转意被关闭,所以在child模板中自动转意也会关闭.因此,在下面一段HTML被提交时,变量greeting的值就为字符串Hello!
+
+Generally, template authors don’t need to worry about auto-escaping very much.
+通常,模板作者没必要为自动转意担心. 基于Pyhton的开发者(编写VIEWS视图和自定义过滤器)只需要考虑哪些数据不需要被转意,适时的标记数据,就可以让它们在模板中工作
+
+If you’re creating a template that might be used in situations where you’re not sure whether auto-escaping is enabled, then add an escape filter to any variable that needs escaping.
+如果你正在编写一个模板而不知道是否要关闭自动转意,那就为所有需要转意的变量添加一个escape过滤器
+
+When auto-escaping is on, there’s no danger of the escape filter double-escaping data – the escape filter does not affect auto-escaped variables.
+ 当自动转意开启时，使用escape过滤器似乎会两次转意数据，但其实没有任何危险
+
+As we mentioned earlier, filter arguments can be strings:
+就像我们前面提到的,过滤器也可以是字符串.
+
+All string literals are inserted without any automatic escaping into the template – they act as if they were all passed through the safe filter.
+所有字符常量没有经过转义就被插入模板,就如同它们都经过了safe过滤
+
+The reasoning behind this is that the template author is in control of what goes into the string literal, so they can make sure the text is correctly escaped when the template is written.
+ 这是由于字符常量完全由模板作者决定,因此编写模板的时候他们会确保文本的正确性
+
+This means you would write
+这意味着你必须这样写
+
+...rather than
+而不是这样
+
+This doesn’t affect what happens to data coming from the variable itself.
+这点对来自变量本身的数据不起作用
+
+The variable’s contents are still automatically escaped, if necessary, because they’re beyond the control of the template author.
+ 如果必要,变量内容会自动转义,因为它们不在模板作者的控制下
+
+Inside Template Loading¶
+模板加载的内幕
+
+Generally, you’ll store templates in files on your filesystem, but you can use custom template loaders to load templates from other sources.
+一般说来，你会把模板以文件的方式存储在文件系统中，但是你也可以使用自定义的 template loaders 从其他来源加载模板
+
+Django has two ways to load templates:
+Django有两种方法加载模板
+
+django.template.loader.get_template(template_name): get_template returns the compiled template (a Template object) for the template with the given name.
+django.template.loader.get_template(template_name) ： get_template 根据给定的模板名称返回一个已编译的模板（一个 Template 对象）
+
+If the template doesn’t exist, a TemplateDoesNotExist exception will be raised.
+ 如果模板不存在，就触发 TemplateDoesNotExist 的异常
+
+django.template.loader.select_template(template_name_list): select_template is just like get_template, except it takes a list of template names.
+django.template.loader.select_template(template_name_list) ： select_template 很像get_template ，不过它是以模板名称的列表作为参数的
+
+Of the list, it returns the first template that exists.
+ 它会返回列表中存在的第一个模板
+
+If none of the templates exist, a TemplateDoesNotExist exception will be raised.
+ 如果模板都不存在，将会触发TemplateDoesNotExist异常
+
+As covered in Chapter 4, each of these functions by default uses your TEMPLATE_DIRS setting to load templates.
+正如在第四章中所提到的，默认情况下这些函数使用 TEMPLATE_DIRS 的设置来载入模板
+
+Internally, however, these functions actually delegate to a template loader for the heavy lifting.
+ 但是，在内部这些函数可以指定一个模板加载器来完成这些繁重的任务
+
+Some of loaders are disabled by default, but you can activate them by editing the TEMPLATE_LOADERS setting.
+一些加载器默认被禁用，但是你可以通过编辑 TEMPLATE_LOADERS 设置来激活它们
+
+TEMPLATE_LOADERS should be a tuple of strings, where each string represents a template loader.
+ TEMPLATE_LOADERS 应当是一个字符串的元组，其中每个字符串都表示一个模板加载器
+
+These template loaders ship with Django:
+ 这些模板加载器随Django一起发布
+
+django.template.loaders.filesystem.load_template_source: This loader loads templates from the filesystem, according to TEMPLATE_DIRS.
+django.template.loaders.filesystem.load_template_source : 这个加载器根据 TEMPLATE_DIRS 的设置从文件系统加载模板
+
+It is enabled by default.
+它默认是可用的
+
+django.template.loaders.app_directories.load_template_source: This loader loads templates from Django applications on the filesystem.
+django.template.loaders.app_directories.load_template_source : 这个加 载器从文件系统上的Django应用中加载模板
+
+For each application in INSTALLED_APPS, the loader looks for a templates subdirectory.
+ 对 INSTALLED_APPS 中的每个应用，这个加载器会查找templates 子目录
+
+If the directory exists, Django looks for templates there.
+ 如果这个目录存在，Django就在那里寻找模板
+
+This means you can store templates with your individual applications, making it easy to distribute Django applications with default templates.
+这意味着你可以把模板和你的应用一起保存，从而使得Django应用更容易和默认模板一起发布
+
+For example, if INSTALLED_APPS contains ('myproject.polls', 'myproject.music'), then get_template('foo.html') will look for templates in this order:
+ 例如，如果 INSTALLED_APPS 包含 ('myproject.polls','myproject.music') ，那么 get_template('foo.html') 会按这个顺序查找模板：
+
+Note that the loader performs an optimization when it is first imported: it caches a list of which INSTALLED_APPS packages have a templates subdirectory.
+请注意加载器在首次被导入的时候会执行一个优化： 它会缓存一个列表，这个列表包含了 INSTALLED_APPS中带有 templates 子目录的包
+
+This loader is enabled by default.
+这个加载器默认启用
+
+django.template.loaders.eggs.load_template_source: This loader is just like app_directories, except it loads templates from Python eggs rather than from the filesystem.
+django.template.loaders.eggs.load_template_source : 这个加载器类似 app_directories ，只不过它从Python eggs而不是文件系统中加载模板
+
+This loader is disabled by default;
+ 这个加载器默认被禁用
+
+you’ll need to enable it if you’re using eggs to distribute your application.
+如果你使用eggs来发布你的应用，那么你就需要启用它
+
+(Python eggs are a way of compressing Python code into a single file.)
+ Python eggs可以将Python代码压缩到一个文件中
+
+Django uses the template loaders in order according to the TEMPLATE_LOADERS setting.
+Django按照 TEMPLATE_LOADERS 设置中的顺序使用模板加载器
+
+It uses each loader until a loader finds a match.
+ 它逐个使用每个加载器直至找到一个匹配的模板
+
+Extending the Template System¶
+扩展模板系统
+
+Now that you understand a bit more about the internals of the template system, let’s look at how to extend the system with custom code.
+既然你已经对模板系统的内幕多了一些了解，让我们来看看如何使用自定义的代码来扩展这个系统吧
+
+Most template customization comes in the form of custom template tags and/or filters.
+绝大部分的模板定制是以自定义标签/过滤器的方式来完成的
+
+Although the Django template language comes with many built-in tags and filters, you’ll probably assemble your own libraries of tags and filters that fit your own needs.
+ 尽管Django模板语言自带了许多内建标签和过滤器，但是你可能还是需要组建你自己的标签和过滤器库来满足你的需要
+
+Fortunately, it’s quite easy to define your own functionality.
+ 幸运的是，定义你自己的功能非常容易
+
+Whether you’re writing custom tags or filters, the first thing to do is to create a template library – a small bit of infrastructure Django can hook into.
+不管是写自定义标签还是过滤器，第一件要做的事是创建模板库（Django能够导入的基本结构）
+
+Creating a template library is a two-step process:
+创建一个模板库分两步走：
+
+First, decide which Django application should house the template library.
+第一，决定模板库应该放在哪个Django应用下
+
+If you’ve created an app via manage.py startapp, you can put it in there, or you can create another app solely for the template library.
+ 如果你通过 manage.py startapp 创建了一个应用，你可以把它放在那里，或者你可以为模板库单独创建一个应用
+
+We’d recommend the latter, because your filters might be useful to you in future projects.
+ 我们更推荐使用后者，因为你的filter可能在后来的工程中有用
+
+Whichever route you take, make sure to add the app to your INSTALLED_APPS setting.
+无论你采用何种方式，请确保把你的应用添加到 INSTALLED_APPS 中
+
+We’ll explain this shortly.
+ 我们稍后会解释这一点
+
+Second, create a templatetags directory in the appropriate Django application’s package.
+第二，在适当的Django应用包里创建一个 templatetags 目录
+
+It should be on the same level as models.py, views.py, and so forth.
+ 这个目录应当和 models.py 、 views.py 等处于同一层次
+
+For example:
+ 例如：
+
+Create two empty files in the templatetags directory: an __init__.py file (to indicate to Python that this is a package containing Python code) and a file that will contain your custom tag/filter definitions.
+在 templatetags 中创建两个空文件： 一个 init.py （告诉Python这是 一个包含了Python代码的包）和一个用来存放你自定义的标签/过滤器定义的文件
+
+The name of the latter file is what you’ll use to load the tags later.
+ 第二个文件的名字稍后将用来加载标签
+
+For example, if your custom tags/filters are in a file called poll_extras.py, you’d write the following in a template:
+ 例如，如果你的自定义标签/过滤器在一个叫作 poll_extras.py 的文件中，你需要在模板中写入如下内容：
+
+The {% load %} tag looks at your INSTALLED_APPS setting and only allows the loading of template libraries within installed Django applications.
+{% load %} 标签检查 INSTALLED_APPS 中的设置，仅允许加载已安装的Django应用程序中的模板库
+
+This is a security feature;
+ 这是一个安全特性
+
+it allows you to host Python code for many template libraries on a single computer without enabling access to all of them for every Django installation.
+它可以让你在一台电脑上部署很多的模板库的代码，而又不用把它们暴露给每一个Django安装
+
+If you write a template library that isn’t tied to any particular models/views, it’s valid and quite normal to have a Django application package that contains only a templatetags package.
+如果你写了一个不和任何特定模型/视图关联的模板库，那么得到一个仅包含 templatetags 包的Django应用程序包是完全正常的
+
+There’s no limit on how many modules you put in the templatetags package.
+ 对于在 templatetags 包中放置多少个模块没有做任何的限制
+
+Just keep in mind that a {% load %} statement will load tags/filters for the given Python module name, not the name of the application.
+ 需要了解的是：{%load%}语句是通过指定的Python模块名而不是应用名来加载标签/过滤器的
+
+Once you’ve created that Python module, you’ll just have to write a bit of Python code, depending on whether you’re writing filters or tags.
+一旦创建了Python模块，你只需根据是要编写过滤器还是标签来相应的编写一些Python代码
+
+To be a valid tag library, the module must contain a module-level variable named register that is an instance of template.Library.
+作为合法的标签库，模块需要包含一个名为register的模块级变量
+
+This is the data structure in which all the tags and filters are registered.
+这个变量是template.Library的实例，是所有注册标签和过滤器的数据结构
+
+So, near the top of your module, insert the following:
+ 所以，请在你的模块的顶部插入如下语句：
+
+Note
+注意
+
+For a fine selection of examples, read the source code for Django’s default filters and tags.
+请阅读Django默认的过滤器和标签的源码，那里有大量的例子
+
+They’re in django/template/defaultfilters.py and django/template/defaulttags.py, respectively.
+ 他们分别为：django/template/defaultfilters.py 和 django/template/defaulttags.py 
+
+Some applications in django.contrib also contain template libraries.
+django.contrib中的某些应用程序也包含模板库
+
+Once you’ve created this register variable, you’ll use it to create template filters and tags.
+创建 register 变量后，你就可以使用它来创建模板的过滤器和标签了
+
+Custom filters are just Python functions that take one or two arguments:
+自定义过滤器就是有一个或两个参数的Python函数:
+
+The value of the variable (input)
+(输入)变量的值
+
+The value of the argument, which can have a default value or be left out altogether
+参数的值， 可以是默认值或者完全留空
+
+For example, in the filter {{ var|foo:"bar" }}, the filter foo would be passed the contents of the variable var and the argument "bar".
+例如，在过滤器 {{ var|foo:"bar" }} 中 ，过滤器 foo 会被传入变量 var 和默认参数 bar
+
+Filter functions should always return something.
+过滤器函数应该总有返回值
+
+They shouldn’t raise exceptions, and they should fail silently.
+ 而且不能触发异常，它们都应该静静地失败
+
+If there’s an error, they should return either the original input or an empty string, whichever makes more sense.
+ 如果出现错误，应该返回一个原始输入或者空字符串，这会更有意义
+
+Here’s an example filter definition:
+这里是一些定义过滤器的例子：
+
+And here’s an example of how that filter would be used to cut spaces from a variable’s value:
+下面是一个可以用来去掉变量值空格的过滤器例子：
+
+Most filters don’t take arguments.
+大多数过滤器并不需要参数
+
+In this case, just leave the argument out of your function:
+ 下面的例子把参数从你的函数中拿掉了：
+
+When you’ve written your filter definition, you need to register it with your Library instance, to make it available to Django’s template language:
+当你定义完过滤器后，你需要用 Library 实例来注册它，这样就能通过Django的模板语言来使用了：
+
+The Library.filter() method takes two arguments:
+Library.filter() 方法需要两个参数：
+
+The name of the filter (a string)
+过滤器的名称（一个字串）
+
+The filter function itself
+过滤器函数本身
+
+If you’re using Python 2.4 or above, you can use register.filter() as a decorator instead:
+如果你使用的是Python 2.4或者更新的版本，你可以使用装饰器register.filter()：
+
+If you leave off the name argument, as in the second example, Django will use the function’s name as the filter name.
+如果你想第二个例子那样不使用 name 参数，那么Django会把函数名当作过滤器的名字
+
+Here, then, is a complete template library example, supplying the cut filter:
+下面是一个完整的模板库的例子，它包含一个 cut 过滤器：
+
+Tags are more complex than filters, because tags can do nearly anything.
+标签要比过滤器复杂些，因为标签几乎能做任何事情
+
+Chapter 4 describes how the template system works in a two-step process: compiling and rendering.
+第四章描述了模板系统的两步处理过程： 编译和呈现
+
+To define a custom template tag, you need to tell Django how to manage both of these steps when it gets to your tag.
+ 为了自定义一个模板标签，你需要告诉Django当遇到你的标签时怎样进行这个过程
+
+When Django compiles a template, it splits the raw template text into nodes.
+当Django编译一个模板时，它将原始模板分成一个个 节点 
+
+Each node is an instance of django.template.Node and has a render() method.
+每个节点都是 django.template.Node 的一个实例，并且具备 render() 方法
+
+Thus, a compiled template is simply a list of Node objects.
+ 于是，一个已编译的模板就是 节点 对象的一个列表
+
+For example, consider this template:
+ 例如，看看这个模板：
+
+In compiled template form, this template is represented as this list of nodes:
+被编译的模板表现为节点列表的形式：
+
+When you call render() on a compiled template, the template calls render() on each Node in its node list, with the given context.
+当你调用一个已编译模板的 render() 方法时，模板就会用给定的context来调用每个在它的节点列表上的所有节点的 render() 方法
+
+The results are all concatenated together to form the output of the template.
+ 这些渲染的结果合并起来，形成了模板的输出
+
+Thus, to define a custom template tag, you specify how the raw template tag is converted into a Node (the compilation function) and what the node’s render() method does.
+ 因此，要自定义模板标签，你需要指明原始模板标签如何转换成节点（编译函数）和节点的render()方法完成的功能 
+
+In the sections that follow, we cover all the steps in writing a custom tag.
+在下面的章节中，我们将详细解说写一个自定义标签时的所有步骤
+
+For each template tag the parser encounters, it calls a Python function with the tag contents and the parser object itself.
+当遇到一个模板标签（template tag）时，模板解析器就会把标签包含的内容，以及模板解析器自己作为参数调用一个python函数
+
+This function is responsible for returning a Node instance based on the contents of the tag.
+ 这个函数负责返回一个和当前模板标签内容相对应的节点（Node）的实例
+
+For example, let’s write a template tag, {% current_time %}, that displays the current date/time, formatted according to a parameter given in the tag, in strftime syntax (see http://www.djangoproject.com/r/python/strftime/).
+例如，写一个显示当前日期的模板标签：{% current_time %}
+
+It’s a good idea to decide the tag syntax before anything else.
+该标签会根据参数指定的 strftime 格式（参见：http://www.djangoproject.com/r/python/strftime/）显示当前时间
+
+In our case, let’s say the tag should be used like this:
+首先确定标签的语法是个好主意
+
+Note
+注意
+
+Yes, this template tag is redundant–Django’s default {% now %} tag does the same task with simpler syntax.
+没错, 这个模板标签是多余的，Django默认的 {% now %} 用更简单的语法完成了同样的工作
+
+This template tag is presented here just for example purposes.
+ 这个模板标签在这里只是作为一个例子
+
+The parser for this function should grab the parameter and create a Node object:
+这个函数的分析器会获取参数并创建一个 Node 对象:
+
+There’s a lot going here:
+这里需要说明的地方很多：
+
+Each template tag compilation function takes two arguments, parser and token.
+每个标签编译函数有两个参数，parser和token
+
+parser is the template parser object.
+parser是模板解析器对象
+
+We don’t use it in this example.
+ 我们在这个例子中并不使用它
+
+token is the token currently being parsed by the parser.
+ token是正在被解析的语句
+
+token.contents is a string of the raw contents of the tag.
+token.contents 是包含有标签原始内容的字符串
+
+In our example, it’s 'current_time "%Y-%m-%d %I:%M %p"'.
+ 在我们的例子中，它是'current_time "%Y-%m-%d %I:%M %p"' 
+
+The token.split_contents() method separates the arguments on spaces while keeping quoted strings together.
+token.split_contents() 方法按空格拆分参数同时保证引号中的字符串不拆分
+
+Avoid using token.contents.split() (which just uses Python’s standard string-splitting semantics).
+ 应该避免使用token.contents.split() （仅使用Python的标准字符串拆分）
+
+It’s not as robust, as it naively splits on all spaces, including those within quoted strings.
+ 它不够健壮，因为它只是简单的按照所有空格进行拆分，包括那些引号引起来的字符串中的空格
+
+This function is responsible for raising django.template.TemplateSyntaxError, with helpful messages, for any syntax error.
+这个函数可以抛出 django.template.TemplateSyntaxError ，这个异常提供所有语法错误的有用信息
+
+Don’t hard-code the tag’s name in your error messages, because that couples the tag’s name to your function.
+不要把标签名称硬编码在你的错误信息中，因为这样会把标签名称和你的函数耦合在一起
+
+token.split_contents()[0] will always be the name of your tag – even when the tag has no arguments.
+token.split_contents()[0]_总是_记录标签的名字，就算标签没有任何参数
+
+The function returns a CurrentTimeNode (which we’ll create shortly) containing everything the node needs to know about this tag.
+这个函数返回一个 CurrentTimeNode （稍后我们将创建它），它包含了节点需要知道的关于这个标签的全部信息
+
+In this case, it just passes the argument "%Y-%m-%d %I:%M %p".
+ 在这个例子中，它只是传递了参数 "%Y-%m-%d %I:%M %p" 
+
+The leading and trailing quotes from the template tag are removed with format_string[1:-1].
+模板标签开头和结尾的引号使用format_string[1:-1] 除去
+
+Template tag compilation functions must return a Node subclass;
+模板标签编译函数 必须 返回一个 Node 子类，返回其它值都是错的
+
+The second step in writing custom tags is to define a Node subclass that has a render() method.
+编写自定义标签的第二步就是定义一个拥有 render() 方法的 Node 子类
+
+Continuing the preceding example, we need to define CurrentTimeNode:
+ 继续前面的例子，我们需要定义CurrentTimeNode ：
+
+These two functions (__init__() and render()) map directly to the two steps in template processing (compilation and rendering).
+这两个函数（ init() 和 render() ）与模板处理中的两步（编译与渲染）直接对应
+
+Thus, the initialization function only needs to store the format string for later use, and the render() function does the real work.
+ 这样，初始化函数仅仅需要存储后面要用到的格式字符串，而 render() 函数才做真正的工作
+
+Like template filters, these rendering functions should fail silently instead of raising errors.
+与模板过滤器一样，这些渲染函数应该静静地捕获错误，而不是抛出错误
+
+The only time that template tags are allowed to raise errors is at compilation time.
+ 模板标签只允许在编译的时候抛出错误
+
+Finally, you need to register the tag with your module’s Library instance.
+最后，你需要用你模块的Library 实例注册这个标签
+
+Registering custom tags is very similar to registering custom filters (as explained above).
+ 注册自定义标签与注册自定义过滤器非常类似（如前文所述）
+
+Just instantiate a template.Library instance and call its tag() method.
+ 只需实例化一个 template.Library 实例然后调用它的 tag() 方法
+
+For example:
+ 例如：
+
+The tag() method takes two arguments:
+tag() 方法需要两个参数:
+
+The name of the template tag (string).
+模板标签的名字（字符串）
+
+The compilation function.
+编译函数
+
+As with filter registration, it is also possible to use register.tag as a decorator in Python 2.4 and above:
+和注册过滤器类似，也可以在Python2.4及其以上版本中使用 register.tag装饰器：
+
+If you leave off the name argument, as in the second example, Django will use the function’s name as the tag name.
+如果你像在第二个例子中那样忽略 name 参数的话，Django会使用函数名称作为标签名称
+
+The previous section’s example simply returned a value.
+前一节的例子只是简单的返回一个值
+
+Often it’s useful to set template variables instead of returning values.
+ 很多时候设置一个模板变量而非返回值也很有用
+
+That way, template authors can just use the variables that your template tags set.
+ 那样，模板作者就只能使用你的模板标签所设置的变量
+
+To set a variable in the context, use dictionary assignment on the context object in the render() method.
+要在上下文中设置变量，在 render() 函数的context对象上使用字典赋值
+
+Here’s an updated version of CurrentTimeNode that sets a template variable, current_time, instead of returning it:
+ 这里是一个修改过的CurrentTimeNode ，其中设定了一个模板变量 current_time ，并没有返回它：
+
+(We’ll leave the creation of a do_current_time2 function, plus the registration of that function to a current_time2 template tag, as exercises for the reader.)
+(我们把创建函数do_current_time2和注册给current_time2模板标签的工作留作读者练习
+
+Note that render() returns an empty string.
+注意 render() 返回了一个空字符串
+
+render() should always return a string, so if all the template tag does is set a variable, render() should return an empty string.
+ render() 应当总是返回一个字符串，所以如果模板标签只是要设置变量， render() 就应该返回一个空字符串
+
+Here’s how you’d use this new version of the tag:
+你应该这样使用这个新版本的标签：
+
+But there’s a problem with CurrentTimeNode2: the variable name current_time is hard-coded.
+但是 CurrentTimeNode2 有一个问题: 变量名 current_time 是硬编码的
+
+This means you’ll need to make sure your template doesn’t use {{ current_time }} anywhere else, because {% current_time2 %} will blindly overwrite that variable’s value.
+ 这意味着你必须确定你的模板在其它任何地方都不使用 {{ current_time }} ，因为 {% current_time2 %} 会盲目的覆盖该变量的值
+
+A cleaner solution is to make the template tag specify the name of the variable to be set, like so:
+一种更简洁的方案是由模板标签来指定需要设定的变量的名称，就像这样：
+
+To do so, you’ll need to refactor both the compilation function and the Node class, as follows:
+为此，你需要重构编译函数和 Node 类，如下所示：
+
+Now do_current_time() passes the format string and the variable name to CurrentTimeNode3.
+现在 do_current_time() 把格式字符串和变量名传递给 CurrentTimeNode3 
+
+Template tags can work as blocks containing other tags (like {% if %}, {% for %}, etc.).
+模板标签可以像包含其它标签的块一样工作（想想 {% if %} 、 {% for %} 等）
+
+To create a template tag like this, use parser.parse() in your compilation function.
+ 要创建一个这样的模板标签，在你的编译函数中使用 parser.parse() 
+
+Here’s how the standard {% comment %} tag is implemented:
+标准的 {% comment %} 标签是这样实现的：
+
+parser.parse() takes a tuple of names of template tags to parse until.
+parser.parse() 接收一个包含了需要分析的模板标签名的元组作为参数
+
+It returns an instance of django.template.NodeList, which is a list of all Node objects that the parser encountered before it encountered any of the tags named in the tuple.
+ 它返回一个django.template.NodeList实例，它是一个包含了所有_Node_对象的列表，这些对象是解析器在解析到任一元组中指定的标签之前遇到的内容.
+
+So in the preceding example, nodelist is a list of all nodes between {% comment %} and {% endcomment %}, not counting {% comment %} and {% endcomment %} themselves.
+因此在前面的例子中， nodelist 是在 {% comment %} 和 {% endcomment %} 之间所有节点的列表，不包括{% comment %} 和 {% endcomment %} 自身
+
+After parser.parse() is called, the parser hasn’t yet “consumed” the {% endcomment %} tag, so the code needs to explicitly call parser.delete_first_token() to prevent that tag from being processed twice.
+在 parser.parse() 被调用之后，分析器还没有清除 {% endcomment %} 标签，因此代码需要显式地调用parser.delete_first_token() 来防止该标签被处理两次
+
+Then CommentNode.render() simply returns an empty string.
+之后 CommentNode.render() 只是简单地返回一个空字符串
+
+Anything between {% comment %} and {% endcomment %} is ignored.
+ 在 {% comment %} 和 {% endcomment %} 之间的所有内容都被忽略
+
+In the previous example, do_comment() discarded everything between {% comment %} and {% endcomment %}.
+在前一个例子中， do_comment() 抛弃了{% comment %} 和 {% endcomment %} 之间的所有内容
+
+It’s also possible to do something with the code between template tags instead.
+当然也可以修改和利用下标签之间的这些内容
+
+For example, here’s a custom template tag, {% upper %}, that capitalizes everything between itself and {% endupper %}:
+例如，这个自定义模板标签{% upper %}，它会把它自己和{% endupper %}之间的内容变成大写：
+
+As in the previous example, we’ll use parser.parse().
+就像前面的例子一样，我们将使用 parser.parse() 
+
+This time, we pass the resulting nodelist to Node:
+这次，我们将产生的 nodelist 传递给 Node ：
+
+The only new concept here is self.nodelist.render(context) in UpperNode.render().
+这里唯一的一个新概念是 UpperNode.render() 中的 self.nodelist.render(context) 
+
+This simply calls render() on each Node in the node list.
+它对节点列表中的每个Node 简单的调用 render() 
+
+For more examples of complex rendering, see the source code for {% if %}, {% for %}, {% ifequal %}, and {% ifchanged %}.
+更多的复杂渲染示例请查看 django/template/defaulttags.py 中的 {% if %} 、 {% for %} 、 {% ifequal %}和 {% ifchanged %} 的代码
+
+Many template tags take a single argument – a string or a template variable reference – and return a string after doing some processing based solely on the input argument and some external information.
+许多模板标签接收单一的字符串参数或者一个模板变量引用，然后独立地根据输入变量和一些其它外部信息进行处理并返回一个字符串
+
+For example, the current_time tag we wrote earlier is of this variety.
+ 例如，我们先前写的current_time标签就是这样一个例子
+
+We give it a format string, and it returns the time as a string.
+ 我们给定了一个格式化字符串，然后它返回一个字符串形式的时间
+
+To ease the creation of these types of tags, Django provides a helper function, simple_tag.
+为了简化这类标签，Django提供了一个帮助函数simple_tag
+
+This function, which is a method of django.template.Library, takes a function that accepts one argument, wraps it in a render function and the other necessary bits mentioned previously, and registers it with the template system.
+这个函数是django.template.Library的一个方法，它接受一个只有一个参数的函数作参数，把它包装在render函数和之前提及过的其他的必要单位中，然后通过模板系统注册标签
+
+Our earlier current_time function could thus be written like this:
+我们之前的的 current_time 函数于是可以写成这样：
+
+In Python 2.4, the decorator syntax also works:
+在Python 2.4中，也可以使用装饰器语法：
+
+Notice a couple of things to notice about the simple_tag helper function:
+有关 simple_tag 辅助函数，需要注意下面一些事情：
+
+Only the (single) argument is passed into our function.
+传递给我们的函数的只有（单个）参数
+
+Checking for the required number of arguments has already been done by the time our function is called, so we don’t need to do that.
+在我们的函数被调用的时候，检查必需参数个数的工作已经完成了，所以我们不需要再做这个工作
+
+The quotes around the argument (if any) have already been stripped away, so we receive a plain Unicode string.
+参数两边的引号（如果有的话）已经被截掉了，所以我们会接收到一个普通Unicode字符串
+
+Another common template tag is the type that displays some data by rendering another template.
+另外一类常用的模板标签是通过渲染 其他 模板显示数据的
+
+For example, Django’s admin interface uses custom template tags to display the buttons along the bottom of the “add/change” form pages.
+ 比如说，Django的后台管理界面，它使用了自定义的模板标签来显示新增/编辑表单页面下部的按钮
+
+Those buttons always look the same, but the link targets change depending on the object being edited.
+ 那些按钮看起来总是一样的，但是链接却随着所编辑的对象的不同而改变
+
+They’re a perfect case for using a small template that is filled with details from the current object.
+ 这就是一个使用小模板很好的例子，这些小模板就是当前对象的详细信息
+
+These sorts of tags are called inclusion tags.
+这些排序标签被称为 包含标签 
+
+Writing inclusion tags is probably best demonstrated by example.
+如何写包含标签最好通过举例来说明
+
+Let’s write a tag that produces a list of books for a given Author object.
+ 让我们来写一个能够产生指定作者对象的书籍清单的标签
+
+We’ll use the tag like this:
+ 我们将这样利用标签：
+
+The result will be something like this:
+结果将会像下面这样：
+
+First, we define the function that takes the argument and produces a dictionary of data for the result.
+首先，我们定义一个函数，通过给定的参数生成一个字典形式的结果
+
+Notice that we need to return only a dictionary, not anything more complex.
+ 需要注意的是，我们只需要返回字典类型的结果就行了，不需要返回更复杂的东西
+
+This will be used as the context for the template fragment:
+ 这将被用来作为模板片段的内容：
+
+Next, we create the template used to render the tag’s output.
+接下来，我们创建用于渲染标签输出的模板
+
+Following our example, the template is very simple:
+ 在我们的例子中，模板很简单：
+
+Finally, we create and register the inclusion tag by calling the inclusion_tag() method on a Library object.
+最后，我们通过对一个 Library 对象使用 inclusion_tag() 方法来创建并注册这个包含标签
+
+Following our example, if the preceding template is in a file called book_snippet.html, we register the tag like this:
+在我们的例子中，如果先前的模板在 polls/result_snippet.html 文件中，那么我们这样注册标签：
+
+Python 2.4 decorator syntax works as well, so we could have written this, instead:
+Python 2.4装饰器语法也能正常工作，所以我们可以这样写：
+
+Sometimes, your inclusion tags need access to values from the parent template’s context.
+有时候，你的包含标签需要访问父模板的context
+
+To solve this, Django provides a takes_context option for inclusion tags.
+ 为了解决这个问题，Django为包含标签提供了一个takes_context 选项
+
+If you specify takes_context in creating an inclusion tag, the tag will have no required arguments, and the underlying Python function will have one argument: the template context as of when the tag was called.
+ 如果你在创建模板标签时，指明了这个选项，这个标签就不需要参数，并且下面的Python函数会带一个参数： 就是当这个标签被调用时的模板context
+
+For example, say you’re writing an inclusion tag that will always be used in a context that contains home_link and home_title variables that point back to the main page.
+例如，你正在写一个包含标签，该标签包含有指向主页的 home_link 和 home_title 变量
+
+Here’s what the Python function would look like:
+ Python函数会像这样：
+
+(Note that the first parameter to the function must be called context.)
+（注意函数的第一个参数 必须 是 context 
+
+The template link.html might contain the following:
+模板 link.html 可能包含下面的东西：
+
+Then, anytime you want to use that custom tag, load its library and call it without any arguments, like so:
+然后您想使用自定义标签时，就可以加载它的库，然后不带参数地调用它，就像这样：
+
+Writing Custom Template Loaders¶
+编写自定义模板加载器
+
+Django’s built-in template loaders (described in the “Inside Template Loading” section above) will usually cover all your template-loading needs, but it’s pretty easy to write your own if you need special loading logic.
+Djangos 内置的模板加载器（在先前的模板加载内幕章节有叙述）通常会满足你的所有的模板加载需求，但是如果你有特殊的加载需求的话，编写自己的模板加载器也会相当简单
+
+For example, you could load templates from a database, or directly from a Subversion repository using Subversion’s Python bindings, or (as shown shortly) from a ZIP archive.
+ 比如：你可以从数据库中，或者利用Python的绑定直接从Subversion库中，更或者从一个ZIP文档中加载模板
+
+A template loader – that is, each entry in the TEMPLATE_LOADERS setting – is expected to be a callable object with this interface:
+模板加载器，也就是 TEMPLATE_LOADERS 中的每一项，都要能被下面这个接口调用：
+
+The template_name argument is the name of the template to load (as passed to loader.get_template() or loader.select_template()), and template_dirs is an optional list of directories to search instead of TEMPLATE_DIRS.
+参数 template_name 是所加载模板的名称 (和传递给 loader.get_template() 或者 loader.select_template()一样), 而 template_dirs 是一个可选的代替TEMPLATE_DIRS的搜索目录列表
+
+If a loader is able to successfully load a template, it should return a tuple: (template_source, template_path).
+如果加载器能够成功加载一个模板, 它应当返回一个元组： (template_source, template_path) 
+
+Here, template_source is the template string that will be compiled by the template engine, and template_path is the path the template was loaded from.
+在这里的template_source 就是将被模板引擎编译的的模板字符串，而 template_path 是被加载的模板的路径
+
+That path might be shown to the user for debugging purposes, so it should quickly identify where the template was loaded from.
+ 由于那个路径可能会出于调试目的显示给用户，因此它应当很快的指明模板从哪里加载
+
+If the loader is unable to load a template, it should raise django.template.TemplateDoesNotExist.
+如果加载器加载模板失败，那么就会触发 django.template.TemplateDoesNotExist 异常
+
+Each loader function should also have an is_usable function attribute.
+每个加载函数都应该有一个名为 is_usable 的函数属性
+
+This is a Boolean that informs the template engine whether this loader is available in the current Python installation.
+ 这个属性是一个布尔值，用于告知模板引擎这个加载器是否在当前安装的Python中可用
+
+For example, the eggs loader (which is capable of loading templates from Python eggs) sets is_usable to False if the pkg_resources module isn’t installed, because pkg_resources is necessary to read data from eggs.
+ 例如，如果 pkg_resources 模块没有安装的话，eggs加载器（它能够从python eggs中加载模板）就应该把 is_usable 设为 False ，因为必须通过 pkg_resources 才能从eggs中读取数据
+
+An example should help clarify all of this.
+一个例子可以清晰地阐明一切
+
+Here’s a template loader function that can load templates from a ZIP file.
+ 这儿是一个模板加载函数，它可以从ZIP文件中加载模板
+
+It uses a custom setting, TEMPLATE_ZIP_FILES, as a search path instead of TEMPLATE_DIRS, and it expects each item on that path to be a ZIP file containing templates:
+ 它使用了自定义的设置 TEMPLATE_ZIP_FILES 来取代了 TEMPLATE_DIRS 用作查找路径，并且它假设在此路径上的每一个文件都是包含模板的ZIP文件：
+
+The only step left if we want to use this loader is to add it to the TEMPLATE_LOADERS setting.
+我们要想使用它，还差最后一步，就是把它加入到 TEMPLATE_LOADERS 
+
+If we put this code in a package called mysite.zip_loader, then we add mysite.zip_loader.load_template_source to TEMPLATE_LOADERS.
+ 如果我们将这个代码放入一个叫mysite.zip_loader的包中，那么我们要把mysite.zip_loader.load_template_source加到TEMPLATE_LOADERS中
+
+Configuring the Template System in Standalone Mode¶
+配置独立模式下的模板系统
+
+Note
+注意：
+
+This section is only of interest to people trying to use the template system as an output component in another application.
+这部分只针对于对在其他应用中使用模版系统作为输出组件感兴趣的人
+
+If you are using the template system as part of a Django application, the information presented here doesn’t apply to you.
+ 如果你是在Django应用中使用模版系统，请略过此部分
+
+Normally, Django loads all the configuration information it needs from its own default configuration file, combined with the settings in the module given in the DJANGO_SETTINGS_MODULE environment variable.
+通常，Django会从它的默认配置文件和由 DJANGO_SETTINGS_MODULE 环境变量所指定的模块中加载它需要的所有配置信息
+
+(This was explained in “A special Python prompt” in Chapter 4.) But if you’re using the template system independently of the rest of Django, the environment variable approach isn’t very convenient, because you probably want to configure the template system in line with the rest of your application rather than dealing with settings files and pointing to them via environment variables.
+ （这点在第四章的”特殊的Python命令提示行”一节解释过
+
+To solve this problem, you need to use the manual configuration option described fully in Appendix D.
+为了解决这个问题，你需要使用附录D中所描述的手动配置选项
+
+In a nutshell, you need to import the appropriate pieces of the template system and then, before you call any of the template functions, call django.conf.settings.configure() with any settings you wish to specify.
+概括的说，你需要导入正确的模板中的片段，然后在你访问任一个模板函数之前，首先用你想指定的配置访问Django.conf.settings.configure()
+
+You might want to consider setting at least TEMPLATE_DIRS (if you are going to use template loaders), DEFAULT_CHARSET (although the default of utf-8 is probably fine) and TEMPLATE_DEBUG.
+你可能会考虑至少要设置 TEMPLATE_DIRS （如果你打算使用模板加载器）， DEFAULT_CHARSET （尽管默认的utf-8 编码相当好用），以及 TEMPLATE_DEBUG 
+
+All available settings are described in Appendix D, and any setting starting with TEMPLATE_ is of obvious interest.
+所有可用的选项在附录D中都有详细描述，所有以 TEMPLATE_开头的选项都可能使你感兴趣
+
+What’s Next¶
+接下来做什么
+
+Continuing this section’s theme of advanced topics, the next chapter covers advanced usage of Django models.
+延续本章的高级话题，下一章 会继续讨论Django模型的高级用法
+
+© Copyright 2012, Matt Behrens.
+www.shoucewang.com. All Rights Reserved. 手册网 版权所有
+

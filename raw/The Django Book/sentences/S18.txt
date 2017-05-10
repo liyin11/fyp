@@ -1,0 +1,552 @@
+Chapter 19: Internationalization¶
+第十九章：国际化
+
+Django was originally developed right in the middle of the United States – quite literally, as Lawrence, Kansas, is less than 40 miles from the geographic center of the continental United States.
+Django诞生于美国中部堪萨斯的劳伦斯，距美国的地理中心不到40英里
+
+Like most open source projects, though, Django’s community grew to include people from all over the globe.
+ 像大多数开源项目一样，Djano社区逐渐开始包括来自全球各地的许多参与者
+
+As Django’s community became increasingly diverse, internationalization and localization became increasingly important.
+ 鉴于Django社区逐渐变的多样性，_国际化_和_本地化_逐渐变得很重要
+
+Because many developers have at best a fuzzy understanding of these terms, we’ll define them briefly.
+ 由于很多开发者对这些措辞比较困惑，所以我们将简明的定义一下它们
+
+Internationalization refers to the process of designing programs for the potential use of any locale.
+国际化* 是指为了该软件在任何地区的潜在使用而进行程序设计的过程
+
+This includes marking text (such as UI elements and error messages) for future translation, abstracting the display of dates and times so that different local standards may be observed, providing support for differing time zones, and generally making sure that the code contains no assumptions about the location of its users.
+ 它包括了为将来翻译而标记的文本（比如用户界面要素和错误信息等）、日期和时间的抽象显示以便保证不同地区的标准得到遵循、为不同时区提供支持，并且一般确保代码中不会存在关于使用者所在地区的假设
+
+You’ll often see “internationalization” abbreviated I18N.
+ 您会经常看到国际化被缩写为“I18N”(18表示Internationlization这个单词首字母I和结尾字母N之间的字母有18个)
+
+Localization refers to the process of actually translating an internationalized program for use in a particular locale.
+Django本身是完全国际化了的，所有的字符串均因翻译所需而被标记，并且设定了与地域无关的显示控制值，如时间和日期
+
+You’ll sometimes see “localization” abbreviated as L10N.
+ Django是带着50个不同的本地化文件发行的
+
+Django itself is fully internationalized;
+这些本地化文件所使用的国际化框架同样也可以被用在您自己的代码和模板中
+
+The same internationalization framework used for these localizations is available for you to use in your own code and templates.
+您只需要添加少量的挂接代码到您的Python代码和模板中
+
+To use this framework, you’ll need to add a minimal number of hooks to your Python code and templates.
+Django会根据用户的语言偏好，在线地运用这些挂接指令去翻译Web应用程序
+
+Django takes care of using these hooks to translate Web applications, on the fly, according to users’ language preferences.
+本质上来说，Django做两件事情：
+
+Essentially, Django does two things:
+它让开发者和模板的作者指定他们的应用程序的哪些部分应该被翻译
+
+Note
+备注:
+
+Django’s translation machinery uses GNU gettext (http://www.gnu.org/software/gettext/) via the standard gettext module that comes with Python.
+Django的翻译机制是使用 GNU gettext (http://www.gnu.org/software/gettext/)，具体为Python自带的标准模块 gettext 
+
+If You Don’t Need Internationalization:
+如果您不需要国际化:
+
+Django’s internationalization hooks are enabled by default, which incurs a small bit of overhead.
+Django的国际化挂接是默认开启的，这可能会给Django的运行增加一点点开销
+
+If you don’t use internationalization, you should set USE_I18N = False in your settings file.
+ 如果您不需要国际化支持，那么您可以在您的设置文件中设置 USE_I18N = False 
+
+If USE_I18N is set to False, then Django will make some optimizations so as not to load the internationalization machinery.
+ 如果 USE_I18N 被设为 False ，那么Django会进行一些优化，而不加载国际化支持机制
+
+You’ll probably also want to remove 'django.core.context_processors.i18n' from your TEMPLATE_CONTEXT_PROCESSORS setting.
+您也可以从您的 TEMPLATE_CONTEXT_PROCESSORS 设置中移除 'django.core.context_processors.i18n' 
+
+The three steps for internationalizing your Django application are:
+对你的Django应用进行国际化的三个步骤:
+
+We’ll cover each one of these steps in detail.
+第一步：在你的Python代码和模板中嵌入待翻译的字符串
+
+Specify a translation string by using the function ugettext().
+显然，你也可以不使用别名来编码
+
+It’s convention to import this as a shorter alias, _, to save typing.
+ 下面这个例子和前面两个例子相同：
+
+In this example, the text "Welcome to my site." is marked as a translation string:
+翻译字符串对于计算出来的值同样有效
+
+Obviously, you could code this without using the alias.
+翻译对变量也同样有效
+
+This example is identical to the previous one:
+ 这里是一个同样的例子：
+
+Translation works on computed values.
+（以上两个例子中，对于使用变量或计算值，需要注意的一点是Django的待翻译字符串检测工具，make-messages.py ，将不能找到这些字符串
+
+This example is identical to the previous two:
+ 稍后，在 makemessages 中会有更多讨论
+
+Translation works on variables.
+你传递给 _() 或 gettext() 的字符串可以接受占位符，由Python标准命名字符串插入句法指定的
+
+Again, here’s an identical example:
+ 例如：
+
+(The caveat with using variables or computed values, as in the previous two examples, is that Django’s translation-string-detecting utility, django-admin.py makemessages, won’t be able to find these strings.
+这项技术使得特定语言的译文可以对这段文本进行重新排序
+
+More on makemessages later.)
+ 比如，一段英语译文可能是"Today is November 26." ，而一段西班牙语译文会是 "Hoy es 26 de Noviembre." 使用占位符（月份和日期）交换它们的位置
+
+The strings you pass to _() or ugettext() can take placeholders, specified with Python’s standard named-string interpolation syntax.
+由于这个原因，无论何时当你有多于一个单一参数时，你应当使用命名字符串插入（例如： %(day)s ）来替代位置插入（例如： %s or %d ）
+
+Example:
+ 如果你使用位置插入的话，翻译动作将不能重新排序占位符文本
+
+This technique lets language-specific translations reorder the placeholder text.
+使用 django.utils.translation.gettext_noop() 函数来标记一个不需要立即翻译的字符串
+
+For example, an English translation may be "Today is November 26.", while a Spanish translation may be "Hoy es 26 de Noviembre." – with the placeholders (the month and the day) with their positions swapped.
+ 这个串会稍后从变量翻译
+
+For this reason, you should use named-string interpolation (e.g., %(day)s) instead of positional interpolation (e.g., %s or %d) whenever you have more than a single parameter.
+使用这种方法的环境是，有字符串必须以原始语言的形式存储（如储存在数据库中的字符串）而在最后需要被翻译出来（如显示给用户时）
+
+Use the function django.utils.translation.ugettext_noop() to mark a string as a translation string without translating it.
+使用 django.utils.translation.gettext_lazy() 函数，使得其中的值只有在访问时才会被翻译，而不是在gettext_lazy() 被调用时翻译
+
+Use this if you have constant strings that should be stored in the source language because they are exchanged over systems or users – such as strings in a database – but should be translated at the last possible point in time, such as when the string is presented to the user.
+例如：要翻译一个模型的 help_text，按以下进行：
+
+Use the function django.utils.translation.ugettext_lazy() to translate strings lazily – when the value is accessed rather than when the ugettext_lazy() function is called.
+在这个例子中， ugettext_lazy() 将字符串作为惰性参照存储，而不是实际翻译
+
+For example, to translate a model’s help_text, do the following:
+在Python中，无论何处你要使用一个unicode 字符串（一个unicode 类型的对象），您都可以使用一个ugettext_lazy() 调用的结果
+
+In this example, ugettext_lazy() stores a lazy reference to the string – not the actual translation.
+如果你曾经见到到像"hello"这样的输出，你就可能在一个字节串中插入了ugettext_lazy()的结果
+
+The translation itself will be done when the string is used in a string context, such as template rendering on the Django admin site.
+ 在您的代码中，那是一个漏洞
+
+The result of a ugettext_lazy() call can be used wherever you would use a unicode string (an object with type unicode) in Python.
+如果觉得 gettextlazy 太过冗长，可以用  （下划线）作为别名，就像这样：
+
+If you ever see output that looks like "hello <django.utils.functional...>", you have tried to insert the result of ugettext_lazy() into a bytestring.
+在Django模型中总是无一例外的使用惰性翻译
+
+That’s a bug in your code.
+ 为了翻译，字段名和表名应该被标记
+
+If you don’t like the verbose name ugettext_lazy, you can just alias it as _ (underscore), like so:
+使用django.utils.translation.ungettext()来指定以复数形式表示的消息
+
+Always use lazy translations in Django models.
+ngettext 函数包括三个参数： 单数形式的翻译字符串，复数形式的翻译字符串，和对象的个数（将以 count 变量传递给需要翻译的语言）
+
+Use the function django.utils.translation.ungettext() to specify pluralized messages.
+Django模板使用两种模板标签，且语法格式与Python代码有些许不同
+
+Example:
+ 为了使得模板访问到标签，需要将{% load i18n %} 放在模板最前面
+
+ungettext takes three arguments: the singular translation string, the plural translation string and the number of objects (which is passed to the translation languages as the count variable).
+这个{% trans %}模板标记翻译一个常量字符串 (括以单或双引号) 或 可变内容：
+
+Translation in Django templates uses two template tags and a slightly different syntax than in Python code.
+使用模板过滤器来翻译一个模板表达式，需要在翻译的这段文本中将表达式绑定到一个本地变量中：
+
+The {% trans %} template tag translates either a constant string (enclosed in single or double quotes) or variable content:
+如果需要在 blocktrans 标签内绑定多个表达式，可以用 and 来分隔：
+
+If the noop option is present, variable lookup still takes place but the translation is skipped.
+为了表示单复数相关的内容，需要在 {% blocktrans %} 和 {% endblocktrans %} 之间使用 {% plural %} 标签来指定单复数形式，例如：
+
+It’s not possible to mix a template variable inside a string within {% trans %}.
+其内在机制是，所有的块和内嵌翻译调用相应的 gettext 或 ngettext 
+
+To translate a template expression – say, using template filters – you need to bind the expression to a local variable for use within the translation block:
+每一个RequestContext可以访问三个指定翻译变量：
+
+If you need to bind more than one expression inside a blocktrans tag, separate the pieces with and:
+{{ LANGUAGES }} 是一系列元组组成的列表，每个元组的第一个元素是语言代码，第二个元素是用该语言表示的语言名称
+
+To pluralize, specify both the singular and plural forms with the {% plural %} tag, which appears within {% blocktrans %} and {% endblocktrans %}.
+作为一二字符串，LANGUAGE_CODE是当前用户的优先语言
+
+Example:
+ 例如： en-us
+
+Internally, all block and inline translations use the appropriate ugettext / ungettext call.
+如果你不用这个RequestContext扩展，你可以用3个标记到那些值：
+
+Each RequestContext has access to three translation-specific variables:
+这些标记亦要求一个 {% load i18n %} 
+
+If you don’t use the RequestContext extension, you can get those values with three tags:
+翻译的hook在任何接受常量字符串的模板块标签内也是可以使用的
+
+These tags also require a {% load i18n %}.
+在这种情况下，标记和过滤器两个都会看到已经翻译的字符串，所有它们并不需要提防翻译操作
+
+Translation hooks are also available within any template block tag that accepts constant strings.
+备注:
+
+In this case, both the tag and the filter will see the already-translated string, so they don’t need to be aware of translations.
+在这个例子中，翻译结构将放过字符串"yes,no"，而不是单独的字符串"yes"和"no"
+
+Note
+在模型和公用函数中，使用ugettext_lazy()和ungettext_lazy()来标记字符串是很普遍的操作
+
+In this example, the translation infrastructure will be passed the string "yes,no", not the individual strings "yes" and "no".
+标准Python字符串拼接(''.join([...]) ) 将不会工作在包括惰性翻译对象的列表上
+
+The translated string will need to contain the comma so that the filter parsing code knows how to split up the arguments.
+ 作为替代，你可以使用django.utils.translation.string_concat()， 这个函数创建了一个惰性对象，其连接起它的内容 并且 仅当结果被包括在一个字符串中时转换它们为字符串 
+
+For example, a German translator might translate the string "yes,no" as "ja,nein" (keeping the comma intact).
+ 例如：
+
+Using ugettext_lazy() and ungettext_lazy() to mark strings in models and utility functions is a common operation.
+如果你写你自己的类似函数并且与翻译打交道，当第一个参数是惰性翻译对象时，你会面临“做什么”的难题
+
+When you’re working with these objects elsewhere in your code, you should ensure that you don’t accidentally convert them to strings, because they should be converted as late as possible (so that the correct locale is in effect).
+ 因为你可能在视图之外使用这个函数（并且因此当前线程的本地设置将会不正确），所以你不想立即转换其为一个字符串
+
+Standard Python string joins (''.join([...])) will not work on lists containing lazy translation objects.
+象这种情况，请使用 django.utils.functional.allow_lazy() 修饰符
+
+Instead, you can use django.utils.translation.string_concat(), which creates a lazy object that concatenates its contents and converts them to strings only when the result is included in a string.
+ 它修改这个函数以便 _假如_第一个参数是一个惰性翻译， 这个函数的赋值会被延后直到它需要被转化为一个字符串为止
+
+In this case, the lazy translations in result will only be converted to strings when result itself is used in a string (usually at template rendering time).
+例如：
+
+Django offers many utility functions (particularly in django.utils) that take a string as their first argument and do something to that string.
+allow_lazy() 装饰符 采用了另外的函数来装饰，以及一定量的，原始函数可以返回的特定类型的额外参数 (*args ) 
+
+These functions are used by template filters as well as directly in other code.
+ 通常，在这里包括 unicode 就足够了并且确定你的函数将仅返回Unicode字符串
+
+If you write your own similar functions and deal with translations, you’ll face the problem of what to do when the first argument is a lazy translation object.
+使用这个修饰符意味着你能写你的函数并且假设输入是合适的字符串，然后在末尾添加对惰性翻译对象的支持
+
+For example:
+地域限制
+
+The allow_lazy() decorator takes, in addition to the function to decorate, a number of extra arguments (*args) specifying the type(s) that the original function can return.
+Django不支持把你的应用本地化到一个连它自己都还没被翻译的地域
+
+Usually, it’s enough to include unicode here and ensure that your function returns only Unicode strings.
+ 在这种情况下，它将忽略你的翻译文件
+
+Using this decorator means you can write your function and assume that the input is a proper string, then add support for lazy translation objects at the end.
+第一步，就是为一种语言创建一个信息文件
+
+Once you’ve tagged your strings for later translation, you need to write (or obtain) the language translations themselves.
+这段脚本应该在三处之一运行：
+
+Locale restrictions
+Django项目根目录
+
+Django does not support localizing your application into a locale for which Django itself has not been translated.
+您Django应用的根目录
+
+The first step is to create a message file for a new language.
+用逗号和（或）使用-e或--extension来分隔多项扩展名：
+
+Django comes with a tool, django-admin.py makemessages, that automates the creation and upkeep of these files.
+当创建JavaScript翻译目录时，你需要使用特殊的Django域：not -e js 
+
+...where de is the language code for the message file you want to create.
+没有gettext
+
+The script should be run from one of three places:
+如果没有安装 gettext 组件， make-messages.py 将会创建空白文件
+
+This script runs over your project source tree or your application source tree and pulls out all strings marked for translation.
+工作在Windows上么
+
+By default django-admin.py makemessages examines every file that has the .html file extension.
+如果你正在使用Windows，且需要安装GNU gettext共用程序以便 django-admin makemessages 可以工作，请参看下面Windows小节中gettext部分以获得更多信息
+
+Separate multiple extensions with commas and/or use -e or --extension multiple times:
+.po 文件格式很直观
+
+When creating JavaScript translation catalogs (which we’ll cover later in this chapter,) you need to use the special ‘djangojs’ domain, not -e js.
+举个例子，如果Django应用程序包括一个 "Welcome to my site." 的待翻译字符串 ，像这样：
+
+No gettext?
+则django-admin.py makemessages将创建一个 .po 文件来包含以下片段的消息：
+
+If you don’t have the gettext utilities installed, django-admin.py makemessages will create empty files.
+快速解释：
+
+Working on Windows?
+msgid 是在源文件中出现的翻译字符串
+
+If you’re using Windows and need to install the GNU gettext utilities so django-admin makemessages works, see the “gettext on Windows” section below for more information.
+msgstr 是相应语言的翻译结果
+
+The format of .po files is straightforward.
+对于比较长的信息也有其处理方法
+
+Each .po file contains a small bit of metadata, such as the translation maintainer’s contact information, but the bulk of the file is a list of messages – simple mappings between translation strings and the actual translated text for the particular language.
+ msgstr （或 msgid ）后紧跟着的字符串为一个空字符串
+
+For example, if your Django app contained a translation string for the text "Welcome to my site.", like so:
+若要对新创建的翻译字符串校验所有的源代码和模板，并且更新所有语言的信息文件，可以运行以下命令：
+
+...then django-admin.py makemessages will have created a .po file containing the following snippet – a message:
+创建信息文件之后，每次对其做了修改，都需要将它重新编译成一种更有效率的形式，供 gettext 使用
+
+A quick explanation:
+这个工具作用于所有有效的 .po 文件，创建优化过的二进制 .mo 文件供 gettext 使用
+
+Long messages are a special case.
+就是这样了
+
+There, the first string directly after the msgstr (or msgid) is an empty string.
+ 你的翻译成果已经可以使用了
+
+After you create your message file – and each time you make changes to it – you’ll need to compile it into a more efficient form, for use by gettext.
+如果你只是想要用本地语言来运行Django，并且该语言的语言文件存在，只需要简单地设置 LANGUAGE_CODE 即可
+
+This tool runs over all available .po files and creates .mo files, which are binary files optimized for use by gettext.
+如果要让每一个使用者各自指定语言偏好，就需要使用 LocaleMiddleware 
+
+In the same directory from which you ran django-admin.py makemessages, run django-admin.py compilemessages like this:
+ LocaleMiddleware 使得Django基于请求的数据进行语言选择，从而为每一位用户定制内容
+
+That’s it.
+使用 LocaleMiddleware 需要在 MIDDLEWARE_CLASSES 设置中增加'django.middleware.locale.LocaleMiddleware' 
+
+Your translations are ready for use.
+ 中间件的顺序是有影响的，最好按照依照以下要求：
+
+Once you’ve prepared your translations – or, if you just want to use the translations that come with Django – you’ll just need to activate translation for your app.
+例如， MIDDLE_CLASSES 可能会是如此：
+
+Behind the scenes, Django has a very flexible model of deciding which language should be used – installation-wide, for a particular user, or both.
+MIDDLEWARE_CLASSES = ( 'django.contrib.sessions.middleware.SessionMiddleware', 'django.middleware.locale.LocaleMiddleware', 'django.middleware.common.CommonMiddleware', )
+
+To set an installation-wide language preference, set LANGUAGE_CODE.
+（更多关于中间件的内容，请参阅第17章）
+
+If all you want to do is run Django with your native language, and a language file is available for your language, all you need to do is set LANGUAGE_CODE.
+LocaleMiddleware 按照如下算法确定用户的语言:
+
+If you want to let each individual user specify which language he or she prefers, use LocaleMiddleware.
+首先，在当前用户的 session 的中查找django_language键
+
+To use LocaleMiddleware, add 'django.middleware.locale.LocaleMiddleware' to your MIDDLEWARE_CLASSES setting.
+如未找到，它会找寻一个cookie
+
+For example, your MIDDLEWARE_CLASSES might look like this:
+还找不到的话，它会在 HTTP 请求头部里查找Accept-Language， 该头部是你的浏览器发送的，并且按优先顺序告诉服务器你的语言偏好
+
+(For more on middleware, see Chapter 17.)
+备注：
+
+LocaleMiddleware tries to determine the user’s language preference by following this algorithm:
+在上述每一处，语种偏好应作为字符串，以标准的语种格式出现
+
+Notes:
+如果一个基本语种存在而亚语种没有指定，Django将使用基本语种
+
+In each of these places, the language preference is expected to be in the standard language format, as a string.
+只有在 LANGUAGES 设置中列出的语言才能被选用
+
+For example, Brazilian Portuguese is pt-br.
+ 若希望将语言限制为所提供语言中的某些（因为应用程序并不提供所有语言的表示），则将 LANGUAGES 设置为所希望提供语言的列表，例如： 例如：
+
+If a base language is available but the sublanguage specified is not, Django uses the base language.
+上面这个例子限制了语言偏好只能是德语和英语（包括它们的子语言，如 de-ch 和 en-us ）
+
+Only languages listed in the LANGUAGES setting can be selected.
+如果自定义了 LANGUAGES ，将语言标记为翻译字符串是可以的，但是，请不要使用django.utils.translation 中的 gettext() （决不要在settings文件中导入 django.utils.translation ，因为这个模块本身是依赖于settings，这样做会导致无限循环），而是使用一个“虚构的” gettext() 
+
+This example restricts languages that are available for automatic selection to German and English (and any sublanguage, like de-ch or en-us).
+解决方案就是使用一个“虚假的” gettext() 
+
+If you define a custom LANGUAGES setting, as explained in the previous bullet, it’s OK to mark the languages as translation strings – but use a “dummy” ugettext() function, not the one in django.utils.translation.
+这样做的话， make-messages.py 仍会寻找并标记出将要被翻译的这些字符串，但翻译不会在运行时进行，故而需要在任何使用 LANGUAGES 的代码中用“真实的” ugettext()
+
+The solution is to use a “dummy” ugettext() function.
+LocaleMiddleware 只能选择那些Django已经提供了基础翻译的语言
+
+Here’s a sample settings file:
+ 如果想要在应用程序中对Django中还没有基础翻译的语言提供翻译，那么必须至少先提供该语言的基本的翻译
+
+With this arrangement, django-admin.py makemessages will still find and mark these strings for translation, but the translation won’t happen at runtime – so you’ll have to remember to wrap the languages in the real ugettext() in any code that uses LANGUAGES at runtime.
+以英语的 .po 文件为基础，翻译其中的技术相关的信息，可能还包括一些使之生效的信息
+
+The LocaleMiddleware can only select languages for which there is a Django-provided base translation.
+技术相关的信息ID很容易被认出来：它们都是大写的
+
+If you want to provide translations for your application that aren’t already in the set of translations in Django’s source tree, you’ll want to provide at least basic translations for that language.
+ 这些信息ID的翻译与其他信息不同:你需要提供其对应的本地化内容
+
+For example, Django uses technical message IDs to translate date formats and time formats – so you will need at least those translations for the system to work correctly.
+ 例如，对于 DATETIME_FORMAT （或 DATE_FORMAT 、 TIME_FORMAT ），应该提供希望在该语言中使用的格式化字符串
+
+A good starting point is to copy the English .po file and to translate at least the technical messages – maybe the validation messages, too.
+一旦LocaleMiddleware决定用户的偏好，它会让这个偏好作为request.LANGUAGE_CODE对每一个HttpRequest有效
+
+Technical message IDs are easily recognized;
+注意，对于静态翻译（无中间件）而言，此语言在settings.LANGUAGE_CODE中，而对于动态翻译（中间件），它在request.LANGUAGE_CODE中
+
+Note that, with static (middleware-less) translation, the language is in settings.LANGUAGE_CODE, while with dynamic (middleware) translation, it’s in request.LANGUAGE_CODE.
+首先，Django在该视图所在的应用程序文件夹中寻找 locale 目录
+
+Django looks for translations by following this algorithm:
+所有的信息文件库都是以同样方式组织的： 它们是：
+
+This way, you can write applications that include their own translations, and you can override base translations in your project path.
+$APPPATH/locale//LC_MESSAGES/django.(po|mo)
+
+All message file repositories are structured the same way.
+$PROJECTPATH/locale//LC_MESSAGES/django.(po|mo)
+
+To create message files, you use the same django-admin.py makemessages tool as with the Django message files.
+所有在settings文件中 LOCALE_PATHS 中列出的路径以其列出的顺序搜索/LC_MESSAGES/django.(po|mo)
+
+You can also run django-admin.py compilemessages --settings=path.to.settings to make the compiler process all the directories in your LOCALE_PATHS setting.
+要创建信息文件，也是使用 django-admin.py makemessages.py 工具，和Django信息文件一样
+
+Application message files are a bit complicated to discover – they need the LocaleMiddleware.
+您亦可运行django-admin.py compilemessages --settings=path.to.settings 来使编译器处理所有存在于您LOCALE_PATHS 设置中的目录
+
+Finally, you should give some thought to the structure of your translation files.
+应用程序信息文件稍微难以发现——因为它们需要 LocaleMiddle 
+
+If your applications need to be delivered to other users and will be used in other projects, you might want to use app-specific translations.
+如果不使用中间件，Django只会处理Django的信息文件和项目的信息文件
+
+The easiest way out is to store applications that are not part of the project (and so carry their own translations) outside the project tree.
+最后，需要考虑一下翻译文件的结构
+
+That way, django-admin.py makemessages on the project level will only translate strings that are connected to your explicit project and not strings that are distributed independently.
+ 若应用程序要发放给其他用户，应用到其它项目中，可能需要使用应用程序相关的翻译
+
+As a convenience, Django comes with a view, django.views.i18n.set_language, that sets a user’s language preference and redirects back to the previous page.
+方便起见，Django自带了一个 django.views.i18n.set_language 视图，作用是设置用户语言偏好并重定向返回到前一页面
+
+Activate this view by adding the following line to your URLconf:
+在URLconf中加入下面这行代码来激活这个视图：
+
+(Note that this example makes the view available at /i18n/setlang/.)
+（注意这个例子使得这个视图在 /i18n/setlang/ 中有效
+
+The view expects to be called via the POST method, with a language parameter set in request.
+这个视图是通过 GET 方法调用的，在请求中包含了 language 参数
+
+If session support is enabled, the view saves the language choice in the user’s session.
+ 如果session已启用，这个视图会将语言选择保存在用户的session中
+
+Otherwise, it saves the language choice in a cookie that is by default named django_language.
+ 否则，它会以缺省名django_language在cookie中保存这个语言选择
+
+(The name can be changed through the LANGUAGE_COOKIE_NAME setting.)
+(这个名字可以通过LANGUAGE_COOKIE_NAME设置来改变)
+
+After setting the language choice, Django redirects the user, following this algorithm:
+保存了语言选择后，Django根据以下算法来重定向页面：
+
+Here’s example HTML template code:
+Django 在 POST 数据中寻找一个 下一个 参数
+
+Django provides an integrated solution for these problems: It passes the translations into JavaScript, so you can call gettext, etc., from within JavaScript.
+JavaScript代码无法访问一个 gettext 的实现
+
+The main solution to these problems is the javascript_catalog view, which sends out a JavaScript code library with functions that mimic the gettext interface, plus an array of translation strings.
+这些问题的主要解决方案就是 javascript_catalog 视图
+
+Those translation strings are taken from the application, project or Django core, according to what you specify in either the info_dict or the URL.
+该视图生成一个JavaScript代码库，包括模仿 gettext 接口的函数，和翻译字符串的数组
+
+You hook it up like this:
+像这样使用：
+
+Each string in packages should be in Python dotted-package syntax (the same format as the strings in INSTALLED_APPS) and should refer to a package that contains a locale directory.
+packages 里的每个字符串应该是Python中的点分割的包的表达式形式（和在 INSTALLED_APPS 中的字符串相同的格式），而且应指向包含 locale 目录的包
+
+If you specify multiple packages, all those catalogs are merged into one catalog.
+ 如果指定了多个包，所有的目录会合并成一个目录
+
+This is useful if you have JavaScript that uses strings from different applications.
+ 如果有用到来自不同应用程序的字符串的JavaScript，这种机制会很有帮助
+
+You can make the view dynamic by putting the packages into the URL pattern:
+你可以动态使用视图，将包放在urlpatterns里：
+
+With this, you specify the packages as a list of package names delimited by ‘+’ signs in the URL.
+这样的话，就可以在URL中指定由加号（ + ）分隔包名的包了
+
+This is especially useful if your pages use code from different apps and this changes often and you don’t want to pull in one big catalog file.
+ 如果页面使用来自不同应用程序的代码，且经常改变，还不想将其放在一个大的目录文件中，对于这些情况，显然这是很有用的
+
+As a security measure, these values can only be either django.conf or any package from the INSTALLED_APPS setting.
+ 出于安全考虑，这些值只能是 django.conf 或 INSTALLED_APPS 设置中的包
+
+To use the catalog, just pull in the dynamically generated script like this:
+也有一个ngettext接口：
+
+This is how the admin fetches the translation catalog from the server.
+甚至有一个字符串插入函数：
+
+There is also an ngettext interface:
+插入句法是从Python借用的，所以interpolate 函数对位置和命名插入均提供支持：
+
+and even a string interpolation function:
+位置插入 obj包括一个JavaScript数组对象，元素值在它们对应于fmt的占位符中以它们出现的相同次序顺序插值 
+
+The interpolation syntax is borrowed from Python, so the interpolate function supports both positional and named interpolation:
+命名插入 通过传送为真（TRUE）的布尔参数name来选择这个模式
+
+Positional interpolation: obj contains a JavaScript Array object whose elements values are then sequentially interpolated in their corresponding fmt placeholders in the same order they appear.
+但是，你不应重复编写字符串插值： 这还是JavaScript，所以这段代码不得不重复做正则表达式置换
+
+For example:
+ 它不会和Python中的字符串插补一样快，因此只有真正需要的时候再使用它（例如，利用 ngettext 生成合适的复数形式）
+
+Named interpolation: This mode is selected by passing the optional boolean named parameter as true.
+你可以创建和更改翻译目录，就像其他
+
+You shouldn’t go over the top with string interpolation, though: this is still JavaScript, so the code has to make repeated regular-expression substitutions.
+Django翻译目录一样，使用django-admin.py makemessages 工具
+
+This isn’t as fast as string interpolation in Python, so keep it to those cases where you really need it (for example, in conjunction with ngettext to produce proper pluralizations).
+ 唯一的差别是需要提供一个-d djangojs 的参数，就像这样：
+
+You create and update the translation catalogs the same way as the other
+如果你了解 gettext ，你可能会发现Django进行翻译时的一些特殊的东西：
+
+Django translation catalogs – with the django-admin.py makemessages tool.
+字符串域为 django 或 djangojs 
+
+The only difference is you need to provide a -d djangojs parameter, like this:
+字符串域是用来区别将数据存储在同一信息文件库（一般是/usr/share/locale/ ）的不同程序
+
+If you know gettext, you might note these specialties in the way Django does translation:
+gettext-tools-X.bin.woe32.zip
+
+This is only needed for people who either want to extract message IDs or compile message files (.po).
+控制面板 > 系统> 高级 > 环境变量
+
+You may also use gettext binaries you have obtained elsewhere, so long as the xgettext --version command works properly.
+在系统变量列表中，点击Path，点击Edit
+
+The final chapter focuses on security – how you can help secure your sites and your users from malicious attackers.
+Inline literal start-string without end-string.
+
+© Copyright 2012, Matt Behrens.
+www.shoucewang.com. All Rights Reserved. 手册网 版权所有
+

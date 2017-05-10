@@ -1,0 +1,429 @@
+Downloader Middleware¶
+下载器中间件(Downloader Middleware)¶
+
+The downloader middleware is a framework of hooks into Scrapy’s request/response processing.
+下载器中间件是介于Scrapy的request/response处理的钩子框架
+
+It’s a light, low-level system for globally altering Scrapy’s requests and responses.
+ 是用于全局修改Scrapy request和response的一个轻量、底层的系统
+
+Activating a downloader middleware¶
+激活下载器中间件¶
+
+To activate a downloader middleware component, add it to the DOWNLOADER_MIDDLEWARES setting, which is a dict whose keys are the middleware class paths and their values are the middleware orders.
+要激活下载器中间件组件，将其加入到 DOWNLOADER_MIDDLEWARES 设置中
+
+Here’s an example:
+这里是一个例子:
+
+The DOWNLOADER_MIDDLEWARES setting is merged with the DOWNLOADER_MIDDLEWARES_BASE setting defined in Scrapy (and not meant to be overridden) and then sorted by order to get the final sorted list of enabled middlewares: the first middleware is the one closer to the engine and the last is the one closer to the downloader.
+DOWNLOADER_MIDDLEWARES 设置会与Scrapy定义的 DOWNLOADER_MIDDLEWARES_BASE 设置合并(但不是覆盖)， 而后根据顺序(order)进行排序，最后得到启用中间件的有序列表: 第一个中间件是最靠近引擎的，最后一个中间件是最靠近下载器的
+
+To decide which order to assign to your middleware see the DOWNLOADER_MIDDLEWARES_BASE setting and pick a value according to where you want to insert the middleware.
+关于如何分配中间件的顺序请查看 DOWNLOADER_MIDDLEWARES_BASE 设置，而后根据您想要放置中间件的位置选择一个值
+
+The order does matter because each middleware performs a different action and your middleware could depend on some previous (or subsequent) middleware being applied.
+ 由于每个中间件执行不同的动作，您的中间件可能会依赖于之前(或者之后)执行的中间件，因此顺序是很重要的
+
+If you want to disable a built-in middleware (the ones defined in DOWNLOADER_MIDDLEWARES_BASE and enabled by default) you must define it in your project’s DOWNLOADER_MIDDLEWARES setting and assign None as its value.
+如果您想禁止内置的(在 DOWNLOADER_MIDDLEWARES_BASE 中设置并默认启用的)中间件， 您必须在项目的 DOWNLOADER_MIDDLEWARES 设置中定义该中间件，并将其值赋为 None 
+
+For example, if you want to disable the user-agent middleware:
+ 例如，如果您想要关闭user-agent中间件:
+
+Finally, keep in mind that some middlewares may need to be enabled through a particular setting.
+最后，请注意，有些中间件需要通过特定的设置来启用
+
+See each middleware documentation for more info.
+更多内容请查看相关中间件文档
+
+Writing your own downloader middleware¶
+编写您自己的下载器中间件¶
+
+Each middleware component is a Python class that defines one or more of the following methods:
+编写下载器中间件十分简单
+
+Note
+当每个request通过下载中间件时，该方法被调用
+
+Any of the downloader middleware methods may also return a deferred.
+process_request() 必须返回其中之一: 返回 None 、返回一个 Response 对象、返回一个 Request 对象或raise IgnoreRequest 
+
+This method is called for each request that goes through the download middleware.
+如果其返回 None ，Scrapy将继续处理该request，执行其他的中间件的相应方法，直到合适的下载器处理函数(download handler)被调用， 该request被执行(其response被下载)
+
+process_request() should either: return None, return a Response object, return a Request object, or raise IgnoreRequest.
+如果其返回 Response 对象，Scrapy将不会调用 任何 其他的 process_request() 或 process_exception() 方法，或相应地下载函数
+
+If it returns None, Scrapy will continue processing this request, executing all other middlewares until, finally, the appropriate downloader handler is called the request performed (and its response downloaded).
+如果其返回 Request 对象，Scrapy则停止调用 process_request方法并重新调度返回的request
+
+If it returns a Response object, Scrapy won’t bother calling any other process_request() or process_exception() methods, or the appropriate download function;
+如果其raise一个 IgnoreRequest 异常，则安装的下载中间件的 process_exception() 方法会被调用
+
+it’ll return that response.
+如果没有任何一个方法处理该异常， 则request的errback(Request.errback)方法会被调用
+
+The process_response() methods of installed middleware is always called on every response.
+如果没有代码处理抛出的异常， 则该异常被忽略且不记录(不同于其他异常那样)
+
+If it returns a Request object, Scrapy will stop calling process_request methods and reschedule the returned request.
+process_request() 必须返回以下之一: 返回一个 Response 对象、 返回一个 Request 对象或raise一个 IgnoreRequest 异常
+
+If it raises an IgnoreRequest exception, the process_exception() methods of installed downloader middleware will be called.
+如果其返回一个 Response (可以与传入的response相同，也可以是全新的对象)， 该response会被在链中的其他中间件的 process_response() 方法处理
+
+process_response() should either: return a Response object, return a Request object or raise a IgnoreRequest exception.
+如果其返回一个 Request 对象，则中间件链停止， 返回的request会被重新调度下载
+
+If it returns a Response (it could be the same given response, or a brand-new one), that response will continue to be processed with the process_response() of the next middleware in the chain.
+如果其抛出一个 IgnoreRequest 异常，则调用request的errback(Request.errback)
+
+If it returns a Request object, the middleware chain is halted and the returned request is rescheduled to be downloaded in the future.
+当下载处理器(download handler)或 process_request() (下载中间件)抛出异常(包括 IgnoreRequest 异常)时， Scrapy调用 process_exception() 
+
+If it raises an IgnoreRequest exception, the errback function of the request (Request.errback) is called.
+process_exception() 应该返回以下之一: 返回 None 、 一个 Response 对象、或者一个 Request 对象
+
+Scrapy calls process_exception() when a download handler or a process_request() (from a downloader middleware) raises an exception (including an IgnoreRequest exception)
+如果其返回 None ，Scrapy将会继续处理该异常，接着调用已安装的其他中间件的 process_exception() 方法，直到所有中间件都被调用完毕，则调用默认的异常处理
+
+process_exception() should return: either None, a Response object, or a Request object.
+如果其返回一个 Response 对象，则已安装的中间件链的 process_response() 方法被调用
+
+If it returns None, Scrapy will continue processing this exception, executing any other process_exception() methods of installed middleware, until no middleware is left and the default exception handling kicks in.
+如果其返回一个 Request 对象， 则返回的request将会被重新调用下载
+
+For a list of the components enabled by default (and their orders) see the DOWNLOADER_MIDDLEWARES_BASE setting.
+关于默认启用的中间件列表(及其顺序)请参考 DOWNLOADER_MIDDLEWARES_BASE 设置
+
+CookiesMiddleware¶
+CookiesMiddleware¶
+
+This middleware enables working with sites that require cookies, such as those that use sessions.
+该中间件使得爬取需要cookie(例如使用session)的网站成为了可能
+
+It keeps track of cookies sent by web servers, and send them back on subsequent requests (from that spider), just like web browsers do.
+ 其追踪了web server发送的cookie，并在之后的request中发送回去， 就如浏览器所做的那样
+
+The following settings can be used to configure the cookie middleware:
+以下设置可以用来配置cookie中间件:
+
+Multiple cookie sessions per spider¶
+单spider多cookie session¶
+
+New in version 0.15.
+0.15 新版功能.
+
+There is support for keeping multiple cookie sessions per spider by using the cookiejar Request meta key.
+Scrapy通过使用 cookiejar Request meta key来支持单spider追踪多cookie session
+
+By default it uses a single cookie jar (session), but you can pass an identifier to use different ones.
+ 默认情况下其使用一个cookie jar(session)，不过您可以传递一个标示符来使用多个
+
+For example:
+例如:
+
+Keep in mind that the cookiejar meta key is not “sticky”.
+需要注意的是 cookiejar meta key不是”黏性的(sticky)”
+
+You need to keep passing it along on subsequent requests.
+ 您需要在之后的request请求中接着传递
+
+For example:
+例如:
+
+COOKIES_ENABLED¶
+COOKIES_ENABLED¶
+
+Default: True
+默认: True
+
+Whether to enable the cookies middleware.
+是否启用cookies middleware
+
+If disabled, no cookies will be sent to web servers.
+如果关闭，cookies将不会发送给web server
+
+COOKIES_DEBUG¶
+COOKIES_DEBUG¶
+
+Default: False
+默认: False
+
+If enabled, Scrapy will log all cookies sent in requests (ie.
+如果启用，Scrapy将记录所有在request(Cookie 请求头)发送的cookies及response接收到的cookies(Set-Cookie 接收头)
+
+Here’s an example of a log with COOKIES_DEBUG enabled:
+下边是启用 COOKIES_DEBUG 的记录的样例:
+
+DefaultHeadersMiddleware¶
+DefaultHeadersMiddleware¶
+
+This middleware sets all default requests headers specified in the DEFAULT_REQUEST_HEADERS setting.
+该中间件设置 DEFAULT_REQUEST_HEADERS 指定的默认request header
+
+DownloadTimeoutMiddleware¶
+DownloadTimeoutMiddleware¶
+
+This middleware sets the download timeout for requests specified in the DOWNLOAD_TIMEOUT setting or download_timeout spider attribute.
+该中间件设置 DOWNLOAD_TIMEOUT 或 spider的 download_timeout 属性指定的request下载超时时间.
+
+Note
+注解
+
+You can also set download timeout per-request using download_timeout Request.meta key;
+您也可以使用 download_timeout Request.meta key 来对每个请求设置下载超时时间. 这种方式在 DownloadTimeoutMiddleware 被关闭时仍然有效.
+
+HttpAuthMiddleware¶
+HttpAuthMiddleware¶
+
+This middleware authenticates all requests generated from certain spiders using Basic access authentication (aka.
+该中间件完成某些使用 Basic access authentication (或者叫HTTP认证)的spider生成的请求的认证过程
+
+To enable HTTP authentication from certain spiders, set the http_user and http_pass attributes of those spiders.
+在spider中启用HTTP认证，请设置spider的 http_user 及 http_pass 属性
+
+Example:
+样例:
+
+HttpCacheMiddleware¶
+HttpCacheMiddleware¶
+
+This middleware provides low-level cache to all HTTP requests and responses.
+该中间件为所有HTTP request及response提供了底层(low-level)缓存支持
+
+It has to be combined with a cache storage backend as well as a cache policy.
+ 其由cache存储后端及cache策略组成
+
+Scrapy ships with two HTTP cache storage backends:
+Scrapy提供了两种HTTP缓存存储后端:
+
+You can change the HTTP cache storage backend with the HTTPCACHE_STORAGE setting.
+您可以使用 HTTPCACHE_STORAGE 设定来修改HTTP缓存存储后端
+
+Or you can also implement your own storage backend.
+ 您也可以实现您自己的存储后端
+
+Scrapy ships with two HTTP cache policies:
+Scrapy提供了两种了缓存策略:
+
+You can change the HTTP cache policy with the HTTPCACHE_POLICY setting.
+您可以使用 HTTPCACHE_POLICY 设定来修改HTTP缓存存储后端
+
+Or you can also implement your own policy.
+ 您也可以实现您自己的存储策略
+
+This policy has no awareness of any HTTP Cache-Control directives.
+该策略不考虑任何HTTP Cache-Control指令
+
+Every request and its corresponding response are cached.
+每个request及其对应的response都被缓存
+
+When the same request is seen again, the response is returned without transferring anything from the Internet.
+ 当相同的request发生时，其不发送任何数据，直接返回response
+
+The Dummy policy is useful for testing spiders faster (without having to wait for downloads every time) and for trying your spider offline, when an Internet connection is not available.
+Dummpy策略对于测试spider十分有用
+
+The goal is to be able to “replay” a spider run exactly as it ran before.
+其能使spider运行更快(不需要每次等待下载完成)， 同时在没有网络连接时也能测试
+
+In order to use this policy, set:
+使用这个策略请设置:
+
+RFC2616 policy¶
+RFC2616策略¶
+
+This policy provides a RFC2616 compliant HTTP cache, i.e.
+该策略提供了符合RFC2616的HTTP缓存，例如符合HTTP Cache-Control， 针对生产环境并且应用在持续性运行环境所设置
+
+with HTTP Cache-Control awareness, aimed at production and used in continuous runs to avoid downloading unmodified data (to save bandwidth and speed up crawls).
+该策略能避免下载未修改的数据(来节省带宽，提高爬取速度)
+
+what is implemented:
+实现了:
+
+Do not attempt to store responses/requests with no-store cache-control directive set
+目前仍然缺失:
+
+Do not serve responses from cache if no-cache cache-control directive is set even for fresh responses
+使用这个策略，设置:
+
+Compute freshness lifetime from Last-Modified response header (heuristic used by Firefox)
+文件系统存储后端可以用于HTTP缓存中间件
+
+Compute current age from Age response header
+使用该存储端，设置:
+
+Compute current age from Date header
+每个request/response组存储在不同的目录中，包含下列文件:
+
+Revalidate stale responses based on Last-Modified response header
+目录的名称与request的指纹(参考 scrapy.utils.request.fingerprint)有关，而二级目录是为了避免在同一文件夹下有太多文件 (这在很多文件系统中是十分低效的)
+
+Support max-stale cache-control directive in requests
+0.13 新版功能.
+
+This allows spiders to be configured with the full RFC2616 cache policy, but avoid revalidation on a request-by-request basis, while remaining conformant with the HTTP spec.
+同时也有 DBM 存储后端可以用于HTTP缓存中间件
+
+Example:
+默认情况下，其采用 anydbm 模块，不过您也可以通过 HTTPCACHE_DBM_MODULE 设置进行修改
+
+Add Cache-Control: max-stale=600 to Request headers to accept responses that have exceeded their expiration time by no more than 600 seconds.
+使用该存储端，设置:
+
+In order to use this policy, set:
+0.23 新版功能.
+
+In order to use this storage backend, set:
+This backend is not recommended for development because only one process can access LevelDB databases at the same time, so you can’t run a crawl and open the scrapy shell in parallel for the same spider.
+
+Each request/response pair is stored in a different directory containing the following files:
+In order to use this storage backend:
+
+New in version 0.13.
+HttpCacheMiddleware 可以通过以下设置进行配置:
+
+A DBM storage backend is also available for the HTTP cache middleware.
+0.11 新版功能.
+
+By default, it uses the anydbm module, but you can change it with the HTTPCACHE_DBM_MODULE setting.
+默认: False
+
+In order to use this storage backend, set:
+HTTP缓存是否开启
+
+A LevelDB storage backend is also available for the HTTP cache middleware.
+默认: 0
+
+This backend is not recommended for development because only one process can access LevelDB databases at the same time, so you can’t run a crawl and open the scrapy shell in parallel for the same spider.
+缓存的request的超时时间，单位秒
+
+In order to use this storage backend:
+超过这个时间的缓存request将会被重新下载
+
+New in version 0.11.
+默认: 'httpcache'
+
+Default: False
+存储(底层的)HTTP缓存的目录
+
+Whether the HTTP cache will be enabled.
+0.10 新版功能.
+
+Changed in version 0.11: Before 0.11, HTTPCACHE_DIR was used to enable cache.
+默认: []
+
+Default: 0
+不缓存设置中的HTTP返回值(code)的request
+
+Expiration time for cached requests, in seconds.
+默认: False
+
+Cached requests older than this time will be re-downloaded.
+如果启用，在缓存中没找到的request将会被忽略，不下载
+
+Changed in version 0.11: Before 0.11, zero meant cached requests always expire.
+0.10 新版功能.
+
+Default: 'httpcache'
+默认: ['file']
+
+The directory to use for storing the (low-level) HTTP cache.
+不缓存这些URI标准(scheme)的response
+
+New in version 0.10.
+默认: 'scrapy.contrib.httpcache.FilesystemCacheStorage'
+
+Default: []
+实现缓存存储后端的类
+
+Don’t cache response with these HTTP codes.
+0.13 新版功能.
+
+Default: False
+默认: 'anydbm'
+
+If enabled, requests not found in the cache will be ignored instead of downloaded.
+在 DBM存储后端 的数据库模块
+
+New in version 0.10.
+0.18 新版功能.
+
+Default: ['file']
+默认: 'scrapy.contrib.httpcache.DummyPolicy'
+
+Don’t cache responses with these URI schemes.
+实现缓存策略的类
+
+New in version 0.13.
+该中间件提供了对压缩(gzip, deflate)数据的支持
+
+New in version 0.18.
+默认: True
+
+Default: 'scrapy.extensions.httpcache.DummyPolicy'
+Compression Middleware(压缩中间件)是否开启
+
+Default: False
+该中间件添加了对 chunked transfer encoding 的支持
+
+Default: False
+0.8 新版功能.
+
+If enabled, will cache pages unconditionally.
+该中间件提供了对request设置HTTP代理的支持
+
+A spider may wish to have all responses available in the cache, for future use with Cache-Control: max-stale, for instance.
+类似于Python标准库模块 urllib 及 urllib2 ，其使用了下列环境变量:
+
+Default: []
+该中间件根据response的状态处理重定向的request
+
+List of Cache-Control directives in responses to be ignored.
+通过该中间件的(被重定向的)request的url可以通过 Request.meta 的 redirect_urls 键找到
+
+Sites often set “no-store”, “no-cache”, “must-revalidate”, etc., but get upset at the traffic a spider can generate if it respects those directives.
+RedirectMiddleware 可以通过下列设置进行配置(更多内容请参考设置文档):
+
+We assume that the spider will not issue Cache-Control directives in requests unless it actually needs them, so directives in requests are not filtered.
+如果 Request.meta 中 dont_redirect 设置为True ，则该request将会被此中间件忽略
+
+Whether the Compression middleware will be enabled.
+默认: True
+
+This middleware sets the HTTP proxy to use for requests, by setting the proxy meta value for Request objects.
+单个request被重定向的最大次数
+
+The urls which the request goes through (while being redirected) can be found in the redirect_urls Request.meta key.
+MetaRefreshMiddleware 可以通过以下设定进行配置 (更多内容请参考设置文档)
+
+The RedirectMiddleware can be configured through the following settings (see the settings documentation for more info):
+该中间件遵循 RedirectMiddleware 描述的 REDIRECT_MAX_TIMES 设定，dont_redirect 及 redirect_urls meta key
+
+For example, if you want the redirect middleware to ignore 301 and 302 responses (and pass them through to your spider) you can do this:
+0.17 新版功能.
+
+The handle_httpstatus_list key of Request.meta can also be used to specify which response codes to allow on a per-request basis.
+默认: True
+
+Default: True
+默认: 100
+
+Whether the Redirect middleware will be enabled.
+跟进重定向的最大 meta-refresh 延迟(单位:秒)
+
+The MetaRefreshMiddleware can be configured through the following settings (see the settings documentation for more info):
+爬取进程会收集失败的页面并在最后，spider爬取完所有正常(不失败)的页面后重新调度
+
+This middleware obey REDIRECT_MAX_TIMES setting, dont_redirect and redirect_urls request meta keys as described for RedirectMiddleware
+RetryMiddleware 可以通过下列设定进行配置 (更多内容请参考设置文档):
+
+Default: True
+如果根据HTTP协议，您可能想要在设定 RETRY_HTTP_CODES 中移除400错误
+
+Whether the Meta Refresh middleware will be enabled.
+如果 Request.meta 中 dont_retry 设为True， 该request将会被本中间件忽略
+

@@ -1,0 +1,90 @@
+Stats Collection¶
+数据收集(Stats Collection)¶
+
+Scrapy provides a convenient facility for collecting stats in the form of key/values, where values are often counters.
+Scrapy提供了方便的收集数据的机制
+
+The facility is called the Stats Collector, and can be accessed through the stats attribute of the Crawler API, as illustrated by the examples in the Common Stats Collector uses section below.
+数据以key/value方式存储，值大多是计数值
+
+However, the Stats Collector is always available, so you can always import it in your module and use its API (to increment or set new stat keys), regardless of whether the stats collection is enabled or not.
+无论数据收集(stats collection)开启或者关闭，数据收集器永远都是可用的
+
+If it’s disabled, the API will still work but it won’t collect anything.
+ 因此您可以import进自己的模块并使用其API(增加值或者设置新的状态键(stat keys))
+
+This is aimed at simplifying the stats collector usage: you should spend no more than one line of code for collecting stats in your spider, Scrapy extension, or whatever code you’re using the Stats Collector from.
+ 该做法是为了简化数据收集的方法: 您不应该使用超过一行代码来收集您的spider，Scrpay扩展或任何您使用数据收集器代码里头的状态
+
+Another feature of the Stats Collector is that it’s very efficient (when enabled) and extremely efficient (almost unnoticeable) when disabled.
+数据收集器的另一个特性是(在启用状态下)很高效，(在关闭情况下)非常高效(几乎察觉不到)
+
+The Stats Collector keeps a stats table per open spider which is automatically opened when the spider is opened, and closed when the spider is closed.
+数据收集器对每个spider保持一个状态表
+
+Common Stats Collector uses¶
+常见数据收集器使用方法¶
+
+Access the stats collector through the stats attribute.
+通过 stats 属性来使用数据收集器
+
+Here is an example of an extension that access stats:
+ 下面是在扩展中使用状态的例子:
+
+Set stat value:
+设置数据:
+
+Increment stat value:
+增加数据值:
+
+Set stat value only if greater than previous:
+当新的值比原来的值大时设置数据:
+
+Set stat value only if lower than previous:
+当新的值比原来的值小时设置数据:
+
+Get stat value:
+获取数据:
+
+Get all stats:
+获取所有数据:
+
+Available Stats Collectors¶
+可用的数据收集器¶
+
+Besides the basic StatsCollector there are other Stats Collectors available in Scrapy which extend the basic Stats Collector.
+除了基本的 StatsCollector ，Scrapy也提供了基于 StatsCollector 的数据收集器
+
+You can select which Stats Collector to use through the STATS_CLASS setting.
+ 您可以通过 STATS_CLASS 设置来选择
+
+The default Stats Collector used is the MemoryStatsCollector.
+默认使用的是 MemoryStatsCollector 
+
+MemoryStatsCollector¶
+MemoryStatsCollector¶
+
+A simple stats collector that keeps the stats of the last scraping run (for each spider) in memory, after they’re closed.
+一个简单的数据收集器
+
+The stats can be accessed through the spider_stats attribute, which is a dict keyed by spider domain name.
+其在spider运行完毕后将其数据保存在内存中
+
+This is the default Stats Collector used in Scrapy.
+这是Scrapy的默认选择
+
+A dict of dicts (keyed by spider name) containing the stats of the last scraping run for each spider.
+保存了每个spider最近一次爬取的状态的字典(dict)
+
+DummyStatsCollector¶
+DummyStatsCollector¶
+
+A Stats collector which does nothing but is very efficient (because it does nothing).
+该数据收集器并不做任何事情但非常高效(因为什么都不做(写文档的人真调皮o(╯□╰)o))
+
+This stats collector can be set via the STATS_CLASS setting, to disable stats collect in order to improve performance.
+ 您可以通过设置 STATS_CLASS 启用这个收集器，来关闭数据收集，提高效率
+
+However, the performance penalty of stats collection is usually marginal compared to other Scrapy workload like parsing pages.
+ 不过，数据收集的性能负担相较于Scrapy其他的处理(例如分析页面)来说是非常小的
+

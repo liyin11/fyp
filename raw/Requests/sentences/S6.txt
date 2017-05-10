@@ -1,0 +1,87 @@
+Recommended Packages and Extensions¶
+推荐的库和扩展¶
+
+Requests has a great variety of powerful and useful third-party extensions.
+Requests 拥有很多强大有用的第三方扩展
+
+This page provides an overview of some of the best of them.
+这里概述了其中最好的几个
+
+Certifi CA Bundle¶
+Certifi CA Bundle¶
+
+Certifi is a carefully curated collection of Root Certificates for validating the trustworthiness of SSL certificates while verifying the identity of TLS hosts.
+Certifi 是一个精心准备的根证书集合，用来验证 SSL 证书的可信任度，同时还会验证 TLS 主机的身份
+
+It has been extracted from the Requests project.
+这是一个从 Requests 项目中剥离出来的项目
+
+CacheControl¶
+CacheControl¶
+
+CacheControl is an extension that adds a full HTTP cache to Requests.
+CacheControl 这个扩展能为 Requests 添加完整的 HTTP 缓存功能
+
+This makes your web requests substantially more efficient, and should be used whenever you're making a lot of web requests.
+这样你的 web 请求的效率会高很多，这个扩展适合在需要大量 web 请求的场合使用
+
+Requests-Toolbelt¶
+Requests-Toolbelt¶
+
+Requests-Toolbelt is a collection of utilities that some users of Requests may desire, but do not belong in Requests proper.
+Requests-Toolbelt 使一些有用工具的集合，有的用户会觉得它们很有用，但 Requests 中不适合将它们包进去
+
+This library is actively maintained by members of the Requests core team, and reflects the functionality most requested by users within the community.
+Requests 的核心组积极维护着这个库，它反映了社区用户最想要的一些功能
+
+Requests-OAuthlib¶
+Requests-OAuthlib¶
+
+requests-oauthlib makes it possible to do the OAuth dance from Requests automatically.
+requests-oauthlib 使得从 Requests 自动进行 OAuth 跳转变成可能
+
+This is useful for the large number of websites that use OAuth to provide authentication.
+这对很多使用 OAuth 进行验证的网站都很有用
+
+It also provides a lot of tweaks that handle ways that specific OAuth providers differ from the standard specifications.
+它还提供了很多小配置，用来对非标准的 OAuth 提供者进行处理
+
+Betamax¶
+Betamax¶
+
+Betamax records your HTTP interactions so the NSA does not have to.
+Betamax 记录了你的 HTTP 交互，这样就不需要 NSA 费心了
+
+A VCR imitation designed only for Python-Requests.
+这是一个专为 Python-Requests 设计的模拟录像机
+
+Requests is an elegant and simple HTTP library for Python, built for human beings.
+Requests is an elegant and simple HTTP library for Python, built for human beings. You are currently looking at the documentation of the development release.
+
+Stay Informed
+Stay Informed
+
+Receive updates on new releases and upcoming projects.
+Receive updates on new releases and upcoming projects.
+
+Join Mailing List.
+Join Mailing List.
+
+If you enjoy using this project, Say Thanks!
+Follow @kennethreitz
+
+More Kenneth Reitz projects:
+More Kenneth Reitz projects:
+
+Translations
+Translations
+
+Table Of Contents
+內容目录
+
+Related Topics
+Related Topics
+
+Quick search
+快速搜索
+

@@ -1,0 +1,366 @@
+Miscellaneous markup
+Miscellaneous markup
+
+Available builders
+Available builders
+
+While this was always possible, it is now much easier to easily support documentation of projects using different programming languages or even ones not supported by the main Sphinx distribution, by providing a domain for every such purpose.
+New in version 1.0.
+
+This section describes what the domains that come with Sphinx provide.
+Originally, Sphinx was conceived for a single project, the documentation of the Python language. Shortly afterwards, it was made available for everyone as a documentation tool, but the documentation of Python modules remained deeply built in – the most fundamental directives, like function, were designed for Python objects. Since Sphinx has become somewhat popular, interest developed in using it for many different purposes: C/C++ projects, JavaScript, or even reStructuredText markup (like in this documentation).
+
+This describes the two Python functions spam and ham.
+A domain is a collection of markup (reStructuredText directives and roles) to describe and link to objects belonging together, e.g. elements of a programming language. Directive and role names in a domain have names like domain:name, e.g. py:function. Domains can also provide custom indices (like the Python Module Index).
+
+(This example also shows how to use the :noindex: flag.)
+Having domains means that there are no naming problems when one set of documentation wants to refer to e.g. C++ and Python classes. It also means that extensions that support the documentation of whole new languages are much easier to write.
+
+The domains also provide roles that link back to these object descriptions.
+This section describes what the domains that come with Sphinx provide. The domain API is documented as well, in the section Domain API.
+
+To avoid having to writing the domain name all the time when you e.g.
+Most domains provide a number of object description directives, used to describe specific objects provided by modules. Each directive requires one or more signatures to provide basic information about what is being described, and the content should be the description. The basic version makes entries in the general index; if no index entry is desired, you can give the directive option flag :noindex:. An example using a Python domain directive:
+
+Select a new default domain.
+This describes the two Python functions spam and ham. (Note that when signatures become too long, you can break them if you add a backslash to lines that are continued in the next line. Example:
+
+If no other default is selected, the Python domain (named py) is the default one, mostly for compatibility with documentation written for older versions of Sphinx.
+(This example also shows how to use the :noindex: flag.)
+
+Directives and roles that belong to the default domain can be mentioned without giving the domain name, i.e.
+The domains also provide roles that link back to these object descriptions. For example, to link to one of the functions described in the example above, you could say
+
+For cross-reference roles provided by domains, the same facilities exist as for general cross-references.
+As you can see, both directive and role names contain the domain name and the directive name.
+
+In short:
+Default Domain
+
+This directive marks the beginning of the description of a module (or package submodule, in which case the name should be fully qualified, including the package name).
+Select a new default domain. While the primary_domain selects a global default, this only has an effect within the same file.
+
+This directive will also cause an entry in the global module index.
+If no other default is selected, the Python domain (named py) is the default one, mostly for compatibility with documentation written for older versions of Sphinx.
+
+The platform option, if present, is a comma-separated list of the platforms on which the module is available (if it is available on all platforms, the option should be omitted).
+Directives and roles that belong to the default domain can be mentioned without giving the domain name, i.e.
+
+The synopsis option should consist of one sentence describing the module’s purpose – it is currently only used in the Global Module Index.
+For cross-reference roles provided by domains, the same facilities exist as for general cross-references. See Cross-referencing syntax.
+
+The deprecated option can be given (with no value) to mark a module as deprecated;
+In short:
+
+Describes a module-level function.
+The Python domain (name py) provides the following directives for module declarations:
+
+For methods you should use py:method.
+This directive marks the beginning of the description of a module (or package submodule, in which case the name should be fully qualified, including the package name). It does not create content (like e.g. py:class does).
+
+The description normally includes information about the parameters required and how they are used (especially whether mutable objects passed as parameters are modified), side effects, and possible exceptions.
+This directive will also cause an entry in the global module index.
+
+This information can (in any py directive) optionally be given in a structured form, see Info field lists.
+The platform option, if present, is a comma-separated list of the platforms on which the module is available (if it is available on all platforms, the option should be omitted). The keys are short identifiers; examples that are in use include “IRIX”, “Mac”, “Windows”, and “Unix”. It is important to use a key which has already been used when applicable.
+
+Describes global data in a module, including both variables and values used as “defined constants.” Class and object attributes are not documented using this environment.
+The synopsis option should consist of one sentence describing the module’s purpose – it is currently only used in the Global Module Index.
+
+Describes an exception class.
+The deprecated option can be given (with no value) to mark a module as deprecated; it will be designated as such in various locations then.
+
+Describes a class.
+This directive tells Sphinx that the classes, functions etc. documented from here are in the given module (like py:module), but it will not create index entries, an entry in the Global Module Index, or a link target for py:mod. This is helpful in situations where documentation for things in a module is spread over multiple files or sections – one location has the py:module directive, the others only py:currentmodule.
+
+Methods and attributes belonging to the class should be placed in this directive’s body.
+The following directives are provided for module and class contents:
+
+The first way is the preferred one.
+Describes global data in a module, including both variables and values used as “defined constants.” Class and object attributes are not documented using this environment.
+
+Describes an object data attribute.
+Describes an exception class. The signature can, but need not include parentheses with constructor arguments.
+
+Describes an object method.
+Describes a module-level function. The signature should include the parameters, enclosing optional parameters in brackets. Default values can be given if it enhances clarity; see Python Signatures. For example:
+
+Like py:method, but indicates that the method is a static method.
+Object methods are not documented using this directive. Bound object methods placed in the module namespace as part of the public interface of the module are documented using this, as they are equivalent to normal functions for most purposes.
+
+New in version 0.4.
+The description should include information about the parameters required and how they are used (especially whether mutable objects passed as parameters are modified), side effects, and possible exceptions. A small example may be provided.
+
+Like py:method, but indicates that the method is a class method.
+Describes a class. The signature can include parentheses with parameters which will be shown as the constructor arguments. See also Python Signatures.
+
+New in version 0.6.
+Methods and attributes belonging to the class should be placed in this directive’s body. If they are placed outside, the supplied name should contain the class name so that cross-references still work. Example:
+
+Describes a decorator function.
+The first way is the preferred one.
+
+the descriptions should look like this:
+Describes an object data attribute. The description should include information about the type of the data to be expected and whether it may be changed directly.
+
+(as opposed to ..
+Describes an object method. The parameters should not include the self parameter. The description should include similar information to that described for function. See also Python Signatures.
+
+There is no py:deco role to link to a decorator that is marked up with this directive;
+Like py:method, but indicates that the method is a static method.
+
+Same as py:decorator, but for decorators that are methods.
+New in version 0.4.
+
+Refer to a decorator method using the py:meth role.
+Like py:method, but indicates that the method is a class method.
+
+Signatures of functions, methods and class constructors can be given like they would be written in Python.
+New in version 0.6.
+
+Default values for optional arguments can be given (but if they contain commas, they will confuse the signature parser).
+Describes a decorator function. The signature should not represent the signature of the actual function, but the usage as a decorator. For example, given the functions
+
+For functions with optional parameters that don’t have default values (typically functions implemented in C extension modules without keyword argument support), you can use brackets to specify the optional parts:
+the descriptions should look like this:
+
+It is customary to put the opening bracket before the comma.
+There is no py:deco role to link to a decorator that is marked up with this directive; rather, use the py:func role.
+
+New in version 0.4.
+Same as py:decorator, but for decorators that are methods.
+
+Inside Python object description directives, reST field lists with these fields are recognized and formatted nicely:
+Refer to a decorator method using the py:meth role.
+
+The field names must consist of one of these keywords and an argument (except for returns and rtype, which do not need an argument).
+Signatures of functions, methods and class constructors can be given like they would be written in Python, with the exception that optional parameters can be indicated by brackets:
+
+This will render like this:
+It is customary to put the opening bracket before the comma. In addition to this “nested” bracket style, a “flat” style can also be used, due to the fact that most optional parameters can be given independently:
+
+Send a message to a recipient
+Default values for optional arguments can be given (but if they contain commas, they will confuse the signature parser). Python 3-style argument annotations can also be given as well as return type annotations:
+
+the message id
+New in version 0.4.
+
+int
+Inside Python object description directives, reST field lists with these fields are recognized and formatted nicely:
+
+It is also possible to combine parameter type and description, if the type is a single word, like this:
+The field names must consist of one of these keywords and an argument (except for returns and rtype, which do not need an argument). This is best explained by an example:
+
+The following roles refer to objects in modules and are possibly hyperlinked if a matching identifier is found:
+This will render like this:
+
+Reference a module;
+Format the exception with a traceback.
+
+Reference a Python function;
+list of strings
+
+Reference a module-level variable.
+It is also possible to combine parameter type and description, if the type is a single word, like this:
+
+Reference a “defined” constant.
+The following roles refer to objects in modules and are possibly hyperlinked if a matching identifier is found:
+
+Reference a class;
+Reference a module; a dotted name may be used. This should also be used for package names.
+
+Reference a method of an object.
+Reference a Python function; dotted names may be used. The role text needs not include trailing parentheses to enhance readability; they will be added automatically by Sphinx if the add_function_parentheses config value is true (the default).
+
+Reference a data attribute of an object.
+Reference a module-level variable.
+
+Reference an exception.
+Reference a “defined” constant. This may be a C-language #define or a Python variable that is not intended to be changed.
+
+Reference an object of unspecified type.
+Reference a class; a dotted name may be used.
+
+New in version 0.4.
+Reference a method of an object. The role text can include the type name and the method name; if it occurs within the description of a type, the type name can be omitted. A dotted name may be used.
+
+The name enclosed in this markup can include a module name and/or a class name.
+Reference a data attribute of an object.
+
+Normally, names in these roles are searched first without any further qualification, then with the current module name prepended, then with the current module and class name (if any) prepended.
+Reference an exception. A dotted name may be used.
+
+A similar heuristic is used to determine whether the name is an attribute of the currently documented class.
+Reference an object of unspecified type. Useful e.g. as the default_role.
+
+Also, if the name is prefixed with a dot, and no exact match is found, the target is taken as a suffix and all object names with that suffix are searched.
+New in version 0.4.
+
+Note that you can combine the ~ and .
+The name enclosed in this markup can include a module name and/or a class name. For example, :py:func:`filter` could refer to a function named filter in the current module, or the built-in function of that name. In contrast, :py:func:`foo.filter` clearly refers to the filter function in the foo module.
+
+Describes a C function.
+A similar heuristic is used to determine whether the name is an attribute of the currently documented class.
+
+This is also used to describe function-like preprocessor macros.
+Also, if the name is prefixed with a dot, and no exact match is found, the target is taken as a suffix and all object names with that suffix are searched. For example, :py:meth:`.TarFile.close` references the tarfile.TarFile.close() function, even if the current module is not tarfile. Since this can get ambiguous, if there is more than one possible match, you will get a warning from Sphinx.
+
+Note that you don’t have to backslash-escape asterisks in the signature, as it is not parsed by the reST inliner.
+Note that you can combine the ~ and . prefixes: :py:meth:`~.TarFile.close` will reference the tarfile.TarFile.close() method, but the visible link caption will only be close().
+
+Describes a “simple” C macro.
+The C domain (name c) is suited for documentation of C API.
+
+Describes a C type (whether defined by a typedef or struct).
+Describes a C function. The signature should be given as in C, e.g.:
+
+Describes a global C variable.
+This is also used to describe function-like preprocessor macros. The names of the arguments should be given so they may be used in the description.
+
+The following roles create cross-references to C-language constructs if they are defined in the documentation:
+Note that you don’t have to backslash-escape asterisks in the signature, as it is not parsed by the reST inliner.
+
+Reference a C-language variable.
+Describes a C struct member. Example signature:
+
+Reference a C-language function.
+The text of the description should include the range of values allowed, how the value should be interpreted, and whether the value can be changed. References to structure members in text should use the member role.
+
+Reference a “simple” C macro, as defined above.
+Describes a “simple” C macro. Simple macros are macros which are used for code expansion, but which do not take arguments so cannot be described as functions. This is not to be used for simple constant definitions. Examples of its use in the Python documentation include PyObject_HEAD and Py_BEGIN_ALLOW_THREADS.
+
+Reference a C-language type.
+Describes a C type (whether defined by a typedef or struct). The signature should just be the type name.
+
+The following directives are available.
+The following roles create cross-references to C-language constructs if they are defined in the documentation:
+
+Describe a class/struct, possibly with specification of inheritance, e.g.,:
+Reference a C-language variable.
+
+The class can be directly declared inside a nested scope, e.g.,:
+Reference a C-language function. Should include trailing parentheses.
+
+A template class can be declared:
+Reference a “simple” C macro, as defined above.
+
+or with a line break:
+Reference a C-language type.
+
+Function templates can also be described:
+The C++ domain (name cpp) supports documenting C++ projects.
+
+and function template specialisations:
+The following directives are available:
+
+Describe a variable or member variable, e.g.,:
+Describe a C++ object. Full signature specification is supported – give the signature as you would in the declaration. Here some examples:
+
+Variable templates can also be described:
+Will be rendered like this:
+
+Describe a type as in a typedef declaration, a type alias declaration, or simply the name of a type with unspecified type, e.g.,:
+Describes a method with parameters and types.
+
+A type alias can also be templated:
+Describes a method without types.
+
+The example are rendered as follows.
+Describes the constant indexing operator of a templated array.
+
+A typedef-like declaration of a type.
+Describe a casting operator here.
+
+Declaration of a type alias with unspecified type.
+Describe a constexpr function here.
+
+Declaration of a type alias.
+Select the current C++ namespace for the following objects.
+
+Describe a (scoped) enum, possibly with the underlying type specified.
+These roles link to the given object types:
+
+Describe an enumerator, optionally with its value defined, e.g.,:
+Reference a C++ object. You can give the full signature (and need to, for overloaded functions.)
+
+Declarations in the C++ domain are as default placed in global scope.
+Note
+
+Changes the current scope for the subsequent objects to the given scope, and resets the namespace directive stack.
+Sphinx’ syntax to give references a custom title can interfere with linking to template classes, if nothing follows the closing angle bracket, i.e. if the link looks like this: :cpp:class:`MyClass`. This is interpreted as a link to T with a title of MyClass. In this case, please escape the opening angle bracket with a backslash, like this: :cpp:class:`MyClass\`.
+
+All subsequent objects will be defined as if their name were declared with the scope prepended.
+Note on References
+
+Using NULL, 0, or nullptr as the scope will change to global scope.
+It is currently impossible to link to a specific version of an overloaded method. Currently the C++ domain is the first domain that has basic support for overloaded methods and until there is more data for comparison we don’t want to select a bad syntax to reference a specific overload. Currently Sphinx will link to the first overloaded version of the method / function.
+
+or::
+The so-called “standard” domain collects all markup that doesn’t warrant a domain of its own. Its directives and roles are not prefixed with a domain name.
+
+Change the scope relatively to the current scope.
+The standard domain is also where custom object descriptions, added using the add_object_type() API, are placed.
+
+the current scope will be A::B::C::D.
+There is a set of directives allowing documenting command-line programs:
+
+Undo the previous cpp:namespace-push directive (not just pop a scope).
+Describes a command line option or switch. Option argument names should be enclosed in angle brackets. Example:
+
+the current scope will be A::B (not A::B::C).
+The directive will create a cross-reference target named after the first option, referencable by option (in the example case, you’d use something like :option:`-m`).
+
+If no previous cpp:namespace-push directive has been used, but only a cpp:namespace directive, then the current scope will be reset to global scope.
+Describes an environment variable that the documented code or program uses or defines. Referencable by envvar.
+
+The C++ directives support the following info fields (see also Info field lists):
+Like py:currentmodule, this directive produces no output. Instead, it serves to notify Sphinx that all following option directives document options for the program called name.
+
+These roles link to the given declaration types:
+If you use program, you have to qualify the references in your option roles by the program name, so if you have the following situation
+
+Reference a C++ declaration by name (see below for details).
+then :option:`rm -r` would refer to the first option, while :option:`svn -r` would refer to the second one.
+
+Note on References with Templates Parameters/Arguments
+The program name may contain spaces (in case you want to document subcommands like svn add and svn commit separately).
+
+Sphinx’s syntax to give references a custom title can interfere with linking to template classes, if nothing follows the closing angle bracket, i.e.
+New in version 0.5.
+
+Note on References to Overloaded Functions
+There is also a very generic object description directive, which is not tied to any domain:
+
+It is currently impossible to link to a specific version of an overloaded method.
+This directive produces the same formatting as the specific ones provided by domains, but does not create index entries or cross-referencing targets. Example:
+
+In general the reference must include the template paraemter declarations, e.g., template\<typename TOuter> Wrapper::Outer (template<typename TOuter> Wrapper::Outer).
+The JavaScript domain (name js) provides the following directives:
+
+The inner template class can not be directly referenced, unless the current namespace is changed or the following shorthand is used.
+Describes a JavaScript function or method. If you want to describe arguments as optional use square brackets as documented for Python signatures.
+
+Assume the following declarations.
+You can use fields to give more details about arguments and their expected types, errors which may be thrown by the function, and the value being returned:
+
+In general the reference must include a template parameter list for each template argument list.
+This is rendered as:
+
+Assume the following declaration.
+For whatever reason in that case.
+
+References to partial specialisations must always include the template parameter lists, e.g., template\<typename T> Outer\<T*> (template<typename T> Outer<T*>).
+Something
+
+The standard domain is also where custom object descriptions, added using the add_object_type() API, are placed.
+This is rendered as:
+
+There is a set of directives allowing documenting command-line programs:
+Describes a global variable or constant.
+
+Describes a command line argument or switch.
+Describes the attribute name of object.
+
+The directive will create cross-reference targets for the given options, referencable by option (in the example case, you’d use something like :option:`dest_dir`, :option:`-m`, or :option:`--module`).
+These roles are provided to refer to the described objects:
+

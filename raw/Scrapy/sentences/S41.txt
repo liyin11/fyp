@@ -1,0 +1,150 @@
+Signals¶
+信号(Signals)¶
+
+Scrapy uses signals extensively to notify when certain events occur.
+Scrapy使用信号来通知事情发生
+
+You can catch some of those signals in your Scrapy project (using an extension, for example) to perform additional tasks or extend Scrapy to add functionality not provided out of the box.
+您可以在您的Scrapy项目中捕捉一些信号(使用 extension)来完成额外的工作或添加额外的功能，扩展Scrapy
+
+Even though signals provide several arguments, the handlers that catch them don’t need to accept all of them - the signal dispatching mechanism will only deliver the arguments that the handler receives.
+虽然信号提供了一些参数，不过处理函数不用接收所有的参数 - 信号分发机制(singal dispatching mechanism)仅仅提供处理器(handler)接受的参数
+
+You can connect to signals (or send your own) through the Signals API.
+您可以通过 信号(Signals) API 来连接(或发送您自己的)信号
+
+Some signals support returning Twisted deferreds from their handlers, see the Built-in signals reference below to know which ones.
+有些信号支持从处理器返回 Twisted deferreds ，参考下边的 内置信号参考手册(Built-in signals reference) 来了解哪些支持
+
+Built-in signals reference¶
+内置信号参考手册(Built-in signals reference)¶
+
+Here’s the list of Scrapy built-in signals and their meaning.
+以下给出Scrapy内置信号的列表及其意义
+
+engine_started¶
+engine_started¶
+
+Sent when the Scrapy engine has started crawling.
+当Scrapy引擎启动爬取时发送该信号
+
+This signal supports returning deferreds from their handlers.
+该信号支持返回deferreds
+
+Note
+注解
+
+This signal may be fired after the spider_opened signal, depending on how the spider was started.
+该信号可能会在信号 spider_opened 之后被发送，取决于spider的启动方式
+
+So don’t rely on this signal getting fired before spider_opened.
+ 所以不要 依赖 该信号会比 spider-opened 更早被发送
+
+engine_stopped¶
+engine_stopped¶
+
+Sent when the Scrapy engine is stopped (for example, when a crawling process has finished).
+当Scrapy引擎停止时发送该信号(例如，爬取结束)
+
+This signal supports returning deferreds from their handlers.
+该信号支持返回deferreds
+
+item_scraped¶
+item_scraped¶
+
+Sent when an item has been scraped, after it has passed all the Item Pipeline stages (without being dropped).
+当item被爬取，并通过所有 Item Pipeline 后(没有被丢弃(dropped)，发送该信号
+
+This signal supports returning deferreds from their handlers.
+该信号支持返回deferreds
+
+item_dropped¶
+item_dropped¶
+
+Sent after an item has been dropped from the Item Pipeline when some stage raised a DropItem exception.
+当item通过 Item Pipeline ，有些pipeline抛出 DropItem 异常，丢弃item时，该信号被发送
+
+This signal supports returning deferreds from their handlers.
+该信号支持返回deferreds
+
+spider_closed¶
+spider_closed¶
+
+Sent after a spider has been closed.
+当某个spider被关闭时，该信号被发送
+
+This can be used to release per-spider resources reserved on spider_opened.
+该信号可以用来释放每个spider在 spider_opened 时占用的资源
+
+This signal supports returning deferreds from their handlers.
+该信号支持返回deferreds
+
+spider_opened¶
+spider_opened¶
+
+Sent after a spider has been opened for crawling.
+当spider开始爬取时发送该信号
+
+This is typically used to reserve per-spider resources, but can be used for any task that needs to be performed when a spider is opened.
+该信号一般用来分配spider的资源，不过其也能做任何事
+
+This signal supports returning deferreds from their handlers.
+该信号支持返回deferreds
+
+spider_idle¶
+spider_idle¶
+
+Sent when a spider has gone idle, which means the spider has no further:
+当spider进入空闲(idle)状态时该信号被发送
+
+If the idle state persists after all handlers of this signal have finished, the engine starts closing the spider.
+当该信号的所有处理器(handler)被调用后，如果spider仍然保持空闲状态， 引擎将会关闭该spider
+
+After the spider has finished closing, the spider_closed signal is sent.
+当spider被关闭后， spider_closed 信号将被发送
+
+You can, for example, schedule some requests in your spider_idle handler to prevent the spider from being closed.
+您可以，比如，在 spider_idle 处理器中调度某些请求来避免spider被关闭
+
+This signal does not support returning deferreds from their handlers.
+该信号 不支持 返回deferreds
+
+spider_error¶
+spider_error¶
+
+Sent when a spider callback generates an error (ie.
+当spider的回调函数产生错误时(例如，抛出异常)，该信号被发送
+
+Sent when the engine schedules a Request, to be downloaded later.
+当引擎调度一个 Request 对象用于下载时，该信号被发送
+
+The signal does not support returning deferreds from their handlers.
+该信号 不支持 返回deferreds
+
+request_dropped¶
+request_dropped¶
+
+Sent when a Request, scheduled by the engine to be downloaded later, is rejected by the scheduler.
+Sent when a Request, scheduled by the engine to be downloaded later, is rejected by the scheduler.
+
+The signal does not support returning deferreds from their handlers.
+The signal does not support returning deferreds from their handlers.
+
+response_received¶
+response_received¶
+
+Sent when the engine receives a new Response from the downloader.
+当引擎从downloader获取到一个新的 Response 时发送该信号
+
+This signal does not support returning deferreds from their handlers.
+该信号 不支持 返回deferreds
+
+response_downloaded¶
+response_downloaded¶
+
+Sent by the downloader right after a HTTPResponse is downloaded.
+当一个 HTTPResponse 被下载时，由downloader发送该信号
+
+This signal does not support returning deferreds from their handlers.
+该信号 不支持 返回deferreds
+

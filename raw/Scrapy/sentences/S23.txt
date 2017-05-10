@@ -1,0 +1,66 @@
+Using Firefox for scraping¶
+借助Firefox来爬取¶
+
+Here is a list of tips and advice on using Firefox for scraping, along with a list of useful Firefox add-ons to ease the scraping process.
+这里介绍一些使用Firefox进行爬取的点子及建议，以及一些帮助爬取的Firefox实用插件
+
+Caveats with inspecting the live browser DOM¶
+在浏览器中检查DOM的注意事项¶
+
+Since Firefox add-ons operate on a live browser DOM, what you’ll actually see when inspecting the page source is not the original HTML, but a modified one after applying some browser clean up and executing Javascript code.
+Firefox插件操作的是活动的浏览器DOM(live browser DOM)，这意味着当您检查网页源码的时候， 其已经不是原始的HTML，而是经过浏览器清理并执行一些Javascript代码后的结果
+
+Firefox, in particular, is known for adding  elements to tables.
+ Firefox是个典型的例子，其会在table中添加  元素
+
+Scrapy, on the other hand, does not modify the original page HTML, so you won’t be able to extract any data if you use  in your XPath expressions.
+ 而Scrapy相反，其并不修改原始的HTML，因此如果在XPath表达式中使用  ，您将获取不到任何数据
+
+Therefore, you should keep in mind the following things when working with Firefox and XPath:
+所以，当XPath配合Firefox使用时您需要记住以下几点:
+
+Useful Firefox add-ons for scraping¶
+对爬取有帮助的实用Firefox插件¶
+
+Firebug¶
+Firebug¶
+
+Firebug is a widely known tool among web developers and it’s also very useful for scraping.
+Firebug 是一个在web开发者间很著名的工具，其对抓取也十分有用
+
+In particular, its Inspect Element feature comes very handy when you need to construct the XPaths for extracting data because it allows you to view the HTML code of each page element while moving your mouse over it.
+ 尤其是 检查元素(Inspect Element) 特性对构建抓取数据的XPath十分方便
+
+See Using Firebug for scraping for a detailed guide on how to use Firebug with Scrapy.
+查看 使用Firebug进行爬取 ，了解如何配合Scrapy使用Firebug的详细教程
+
+XPather¶
+XPather¶
+
+XPather allows you to test XPath expressions directly on the pages.
+XPather 能让你在页面上直接测试XPath表达式
+
+XPath Checker¶
+XPath Checker¶
+
+XPath Checker is another Firefox add-on for testing XPaths on your pages.
+XPath Checker 是另一个用于测试XPath表达式的Firefox插件
+
+Tamper Data¶
+Tamper Data¶
+
+Tamper Data is a Firefox add-on which allows you to view and modify the HTTP request headers sent by Firefox.
+Tamper Data 是一个允许您查看及修改Firefox发送的header的插件
+
+Firebug also allows to view HTTP headers, but not to modify them.
+Firebug能查看HTTP header，但无法修改
+
+Firecookie¶
+Firecookie¶
+
+Firecookie makes it easier to view and manage cookies.
+Firecookie 使得查看及管理cookie变得简单
+
+You can use this extension to create a new cookie, delete existing cookies, see a list of cookies for the current site, manage cookies permissions and a lot more.
+您可以使用这个插件来创建新的cookie， 删除存在的cookie，查看当前站点的cookie，管理cookie的权限及其他功能
+

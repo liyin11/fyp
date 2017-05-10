@@ -1,0 +1,90 @@
+Internationalization
+Internationalization
+
+Templating
+Templating
+
+That would give you the classic theme, but with a sidebar on the right side and a black background for the relation bar (the bar with the navigation links at the page’s top and bottom).
+Sphinx supports changing the appearance of its HTML output via themes. A theme is a collection of HTML templates, stylesheet(s) and other static files. Additionally, it has a configuration file which specifies from which theme to inherit, which highlighting style to use, and what options exist for customizing the theme’s look and feel.
+
+If the theme does not come with Sphinx, it can be in two static forms: either a directory (containing theme.conf and other needed files), or a zip file with the same contents.
+Themes are meant to be project-unaware, so they can be used for different projects without change.
+
+classic
+That would give you the default theme, but with a sidebar on the right side and a black background for the relation bar (the bar with the navigation links at the page’s top and bottom).
+
+sphinxdoc
+If the theme does not come with Sphinx, it can be in two forms: either a directory (containing theme.conf and other needed files), or a zip file with the same contents. Either of them must be put where Sphinx can find it; for this there is the config value html_theme_path. It gives a list of directories, relative to the directory containing conf.py, that can contain theme directories or zip files. For example, if you have a theme in the file blue.zip, you can put it right in the directory containing conf.py and use this configuration:
+
+traditional
+default
+
+nature
+sphinxdoc
+
+haiku
+scrolls
+
+pyramid
+agogo
+
+bizstyle
+traditional
+
+Sphinx comes with a selection of themes to choose from.
+nature
+
+These themes are:
+haiku
+
+basic – This is a basically unstyled layout used as the base for the other themes, and usable as the base for custom themes as well.
+pyramid
+
+alabaster – Alabaster theme is a modified “Kr” Sphinx theme from @kennethreitz (especially as used in his Requests project), which was itself originally based on @mitsuhiko’s theme used for Flask & related projects.
+Sphinx comes with a selection of themes to choose from.
+
+classic – This is the classic theme, which looks like the Python 2 documentation.
+These themes are:
+
+There are also various color and font options that can change the color scheme without having to write a custom stylesheet:
+basic – This is a basically unstyled layout used as the base for the other themes, and usable as the base for custom themes as well. The HTML contains all important elements like sidebar and relation bar. There are these options (which are inherited by the other themes):
+
+sphinxdoc – The theme used for this documentation.
+default – This is the default theme, which looks like the Python documentation. It can be customized via these options:
+
+scrolls – A more lightweight theme, based on the Jinja documentation.
+There are also various color and font options that can change the color scheme without having to write a custom stylesheet:
+
+agogo – A theme created by Andi Albrecht.
+sphinxdoc – The theme used for this documentation. It features a sidebar on the right side. There are currently no options beyond nosidebar and sidebarwidth.
+
+nature – A greenish theme.
+scrolls – A more lightweight theme, based on the Jinja documentation. The following color options are available:
+
+pyramid – A theme from the Pyramid web framework project, designed by Blaise Laflamme.
+agogo – A theme created by Andi Albrecht. The following options are supported:
+
+haiku – A theme without sidebar inspired by the Haiku OS user guide.
+nature – A greenish theme. There are currently no options beyond nosidebar and sidebarwidth.
+
+traditional – A theme resembling the old Python documentation.
+pyramid – A theme from the Pyramid web framework project, designed by Blaise Laflamme. There are currently no options beyond nosidebar and sidebarwidth.
+
+epub – A theme for the epub builder.
+haiku – A theme without sidebar inspired by the Haiku OS user guide. The following options are supported:
+
+New in version 1.3: ‘alabaster’, ‘sphinx_rtd_theme’ and ‘bizstyle’ theme.
+traditional – A theme resembling the old Python documentation. There are currently no options beyond nosidebar and sidebarwidth.
+
+Changed in version 1.3: The ‘default’ theme has been renamed to ‘classic’.
+epub – A theme for the epub builder. There are currently no options. This theme tries to save visual space which is a sparse resource on ebook readers.
+
+Creating themes¶
+Creating themes¶
+
+As said, themes are either a directory or a zipfile (whose name is the theme name), containing the following:
+As said, themes are either a directory or a zipfile (whose name is the theme name), containing the following:
+
+The theme.conf file is in INI format [1] (readable by the standard Python ConfigParser module) and has the following structure:
+The theme.conf file is in INI format [1] (readable by the standard Python ConfigParser module) and has the following structure:
+

@@ -1,0 +1,261 @@
+Core API¶
+核心API¶
+
+New in version 0.15.
+0.15 新版功能.
+
+This section documents the Scrapy core API, and it’s intended for developers of extensions and middlewares.
+该节文档讲述Scrapy核心API，目标用户是开发Scrapy扩展(extensions)和中间件(middlewares)的开发人员
+
+Crawler API¶
+Crawler API¶
+
+The main entry point to Scrapy API is the Crawler object, passed to extensions through the from_crawler class method.
+Scrapy API的主要入口是 Crawler 的实例对象， 通过类方法 from_crawler 将它传递给扩展(extensions)
+
+This object provides access to all Scrapy core components, and it’s the only way for extensions to access them and hook their functionality into Scrapy.
+ 该对象提供对所有Scrapy核心组件的访问， 也是扩展访问Scrapy核心组件和挂载功能到Scrapy的唯一途径
+
+The Extension Manager is responsible for loading and keeping track of installed extensions and it’s configured through the EXTENSIONS setting which contains a dictionary of all available extensions and their order similar to how you configure the downloader middlewares.
+Extension Manager负责加载和跟踪已经安装的扩展， 它通过 EXTENSIONS 配置，包含一个所有可用扩展的字典， 字典的顺序跟你在 configure the downloader middlewares 配置的顺序一致
+
+The Crawler object must be instantiated with a scrapy.spiders.Spider subclass and a scrapy.settings.Settings object.
+Crawler必须使用 scrapy.spider.Spider 子类及 scrapy.settings.Settings 的对象进行实例化
+
+The settings manager of this crawler.
+crawler的配置管理器
+
+This is used by extensions & middlewares to access the Scrapy settings of this crawler.
+扩展(extensions)和中间件(middlewares)使用它用来访问Scrapy的配置
+
+For an introduction on Scrapy settings see Settings.
+关于Scrapy配置的介绍参考这里 Settings
+
+For the API see Settings class.
+API参考 Settings
+
+The signals manager of this crawler.
+crawler的信号管理器
+
+This is used by extensions & middlewares to hook themselves into Scrapy functionality.
+扩展和中间件使用它将自己的功能挂载到Scrapy
+
+For an introduction on signals see Signals.
+关于信号的介绍参考 信号(Signals)
+
+For the API see SignalManager class.
+API参考 SignalManager
+
+The stats collector of this crawler.
+crawler的统计信息收集器
+
+This is used from extensions & middlewares to record stats of their behaviour, or access stats collected by other extensions.
+扩展和中间件使用它记录操作的统计信息，或者访问由其他扩展收集的统计信息
+
+For an introduction on stats collection see Stats Collection.
+关于统计信息收集器的介绍参考 数据收集(Stats Collection)
+
+For the API see StatsCollector class.
+API参考类 StatsCollector class
+
+The extension manager that keeps track of enabled extensions.
+扩展管理器，跟踪所有开启的扩展
+
+Most extensions won’t need to access this attribute.
+大多数扩展不需要访问该属性
+
+For an introduction on extensions and a list of available extensions on Scrapy see Extensions.
+关于扩展和可用扩展列表器的介绍参考 扩展(Extensions)
+
+The execution engine, which coordinates the core crawling logic between the scheduler, downloader and spiders.
+执行引擎，协调crawler的核心逻辑，包括调度，下载和spider
+
+Some extension may want to access the Scrapy engine, to inspect or modify the downloader and scheduler behaviour, although this is an advanced use and this API is not yet stable.
+某些扩展可能需要访问Scrapy的引擎属性，以修改检查(modify inspect)或修改下载器和调度器的行为， 这是该API的高级使用，但还不稳定
+
+Spider currently being crawled.
+根据给定的 args , kwargs 的参数来初始化spider类，启动执行引擎，启动crawler
+
+Starts the crawler by instantiating its spider class with the given args and kwargs arguments, while setting the execution engine in motion.
+返回一个延迟deferred对象，当爬取结束时触发它
+
+Returns a deferred that is fired when the crawl is finished.
+This is a convenient helper class that creates, configures and runs crawlers inside an already setup Twisted reactor.
+
+This is a convenient helper class that keeps track of, manages and runs crawlers inside an already setup Twisted reactor.
+The CrawlerRunner object must be instantiated with a Settings object.
+
+The CrawlerRunner object must be instantiated with a Settings object.
+This class shouldn’t be needed (since Scrapy is responsible of using it accordingly) unless writing scripts that manually handle the crawling process. See 在脚本中运行Scrapy for an example.
+
+This class shouldn’t be needed (since Scrapy is responsible of using it accordingly) unless writing scripts that manually handle the crawling process.
+Set of crawlers created by the crawl() method.
+
+Run a crawler with the provided arguments.
+Set of the deferreds return by the crawl() method. This collection it’s useful for keeping track of current crawling state.
+
+It will call the given Crawler’s crawl() method, while keeping track of it so it can be stopped later.
+This method sets up the crawling of the given spidercls with the provided arguments.
+
+If crawler_or_spidercls isn’t a Crawler instance, this method will try to create one using this parameter as the spider class given to it.
+It takes care of loading the spider class while configuring and starting a crawler for it.
+
+Returns a deferred that is fired when the crawling is finished.
+Returns a deferred that is fired when the crawl is finished.
+
+Set of crawlers started by crawl() and managed by this class.
+Stops simultaneously all the crawling jobs taking place.
+
+Return a Crawler object.
+Returns a deferred that is fired when they all have ended.
+
+Returns a deferred that is fired when they all have ended.
+Dictionary that sets the key name and priority level of the default settings priorities used in Scrapy.
+
+Bases: scrapy.crawler.CrawlerRunner
+Each item defines a settings entry point, giving it a code name for identification and an integer priority. Greater priorities take more precedence over lesser ones when setting and retrieving values in the Settings class.
+
+A class to run multiple scrapy crawlers in a process simultaneously.
+For a detailed explanation on each settings sources, see: Settings.
+
+This class extends CrawlerRunner by adding support for starting a Twisted reactor and handling shutdown signals, like the keyboard interrupt command Ctrl-C.
+This object stores Scrapy settings for the configuration of internal components, and can be used for any further customization.
+
+This utility should be a better fit than CrawlerRunner if you aren’t running another Twisted reactor within your application.
+After instantiation of this class, the new object will have the global default settings described on 内置设定参考手册 already populated.
+
+The CrawlerProcess object must be instantiated with a Settings object.
+Additional values can be passed on initialization with the values argument, and they would take the priority level. If the latter argument is a string, the priority name will be looked up in SETTINGS_PRIORITIES. Otherwise, a expecific integer should be provided.
+
+This class shouldn’t be needed (since Scrapy is responsible of using it accordingly) unless writing scripts that manually handle the crawling process.
+Once the object is created, new settings can be loaded or updated with the set() method, and can be accessed with the square bracket notation of dictionaries, or with the get() method of the instance and its value conversion variants. When requesting a stored key, the value with the highest priority will be retrieved.
+
+Run a crawler with the provided arguments.
+Store a key/value attribute with a given priority. Settings should be populated before configuring the Crawler object (through the configure() method), otherwise they won’t have any effect.
+
+It will call the given Crawler’s crawl() method, while keeping track of it so it can be stopped later.
+Store key/value pairs with a given priority.
+
+If crawler_or_spidercls isn’t a Crawler instance, this method will try to create one using this parameter as the spider class given to it.
+This is a helper function that calls set() for every item of values with the provided priority.
+
+Returns a deferred that is fired when the crawling is finished.
+Store settings from a module with a given priority.
+
+Set of crawlers started by crawl() and managed by this class.
+This is a helper function that calls set() for every globally declared uppercase variable of module with the provided priority.
+
+Return a Crawler object.
+获取某项配置的值，且不修改其原有的值
+
+Returns a deferred that is fired when all managed crawlers have completed their executions.
+return False 将某项配置的值以布尔值形式返回
+
+This method starts a Twisted reactor, adjusts its pool size to REACTOR_THREADPOOL_MAXSIZE, and installs a DNS cache based on DNSCACHE_ENABLED and DNSCACHE_SIZE.
+比如，通过环境变量计算将某项配置设置为 '0'，通过该方法获取得到 False
+
+If stop_after_crawl is True, the reactor will be stopped after all crawlers have finished, using join().
+将某项配置的值以整数形式返回
+
+Stops simultaneously all the crawling jobs taking place.
+将某项配置的值以浮点数形式返回
+
+Returns a deferred that is fired when they all have ended.
+将某项配置的值以列表形式返回
+
+Each item defines a settings entry point, giving it a code name for identification and an integer priority.
+Get a setting value as a dictionary. If the setting original type is a dictionary, a copy of it will be returned. If it’s a string it will evaluated as a json dictionary.
+
+For a detailed explanation on each settings sources, see: Settings.
+Make a deep copy of current settings.
+
+Small helper function that looks up a given string priority in the SETTINGS_PRIORITIES dictionary and returns its numerical value, or directly returns a given numerical priority.
+This method returns a new instance of the Settings class, populated with the same values and their priorities.
+
+Bases: scrapy.settings.BaseSettings
+Modifications to the new object won’t be reflected on the original settings.
+
+This object stores Scrapy settings for the configuration of internal components, and can be used for any further customization.
+Disable further changes to the current settings.
+
+It is a direct subclass and supports all methods of BaseSettings.
+After calling this method, the present state of the settings will become immutable. Trying to change values through the set() method and its variants won’t be possible and will be alerted.
+
+Instances of this class behave like dictionaries, but store priorities along with their (key, value) pairs, and can be frozen (i.e.
+Return an immutable copy of the current settings.
+
+Key-value entries can be passed on initialization with the values argument, and they would take the priority level (unless values is already an instance of BaseSettings, in which case the existing priority levels will be kept).
+Alias for a freeze() call in the object returned by copy()
+
+This method returns a new instance of the Settings class, populated with the same values and their priorities.
+This class is in charge of retrieving and handling the spider classes defined across the project.
+
+Modifications to the new object won’t be reflected on the original settings.
+Custom spider managers can be employed by specifying their path in the SPIDER_MANAGER_CLASS project setting. They must fully implement the scrapy.interfaces.ISpiderManager interface to guarantee an errorless execution.
+
+Make a copy of current settings and convert to a dict.
+This class method is used by Scrapy to create an instance of the class. It’s called with the current project settings, and it loads the spiders found in the modules of the SPIDER_MODULES setting.
+
+This method returns a new dict populated with the same values and their priorities as the current settings.
+Get the Spider class with the given name. It’ll look into the previously loaded spiders for a spider class with name spider_name and will raise a KeyError if not found.
+
+Modifications to the returned dict won’t be reflected on the original settings.
+Get the names of the available spiders in the project.
+
+This method can be useful for example for printing settings in Scrapy shell.
+List the spiders’ names that can handle the given request. Will try to match the request’s url against the domains of the spiders.
+
+Return an immutable copy of the current settings.
+链接一个接收器函数(receiver function) 到一个信号(signal)
+
+Alias for a freeze() call in the object returned by copy().
+signal可以是任何对象，虽然Scrapy提供了一些预先定义好的信号， 参考文档 信号(Signals)
+
+Get a setting value without affecting its original type.
+发送一个信号，捕获异常并记录日志
+
+Get a setting value as a boolean.
+关键字参数会传递给信号处理者(signal handlers)(通过方法 connect() 关联)
+
+1, '1', and True return True, while 0, '0', False and None return False.
+跟 send_catch_log() 相似但支持返回 deferreds 形式的信号处理器
+
+For example, settings populated through environment variables set to '0' will return False when using this method.
+返回一个 deferred ，当所有的信号处理器的延迟被触发时调用
+
+Get a setting value as a dictionary.
+关键字参数会传递给信号处理者(signal handlers)(通过方法 connect() 关联)
+
+Get a setting value as a float.
+解除一个接收器函数和一个信号的关联
+
+Get a setting value as an int.
+取消给定信号绑定的所有接收器
+
+Return the current numerical priority value of a setting, or None if the given name does not exist.
+模块 scrapy.statscol 下有好几种状态收集器， 它们都实现了状态收集器API对应的类 Statscollector (即它们都继承至该类)
+
+Get a composition of a dictionary-like setting and its _BASE counterpart.
+返回指定key的统计值，如果key不存在则返回缺省值
+
+Return the numerical value of the highest priority present throughout all settings, or the numerical value for default from SETTINGS_PRIORITIES if there are no settings stored.
+以dict形式返回当前spider的所有统计值
+
+Store a key/value attribute with a given priority.
+设置key所指定的统计值为value
+
+Settings should be populated before configuring the Crawler object (through the configure() method), otherwise they won’t have any effect.
+使用dict形式的 stats 参数覆盖当前的统计值
+
+Store settings from a module with a given priority.
+增加key所对应的统计值，增长值由count指定
+
+This is a helper function that calls set() for every globally declared uppercase variable of module with the provided priority.
+如果key所对应的当前value小于参数所指定的value，则设置value
+
+Store key/value pairs with a given priority.
+如果key所对应的当前value大于参数所指定的value，则设置value
+
+This is a helper function that calls set() for every item of values with the provided priority.
+清除所有统计信息
+

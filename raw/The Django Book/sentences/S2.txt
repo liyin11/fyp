@@ -1,0 +1,894 @@
+Chapter 3: Views and URLconfs¶
+第三章：视图和URL配置
+
+In the previous chapter, we explained how to set up a Django project and run the Django development server.
+前一章中，我们解释了如何建立一个 Django 项目并启动 Django 开发服务器
+
+In this chapter, you’ll learn the basics of creating dynamic Web pages with Django.
+ 在这一章，你将会学到用Django创建动态网页的基本知识
+
+Your First Django-Powered Page: Hello World¶
+你的第一个基于Django的页面： Hello World
+
+As our first goal, let’s create a Web page that outputs that famous example message: “Hello world.”
+正如我们的第一个目标，创建一个网页，用来输出这个著名的示例信息：
+
+If you were publishing a simple “Hello world” Web page without a Web framework, you’d simply type “Hello world” into a text file, call it hello.html, and upload it to a directory on a Web server somewhere.
+如果你曾经发布过Hello world页面，但是没有使用网页框架，只是简单的在hello.html文本文件中输入Hello World，然后上传到任意的一个网页服务器上
+
+Notice, in that process, you’ve specified two key pieces of information about that Web page: its contents (the string "Hello world") and its URL ( http://www.example.com/hello.html, or maybe http://www.example.com/files/hello.html if you put it in a subdirectory).
+ 注意，在这个过程中，你已经说明了两个关于这个网页的关键信息： 它包括（字符串 "Hello world"）和它的URL( http://www.example.com/hello.html , 如果你把文件放在子目录，也可能是 http://www.example.com/files/hello.html)
+
+With Django, you specify those same two things, but in a different way.
+使用Django，你会用不同的方法来说明这两件事 页面的内容是靠view function（视图函数） 来产生，URL定义在 URLconf 中
+
+The contents of the page are produced by a view function, and the URL is specified in a URLconf.
+首先，我们先写一个Hello World视图函数
+
+Within the mysite directory that django-admin.py startproject made in the last chapter, create an empty file called views.py.
+在上一章使用django-admin.py startproject制作的mysite文件夹中，创建一个叫做views.py的空文件
+
+This Python module will contain our views for this chapter.
+这个Python模块将包含这一章的视图
+
+Note that there’s nothing special about the name views.py – Django doesn’t care what the file is called, as you’ll see in a bit – but it’s a good idea to call it views.py as a convention, for the benefit of other developers reading your code.
+ 请留意，Django对于view.py的文件命名没有特别的要求，它不在乎这个文件叫什么
+
+Our “Hello world” view is simple.
+我们的Hello world视图非常简单
+
+Here’s the entire function, plus import statements, which you should type into the views.py file:
+ 这些是完整的函数和导入声明，你需要输入到views.py文件：
+
+Let’s step through this code one line at a time:
+我们逐行逐句地分析一遍这段代码：
+
+First, we import the class HttpResponse, which lives in the django.http module.
+首先，我们从 django.http 模块导入（import） HttpResponse 类
+
+We need to import this class because it’s used later in our code.
+参阅附录 H 了解更多关于 HttpRequest和 HttpResponse 的细节
+
+Next, we define a function called hello – the view function.
+接下来，我们定义一个叫做hello 的视图函数
+
+Each view function takes at least one parameter, called request by convention.
+每个视图函数至少要有一个参数，通常被叫作request
+
+This is an object that contains information about the current Web request that has triggered this view, and it’s an instance of the class django.http.HttpRequest.
+ 这是一个触发这个视图、包含当前Web请求信息的对象，是类django.http.HttpRequest的一个实例
+
+In this example, we don’t do anything with request, but it must be the first parameter of the view nonetheless.
+在这个示例中，我们虽然不用request做任何事情，然而它仍必须是这个视图的第一个参数
+
+Note that the name of the view function doesn’t matter;
+注意视图函数的名称并不重要
+
+it doesn’t have to be named in a certain way in order for Django to recognize it.
+并不一定非得以某种特定的方式命名才能让 Django 识别它
+
+We’re calling it hello here, because that name clearly indicates the gist of the view, but it could just as well be named hello_wonderful_beautiful_world, or something equally revolting.
+ 在这里我们把它命名为：hello，是因为这个名称清晰的显示了视图的用意
+
+The next section, “Your First URLconf”, will shed light on how Django finds this function.
+同样地，你可以用诸如：hello_wonderful_beautiful_world，这样难看的短句来给它命名
+
+The function is a simple one-liner: it merely returns an HttpResponse object that has been instantiated with the text "Hello world".
+这个函数只有简单的一行代码： 它仅仅返回一个HttpResponse对象，这个对象包含了文本“Hello world”
+
+The main lesson here is this: a view is just a Python function that takes an HttpRequest as its first parameter and returns an instance of HttpResponse.
+这里主要讲的是： 一个视图就是Python的一个函数
+
+In order for a Python function to be a Django view, it must do these two things.
+这个函数第一个参数的类型是HttpRequest
+
+(There are exceptions, but we’ll get to those later.)
+它返回一个HttpResponse实例
+
+If, at this point, you ran python manage.py runserver again, you’d still see the “Welcome to Django” message, with no trace of our “Hello world” view anywhere.
+现在，如果你再运行：python manage.py runserver，你还将看到Django的欢迎页面，而看不到我们刚才写的Hello world显示页面
+
+That’s because our mysite project doesn’t yet know about the hello view;
+ 那是因为我们的mysite项目还对hello视图一无所知
+
+we need to tell Django explicitly that we’re activating this view at a particular URL.
+我们需要通过一个详细描述的URL来显式的告诉它并且激活这个视图
+
+(Continuing our previous analogy of publishing static HTML files, at this point we’ve created the HTML file but haven’t uploaded it to a directory on the server yet.) To hook a view function to a particular URL with Django, use a URLconf.
+ （继续我们刚才类似发布静态HTML文件的例子
+
+A URLconf is like a table of contents for your Django-powered Web site.
+URLconf 就像是 Django 所支撑网站的目录
+
+Basically, it’s a mapping between URLs and the view functions that should be called for those URLs.
+ 它的本质是 URL 模式以及要为该 URL 模式调用的视图函数之间的映射表
+
+It’s how you tell Django, “For this URL, call this code, and for that URL, call that code.” For example, “When somebody visits the URL /foo/, call the view function foo_view(), which lives in the Python module views.py.”
+ 你就是以这种方式告诉 Django，对于这个 URL 调用这段代码，对于那个 URL 调用那段代码
+
+When you executed django-admin.py startproject in the previous chapter, the script created a URLconf for you automatically: the file urls.py.
+前一章中执行 django-admin.py startproject 时，该脚本会自动为你建了一份 URLconf（即 urls.py 文件）
+
+By default, it looks something like this:
+ 默认的urls.py会像下面这个样子：
+
+This default URLconf includes some commonly used Django features commented out, so that activating those features is as easy as uncommenting the appropriate lines.
+默认的URLconf包含了一些被注释起来的Django中常用的功能，仅仅只需去掉这些注释就可以开启这些功能. 下面是URLconf中忽略被注释的行后的实际内容
+
+Let’s step through this code one line at a time:
+让我们逐行解释一下代码：
+
+The main thing to note here is the variable urlpatterns, which Django expects to find in your URLconf module.
+当前应该注意是 urlpatterns 变量， Django 期望能从 ROOT_URLCONF 模块中找到它
+
+This variable defines the mapping between URLs and the code that handles those URLs.
+ 该变量定义了 URL 以及用于处理这些 URL 的代码之间的映射关系
+
+By default, as we can see, the URLconf is empty – your Django application is a blank slate.
+ 默认情况下，URLconf 所有内容都被注释起来了——Django 应用程序还是白版一块
+
+(As a side note, that’s how Django knew to show you the “Welcome to Django” page in the last chapter.
+ （注：那是上一节中Django怎么知道显示欢迎页面的原因
+
+If your URLconf is empty, Django assumes you just started a new project and, hence, displays that message.)
+ 如果 URLconf 为空，Django 会认定你才创建好新项目，因此也就显示那种信息
+
+To add a URL and view to the URLconf, just add a Python tuple mapping a URL pattern to the view function.
+如果想在URLconf中加入URL和view，只需增加映射URL模式和view功能的Python tuple即可. 这里演示如何添加view中hello功能.
+
+(Note that we’ve removed the commented-out code for brevity.
+请留意：为了简洁，我们移除了注释代码
+
+You can choose to leave those lines in, if you’d like.)
+ 如果你喜欢的话，你可以保留那些行
+
+We made two changes here:
+我们做了两处修改
+
+In a nutshell, we just told Django that any request to the URL /hello/ should be handled by the hello view function.
+简单来说，我们只是告诉 Django，所有指向 URL /hello/ 的请求都应由 hello 这个视图函数来处理
+
+Your Python Path
+Python 搜索路径
+
+Your Python path is the list of directories on your system where Python looks when you use the Python import statement.
+Python 搜索路径 就是使用 import 语句时，Python 所查找的系统目录清单
+
+For example, let’s say your Python path is set to ['', '/usr/lib/python2.4/site-packages', '/home/username/djcode'].
+举例来说，假定你将 Python 路径设置为
+
+If you’re interested in seeing the value of your Python path, start the Python interactive interpreter and type this:
+如果执行代码from foo import bar ，Python 将会首先在当前目录查找 foo.py 模块( Python 路径第一项的空字符串表示当前目录)
+
+Generally you don’t have to worry about setting your Python path – Python and Django take care of things for you automatically behind the scenes.
+如果你想看Python搜索路径的值，运行Python交互解释器，然后输入：
+
+It’s worth discussing the syntax of this URLpattern, as it may not be immediately obvious.
+通常，你不必关心 Python 搜索路径的设置
+
+Although we want to match the URL /hello/, the pattern looks a bit different than that.
+ Python 和 Django 会在后台自动帮你处理好
+
+Django removes the slash from the front of every incoming URL before it checks the URLpatterns.
+讨论一下URLpattern的语法是值得的，因为它不是显而易见的
+
+This means that our URLpattern doesn’t include the leading slash in /hello/.
+ 虽然我们想匹配地址/hello/，但是模式看上去与这有点差别
+
+(At first, this may seem unintuitive, but this requirement simplifies things – such as the inclusion of URLconfs within other URLconfs, which we’ll cover in Chapter 8.)
+ 这就是为什么：
+
+The pattern includes a caret (^) and a dollar sign ($).
+Django在检查URL模式前，移除每一个申请的URL开头的斜杠(/)
+
+These are regular expression characters that have a special meaning: the caret means “require that the pattern matches the start of the string,” and the dollar sign means “require that the pattern matches the end of the string.”
+ 这意味着我们为/hello/写URL模式不用包含斜杠(/)
+
+This concept is best explained by example.
+模式包含了一个尖号(^)和一个美元符号($)
+
+If we had instead used the pattern '^hello/' (without a dollar sign at the end), then any URL starting with /hello/ would match, such as /hello/foo and /hello/bar, not just /hello/.
+这些都是正则表达式符号，并且有特定的含义： 上箭头要求表达式对字符串的头部进行匹配，美元符号则要求表达式对字符串的尾部进行匹配
+
+Most of your URLpatterns will start with carets and end with dollar signs, but it’s nice to have the flexibility to perform more sophisticated matches.
+最好还是用范例来说明一下这个概念
+
+You may be wondering what happens if someone requests the URL /hello (that is, without a trailing slash).
+你大多数的URL模式会以^开始、以$结束，但是拥有复杂匹配的灵活性会更好
+
+If you’re the type of person who likes all URLs to end with slashes (which is the preference of Django’s developers), all you’ll need to do is add a trailing slash to each URLpattern and leave APPEND_SLASH set to True.
+你可能会问：如果有人申请访问/hello（尾部没有斜杠/）会怎样
+
+If you prefer your URLs not to have trailing slashes, or if you want to decide it on a per-URL basis, set APPEND_SLASH to False and put trailing slashes in your URLpatterns as you see fit.
+ 因为我们的URL模式要求尾部有一个斜杠(/)，那个申请URL将不匹配
+
+The other thing to note about this URLconf is that we’ve passed the hello view function as an object without calling the function.
+另外需要注意的是，我们把hello视图函数作为一个对象传递，而不是调用它
+
+This is a key feature of Python (and other dynamic languages): functions are first-class objects, which means you can pass them around just like any other variables.
+ 这是 Python (及其它动态语言的) 的一个重要特性： 函数是一级对象（first-class objects）， 也就是说你可以像传递其它变量一样传递它们
+
+Cool stuff, eh?
+ 很酷吧
+
+To test our changes to the URLconf, start the Django development server, as you did in Chapter 2, by running the command python manage.py runserver.
+启动Django开发服务器来测试修改好的 URLconf, 运行命令行 python manage.py runserver 
+
+(If you left it running, that’s fine, too.
+ (如果你让它一直运行也可以，开发服务器会自动监测代码改动并自动重新载入，所以不需要手工重启） 开发服务器的地址是http://127.0.0.1:8000/ ，打开你的浏览器访问 http://127.0.0.1:8000/hello/ 
+
+The development server automatically detects changes to your Python code and reloads as necessary, so you don’t have to restart the server between changes.) The server is running at the address http://127.0.0.1:8000/, so open up a Web browser and go to http://127.0.0.1:8000/hello/.
+ 你就可以看到输出结果了
+
+You should see the text “Hello world” – the output of your Django view.
+ 开发服务器将自动检测Python代码的更改来做必要的重新加载， 所以你不需要重启Server在代码更改之后
+
+Hooray!
+万岁
+
+You’ve made your first Django-powered Web page.
+ 你已经创建了第一个Django的web页面
+
+Regular Expressions
+正则表达式
+
+Regular expressions (or regexes) are a compact way of specifying patterns in text.
+正则表达式 (或 regexes ) 是通用的文本模式匹配的方法
+
+While Django URLconfs allow arbitrary regexes for powerful URL matching, you’ll probably only use a few regex symbols in practice.
+ Django URLconfs 允许你 使用任意的正则表达式来做强有力的URL映射，不过通常你实际上可能只需要使用很少的一 部分功能
+
+Here’s a selection of common symbols:
+ 这里是一些基本的语法
+
+For more on regular expressions, see http://www.djangoproject.com/r/python/re-module/.
+有关正则表达式的更多内容，请访问 http://www.djangoproject.com/r/python/re-module/.
+
+At this point, our URLconf defines only a single URLpattern: the one that handles requests to the URL /hello/.
+目前，我们的URLconf只定义了一个单独的URL模式： 处理URL /hello/ 
+
+What happens when you request a different URL?
+ 当请求其他URL会怎么样呢
+
+To find out, try running the Django development server and visiting a page such as http://127.0.0.1:8000/goodbye/ or http://127.0.0.1:8000/hello/subdirectory/, or even http://127.0.0.1:8000/ (the site “root”).
+让我们试试看，运行Django开发服务器并访问类似 http://127.0.0.1:8000/goodbye/ 或者http://127.0.0.1:8000/hello/subdirectory/ ，甚至 http://127.0.0.1:8000/ (网站根目录)
+
+You should see a “Page not found” message (see Figure 3-1).
+ 你将会看到一个 “Page not found” 页面（图 3－1）
+
+Django displays this message because you requested a URL that’s not defined in your URLconf.
+ 因为你的URL申请在URLconf中没有定义，所以Django显示这条信息
+
+Figure 3-1.
+图3-1： Django的404 Error页
+
+The utility of this page goes beyond the basic 404 error message.
+这个页面比原始的404错误信息更加实用
+
+It also tells you precisely which URLconf Django used and every pattern in that URLconf.
+ 它同时精确的告诉你Django调用哪个URLconf及其包含的每个模式
+
+From that information, you should be able to tell why the requested URL threw a 404.
+ 这样，你应该能了解到为什么这个请求会抛出404错误
+
+Naturally, this is sensitive information intended only for you, the Web developer.
+当然，这些敏感的信息应该只呈现给你－开发者
+
+If this were a production site deployed live on the Internet, you wouldn’t want to expose that information to the public.
+ 如果是部署到了因特网上的站点就不应该暴露 这些信息
+
+For that reason, this “Page not found” page is only displayed if your Django project is in debug mode.
+ 出于这个考虑，这个“Page not found”页面只会在 调试模式（debug mode） 下 显示
+
+We’ll explain how to deactivate debug mode later.
+ 我们将在以后说明怎么关闭调试模式
+
+As explained in the last section, you’ll see a 404 error message if you view the site root – http://127.0.0.1:8000/.
+在最后一节，如果你想通过http://127.0.0.1:8000/看网站根目录你将看到一个404错误消息
+
+Django doesn’t add magically anything to the site root;
+Django不会增加任何东西在网站根目录，在任何情况下这个URL都不是特殊的 就像在URLconf中的其他条目一样，它也依赖于指定给它的URL模式.
+
+The URLpattern to match the site root is a bit unintuitive, though, so it’s worth mentioning.
+尽管匹配网站根目录的URL模式不能想象，但是还是值得提一下的. 当为网站根目录实现一个视图，你需要使用URL模式‘^$’ , 它代表一个空字符串
+
+When you’re ready to implement a view for the site root, use the URLpattern '^$', which matches an empty string.
+ 例如:
+
+How Django Processes a Request¶
+Django是怎么处理请求的
+
+Before continuing to our second view function, let’s pause to learn a little more about how Django works.
+在继续我们的第二个视图功能之前，让我们暂停一下去了解更多一些有关Django是怎么工作的知识. 具体地说，当你通过在浏览器里敲http://127.0.0.1:8000/hello/来访问Hello world消息得时候，Django在后台有些什么动作呢
+
+It all starts with the settings file.
+所有均开始于setting文件
+
+When you run python manage.py runserver, the script looks for a file called settings.py in the same directory as manage.py.
+当你运行python manage.py runserver，脚本将在于manage.py同一个目录下查找名为setting.py的文件
+
+This file contains all sorts of configuration for this particular Django project, all in uppercase: TEMPLATE_DIRS, DATABASE_NAME, etc.
+这个文件包含了所有有关这个Django项目的配置信息，均大写： TEMPLATE_DIRS , DATABASE_NAME , 等. 最重要的设置时ROOT_URLCONF，它将作为URLconf告诉Django在这个站点中那些Python的模块将被用到
+
+Remember when django-admin.py startproject created the files settings.py and urls.py?
+还记得什么时候django-admin.py startproject创建文件settings.py和urls.py吗
+
+The autogenerated settings.py contains a ROOT_URLCONF setting that points to the autogenerated urls.py.
+自动创建的settings.py包含一个ROOT_URLCONF配置用来指向自动产生的urls.py. 打开文件settings.py你将看到如下：
+
+This corresponds to the file mysite/urls.py.
+相对应的文件是mysite/urls.py
+
+When a request comes in for a particular URL – say, a request for /hello/ – Django loads the URLconf pointed to by the ROOT_URLCONF setting.
+当访问 URL /hello/ 时，Django 根据 ROOT_URLCONF 的设置装载 URLconf 
+
+Then it checks each of the URLpatterns in that URLconf, in order, comparing the requested URL with the patterns one at a time, until it finds one that matches.
+ 然后按顺序逐个匹配URLconf里的URLpatterns，直到找到一个匹配的
+
+When it finds one that matches, it calls the view function associated with that pattern, passing it an HttpRequest object as the first parameter.
+ 当找到这个匹配 的URLpatterns就调用相关联的view函数，并把HttpRequest 对象作为第一个参数
+
+(We’ll cover the specifics of HttpRequest later.)
+ （稍后再给出 HttpRequest 的更多信息） （我们将在后面看到HttpRequest的标准）
+
+As we saw in our first view example, a view function must return an HttpResponse.
+正如我们在第一个视图例子里面看到的，一个视图功能必须返回一个HttpResponse
+
+Once it does this, Django does the rest, converting the Python object to a proper Web response with the appropriate HTTP headers and body (i.e., the content of the Web page).
+ 一旦做完，Django将完成剩余的转换Python的对象到一个合适的带有HTTP头和body的Web Response，（例如，网页内容）
+
+In summary:
+总结一下：
+
+You now know the basics of how to make Django-powered pages.
+你现在知道了怎么做一个 Django-powered 页面了，真的很简单，只需要写视图函数并用 URLconfs把它们和URLs对应起来
+
+It’s quite simple, really – just write view functions and map them to URLs via URLconfs.
+ 你可能会认为用一系列正则表达式将URLs映射到函数也许会比较慢，但事实却会让你惊讶
+
+Your Second View: Dynamic Content¶
+第二个视图： 动态内容
+
+Our “Hello world” view was instructive in demonstrating the basics of how Django works, but it wasn’t an example of a dynamic Web page, because the content of the page are always the same.
+我们的Hello world视图是用来演示基本的Django是如何工作的，但是它不是一个动态网页的例子，因为网页的内容一直是一样的. 每次去查看/hello/，你将会看到相同的内容，它类似一个静态HTML文件
+
+For our second view, let’s create something more dynamic – a Web page that displays the current date and time.
+我们的第二个视图，将更多的放些动态的东西例如当前日期和时间显示在网页上 这将非常好，简单的下一步，因为它不引入了数据库或者任何用户的输入，仅仅是输出显示你的服务器的内部时钟. 它仅仅有限度的比Helloworld刺激一些，但是它将演示一些新的概念
+
+This view needs to do two things: calculate the current date and time, and return an HttpResponse containing that value.
+这个视图需要做两件事情： 计算当前日期和时间，并返回包含这些值的HttpResponse 如果你对python很有经验，那肯定知道在python中需要利用datetime模块去计算时间 下面演示如何去使用它：
+
+That’s simple enough, and it has nothing to do with Django.
+以上代码很简单，并没有涉及Django
+
+It’s just Python code.
+ 它仅仅是Python代码
+
+(We want to emphasize that you should be aware of what code is “just Python” vs.
+ 需要强调的是，你应该意识到哪些是纯Python代码，哪些是Django特性代码
+
+code that is Django-specific.
+ （见上） 因为你学习了Django，希望你能将Django的知识应用在那些不一定需要使用Django的项目上
+
+To make a Django view that displays the current date and time, then, we just need to hook this datetime.datetime.now() statement into a view and return an HttpResponse.
+为了让Django视图显示当前日期和时间，我们仅需要把语句：datetime.datetime.now()放入视图函数，然后返回一个HttpResponse对象即可
+
+Here’s how that looks:
+代码如下：
+
+As with our hello view function, this should live in views.py.
+正如我们的hello函数一样，这个函数也保存在view.py中
+
+Note that we’ve hidden the hello function from this example for brevity, but for the sake of completeness, here’s what the entire views.py looks like:
+为了简洁，上面我们隐藏了hello函数
+
+(From now on, we won’t display previous code in code examples, except when necessary.
+（从现在开始，如非必要，本文不再重复列出先前的代码
+
+You should be able to tell from context which parts of an example are new vs.
+ 你应该懂得识别哪些是新代码，哪些是先前的
+
+old.)
+） （见上）
+
+Let’s step through the changes we’ve made to views.py to accommodate the current_datetime view.
+让我们分析一下改动后的views.py：
+
+We’ve added an import datetime to the top of the module, so we can calculate dates.
+在文件顶端，我们添加了一条语句：import datetime
+
+The new current_datetime function calculates the current date and time, as a datetime.datetime object, and stores that as the local variable now.
+这样就可以计算日期了
+
+The second line of code within the view constructs an HTML response using Python’s “format-string” capability.
+ 函数中的第一行代码计算当前日期和时间，并以 datetime.datetime 对象的形式保存为局部变量 now 
+
+The %s within the string is a placeholder, and the percent sign after the string means “Replace the %s in the preceding string with the value of the variable now.” The now variable is technically a datetime.datetime object, not a string, but the %s format character converts it to its string representation, which is something like "2008-12-13 14:09:39.002731".
+ 函数的第二行代码用 Python 的格式化字符串（format-string）功能构造了一段 HTML 响应
+
+This will result in an HTML string such as "It is now 2008-12-13 14:09:39.002731.</body></html>".
+ 字符串中的%s是占位符，字符串后面的百分号表示用它后面的变量now的值来代替%s
+
+(Yes, our HTML is invalid, but we’re trying to keep the example simple and short.)
+（目前HTML是有错误的，但我们这样做是为了保持例子的简短
+
+Finally, the view returns an HttpResponse object that contains the generated response – just as we did in hello.
+最后，正如我们刚才写的hello函数一样，视图返回一个HttpResponse对象，它包含生成的响应
+
+After adding that to views.py, add the URLpattern to urls.py to tell Django which URL should handle this view.
+添加上述代码之后，还要在urls.py中添加URL模式，以告诉Django由哪一个URL来处理这个视图
+
+Something like /time/ would make sense:
+ 用/time/之类的字眼易于理解：
+
+We’ve made two changes here.
+这里，我们修改了两个地方
+
+First, we imported the current_datetime function at the top.
+ 首先，在顶部导入current_datetime函数
+
+Second, and more importantly, we added a URLpattern mapping the URL /time/ to that new view.
+ 其次，也是比较重要的：添加URL模式来映射URL中的/time/和新视图
+
+Getting the hang of this?
+ 理解了么
+
+With the view written and URLconf updated, fire up the runserver and visit http://127.0.0.1:8000/time/ in your browser.
+写好视图并且更新URLconf之后，运行命令python manage.py runserver以启动服务，在浏览器中输入http://127.0.0.1:8000/time/
+
+You should see the current date and time.
+ 你将看到当前的日期和时间
+
+Django’s Time Zone
+Django时区
+
+Depending on your computer, the date and time may be a few hours off.
+视乎你的机器，显示的日期与时间可能和实际的相差几个小时
+
+That’s because Django is time zone-aware and defaults to the America/Chicago time zone.
+ 这是因为Django是有时区意识的，并且默认时区为America/Chicago
+
+(It has to default to something, and that’s the time zone where the original developers live.) If you live elsewhere, you’ll want to change it in settings.py.
+ （它必须有个值，它的默认值是Django的诞生地：美国/芝加哥）如果你处在别的时区，你需要在settings.py文件中更改这个值
+
+See the comment in that file for a link to an up-to-date list of worldwide time zone options.
+请参见它里面的注释，以获得最新世界时区列表
+
+URLconfs and Loose Coupling¶
+URL配置和松耦合
+
+Now’s a good time to highlight a key philosophy behind URLconfs and behind Django in general: the principle of loose coupling.
+现在是好时机来指出Django和URL配置背后的哲学： 松耦合 原则
+
+Simply put, loose coupling is a software-development approach that values the importance of making pieces interchangeable.
+ 简单的说，松耦合是一个 重要的保证互换性的软件开发方法
+
+Django’s URLconfs are a good example of this principle in practice.
+Django的URL配置就是一个很好的例子
+
+In a Django Web application, the URL definitions and the view functions they call are loosely coupled;
+ 在Django的应用程序中，URL的定义和视图函数之间是松 耦合的，换句话说，决定URL返回哪个视图函数和实现这个视图函数是在两个不同的地方
+
+that is, the decision of what the URL should be for a given function, and the implementation of the function itself, reside in two separate places.
+ 这使得 开发人员可以修改一块而不会影响另一块
+
+For example, consider our current_datetime view.
+例如，考虑一下current_datetime视图
+
+If we wanted to change the URL for the application – say, to move it from /time/ to /current-time/ – we could make a quick change to the URLconf, without having to worry about the view itself.
+ 如果我们想把它的URL 从原来的 /time/ 改变到 /currenttime/ ，我们只需要快速的修改一下URL配置即可， 不用担心这个函数的内部实现
+
+Similarly, if we wanted to change the view function – altering its logic somehow – we could do that without affecting the URL to which the function is bound.
+ 同样的，如果我们想要修改这个函数的内部实现也不用担心会影响 到对应的URL
+
+Furthermore, if we wanted to expose the current-date functionality at several URLs, we could easily take care of that by editing the URLconf, without having to touch the view code.
+此外，如果我们想要输出这个函数到 一些 URL， 我们只需要修改URL配置而不用 去改动视图的代码
+
+In this example, our current_datetime is available at two URLs.
+ 在这个例子里，current_datetime被两个URL使用
+
+It’s a contrived example, but this technique can come in handy:
+ 这是一个故弄玄虚的例子，但这个方法迟早会用得上
+
+URLconfs and views are loose coupling in action.
+URLconf和视图是松耦合的
+
+We’ll continue to point out examples of this important philosophy throughout this book.
+ 我们将在本书中继续给出这一重要哲学的相关例子
+
+Your Third View: Dynamic URLs¶
+第三个视图 动态URL
+
+In our current_datetime view, the contents of the page – the current date/time – were dynamic, but the URL (/time/) was static.
+在我们的current_datetime 视图范例中，尽管内容是动态的，但是URL （ /time/ ）是静态的
+
+In most dynamic Web applications, though, a URL contains parameters that influence the output of the page.
+ 在 大多数动态web应用程序，URL通常都包含有相关的参数
+
+For example, an online bookstore might give each book its own URL, like /books/243/ and /books/81196/.
+ 举个例子，一家在线书店会为每一本书提供一个URL，如：/books/243/、/books/81196/
+
+Let’s create a third view that displays the current date and time offset by a certain number of hours.
+让我们创建第三个视图来显示当前时间和加上时间偏差量的时间，设计是这样的： /time/plus/1/ 显示当前时间＋1个小时的页面 /time/plus/2/ 显示当前时间＋2个小时的页面 /time/plus/3/ 显示当前时间＋3个小时的页面，以此类推
+
+A novice might think to code a separate view function for each hour offset, which might result in a URLconf like this:
+新手可能会考虑写不同的视图函数来处理每个时间偏差量，URL配置看起来就象这样：
+
+Clearly, this line of thought is flawed.
+很明显，这样处理是不太妥当的
+
+Not only would this result in redundant view functions, but also the application is fundamentally limited to supporting only the predefined hour ranges – one, two, three or four hours.
+ 不但有很多冗余的视图函数，而且整个应用也被限制了只支持 预先定义好的时间段，2小时，3小时，或者4小时
+
+If we decided to create a page that displayed the time five hours into the future, we’d have to create a separate view and URLconf line for that, furthering the duplication.
+ 如果哪天我们要实现 5 小时，我们就 不得不再单独创建新的视图函数和配置URL，既重复又混乱
+
+We need to do some abstraction here.
+ 我们需要在这里做一点抽象，提取 一些共同的东西出来
+
+A Word About Pretty URLs
+关于漂亮URL的一点建议
+
+If you’re experienced in another Web development platform, such as PHP or Java, you may be thinking, “Hey, let’s use a query string parameter!” – something like /time/plus?hours=3, in which the hours would be designated by the hours parameter in the URL’s query string (the part after the ?).
+如果你有其它web平台的开发经验（如PHP或Java），你可能会想：嘿
+
+You can do that with Django (and we’ll tell you how in Chapter 7), but one of Django’s core philosophies is that URLs should be beautiful.
+你 可以 在Django里也这样做 (如果你真的想要这样做，我们稍后会告诉你怎么做）， 但是Django的一个核心理念就是URL必须看起来漂亮
+
+The URL /time/plus/3/ is far cleaner, simpler, more readable, easier to recite to somebody aloud and .
+ URL /time/plus/3/ 更加清晰， 更简单，也更有可读性，可以很容易的大声念出来，因为它是纯文本，没有查询字符串那么 复杂
+
+.
+ 漂亮的URL就像是高质量的Web应用的一个标志
+
+Django’s URLconf system encourages pretty URLs by making it easier to use pretty URLs than not to.
+Django的URL配置系统可以使你很容易的设置漂亮的URL，而尽量不要考虑它的 反面 
+
+How, then do we design our application to handle arbitrary hour offsets?
+那么，我们如何设计程序来处理任意数量的时差
+
+The key is to use wildcard URLpatterns.
+ 答案是：使用通配符（wildcard URLpatterns）
+
+As we mentioned previously, a URLpattern is a regular expression;
+正如我们之前提到过，一个URL模式就是一个正则表达式
+
+hence, we can use the regular expression pattern \d+ to match one or more digits:
+因此，这里可以使用d+来匹配1个以上的数字
+
+(We’re using the # ...
+这里使用# …来表示省略了其它可能存在的URL模式定义
+
+to imply there might be other URLpatterns that we trimmed from this example.)
+ （见上）
+
+This new URLpattern will match any URL such as /time/plus/2/, /time/plus/25/, or even /time/plus/100000000000/.
+这个URL模式将匹配类似 /time/plus/2/ , /time/plus/25/ ,甚至 /time/plus/100000000000/ 的任何URL
+
+Come to think of it, let’s limit it so that the maximum allowed offset is 99 hours.
+ 更进一步，让我们把它限制在最大允许99个小时， 这样我们就只允许一个或两个数字，正则表达式的语法就是\d{1,2} :
+
+Note
+备注
+
+When building Web applications, it’s always important to consider the most outlandish data input possible, and decide whether or not the application should support that input.
+在建造Web应用的时候，尽可能多考虑可能的数据输入是很重要的，然后决定哪些我们可以接受
+
+We’ve curtailed the outlandishness here by limiting the offset to 99 hours.
+ 在这里我们就设置了99个小时的时间段限制
+
+One more important detail we’ve introduced here is that r character in front of the regular expression string.
+另外一个重点，正则表达式字符串的开头字母“r”
+
+This tells Python that the string is a “raw string” – its contents should not interpret backslashes.
+ 它告诉Python这是个原始字符串，不需要处理里面的反斜杠（转义字符）
+
+In normal Python strings, backslashes are used for escaping special characters – such as in the string '\n', which is a one-character string containing a newline.
+ 在普通Python字符串中，反斜杠用于特殊字符的转义
+
+When you add the r to make it a raw string, Python does not apply its backslash escaping – so, r'\n' is a two-character string containing a literal backslash and a lowercase “n”.
+比如n转义成一个换行符
+
+There’s a natural collision between Python’s usage of backslashes and the backslashes that are found in regular expressions, so it’s strongly suggested that you use raw strings any time you’re defining a regular expression in Python.
+ 当你用r把它标示为一个原始字符串后，Python不再视其中的反斜杠为转义字符
+
+From now on, all of the URLpatterns in this book will be raw strings.
+也就是说，“n”是两个字符串：“”和“n”
+
+Now that we’ve designated a wildcard for the URL, we need a way of passing that wildcard data to the view function, so that we can use a single view function for any arbitrary hour offset.
+现在我们已经设计了一个带通配符的URL，我们需要一个方法把它传递到视图函数里去，这样 我们只用一个视图函数就可以处理所有的时间段了
+
+We do this by placing parentheses around the data in the URLpattern that we want to save.
+ 我们使用圆括号把参数在URL模式里标识 出来
+
+In the case of our example, we want to save whatever number was entered in the URL, so let’s put parentheses around the \d{1,2}, like this:
+ 在这个例子中，我们想要把这些数字作为参数，用圆括号把 \d{1,2} 包围起来：
+
+If you’re familiar with regular expressions, you’ll be right at home here;
+如果你熟悉正则表达式，那么你应该已经了解，正则表达式也是用圆括号来从文本里 提取 数据的
+
+The final URLconf, including our previous two views, looks like this:
+最终的URLconf包含上面两个视图，如：
+
+With that taken care of, let’s write the hours_ahead view.
+现在开始写 hours_ahead 视图
+
+Coding Order
+编码次序
+
+In this example, we wrote the URLpattern first and the view second, but in the previous examples, we wrote the view first, then the URLpattern.
+这个例子中，我们先写了URLpattern ，然后是视图，但是在前面的例子中， 我们先写了视图，然后是URLpattern 
+
+Which technique is better?
+ 哪一种方式比较好
+
+Well, every developer is different.
+嗯，怎么说呢，每个开发者是不一样的
+
+If you’re a big-picture type of person, it may make the most sense to you to write all of the URLpatterns for your application at the same time, at the start of your project, and then code up the views.
+如果你是喜欢从总体上来把握事物（注： 或译为“大局观”）类型的人，你应该会想在项目开始 的时候就写下所有的URL配置
+
+If you’re more of a bottom-up developer, you might prefer to write the views first, and then anchor them to URLs afterward.
+如果你从更像是一个自底向上的开发者，你可能更喜欢先写视图， 然后把它们挂接到URL上
+
+That’s OK, too.
+ 这同样是可以的
+
+In the end, it comes down to which technique fits your brain the best.
+最后，取决与你喜欢哪种技术，两种方法都是可以的
+
+Both approaches are valid.
+ (见上)
+
+hours_ahead is very similar to the current_datetime view we wrote earlier, with a key difference: it takes an extra argument, the number of hours of offset.
+hours_ahead 和我们以前写的 current_datetime 很象，关键的区别在于： 它多了一个额外参数，时间差
+
+Here’s the view code:
+ 以下是view代码：
+
+Let’s step through this code one line at a time:
+让我们逐行分析一下代码：
+
+The view function, hours_ahead, takes two parameters: request and offset.
+视图函数, hours_ahead , 有 两个 参数: request 和 offset . (见上)
+
+request is an HttpRequest object, just as in hello and current_datetime.
+request 是一个 HttpRequest 对象, 就像在 current_datetime 中一样. 再说一次好了: 每一个视图 _总是_以一个 HttpRequest 对象作为 它的第一个参数
+
+We’ll say it again: each view always takes an HttpRequest object as its first parameter.
+ (见上)
+
+offset is the string captured by the parentheses in the URLpattern.
+offset 是从匹配的URL里提取出来的
+
+For example, if the requested URL were /time/plus/3/, then offset would be the string '3'.
+ 例如：如果请求URL是/time/plus/3/，那么offset将会是3
+
+If the requested URL were /time/plus/21/, then offset would be the string '21'.
+如果请求URL是/time/plus/21/，那么offset将会是21
+
+Note that captured values will always be strings, not integers, even if the string is composed of only digits, such as '21'.
+请注意：捕获值永远都是字符串（string）类型，而不会是整数（integer）类型，即使这个字符串全由数字构成（如：“21”）
+
+(Technically, captured values will always be Unicode objects, not plain Python bytestrings, but don’t worry about this distinction at the moment.)
+（从技术上来说，捕获值总是Unicode objects，而不是简单的Python字节串，但目前不需要担心这些差别
+
+We decided to call the variable offset, but you can call it whatever you’d like, as long as it’s a valid Python identifier.
+在这里我们命名变量为 offset ，你也可以任意命名它，只要符合Python 的语法
+
+The variable name doesn’t matter;
+ 变量名是无关紧要的，重要的是它的位置，它是这个函数的第二个 参数 (在 request 的后面）
+
+all that matters is that it’s the second argument to the function, after request.
+ 你还可以使用关键字来定义它，而不是用 位置
+
+The first thing we do within the function is call int() on offset.
+我们在这个函数中要做的第一件事情就是在 offset 上调用 int() . 这会把这个字符串值转换为整数
+
+Note that Python will raise a ValueError exception if you call int() on a value that cannot be converted to an integer, such as the string 'foo'.
+请留意：如果你在一个不能转换成整数类型的值上调用int()，Python将抛出一个ValueError异常
+
+In this example, if we encounter the ValueError, we raise the exception django.http.Http404, which, as you can imagine, results in a 404 “Page not found” error.
+如：int(‘foo’)
+
+Astute readers will wonder: how could we ever reach the ValueError case, anyway, given that the regular expression in our URLpattern – (\d{1,2}) – captures only digits, and therefore offset will only ever be a string composed of digits?
+机灵的读者可能会问： 我们在URL模式中用正则表达式(d{1,2})约束它，仅接受数字怎么样
+
+The answer is, we won’t, because the URLpattern provides a modest but useful level of input validation, but we still check for the ValueError in case this view function ever gets called in some other way.
+这样无论如何，offset都是由数字构成的
+
+It’s good practice to implement view functions such that they don’t make any assumptions about their parameters.
+ 答案是：我们不会这么做，因为URLpattern提供的是“适度但有用”级别的输入校验
+
+Loose coupling, remember?
+万一这个视图函数被其它方式调用，我们仍需自行检查ValueError
+
+In the next line of the function, we calculate the current date/time and add the appropriate number of hours.
+下一行，计算当前日期/时间，然后加上适当的小时数
+
+We’ve already seen datetime.datetime.now() from the current_datetime view;
+ 在current_datetime视图中，我们已经见过datetime.datetime.now()
+
+the new concept here is that you can perform date/time arithmetic by creating a datetime.timedelta object and adding to a datetime.datetime object.
+这里新的概念是执行日期/时间的算术操作
+
+Our result is stored in the variable dt.
+我们需要创建一个datetime.timedelta对象和增加一个datetime.datetime对象
+
+This line also shows why we called int() on offset – the datetime.timedelta function requires the hours parameter to be an integer.
+这一行还说明了，我们为什么在offset上调用int()——datetime.timedelta函数要求hours参数必须为整数类型
+
+Next, we construct the HTML output of this view function, just as we did in current_datetime.
+这行和前面的那行的的一个微小差别就是，它使用带有两个值的Python的格式化字符串功能， 而不仅仅是一个值
+
+A small difference in this line from the previous line is that it uses Python’s format-string capability with two values, not just one.
+ 因此，在字符串中有两个 %s 符号和一个以进行插入的值的元组： (offset, dt) 
+
+Finally, we return an HttpResponse of the HTML.
+最终，返回一个HTML的HttpResponse
+
+By now, this is old hat.
+ 如今，这种方式已经过时了
+
+With that view function and URLconf written, start the Django development server (if it’s not already running), and visit http://127.0.0.1:8000/time/plus/3/ to verify it works.
+在完成视图函数和URL配置编写后，启动Django开发服务器，用浏览器访问http://127.0.0.1:8000/time/plus/3/ 来确认它工作正常
+
+Then try http://127.0.0.1:8000/time/plus/5/.
+ 然后是 http://127.0.0.1:8000/time/plus/5/ 
+
+Then http://127.0.0.1:8000/time/plus/24/.
+再然后是 http://127.0.0.1:8000/time/plus/24/ 
+
+Finally, visit http://127.0.0.1:8000/time/plus/100/ to verify that the pattern in your URLconf only accepts one- or two-digit numbers;
+最后，访问 http://127.0.0.1:8000/time/plus/100/ 来检验URL配置里设置的模式是否只 接受一个或两个数字
+
+Django should display a “Page not found” error in this case, just as we saw in the section “A Quick Note About 404 Errors” earlier.
+Django会显示一个 Page not found error 页面, 和以前看到的 404 错误一样
+
+The URL http://127.0.0.1:8000/time/plus/ (with no hour designation) should also throw a 404.
+ 访问URL http://127.0.0.1:8000/time/plus/ (没有 定义时间差) 也会抛出404错误
+
+Django’s Pretty Error Pages¶
+Django 漂亮的出错页面
+
+Take a moment to admire the fine Web application we’ve made so far .
+花几分钟时间欣赏一下我们写好的Web应用程序，然后我们再来搞点小破坏
+
+.
+ 我们故意在 views.py 文件中引入一项 Python 错误，注释掉 hours_ahead 视图中的 offset = int(offset) 一行
+
+Load up the development server and navigate to /time/plus/3/.
+启动开发服务器，然后访问 /time/plus/3/ 
+
+You’ll see an error page with a significant amount of information, including a TypeError message displayed at the very top: "unsupported type for timedelta hours component: unicode".
+你会看到一个包含大量信息的出错页，最上面 的一条 TypeError信息是： "unsupported type for timedelta hours component:  unicode" .
+
+What happened?
+怎么回事呢
+
+Well, the datetime.timedelta function expects the hours parameter to be an integer, and we commented out the bit of code that converted offset to an integer.
+ 是的， datetime.timedelta 函数要求 hours 参数必须为整型， 而我们注释掉了将 offset 转为整型的代码
+
+That caused datetime.timedelta to raise the TypeError.
+ 这样导致 datetime.timedelta 弹出 TypeError 异常
+
+The point of this example was to demonstrate Django’s error pages.
+这个例子是为了展示 Django 的出错页面
+
+Take some time to explore the error page and get to know the various bits of information it gives you.
+ 我们来花些时间看一看这个出错页，了解一下其中 给出了哪些信息
+
+Here are some things to notice:
+以下是值得注意的一些要点：
+
+At the top of the page, you get the key information about the exception: the type of exception, any parameters to the exception (the "unsupported type" message in this case), the file in which the exception was raised, and the offending line number.
+在页面顶部，你可以得到关键的异常信息： 异常数据类型、异常的参数 (如本例中的 "unsupported type"）、在哪个文件中引发了异常、出错的行号等等
+
+Under the key exception information, the page displays the full Python traceback for this exception.
+在关键异常信息下方，该页面显示了对该异常的完整 Python 追踪信息
+
+This is similar to the standard traceback you get in Python’s command-line interpreter, except it’s more interactive.
+ 这类似于你在 Python 命令行解释器中获得的追溯信息，只不过后者更具交互性
+
+For each level (“frame”) in the stack, Django displays the name of the file, the function/method name, the line number, and the source code of that line.
+ 对栈中的每一帧，Django 均显示了其文件名、函数或方法名、行号及该行源代码
+
+Click the line of source code (in dark gray), and you’ll see several lines from before and after the erroneous line, to give you context.
+点击该行代码 (以深灰色显示)，你可以看到出错行的前后几行，从而得知相关上下文情况
+
+Click “Local vars” under any frame in the stack to view a table of all local variables and their values, in that frame, at the exact point in the code at which the exception was raised.
+点击栈中的任何一帧的“Local vars”可以看到一个所有局部变量的列表，以及在出错 那一帧时它们的值
+
+This debugging information can be a great help.
+ 这些调试信息相当有用
+
+Note the “Switch to copy-and-paste view” text under the “Traceback” header.
+注意“Traceback”下面的“Switch to copy-and-paste view”文字
+
+Click those words, and the traceback will switch to a alternate version that can be easily copied and pasted.
+ 点击这些字，追溯会 切换另一个视图，它让你很容易地复制和粘贴这些内容
+
+Use this when you want to share your exception traceback with others to get technical support – such as the kind folks in the Django IRC chat room or on the Django users mailing list.
+ 当你想同其他人分享这些异常 追溯以获得技术支持时（比如在 Django 的 IRC 聊天室或邮件列表中），可以使用它
+
+Underneath, the “Share this traceback on a public Web site” button will do this work for you in just one click.
+你按一下下面的“Share this traceback on a public Web site”按钮，它将会完成这项工作
+
+Click it to post the traceback to http://www.dpaste.com/, where you’ll get a distinct URL that you can share with other people.
+ 点击它以传回追溯信息至http://www.dpaste.com/，在那里你可以得到一个单独的URL并与其他人分享你的追溯信息
+
+Next, the “Request information” section includes a wealth of information about the incoming Web request that spawned the error: GET and POST information, cookie values, and meta information, such as CGI headers.
+接下来的“Request information”部分包含了有关产生错误的 Web 请求的大量信息： GET 和 POST、cookie 值、元数据（象 CGI 头）
+
+Appendix G has a complete reference of all the information a request object contains.
+ 
+
+Below the “Request information” section, the “Settings” section lists all of the settings for this particular Django installation.
+在附录H里给出了request的对象的 完整参考
+
+(We’ve already mentioned ROOT_URLCONF, and we’ll show you various Django settings throughout the book.
+ Request信息的下面，“Settings”列出了 Django 使用的具体配置信息
+
+All the available settings are covered in detail in Appendix D.)
+ （我们已经提及过ROOT_URLCONF，接下来我们将向你展示各式的Django设置
+
+The Django error page is capable of displaying more information in certain special cases, such as the case of template syntax errors.
+Django 的出错页某些情况下有能力显示更多的信息，比如模板语法错误
+
+We’ll get to those later, when we discuss the Django template system.
+ 我们讨论 Django 模板系统时再说它们
+
+For now, uncomment the offset = int(offset) lines to get the view function working properly again.
+ 现在，取消 offset = int(offset) 这行的注释，让它重新正常 工作
+
+Are you the type of programmer who likes to debug with the help of carefully placed print statements?
+不知道你是不是那种使用小心放置的 print 语句来帮助调试的程序员
+
+You can use the Django error page to do so – just without the print statements.
+ 你其实可以用 Django 出错页来做这些，而不用 print 语句
+
+At any point in your view, temporarily insert an assert False to trigger the error page.
+ 在你视图的任何位置，临时插入一个 assert False 来触发出错页
+
+Then, you can view the local variables and state of the program.
+ 然后，你就可以看到局部变量和程序语句了
+
+Here’s an example, using the hours_ahead view:
+ 这里有个使用hours_ahead视图的例子：
+
+Finally, it’s obvious that much of this information is sensitive – it exposes the innards of your Python code and Django configuration – and it would be foolish to show this information on the public Internet.
+最后，很显然这些信息很多是敏感的，它暴露了你 Python 代码的内部结构以及 Django 配置，在 Internet 上公开这信息是很愚蠢的
+
+A malicious person could use it to attempt to reverse-engineer your Web application and do nasty things.
+ 不怀好意的人会尝试使用它攻击你的 Web 应用程序，做些下流之事
+
+For that reason, the Django error page is only displayed when your Django project is in debug mode.
+ 因此，Django 出错信息仅在 debug 模式下才会显现
+
+We’ll explain how to deactivate debug mode in Chapter 12.
+ 我们稍后 说明如何禁用 debug 模式
+
+For now, just know that every Django project is in debug mode automatically when you start it.
+ 现在，你只要知道 Django 服务器在你开启它时默认运行在 debug 模式就行了
+
+(Sound familiar?
+ （听起来很熟悉
+
+The “Page not found” errors, described earlier in this chapter, work the same way.)
+ 页面没有发现错误，如前所述，工作正常
+
+What’s next?¶
+下一章
+
+So far, we’ve been writing our view functions with HTML hard-coded directly in the Python code.
+目前为止，我们已经写好了视图函数和硬编码的HTML
+
+We’ve done that to keep things simple while we demonstrated core concepts, but in the real world, this is nearly always a bad idea.
+ 在演示核心概念时，我们所作的是为了保持简单
+
+Django ships with a simple yet powerful template engine that allows you to separate the design of the page from the underlying code.
+幸运的是，Django内建有一个简单有强大的模板处理引擎来让你分离两种工作： 下一章，我们将学习模板引擎
+
+© Copyright 2012, Matt Behrens.
+www.shoucewang.com. All Rights Reserved. 手册网 版权所有
+

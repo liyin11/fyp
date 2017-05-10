@@ -1,0 +1,120 @@
+Broad Crawls¶
+通用爬虫(Broad Crawls)¶
+
+Scrapy defaults are optimized for crawling specific sites.
+Scrapy默认对特定爬取进行优化
+
+These sites are often handled by a single Scrapy spider, although this is not necessary or required (for example, there are generic spiders that handle any given site thrown at them).
+这些站点一般被一个单独的Scrapy spider进行处理， 不过这并不是必须或要求的(例如，也有通用的爬虫能处理任何给定的站点)
+
+In addition to this “focused crawl”, there is another common type of crawling which covers a large (potentially unlimited) number of domains, and is only limited by time or other arbitrary constraint, rather than stopping when the domain was crawled to completion or when there are no more requests to perform.
+除了这种爬取完某个站点或没有更多请求就停止的”专注的爬虫”，还有一种通用的爬取类型，其能爬取大量(甚至是无限)的网站， 仅仅受限于时间或其他的限制
+
+These are called “broad crawls” and is the typical crawlers employed by search engines.
+ 这种爬虫叫做”通用爬虫(broad crawls)”，一般用于搜索引擎
+
+These are some common properties often found in broad crawls:
+通用爬虫一般有以下通用特性:
+
+As said above, Scrapy default settings are optimized for focused crawls, not broad crawls.
+正如上面所述，Scrapy默认设置是对特定爬虫做了优化，而不是通用爬虫
+
+However, due to its asynchronous architecture, Scrapy is very well suited for performing fast broad crawls.
+不过， 鉴于其使用了异步架构，Scrapy对通用爬虫也十分适用
+
+This page summarizes some things you need to keep in mind when using Scrapy for doing broad crawls, along with concrete suggestions of Scrapy settings to tune in order to achieve an efficient broad crawl.
+ 本篇文章总结了一些将Scrapy作为通用爬虫所需要的技巧， 以及相应针对通用爬虫的Scrapy设定的一些建议
+
+Increase concurrency¶
+增加并发¶
+
+Concurrency is the number of requests that are processed in parallel.
+并发是指同时处理的request的数量
+
+There is a global limit and a per-domain limit.
+其有全局限制和局部(每个网站)的限制
+
+The default global concurrency limit in Scrapy is not suitable for crawling many different domains in parallel, so you will want to increase it.
+Scrapy默认的全局并发限制对同时爬取大量网站的情况并不适用，因此您需要增加这个值
+
+How much to increase it will depend on how much CPU you crawler will have available.
+ 增加多少取决于您的爬虫能占用多少CPU
+
+A good starting point is 100, but the best way to find out is by doing some trials and identifying at what concurrency your Scrapy process gets CPU bounded.
+ 一般开始可以设置为 100 
+
+For optimum performance, you should pick a concurrency where CPU usage is at 80-90%.
+不过最好的方式是做一些测试，获得Scrapy进程占取CPU与并发数的关系
+
+To increase the global concurrency use:
+增加全局并发数:
+
+Increase Twisted IO thread pool maximum size¶
+降低log级别¶
+
+Currently Scrapy does DNS resolution in a blocking way with usage of thread pool.
+当进行通用爬取时，一般您所注意的仅仅是爬取的速率以及遇到的错误
+
+With higher concurrency levels the crawling could be slow or even fail hitting DNS resolver timeouts.
+ Scrapy使用 INFO log级别来报告这些信息
+
+Possible solution to increase the number of threads handling DNS queries.
+为了减少CPU使用率(及记录log存储的要求), 在生产环境中进行通用爬取时您不应该使用 DEBUG log级别
+
+The DNS queue will be processed faster speeding up establishing of connection and crawling overall.
+ 不过在开发的时候使用 DEBUG 应该还能接受
+
+To increase maximum thread pool size use:
+设置Log级别:
+
+Setup your own DNS¶
+禁止cookies¶
+
+If you have multiple crawling processes and single central DNS, it can act like DoS attack on the DNS server resulting to slow down of entire network or even blocking your machines.
+除非您 真的 需要，否则请禁止cookies
+
+To avoid this setup your own DNS server with local cache and upstream to some large DNS like OpenDNS or Verizon.
+在进行通用爬取时cookies并不需要， (搜索引擎则忽略cookies)
+
+Disable cookies unless you really need.
+对失败的HTTP请求进行重试会减慢爬取的效率，尤其是当站点响应很慢(甚至失败)时， 访问这样的站点会造成超时并重试多次
+
+Cookies are often not needed when doing broad crawls (search engine crawlers ignore them), and they improve performance by saving some CPU cycles and reducing the memory footprint of your Scrapy crawler.
+这是不必要的，同时也占用了爬虫爬取其他站点的能力
+
+To disable cookies use:
+禁止重试:
+
+Disable retries¶
+减小下载超时¶
+
+Retrying failed HTTP requests can slow down the crawls substantially, specially when sites causes are very slow (or fail) to respond, thus causing a timeout error which gets retried many times, unnecessarily, preventing crawler capacity to be reused for other domains.
+如果您对一个非常慢的连接进行爬取(一般对通用爬虫来说并不重要)， 减小下载超时能让卡住的连接能被快速的放弃并解放处理其他站点的能力
+
+To disable retries use:
+减小下载超时:
+
+Reduce download timeout¶
+禁止重定向¶
+
+Unless you are crawling from a very slow connection (which shouldn’t be the case for broad crawls) reduce the download timeout so that stuck requests are discarded quickly and free up capacity to process the next ones.
+除非您对跟进重定向感兴趣，否则请考虑关闭重定向
+
+To reduce the download timeout use:
+关闭重定向:
+
+Disable redirects¶
+启用 “Ajax Crawlable Pages” 爬取¶
+
+Consider disabling redirects, unless you are interested in following them.
+有些站点(基于2013年的经验数据，之多有1%)声明其为 ajax crawlable 
+
+When doing broad crawls it’s common to save redirects and resolve them when revisiting the site at a later crawl.
+ 这意味着该网站提供了原本只有ajax获取到的数据的纯HTML版本
+
+This also help to keep the number of request constant per crawl batch, otherwise redirect loops may cause the crawler to dedicate too many resources on any specific domain.
+ 网站通过两种方法声明:
+
+To disable redirects use:
+Scrapy自动解决(1)
+

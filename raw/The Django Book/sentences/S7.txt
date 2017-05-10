@@ -1,0 +1,549 @@
+Chapter 8: Advanced Views and URLconfs¶
+第八章：高级视图和URL配置
+
+In Chapter 3, we explained the basics of Django view functions and URLconfs.
+在第三章，我们已经对基本的Django视图和URL配置做了介绍
+
+This chapter goes into more detail about advanced functionality in those two pieces of the framework.
+ 在这一章，将进一步说明框架中这两个部分的高级机能
+
+URLconf Tricks¶
+URLconf 技巧
+
+There’s nothing “special” about URLconfs – like anything else in Django, they’re just Python code.
+URLconf没什么特别的，就象 Django 中其它东西一样，它们只是 Python 代码
+
+You can take advantage of this in several ways, as described in the sections that follow.
+ 你可以在几方面从中得到好处，正如下面所描述的
+
+Consider this URLconf, which builds on the example in Chapter 3:
+正如第三章中所解释的，在 URLconf 中的每一个入口包括了它所关联的视图函数，直接传入了一个函数对象
+
+As explained in Chapter 3, each entry in the URLconf includes its associated view function, passed directly as a function object.
+但随着 Django 应用变得复杂，它的 URLconf 也在增长，并且维护这些导入可能使得管理变麻烦
+
+This means it’s necessary to import the view functions at the top of the module.
+ (对每个新的view函数，你不得不记住要导入它，并且采用这种方法会使导入语句将变得相当长
+
+But as a Django application grows in complexity, its URLconf grows, too, and keeping those imports can be tedious to manage.
+Django 还提供了另一种方法可以在 URLconf 中为某个特别的模式指定视图函数： 你可以传入一个包含模块名和函数名的字符串，而不是函数对象本身
+
+(For each new view function, you have to remember to import it, and the import statement tends to get overly long if you use this approach.) It’s possible to avoid that tedium by importing the views module itself.
+ 继续示例:
+
+Django offers another way of specifying the view function for a particular pattern in the URLconf: you can pass a string containing the module name and function name rather than the function object itself.
+(注意视图名前后的引号
+
+Continuing the ongoing example:
+ 应该使用带引号的 'mysite.views.current_datetime' 而不是mysite.views.current_datetime 
+
+(Note the quotes around the view names.
+使用这个技术，就不必导入视图函数了
+
+We’re using 'mysite.views.current_datetime' – with quotes – instead of mysite.views.current_datetime.)
+Django 会在第一次需要它时根据字符串所描述的视图函数的名字和路径，导入合适的视图函数
+
+Using this technique, it’s no longer necessary to import the view functions;
+当使用字符串技术时，你可以采用更简化的方式：提取出一个公共视图前缀
+
+Django automatically imports the appropriate view function the first time it’s needed, according to the string describing the name and path of the view function.
+ 在我们的URLconf例子中，每个视图字符串的开始部分都是\，造成重复输入
+
+A further shortcut you can take when using the string technique is to factor out a common “view prefix.” In our URLconf example, each of the view strings starts with 'mysite.views', which is redundant to type.
+System Message: WARNING/2 (, line 99); backlink
+
+Note that you don’t put a trailing dot (".") in the prefix, nor do you put a leading dot in the view strings.
+Inline literal start-string without end-string.
+
+With these two approaches in mind, which is better?
+注意既不要在前缀后面跟着一个点号("." )，也不要在视图字符串前面放一个点号
+
+It really depends on your personal coding style and needs.
+ Django 会自动处理它们
+
+Advantages of the string approach are as follows:
+牢记这两种方法，哪种更好一些呢
+
+Advantages of the function object approach are as follows:
+字符串方法的好处如下:
+
+Both approaches are valid, and you can even mix them within the same URLconf.
+更紧凑，因为不需要你导入视图函数
+
+In practice, if you use the string technique, you’ll probably end up mixing views to the point where the views in your URLconf won’t have a common prefix.
+更容易对视图函数进行包装(wrap)
+
+However, you can still take advantage of the view prefix shortcut to remove duplication.
+ 参见本章后面的《包装视图函数》一节
+
+Old:
+两个方法都是有效的，甚至你可以在同一个 URLconf 中混用它们
+
+New:
+在实践中，如果你使用字符串技术，特别是当你的 URLconf 中没有一个公共前缀时，你最终可能混合视图
+
+All the framework cares about is that there’s a module-level variable called urlpatterns.
+旧的:
+
+Speaking of constructing urlpatterns dynamically, you might want to take advantage of this technique to alter your URLconf’s behavior while in Django’s debug mode.
+整个框架关注的是存在一个名为 urlpatterns 的模块级别的变量
+
+To do this, just check the value of the DEBUG setting at runtime, like so:
+如上例，这个变量可以动态生成
+
+In this example, the URL /debuginfo/ will only be available if your DEBUG setting is set to True.
+说到动态构建 urlpatterns，你可能想利用这一技术，在 Django 的调试模式下修改 URLconf 的行为
+
+In all of our URLconf examples so far, we’ve used simple, non-named regular expression groups – that is, we put parentheses around parts of the URL we wanted to capture, and Django passes that captured text to the view function as a positional argument.
+在目前为止的所有 URLconf 例子中，我们使用简单的无命名 正则表达式组，即，在我们想要捕获的URL部分上加上小括号，Django 会将捕获的文本作为位置参数传递给视图函数
+
+In more advanced usage, it’s possible to use named regular expression groups to capture URL bits and pass them as keyword arguments to a view.
+ 在更高级的用法中，还可以使用 命名 正则表达式组来捕获URL，并且将其作为 关键字 参数传给视图
+
+Keyword Arguments vs.
+关键字参数 对比 位置参数
+
+A Python function can be called using keyword arguments or positional arguments – and, in some cases, both at the same time.
+一个 Python 函数可以使用关键字参数或位置参数来调用，在某些情况下，可以同时进行使用
+
+In a keyword argument call, you specify the names of the arguments along with the values you’re passing.
+ 在关键字参数调用中，你要指定参数的名字和传入的值
+
+In a positional argument call, you simply pass the arguments without explicitly specifying which argument matches which value;
+ 在位置参数调用中，你只需传入参数，不需要明确指明哪个参数与哪个值对应，它们的对应关系隐含在参数的顺序中
+
+For example, consider this simple function:
+例如，考虑这个简单的函数:
+
+To call it with positional arguments, you specify the arguments in the order in which they’re listed in the function definition:
+为了使用位置参数来调用它，你要按照在函数定义中的顺序来指定参数
+
+To call it with keyword arguments, you specify the names of the arguments along with the values.
+为了使用关键字参数来调用它，你要指定参数名和值
+
+The following statements are equivalent:
+ 下面的语句是等价的:
+
+Finally, you can mix keyword and positional arguments, as long as all positional arguments are listed before keyword arguments.
+最后，你可以混合关键字和位置参数，只要所有的位置参数列在关键字参数之前
+
+The following statements are equivalent to the previous examples:
+ 下面的语句与前面的例子是等价:
+
+In Python regular expressions, the syntax for named regular expression groups is (?Ppattern), where name is the name of the group and pattern is some pattern to match.
+在 Python 正则表达式中，命名的正则表达式组的语法是 (
+
+Here’s an example URLconf that uses non-named groups:
+下面是一个使用无名组的 URLconf 的例子:
+
+Here’s the same URLconf, rewritten to use named groups:
+下面是相同的 URLconf，使用命名组进行了重写:
+
+This accomplishes exactly the same thing as the previous example, with one subtle difference: the captured values are passed to view functions as keyword arguments rather than positional arguments.
+这段代码和前面的功能完全一样，只有一个细微的差别： 取的值是以关键字参数的方式而不是以位置参数的方式传递给视图函数的
+
+For example, with non-named groups, a request to /articles/2006/03/ would result in a function call equivalent to this:
+例如，如果不带命名组，请求 /articles/2006/03/ 将会等同于这样的函数调用：
+
+With named groups, though, the same request would result in this function call:
+而带命名组，同样的请求就会变成这样的函数调用：
+
+In practice, using named groups makes your URLconfs slightly more explicit and less prone to argument-order bugs – and you can reorder the arguments in your views’ function definitions.
+使用命名组可以让你的URLconfs更加清晰，减少搞混参数次序的潜在BUG，还可以让你在函数定义中对参数重新排序
+
+Following the preceding example, if we wanted to change the URLs to include the month before the year, and we were using non-named groups, we’d have to remember to change the order of arguments in the month_archive view.
+ 接着上面这个例子，如果我们想修改URL把月份放到 年份的 前面 ，而不使用命名组的话，我们就不得不去修改视图 month_archive 的参数次序
+
+If we were using named groups, changing the order of the captured parameters in the URL would have no effect on the view.
+ 如果我们使用命名组的话，修改URL里提取参数的次序对视图没有影响
+
+Of course, the benefits of named groups come at the cost of brevity;
+当然，命名组的代价就是失去了简洁性： 一些开发者觉得命名组的语法丑陋和显得冗余
+
+some developers find the named-group syntax ugly and too verbose.
+ 命名组的另一个好处就是可读性强
+
+A caveat with using named groups in a URLconf is that a single URLconf pattern cannot contain both named and non-named groups.
+如果有任何命名的组，Django会忽略非命名组而直接使用命名组
+
+Sometimes you’ll find yourself writing view functions that are quite similar, with only a few small differences.
+有时你会发现你写的视图函数是十分类似的，只有一点点的不同
+
+For example, say you have two views whose contents are identical except for the template they use:
+ 比如说，你有两个视图，它们的内容是一致的，除了它们所用的模板不太一样：
+
+We’re repeating ourselves in this code, and that’s inelegant.
+我们在这代码里面做了重复的工作，不够简练
+
+At first, you may think to remove the redundancy by using the same view for both URLs, putting parentheses around the URL to capture it, and checking the URL within the view to determine the template, like so:
+ 起初你可能会想，通过对两个URL都使用同样的视图，在URL中使用括号捕捉请求，然后在视图中检查并决定使用哪个模板来去除代码的冗余，就像这样：
+
+The problem with that solution, though, is that it couples your URLs to your code.
+这种解决方案的问题还是老缺点，就是把你的URL耦合进你的代码里面了
+
+If you decide to rename /foo/ to /fooey/, you’ll have to remember to change the view code.
+ 如果你打算把 /foo/ 改成 /fooey/的话，那么你就得记住要去改变视图里面的代码
+
+The elegant solution involves an optional URLconf parameter.
+对一个可选URL配置参数的优雅解决方法： URLconf里面的每一个模式都可以包含第三个数据： 一个关键字参数的字典：
+
+With this in mind, we can rewrite our ongoing example like this:
+有了这个概念以后，我们就可以把我们现在的例子改写成这样：
+
+As you can see, the URLconf in this example specifies template_name in the URLconf.
+如你所见，这个例子中，URLconf指定了 template_name 
+
+The view function treats it as just another parameter.
+ 而视图函数会把它当成另一个参数
+
+This extra URLconf options technique is a nice way of sending additional information to your view functions with minimal fuss.
+这种使用额外的URLconf参数的技术以最小的代价给你提供了向视图函数传递额外信息的一个好方法
+
+As such, it’s used by a couple of Django’s bundled applications, most notably its generic views system, which we cover in Chapter 11.
+ 正因如此，这技术已被很多Django的捆绑应用使用，其中以我们将在第11章讨论的通用视图系统最为明显
+
+The following sections contain a couple of ideas on how you can use the extra URLconf options technique in your own projects.
+下面的几节里面有一些关于你可以怎样把额外URLconf参数技术应用到你自己的工程的建议
+
+Say you have a set of views that match a pattern, along with another URL that doesn’t fit the pattern but whose view logic is the same.
+比如说你有匹配某个模式的一堆视图，以及一个并不匹配这个模式但视图逻辑是一样的URL
+
+In this case, you can “fake” the capturing of URL values by using extra URLconf options to handle that extra URL with the same view.
+ 这种情况下，你可以通过向同一个视图传递额外URLconf参数来伪造URL值的捕捉
+
+For example, you might have an application that displays some data for a particular day, with URLs such as these:
+例如，你可能有一个显示某一个特定日子的某些数据的应用，URL类似这样的：
+
+This is simple enough to deal with – you can capture those in a URLconf like this (using named group syntax):
+这太简单了，你可以在一个URLconf中捕捉这些值，像这样（使用命名组的方法）：
+
+And the view function signature would look like this:
+然后视图函数的原型看起来会是：
+
+This approach is straightforward – it’s nothing you haven’t seen before.
+这种解决方案很直接，没有用到什么你没见过的技术
+
+The trick comes in when you want to add another URL that uses my_view but whose URL doesn’t include a month and/or day.
+ 当你想添加另外一个使用 my_view 视图但不包含month和/或者day的URL时，问题就出现了
+
+For example, you might want to add another URL, /mydata/birthday/, which would be equivalent to /mydata/jan/06/.
+比如你可能会想增加这样一个URL， /mydata/birthday/ ， 这个URL等价于 /mydata/jan/06/ 
+
+You can take advantage of extra URLconf options like so:
+这时你可以这样利用额外URLconf参数：
+
+The cool thing here is that you don’t have to change your view function at all.
+在这里最帅的地方莫过于你根本不用改变你的视图函数
+
+The view function only cares that it gets month and day parameters – it doesn’t matter whether they come from the URL capturing itself or extra parameters.
+ 视图函数只会关心它 获得 了 参数，它不会去管这些参数到底是捕捉回来的还是被额外提供的
+
+It’s good programming practice to “factor out” commonalities in code.
+抽取出我们代码中共性的东西是一个很好的编程习惯
+
+For example, with these two Python functions:
+ 比如，像以下的两个Python函数：
+
+we can factor out the greeting to make it a parameter:
+我们可以把问候语提取出来变成一个参数：
+
+You can apply this same philosophy to your Django views by using extra URLconf parameters.
+通过使用额外的URLconf参数，你可以把同样的思想应用到Django的视图中
+
+With this in mind, you can start making higher-level abstractions of your views.
+了解这个以后，你可以开始创作高抽象的视图
+
+Instead of thinking to yourself, “This view displays a list of Event objects,” and “That view displays a list of BlogEntry objects,” realize they’re both specific cases of “A view that displays a list of objects, where the type of object is variable.”
+ 更具体地说，比如这个视图显示一系列的 Event 对象，那个视图显示一系列的 BlogEntry 对象，并意识到它们都是一个用来显示一系列对象的视图的特例，而对象的类型其实就是一个变量
+
+Take this code, for example:
+以这段代码作为例子：
+
+The two views do essentially the same thing: they display a list of objects.
+这两个视图做的事情实质上是一样的： 显示一系列的对象
+
+So let’s factor out the type of object they’re displaying:
+ 让我们把它们显示的对象的类型抽象出来：
+
+With those small changes, we suddenly have a reusable, model-agnostic view!
+就这样小小的改动，我们突然发现我们有了一个可复用的，模型无关的视图
+
+From now on, anytime we need a view that lists a set of objects, we can simply reuse this object_list view rather than writing view code.
+ 从现在开始，当我们需要一个视图来显示一系列的对象时，我们可以简简单单的重用这一个 object_list 视图，而无须另外写视图代码了
+
+Here are a couple of notes about what we did:
+ 以下是我们做过的事情：
+
+Because database-driven Web sites have several common patterns, Django comes with a set of “generic views” that use this exact technique to save you time.
+我们通过 model 参数直接传递了模型类
+
+We cover Django’s built-in generic views in Chapter 11.
+ 额外URLconf参数的字典是可以传递任何类型的对象，而不仅仅只是字符串
+
+If you’re distributing a Django application, chances are that your users will want some degree of configuration.
+这一行： model.objects.all() 是 鸭子界定 （原文：
+
+A common bit of an application to make configurable is the template name:
+我们使用 model.name.lower() 来决定模板的名字
+
+When there’s a conflict, extra URLconf parameters get precedence over captured parameters.
+因为数据库驱动的网站都有一些通用的模式，Django提供了一个通用视图的集合，使用它可以节省你的时间
+
+In other words, if your URLconf captures a named-group variable and an extra URLconf parameter includes a variable with the same name, the extra URLconf parameter value will be used.
+ 我们将会在下一章讲讲Django的内置通用视图
+
+For example, consider this URLconf:
+如果你发布一个Django的应用，你的用户可能会希望配置上能有些自由度
+
+Here, both the regular expression and the extra dictionary include an id.
+一个应用中比较常见的可供配置代码是模板名字：
+
+Astute readers will note that in this case, it’s a waste of time and typing to capture the id in the regular expression, because its value will always be overridden by the dictionary’s value.
+当冲突出现的时候，额外URLconf参数优先于捕捉值
+
+That’s correct;
+ 也就是说，如果URLconf捕捉到的一个命名组变量和一个额外URLconf参数包含的变量同名时，额外URLconf参数的值会被使用
+
+Another convenient trick is to specify default parameters for a view’s arguments.
+这里，正则表达式和额外字典都包含了一个 id 
+
+This tells the view which value to use for a parameter by default if none is specified.
+硬编码的（额外字典的） id 将优先使用
+
+An example:
+聪明的读者会发现在这种情况下，在正则表达式里面写上捕捉是浪费时间的，因为 id 的值总是会被字典中的值覆盖
+
+Here, both URL patterns point to the same view – views.page – but the first pattern doesn’t capture anything from the URL.
+另外一个方便的特性是你可以给一个视图指定默认的参数
+
+If the first pattern matches, the page() function will use its default argument for num, '1'.
+ 这样，当没有给这个参数赋值的时候将会使用默认的值
+
+(Note that we’ve been careful to set the default argument’s value to the string '1', not the integer 1.
+例子：
+
+It’s common to use this technique in conjunction with configuration options, as explained earlier.
+在这里，两个URL表达式都指向了同一个视图 views.page ，但是第一个表达式没有传递任何参数
+
+This example makes a slight improvement to the example in the “Giving a View Configuration Options” section by providing a default value for template_name:
+ 如果匹配到了第一个样式， page() 函数将会对参数 num 使用默认值 "1" ，如果第二个表达式匹配成功， page() 函数将使用正则表达式传递过来的num的值
+
+Sometimes you’ll have a pattern in your URLconf that handles a large set of URLs, but you’ll need to special-case one of them.
+就像前面解释的一样，这种技术与配置选项的联用是很普遍的
+
+In this case, take advantage of the linear way a URLconf is processed and put the special case first.
+ 以下这个例子比提供视图配置选项一节中的例子有些许的改进
+
+For example, you can think of the “add an object” pages in Django’s admin site as represented by a URLpattern like this:
+有时你有一个模式来处理在你的URLconf中的一系列URL，但是有时候需要特别处理其中的某个URL
+
+This matches URLs such as /myblog/entries/add/ and /auth/groups/add/.
+比方说，你可以考虑通过下面这个URLpattern所描述的方式来向Django的管理站点添加一个目标页面
+
+but that’s inelegant for a reason we’ve touched on multiple times in this chapter: it puts URL logic in the view.
+这将匹配像 /myblog/entries/add/ 和 /auth/groups/add/ 这样的URL 
+
+As a more elegant solution, we can take advantage of the fact that URLconfs are processed in order from top to bottom:
+然而，对于用户对象的添加页面（/auth/user/add/ ）是个特殊情况，因为它不会显示所有的表单域，它显示两个密码域等等
+
+With this in place, a request to /auth/user/add/ will be handled by the user_add_stage view.
+不过，就如我们多次在这章提到的，这样做并不优雅： 因为它把URL逻辑放在了视图中
+
+Although that URL matches the second pattern, it matches the top one first.
+ 更优雅的解决方法是，我们要利用URLconf从顶向下的解析顺序这个特点：
+
+Each captured argument is sent to the view as a plain Python Unicode string, regardless of what sort of match the regular expression makes.
+每个被捕获的参数将被作为纯Python字符串来发送，而不管正则表达式中的格式
+
+For example, in this URLconf line:
+ 举个例子，在这行URLConf中：
+
+the year argument to views.year_archive() will be a string, not an integer, even though \d{4} will only match integer strings.
+尽管 \d{4} 将只匹配整数的字符串，但是参数 year 是作为字符串传至 views.year_archive() 的，而不是整型
+
+This is important to keep in mind when you’re writing view code.
+当你在写视图代码时记住这点很重要，许多Python内建的方法对于接受的对象的类型很讲究
+
+Many built-in Python functions are fussy (and rightfully so) about accepting only objects of a certain type.
+ 许多内置Python函数是挑剔的（这是理所当然的）只接受特定类型的对象
+
+A common error is to attempt to create a datetime.date object with string values instead of integer values:
+ 一个典型的的错误就是用字符串值而不是整数值来创建 datetime.date 对象：
+
+Translated to a URLconf and view, the error looks like this:
+回到URLconf和视图处，错误看起来很可能是这样：
+
+Instead, day_archive() can be written correctly like this:
+因此， day_archive() 应该这样写才是正确的：
+
+Note that int() itself raises a ValueError when you pass it a string that is not composed solely of digits, but we’re avoiding that error in this case because the regular expression in our URLconf has ensured that only strings containing digits are passed to the view function.
+注意，当你传递了一个并不完全包含数字的字符串时， int() 会抛出 ValueError 的异常，不过我们已经避免了这个错误，因为在URLconf的正则表达式中已经确保只有包含数字的字符串才会传到这个视图函数中
+
+When a request comes in, Django tries to match the URLconf patterns against the requested URL, as a Python string.
+例如，在向 http://www.example.com/myapp/ 的请求中，Django将试着去匹配 myapp/ 
+
+This does not include GET or POST parameters, or the domain name.
+在向http://www.example.com/myapp/
+
+It also does not include the leading slash, because every URL has a leading slash.
+page=3 的请求中，Django同样会去匹配 myapp/ 
+
+For example, in a request to http://www.example.com/myapp/, Django will try to match myapp/.
+在解析URLconf时，请求方法（例如， POST ， GET ， HEAD ）并 不会 被考虑
+
+In a request to http://www.example.com/myapp/?page=3, Django will try to match myapp/.
+ 换而言之，对于相同的URL的所有请求方法将被导向到相同的函数中
+
+The request method (e.g., POST, GET) is not taken into account when traversing the URLconf.
+说到关于请求方法的分支，让我们来看一下可以用什么好的方法来实现它
+
+In other words, all request methods will be routed to the same function for the same URL.
+ 考虑这个 URLconf/view 设计:
+
+And speaking of branching based on request method, let’s take a look at how we might build a nice way of doing that.
+在这个示例中，some_page() 视图函数对POST 和GET 这两种请求方法的处理完全不同
+
+Consider this URLconf/view layout:
+ 它们唯一的共同点是共享一个URL地址： /somepage/.正如大家所看到的，在同一个视图函数中对POST 和GET 进行处理是一种很初级也很粗糙的做法
+
+In this example, the some_page() view’s handling of POST vs.
+我们可以像这样做：先写一个视图函数然后由它来具体分派其它的视图，在之前或之后可以执行一些我们自定的程序逻辑
+
+GET requests is quite different.
+ 下边的示例展示了这个技术是如何帮我们改进前边那个简单的some_page() 视图的：
+
+We can do that by writing a view function that delegates to other views, either before or after executing some custom logic.
+让我们从头看一下代码是如何工作的：
+
+Let’s go through what this does:
+我们写了一个新的视图，method_splitter() ，它根据request.method 返回的值来调用相应的视图
+
+We’ve written a new view, method_splitter(), that delegates to other views based on request.method.
+在URLconf中，我们把/somepage/ 指到method_splitter() 函数，并把视图函数额外需要用到的GET 和POST 参数传递给它
+
+In the URLconf, we point /somepage/ at method_splitter() and pass it extra arguments – the view functions to use for GET and POST, respectively.
+最终，我们把some_page() 视图分解到两个视图函数中some_page_get() 和some_page_post() 
+
+Finally, we’ve split the some_page() view into two view functions – some_page_get() and some_page_post().
+注意，在技术上这些视图函数就不用再去检查request.method 了，因为method_splitter() 已经替它们做了
+
+This is much nicer than shoving all of that logic into a single view.
+ （比如，some_page_post() 被调用的时候，我们可以确信request.method 返回的值是post 
+
+Note that these view functions technically no longer have to check request.method, because method_splitter() does that.
+现在我们就拥有了一个不错的，可以通用的视图函数了，里边封装着由request.method 的返回值来分派不同的视图的程序
+
+(By the time some_page_post() is called, for example, we can be confident request.method is 'post'.) Still, just to be safe, and also to serve as documentation, we stuck in an assert that makes sure request.method is what we expect it to be.
+关于method_splitter() 就不说什么了，当然，我们可以把它们重用到其它项目中
+
+Now we have ourselves a nice, generic view function that encapsulates the logic of delegating a view by request.method.
+然而，当我们做到这一步时，我们仍然可以改进method_splitter 
+
+Nothing about method_splitter() is tied to our specific application, of course, so we can reuse it in other projects.
+从代码我们可以看到，它假设Get 和POST 视图除了request 之外不需要任何其他的参数
+
+But, while we’re at it, there’s one way to improve on method_splitter().
+为了实现这个，我们可以使用Python中一个优雅的特性 带星号的可变参数 我们先展示这些例子，接着再进行解释
+
+To do that, we can use a nice Python feature: variable arguments with asterisks.
+这里,我们重构method_splitter(),去掉了GET和POST两个关键字参数,改而支持使用*args和和*kwargs(注意号) 这是一个Python特性，允许函数接受动态的、可变数量的、参数名只在运行时可知的参数
+
+We’ll show the example first, then explain it:
+ 如果你在函数定义时,只在参数前面加一个号,所有传递给函数的参数将会保存为一个元组. 如果你在函数定义时,在参数前面加两个号,所有传递给函数的关键字参数,将会保存为一个字典
+
+Here, we’ve refactored method_splitter() to remove the GET and POST keyword arguments, in favor of *args and **kwargs (note the asterisks).
+例如，对于这个函数
+
+For example, with this function:
+看一下它是怎么工作的
+
+Here’s how it would work:
+回过头来看，你能发现我们用method_splitter()和*args接受**kwargs函数参数并把它们传递到正确的视图
+
+Bringing this back to method_splitter(), you can see we’re using *args and **kwargs to accept any arguments to the function and pass them along to the appropriate view.
+我们最终的视图技巧利用了一个高级python技术
+
+But before we do that, we make two calls to kwargs.pop() to get the GET and POST arguments, if they’re available.
+ 假设你发现自己在各个不同视图里重复了大量代码，就像 这个例子：
+
+Our final view trick takes advantage of an advanced Python technique.
+这里，每一个视图开始都检查request.user是否是已经认证的，是的话，当前用户已经成功登陆站点否则就重定向/accounts/login/ (注意,虽然我们还没有讲到request.user,但是14章将要讲到它.就如你所想像的,request.user描述当前用户是登陆的还是匿名)
+
+Here, each view starts by checking that request.user is authenticated – that is, the current user has successfully logged into the site – and redirects to /accounts/login/ if not.
+如果我们能够丛每个视图里移除那些 重复代，并且只在需要认证的时候指明它们，那就完美了
+
+(Note that we haven’t yet covered request.user – Chapter 14 does – but, as you might imagine, request.user represents the current user, either logged-in or anonymous.)
+ 我们能够通过使用一个视图包装达到目的
+
+It would be nice if we could remove that bit of repetitive code from each of these views and just mark them as requiring authentication.
+函数requires_login,传入一个视图函数view,然后返回一个新的视图函数new_view.这个新的视图函数new_view在函数requires_login内定义 处理request.user.is_authenticated()这个验证,从而决定是否执行原来的view函数
+
+This function, requires_login, takes a view function (view) and returns a new view function (new_view).
+现在,我们可以从views中去掉if not request.user.is_authenticated()验证.我们可以在URLconf中很容易的用requires_login来包装实现.
+
+Now, we can remove the if not request.user.is_authenticated() checks from our views and simply wrap them with requires_login in our URLconf:
+优化后的代码和前面的功能一样,但是减少了代码冗余 现在我们建立了一个漂亮,通用的函数requires_login()来帮助我们修饰所有需要它来验证的视图
+
+If you intend your code to be used on multiple Django-based sites, you should consider arranging your URLconfs in such a way that allows for “including.”
+在任何时候，你的URLconf都可以包含其他URLconf模块
+
+At any point, your URLconf can “include” other URLconf modules.
+在前面第6章介绍Django的admin模块时我们曾经见过include. admin模块有他自己的URLconf,你仅仅只需要在你自己的代码中加入include就可以了.
+
+(We saw this before in Chapter 6, when we introduced the Django admin site.
+这里有个很重要的地方： 例子中的指向 include() 的正则表达式并 不 包含一个 $ （字符串结尾匹配符），但是包含了一个斜杆
+
+The admin site has its own URLconf that you merely include() within yours.)
+ 每当Django遇到 include() 时，它将截断匹配的URL，并把剩余的字符串发往包含的URLconf作进一步处理
+
+There’s an important gotcha here: the regular expressions in this example that point to an include() do not have a $ (end-of-string match character) but do include a trailing slash.
+继续看这个例子，这里就是被包含的URLconf mysite.blog.urls ：
+
+Continuing this example, here’s the URLconf mysite.blog.urls:
+通过这两个URLconf，下面是一些处理请求的例子：
+
+With these two URLconfs, here’s how a few sample requests would be handled:
+/weblog/2007/ ：在第一个URLconf中，模式 r'^weblog/' 被匹配
+
+An included URLconf receives any captured parameters from parent URLconfs, for example:
+/weblog//2007/(包含两个斜杠) 在第一个URLconf中,r’^weblog/’匹配 因为它有一个include(),django去掉了匹配的部,在这个例子中匹配的部分是’weblog/’ 剩下的部分是/2007/ (最前面有一个斜杠),不匹配mysite.blog.urls中的任何一行.
+
+In this example, the captured username variable is passed to the included URLconf and, hence, to every view function within that URLconf.
+一个被包含的URLconf接收任何来自parent URLconfs的被捕获的参数，比如:
+
+Note that the captured parameters will always be passed to every line in the included URLconf, regardless of whether the line’s view actually accepts those parameters as valid.
+在这个例子中，被捕获的 username 变量将传递给被包含的 URLconf，进而传递给那个URLconf中的 每一个 视图函数
+
+Similarly, you can pass extra URLconf options to include(), just as you can pass extra URLconf options to a normal view – as a dictionary.
+相似的，你可以传递额外的URLconf选项到 include() , 就像你可以通过字典传递额外的URLconf选项到普通的视图
+
+When you do this, each line in the included URLconf will be passed the extra options.
+ 当你这样做的时候，被包含URLconf的 每一 行都会收到那些额外的参数
+
+For example, the following two URLconf sets are functionally identical.
+比如，下面的两个URLconf在功能上是相等的
+
+Set one:
+第一个：
+
+Set two:
+第二个
+
+As is the case with captured parameters (explained in the previous section), extra options will always be passed to every line in the included URLconf, regardless of whether the line’s view actually accepts those options as valid.
+这个例子和前面关于被捕获的参数一样（在上一节就解释过这一点），额外的选项将 总是 被传递到被包含的URLconf中的 每一 行，不管那一行对应的视图是否确实作为有效参数接收这些选项，因此，这个技术只有在你确实需要那个被传递的额外参数的时候才显得有用
+
+For this reason, this technique is useful only if you’re certain that every view in the included URLconf accepts the extra options you’re passing.
+ 因为这个原因，这种技术仅当你确信在涉及到的接受到额外你给出的选项的每个URLconf时有用的才奏效
+
+What’s Next?¶
+下一章
+
+This chapter has provided many advanced tips and tricks for views and URLconfs.
+这一章提供了很多高级视图和URLconfs的小提示和技巧
+
+Next, in Chapter 9, we’ll give this advanced treatment to Django’s template system.
+ 接下来，在Chapter 9,我们将会将这个先进的处理方案带给djangos模板系统
+
+© Copyright 2012, Matt Behrens.
+www.shoucewang.com. All Rights Reserved. 手册网 版权所有
+

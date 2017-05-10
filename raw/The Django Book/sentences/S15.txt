@@ -1,0 +1,951 @@
+Chapter 16: django.contrib¶
+第十六章：集成的子框架
+
+One of the many strengths of Python is its “batteries included” philosophy: when you install Python, it comes with a large standard library of packages that you can start using immediately, without having to download anything else.
+Python有众多优点，其中之一就是“开机即用”原则： 安装Python的同时会安装好大量的标准软件包，这样 你可以立即使用而不用自己去下载
+
+Django aims to follow this philosophy, and it includes its own standard library of add-ons useful for common Web development tasks.
+ Django也遵循这个原则，它同样包含了自己的标准库
+
+This chapter covers that collection of add-ons.
+ 这一章就来讲 这些集成的子框架
+
+The Django Standard Library¶
+Django标准库
+
+Django’s standard library lives in the package django.contrib.
+Django的标准库存放在 django.contrib 包中
+
+Within each subpackage is a separate piece of add-on functionality.
+每个子包都是一个独立的附加功能包
+
+These pieces are not necessarily related, but some django.contrib subpackages may require other ones.
+ 这些子包一般是互相独立的，不过有些django.contrib子包需要依赖其他子包
+
+There’s no hard requirement for the types of functionality in django.contrib.
+在 django.contrib 中对函数的类型并没有强制要求 
+
+Some of the packages include models (and hence require you to install their database tables into your database), but others consist solely of middleware or template tags.
+其中一些包中带有模型（因此需要你在数据库中安装对应的数据表），但其它一些由独立的中间件及模板标签组成
+
+The single characteristic the django.contrib packages have in common is this: if you were to remove the django.contrib package entirely, you could still use Django’s fundamental features with no problems.
+django.contrib 开发包共有的特性是: 就算你将整个django.contrib开发包删除，你依然可以使用 Django 的基础功能而不会遇到任何问题
+
+When the Django developers add new functionality to the framework, they use this rule of thumb in deciding whether the new functionality should live in django.contrib or elsewhere.
+ 当 Django 开发者向框架增加新功能的时，他们会严格根据这一原则来决定是否把新功能放入django.contrib中
+
+django.contrib consists of these packages:
+django.contrib 由以下开发包组成：
+
+admin: The Django admin site.
+admin : 自动化的站点管理工具
+
+See Chapter 6.
+ 请查看第6章
+
+admindocs: Auto-documentation for the Django admin site.
+admindocs:为Django admin站点提供自动文档
+
+This book doesn’t cover this feature;
+ 本书没有介绍这方面的知识
+
+check the official Django documentation.
+详情请参阅Django官方文档
+
+auth: Django’s authentication framework.
+auth : Django的用户验证框架
+
+See Chapter 14.
+ 参见第十四章
+
+comments: A comments application.
+comments : 一个评论应用，目前，这个应用正在紧张的开发中，因此在本书出版的时候还不能给出一个完整的说明，关于这个应用的更多信息请参见Django的官方网站. 本书没有介绍这方面的知识
+
+This book doesn’t cover this feature;
+详情请参阅Django官方文档
+
+contenttypes: A framework for hooking into “types” of content, where each installed Django model is a separate content type.
+contenttypes : 这是一个用于引入文档类型的框架，每个安装的Django模块作为一种独立的文档类型
+
+This framework is used internally by other “contrib” applications and is mostly intended for very advanced Django developers.
+ 这个框架主要在Django内部被其他应用使用，它主要面向Django的高级开发者
+
+Those developers should find out more about this application by reading the source code in django/contrib/contenttypes.
+ 可以通过阅读源码来了解关于这个框架的更多信息，源码的位置在 django/contrib/contenttypes/
+
+csrf: Protection against Cross-Site Request Forgery (CSRF).
+csrf : 这个模块用来防御跨站请求伪造(CSRF)
+
+See the later section titled “CSRF Protection.”
+参 见后面标题为”CSRF 防御”的小节
+
+databrowse: A Django application that lets you browse your data.
+databrowse：帮助你浏览数据的Django应用
+
+This book doesn’t cover this feature;
+ 本书没有介绍这方面的知识
+
+check the official Django documentation.
+详情请参阅Django官方文档
+
+flatpages: A framework for managing simple “flat” HTML content in a database.
+flatpages : 一个在数据库中管理单一HTML内容的模块
+
+See the later section titled “Flatpages.”
+ 参见后面标题为“Flatpages”的小节
+
+formtools: A number of useful higher-level libraries for dealing with common patterns in forms.
+formtools：一些列处理表单通用模式的高级库
+
+This book doesn’t cover this feature;
+ 本书没有介绍这方面的知识
+
+check the official Django documentation.
+详情请参阅Django官方文档
+
+gis: Extensions to Django that provide for GIS (Geographic Information Systems) support.
+gis：为Django提供GIS（Geographic Information Systems）支持的扩展
+
+These, for example, allow your Django models to store geographic data and perform geographic queries.
+ 举个例子，它允许你的Django模型保存地理学数据并执行地理学查询
+
+This is a large, complex library and isn’t covered in this book.
+ 这个库比较复杂，本书不详细介绍
+
+See http://geodjango.org/ for documentation.
+ 请参看http://geodjango.org/上的文档
+
+humanize: A set of Django template filters useful for adding a “human touch” to data.
+humanize : 一系列 Django 模块过滤器，用于增加数据的人性化
+
+See the later section titled “Humanizing Data.”
+ 参阅稍后的章节《人性化数据》
+
+localflavor: Assorted pieces of code that are useful for particular countries or cultures.
+localflavor：针对不同国家和文化的混杂代码段
+
+For example, this includes ways to validate U.S.
+ 例如，它包含了验证美国的邮编 以及爱尔兰的身份证号的方法
+
+markup: A set of Django template filters that implement a number of common markup languages.
+markup : 一系列的 Django 模板过滤器，用于实现一些常用标记语言
+
+See the later section titled “Markup Filters.”
+ 参阅后续章节《标记过滤器》
+
+redirects: A framework for managing redirects.
+redirects : 用来管理重定向的框架
+
+See the later section titled “Redirects.”
+ 参看后面的“重定向”小节
+
+sessions: Django’s session framework.
+sessions : Django 的会话框架
+
+See Chapter 14.
+ 参见14章
+
+sitemaps: A framework for generating sitemap XML files.
+sitemaps : 用来生成网站地图的 XML 文件的框架
+
+See Chapter 13.
+ 参见13章
+
+sites: A framework that lets you operate multiple Web sites from the same database and Django installation.
+sites : 一个让你可以在同一个数据库与 Django 安装中管理多个网站的框架
+
+See the next section, “Sites.”
+ 参见下一节：
+
+syndication: A framework for generating syndication feeds in RSS and Atom.
+syndication : 一个用 RSS 和 Atom 来生成聚合订阅源的的框架
+
+See Chapter 13.
+ 参见13章
+
+webdesign: Django add-ons that are particularly useful to Web designers (as opposed to developers).
+webdesign：对设计者非常有用的Django扩展
+
+As of this writing, this included only a single template tag, {% lorem %}.
+ 到编写此文时，它只包含一个模板标签{% lorem %}
+
+Check the Django documentation for information.
+详情参阅Django文档
+
+The rest of this chapter goes into detail a number of django.contrib packages that we haven’t yet covered in this book.
+本章接下来将详细描述前面没有介绍过的 django.contrib 开发包内容
+
+Sites¶
+多个站点
+
+Django’s sites system is a generic framework that lets you operate multiple Web sites from the same database and Django project.
+Django 的多站点系统是一种通用框架，它让你可以在同一个数据库和同一个Django项目下操作多个网站
+
+This is an abstract concept, and it can be tricky to understand, so we’ll start with a couple of scenarios where it would be useful.
+ 这是一个抽象概念，理解起来可能有点困难，因此我们从几个让它能派上用场的实际情景入手
+
+As we explained in Chapter 1, the Django-powered sites LJWorld.com and Lawrence.com are operated by the same news organization: the Lawrence Journal-World newspaper in Lawrence, Kansas.
+正如我们在第一章里所讲，Django 构建的网站 LJWorld.com 和 Lawrance.com 是用由同一个新闻组织控制的： 肯萨斯州劳伦斯市的 劳伦斯日报世界 报纸
+
+LJWorld.com focuses on news, while Lawrence.com focuses on local entertainment.
+ LJWorld.com 主要做新闻，而 Lawrence.com 关注本地娱乐
+
+But sometimes editors want to publish an article on both sites.
+ 然而有时，编辑可能需要把一篇文章发布到 两个 网站上
+
+The brain-dead way of solving the problem would be to use a separate database for each site and to require site producers to publish the same story twice: once for LJWorld.com and again for Lawrence.com.
+解决此问题的死脑筋方法可能是使用每个站点分别使用不同的数据库，然后要求站点维护者把同一篇文章发布两次： 一次为 LJWorld.com，另一次为Lawrence.com
+
+But that’s inefficient for site producers, and it’s redundant to store multiple copies of the same story in the database.
+ 但这对站点管理员来说是低效率的，而且为同一篇文章在数据库里保留多个副本也显得多余
+
+The better solution?
+更好的解决方案
+
+Both sites use the same article database, and an article is associated with one or more sites via a many-to-many relationship.
+ 两个网站用的是同一个文章数据库，并将每一篇文章与一个或多个站点用多对多关系关联起来
+
+The Django sites framework provides the database table to which articles can be related.
+ Django 站点框架提供数据库表来记载哪些文章可以被关联
+
+It’s a hook for associating data with one or more “sites.”
+ 它是一个把数据与一个或多个站点关联起来的钩子
+
+LJWorld.com and Lawrence.com both have e-mail alert functionality, which lets readers sign up to get notifications when news happens.
+LJWorld.com 和 Lawrence.com 都有邮件提醒功能，使读者注册后可以在新闻发生后立即收到通知
+
+It’s pretty basic: a reader signs up on a Web form, and he immediately gets an e-mail saying, “Thanks for your subscription.”
+ 这是一种完美的的机制： 某读者提交了注册表单，然后马上就受到一封内容是“感谢您的注册”的邮件
+
+It would be inefficient and redundant to implement this signup-processing code twice, so the sites use the same code behind the scenes.
+把这个注册过程的代码实现两遍显然是低效、多余的，因此两个站点在后台使用相同的代码
+
+But the “Thank you for your subscription” notice needs to be different for each site.
+ 但感谢注册的通知在两个网站中需要不同
+
+By using Site objects, we can abstract the thank-you notice to use the values of the current site’s name (e.g., 'LJWorld.com') and domain (e.g., 'www.ljworld.com').
+ 通过使用 Site 对象，我们通过使用当前站点的 name (例如 'LJWorld.com' )和domain (例如 'www.ljworld.com' )可以把感谢通知抽提出来
+
+The Django sites framework provides a place for you to store the name and domain for each site in your Django project, which means you can reuse those values in a generic way.
+Django 的多站点框架为你提供了一个位置来存储 Django 项目中每个站点的 name 和 domain ，这意味着你可以用同样的方法来重用这些值
+
+The sites framework is more a series of conventions than a framework.
+多站点框架与其说是一个框架，不如说是一系列约定
+
+The whole thing is based on two simple concepts:
+ 所有的一切都基于两个简单的概念：
+
+The Site model, found in django.contrib.sites, has domain and name fields.
+位于 django.contrib.sites 的 Site 模型有 domain 和 name 两个字段
+
+The SITE_ID setting specifies the database ID of the Site object associated with that particular settings file.
+SITE_ID 设置指定了与特定配置文件相关联的 Site 对象之数据库 ID
+
+How you use these two concepts is up to you, but Django uses them in a couple of ways automatically via simple conventions.
+如何运用这两个概念由你决定，但 Django 是通过几个简单的约定自动使用的
+
+To install the sites application, follow these steps:
+安装多站点应用要执行以下几个步骤：
+
+Add 'django.contrib.sites' to your INSTALLED_APPS.
+将 'django.contrib.sites' 加入到 INSTALLED_APPS 中
+
+Run the command manage.py syncdb to install the django_site table into your database.
+运行 manage.py syncdb 命令将 django_site 表安装到数据库中
+
+This will also create a default site object, with the domain example.com.
+ 这样也会建立默认的站点对象，域名为 example.com
+
+Change the example.com site to your own domain, and add any other Site objects, either through the Django admin site or via the Python API.
+把example.com改成你自己的域名，然后通过Django admin站点或Python API来添加其他Site对象
+
+Create a Site object for each site/domain that this Django project powers.
+ 为该 Django 项目支撑的每个站（或域）创建一个 Site 对象
+
+Define the SITE_ID setting in each of your settings files.
+在每个设置文件中定义一个 SITE_ID 变量
+
+This value should be the database ID of the Site object for the site powered by that settings file.
+ 该变量值应当是该设置文件所支撑的站点Site 对象的数据库 ID
+
+The sections that follow describe the various things you can do with the sites framework.
+下面几节讲述的是用多站点框架能够完成的几项工作
+
+To reuse data on multiple sites, as explained in the first scenario, just create a ManyToManyField to Site in your models, for example:
+正如在情景一中所解释的，要在多个站点间重用数据,仅需在模型中为 Site 添加一个 多对多字段 即可，例如：
+
+That’s the infrastructure you need to associate articles with multiple sites in your database.
+这是在数据库中为多个站点进行文章关联操作的基础步骤
+
+With that in place, you can reuse the same Django view code for multiple sites.
+ 在适当的位置使用该技术，你可以在多个站点中重复使用同一段 Django 视图代码
+
+Continuing the Article model example, here’s what an article_detail view might look like:
+ 继续 Article 模型范例，下面是一个可能的 article_detail 视图：
+
+This view function is reusable because it checks the article’s site dynamically, according to the value of the SITE_ID setting.
+该视图方法是可重用的，因为它根据 SITE_ID 设置的值动态检查 articles 站点
+
+For example, say LJWorld.com’s settings file has a SITE_ID set to 1, and Lawrence.com’s settings file has a SITE_ID set to 2.
+例如， LJWorld.coms 设置文件中有有个 SITE_ID 设置为 1 ，而 Lawrence.coms 设置文件中有个 SITE_ID 设置为 2 
+
+If this view is called when LJWorld.com’s settings file is active, then it will limit the article lookup to articles in which the list of sites includes LJWorld.com.
+如果该视图在 LJWorld.coms 处于激活状态时被调用，那么它将把查找范围局限于站点列表包括 LJWorld.com 在内的文章
+
+Similarly, you can associate a model to the Site model in a many-to-one relationship using ForeignKey.
+同样，你也可以使用 外键 在多对一关系中将一个模型关联到 Site 模型
+
+For example, if each article is associated with only a single site, you could use a model like this:
+举例来说，如果某篇文章仅仅能够出现在一个站点上，你可以使用下面这样的模型：
+
+This has the same benefits as described in the last section.
+这与前一节中介绍的一样有益
+
+On a lower level, you can use the sites framework in your Django views to do particular things based on the site in which the view is being called, for example:
+在底层，通过在 Django 视图中使用多站点框架，你可以让视图根据调用站点不同而完成不同的工作，例如：
+
+Of course, it’s ugly to hard-code the site IDs like that.
+当然，像那样对站点 ID 进行硬编码是比较难看的
+
+A slightly cleaner way of accomplishing the same thing is to check the current site’s domain:
+ 略为简洁的完成方式是查看当前的站点域：
+
+The idiom of retrieving the Site object for the value of settings.SITE_ID is quite common, so the Site model’s manager (Site.objects) has a get_current() method.
+从 Site 对象中获取 settings.SITE_ID 值的做法比较常见，因此 Site 模型管理器 (Site.objects ) 具备一个get_current() 方法
+
+This example is equivalent to the previous one:
+ 下面的例子与前一个是等效的：
+
+Note
+注意
+
+In this final example, you don’t have to import django.conf.settings.
+在这个最后的例子里，你不用导入 django.conf.settings 
+
+For a DRY (Don’t Repeat Yourself) approach to storing your site’s name and domain name, as explained in “Scenario 2: Storing Your Site Name/Domain in One Place,” just reference the name and domain of the current Site object.
+正如情景二中所解释的那样，依据DRY原则(不做重复工作)，你只需在一个位置储存站名和域名，然后引用当前Site 对象的 name 和 domain 
+
+For example:
+例如： 例如：
+
+Continuing our ongoing example of LJWorld.com and Lawrence.com, on Lawrence.com this e-mail has the subject line “Thanks for subscribing to lawrence.com alerts.” On LJWorld.com, the e-mail has the subject line “Thanks for subscribing to LJWorld.com alerts.” This same site-specific behavior is applied to the e-mails’ message body.
+继续我们正在讨论的 LJWorld.com 和 Lawrence.com 例子，在Lawrence.com 该邮件的标题行是“感谢注册 Lawrence.com 提醒信件”
+
+An even more flexible (but more heavyweight) way of doing this would be to use Django’s template system.
+完成这项工作的一种更加灵活（但更重量级）的方法是使用 Django 的模板系统
+
+Assuming Lawrence.com and LJWorld.com have different template directories (TEMPLATE_DIRS), you could simply delegate to the template system like so:
+ 假定 Lawrence.com 和 LJWorld.com 各自拥有不同的模板目录（ TEMPLATE_DIRS ），你可将工作轻松地转交给模板系统，如下所示：
+
+In this case, you have to create subject.txt and message.txt templates in both the LJWorld.com and Lawrence.com template directories.
+本例中，你不得不在 LJWorld.com 和 Lawrence.com 的模板目录中都创建一份 subject.txt 和 message.txt模板
+
+As mentioned previously, that gives you more flexibility, but it’s also more complex.
+ 正如之前所说，该方法带来了更大的灵活性，但也带来了更多复杂性
+
+It’s a good idea to exploit the Site objects as much as possible to remove unneeded complexity and redundancy.
+尽可能多的利用 Site 对象是减少不必要的复杂、冗余工作的好办法
+
+If Site objects play a key role in your application, consider using the CurrentSiteManager in your model(s).
+如果 站点 在你的应用中扮演很重要的角色，请考虑在你的模型中使用方便的 CurrentSiteManager 
+
+It’s a model manager (see Chapter 10) that automatically filters its queries to include only objects associated with the current Site.
+ 这是一个模型管理器（见第十章），它会自动过滤使其只包含与当前站点相关联的对象
+
+Use CurrentSiteManager by adding it to your model explicitly.
+通过显示地将 CurrentSiteManager 加入模型中以使用它
+
+For example:
+ 例如：
+
+With this model, Photo.objects.all() will return all Photo objects in the database, but Photo.on_site.all() will return only the Photo objects associated with the current site, according to the SITE_ID setting.
+通过该模型， Photo.objects.all() 将返回数据库中所有的 Photo 对象，而 Photo.on_site.all() 仅根据SITE_ID 设置返回与当前站点相关联的 Photo 对象
+
+In other words, these two statements are equivalent:
+换言之，以下两条语句是等效的：
+
+How did CurrentSiteManager know which field of Photo was the Site?
+CurrentSiteManager 是如何知道 Photo 的哪个字段是 Site 呢
+
+It defaults to looking for a field called site.
+缺省情况下，它会查找一个叫做 site 的字段
+
+If your model has a ForeignKey or ManyToManyField called something other than site, you need to explicitly pass that as the parameter to CurrentSiteManager.
+如果你的模型包含了名字不是site的_外键_或者多对多关联，你需要把它作为参数传给CurrentSiteManager以显示指明
+
+The following model, which has a field called publish_on, demonstrates this:
+下面的模型拥有一个publish_on字段：
+
+If you attempt to use CurrentSiteManager and pass a field name that doesn’t exist, Django will raise a ValueError.
+如果试图使用 CurrentSiteManager 并传入一个不存在的字段名， Django 将引发一个 ValueError 异常
+
+Note
+注意
+
+You’ll probably want to keep a normal (non-site-specific) Manager on your model, even if you use CurrentSiteManager.
+即便是已经使用了 CurrentSiteManager ，你也许还想在模型中拥有一个正常的（非站点相关）的 管理器 
+
+As explained in Appendix B, if you define a manager manually, then Django won’t create the automatic objects = models.Manager() manager for you.
+正如在附录 B 中所解释的，如果你手动定义了一个管理器，那么 Django 不会为你创建全自动的objects = models.Manager() 管理器
+
+Also, certain parts of Django – namely, the Django admin site and generic views – use whichever manager is defined first in the model, so if you want your admin site to have access to all objects (not just site-specific ones), put objects = models.Manager() in your model, before you define CurrentSiteManager.
+同样，Django 的特定部分（即 Django 超级管理站点和通用视图）使用在模型中定义 的_第一个_管理器，因此如果希望管理站点能够访问所有对象（而不是仅仅站点特有对象），请于定义 CurrentSiteManager 之前在模型中放入 objects = models.Manager() 
+
+Although it’s not required that you use the sites framework, it’s encouraged, because Django takes advantage of it in a few places.
+尽管并不是必须的，我们还是强烈建议使用多站点框架，因为 Django 在几个地方利用了它
+
+Even if your Django installation is powering only a single site, you should take a few seconds to create the site object with your domain and name, and point to its ID in your SITE_ID setting.
+ 即使只用 Django 来支持单个网站，你也应该花一点时间用 domain 和 name 来创建站点对象，并将 SITE_ID 设置指向它的 ID 
+
+Here’s how Django uses the sites framework:
+以下讲述的是 Django 如何使用多站点框架：
+
+In the redirects framework (see the later section “Redirects”), each redirect object is associated with a particular site.
+在重定向框架中（见后面的重定向一节），每一个重定向对象都与一个特定站点关联
+
+When Django searches for a redirect, it takes into account the current SITE_ID.
+ 当 Django 搜索重定向的时候，它会考虑当前的 SITE_ID 
+
+In the comments framework, each comment is associated with a particular site.
+在注册框架中，每个注释都与特定站点相关
+
+When a comment is posted, its site is set to the current SITE_ID, and when comments are listed via the appropriate template tag, only the comments for the current site are displayed.
+ 每个注释被显示时，其 site 被设置为当前的 SITE_ID ，而当通过适当的模板标签列出注释时，只有当前站点的注释将会显示
+
+In the flatpages framework (see the later section “Flatpages”), each flatpage is associated with a particular site.
+在 flatpages 框架中 (参见后面的 Flatpages 一节），每个 flatpage 都与特定的站点相关联
+
+When a flatpage is created, you specify its site, and the flatpage middleware checks the current SITE_ID in retrieving flatpages to display.
+ 创建 flatpage 时，你都将指定它的 site ，而 flatpage 中间件在获取 flatpage 以显示它的过程中，将查看当前的 SITE_ID 
+
+In the syndication framework (see Chapter 13), the templates for title and description automatically have access to a variable {{ site }}, which is the Site object representing the current site.
+在 syndication 框架中（参阅第 13 章）， title 和 description 的模板会自动访问变量 {{ site }} ，它其实是代表当前站点的 Site 对象
+
+Also, the hook for providing item URLs will use the domain from the current Site object if you don’t specify a fully qualified domain.
+ 而且，如果你不指定一个合格的domain的话，提供目录URL的钩子将会使用当前“Site”对象的domain
+
+In the authentication framework (see Chapter 14), the django.contrib.auth.views.login view passes the current Site name to the template as {{ site_name }} and the current Site object as {{ site }}.
+在权限框架中（参见十四章），视图django.contrib.auth.views.login把当前Site名字和对象分别以{{ site_name }}和{{ site }}的形式传给了模板
+
+Flatpages¶
+Flatpages(简单页面)
+
+Often you’ll have a database-driven Web application up and running, but you’ll need to add a couple of one-off static pages, such as an About page or a Privacy Policy page.
+尽管通常情况下总是搭建运行数据库驱动的 Web 应用，有时你还是需要添加一两张一次性的静态页面，例如“关于”页面，或者“隐私策略”页面等等
+
+It would be possible to use a standard Web server such as Apache to serve these files as flat HTML files, but that introduces an extra level of complexity into your application, because then you have to worry about configuring Apache, you have to set up access for your team to edit those files, and you can’t take advantage of Django’s template system to style the pages.
+ 可以用像 Apache 这样的标准Web服务器来处理这些静态页面，但却会给应用带来一些额外的复杂性，因为你必须操心怎么配置 Apache，还要设置权限让整个团队可以修改编辑这些文件，而且你还不能使用 Django 模板系统来统一这些页面的风格
+
+The solution to this problem is Django’s flatpages application, which lives in the package django.contrib.flatpages.
+这个问题的解决方案是使用位于 django.contrib.flatpages 开发包中的 Django 简单页面（flatpages）应用程序
+
+This application lets you manage such one-off pages via Django’s admin site, and it lets you specify templates for them using Django’s template system.
+该应用让你能够通过 Django 管理站点来管理这些一次性的页面，还可以让你使用 Django 模板系统指定它们使用哪个模板
+
+It uses Django models behind the scenes, which means it stores the pages in a database, just like the rest of your data, and you can access flatpages with the standard Django database API.
+ 它在后台使用Django模型，这意味着它把页面项别的数据一样保存在数据库中，也就是说你可以使用标准Django数据库API来存取页面
+
+Flatpages are keyed by their URL and site.
+简单页面以它们的 URL 和站点为键值
+
+When you create a flatpage, you specify which URL it’s associated with, along with which site(s) it’s on.
+ 当创建简单页面时，你指定它与哪个URL以及和哪个站点相关联 
+
+(For more on sites, see the “Sites” section.)
+ （有关站点的更多信息，请查阅”多站点“一节
+
+To install the flatpages application, follow these steps:
+安装简单页面应用程序必须按照下面的步骤：
+
+Add 'django.contrib.flatpages' to your INSTALLED_APPS.
+添加 'django.contrib.flatpages' 到 INSTALLED_APPS 设置
+
+django.contrib.flatpages depends on django.contrib.sites, so make sure the both packages are in INSTALLED_APPS.
+django.contrib.flatpages依赖django.contrib.sites，所以确保它们都在INSTALLED_APPS里
+
+Add 'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware' to your MIDDLEWARE_CLASSES setting.
+将 'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware' 添加到 MIDDLEWARE_CLASSES设置中
+
+Run the command manage.py syncdb to install the two required tables into your database.
+运行 manage.py syncdb 命令在数据库中创建必需的两个表
+
+The flatpages application creates two tables in your database: django_flatpage and django_flatpage_sites.
+简单页面应用程序在数据库中创建两个表： django_flatpage 和 django_flatpage_sites 
+
+django_flatpage simply maps a URL to a title and bunch of text content.
+ django_flatpage只是将 URL 映射到标题和一段文本内容
+
+django_flatpage_sites is a many-to-many table that associates a flatpage with one or more sites.
+ django_flatpage_sites 是一个多对多表，用于关联某个简单页面以及一个或多个站点
+
+The application comes with a single FlatPage model, defined in django/contrib/flatpages/models.py.
+该应用捆绑的 FlatPage 模型在 django/contrib/flatpages/models.py 进行定义，如下所示：
+
+Let’s examine these fields one at a time:
+让我们逐项看看这些字段的含义：
+
+url: The URL at which this flatpage lives, excluding the domain name but including the leading slash (e.g., /about/contact/).
+url : 该简单页面所处的 URL，不包括域名，但是包含前导斜杠 (例如 /about/contact/ )
+
+title: The title of the flatpage.
+title : 简单页面的标题
+
+The framework doesn’t do anything special with this.
+ 框架不对它作任何特殊处理
+
+It’s your responsibility to display it in your template.
+ 由你通过模板来显示它
+
+content: The content of the flatpage (i.e., the HTML of the page).
+content : 简单页面的内容 (即 HTML 页面)
+
+The framework doesn’t do anything special with this.
+ 框架不对它作任何特殊处理
+
+It’s your responsibility to display it in the template.
+ 由你负责使用模板来显示
+
+enable_comments: Whether to enable comments on this flatpage.
+enable_comments : 是否允许该简单页面使用评论
+
+The framework doesn’t do anything special with this.
+ 框架不对它作任何特殊处理
+
+You can check this value in your template and display a comment form if needed.
+ 你可在模板中检查该值并根据需要显示评论窗体
+
+template_name: The name of the template to use for rendering this flatpage.
+template_name : 用来解析该简单页面的模板名称
+
+This is optional;
+ 这是一个可选项
+
+if it’s not given or if this template doesn’t exist, the framework will fall back to the template flatpages/default.html.
+如果未指定模板或该模板不存在，系统会退而使用默认模板 flatpages/default.html 
+
+registration_required: Whether registration is required for viewing this flatpage.
+registration_required : 是否注册用户才能查看此简单页面
+
+This integrates with Django’s authentication/user framework, which is explained further in Chapter 14.
+ 该设置项集成了 Djangos 验证/用户框架，该框架于第十四章详述
+
+sites: The sites that this flatpage lives on.
+sites : 该简单页面放置的站点
+
+This integrates with Django’s sites framework, which is explained in the “Sites” section of this chapter.
+ 该项设置集成了 Django 多站点框架，该框架在本章的“多站点”一节中有所阐述
+
+You can create flatpages through either the Django admin interface or the Django database API.
+你可以通过 Django 超级管理界面或者 Django 数据库 API 来创建简单页面
+
+For more information on this, see the section “Adding, Changing, and Deleting Flatpages.”
+ 要了解更多内容，请查阅“添加、修改和删除简单页面”一节
+
+Once you’ve created flatpages, FlatpageFallbackMiddleware does all of the work.
+一旦简单页面创建完成， FlatpageFallbackMiddleware 将完成（剩下）所有的工作
+
+Each time any Django application raises a 404 error, this middleware checks the flatpages database for the requested URL as a last resort.
+ 每当 Django 引发 404 错误，作为最后的办法，该中间件将根据所请求的 URL 检查简单页面数据库
+
+Specifically, it checks for a flatpage with the given URL with a site ID that corresponds to the SITE_ID setting.
+ 确切地说，它将使用所指定的 URL以及 SITE_ID 设置对应的站点 ID 查找一个简单页面
+
+If it finds a match, it loads the flatpage’s template or flatpages/default.html if the flatpage has not specified a custom template.
+如果找到一个匹配项，它将载入该简单页面的模板（如果没有指定的话，将使用默认模板flatpages/default.html ）
+
+It passes that template a single context variable, flatpage, which is the FlatPage object.
+ 同时，它把一个简单的上下文变量flatpage（一个简单页面对象）传递给模板
+
+It uses RequestContext in rendering the template.
+ 模板解析过程中，它实际用的是RequestContext
+
+If FlatpageFallbackMiddleware doesn’t find a match, the request continues to be processed as usual.
+如果 FlatpageFallbackMiddleware 没有找到匹配项，该请求继续如常处理
+
+Note
+注意
+
+This middleware only gets activated for 404 (page not found) errors – not for 500 (server error) or other error responses.
+该中间件仅在发生 404 （页面未找到）错误时被激活，而不会在 500 （服务器错误）或其他错误响应时被激活
+
+Also note that the order of MIDDLEWARE_CLASSES matters.
+ 还要注意的是必须考虑 MIDDLEWARE_CLASSES 的顺序问题
+
+Generally, you can put FlatpageFallbackMiddleware at or near the end of the list, because it’s a last resort.
+ 通常，你可以把 FlatpageFallbackMiddleware放在列表最后，因为它是最后的办法
+
+You can add, change and delete flatpages in two ways:
+可以用两种方式增加、变更或删除简单页面：
+
+If you’ve activated the automatic Django admin interface, you should see a “Flatpages” section on the admin index page.
+如果已经激活了自动的 Django 超级管理界面，你将会在超级管理页面的首页看到有个 Flatpages 区域
+
+Edit flatpages as you would edit any other object in the system.
+ 你可以像编辑系统中其它对象那样编辑简单页面
+
+As described previously, flatpages are represented by a standard Django model that lives in django/contrib/flatpages/models.py.
+前面已经提到，简单页面表现为 django/contrib/flatpages/models.py 中的标准 Django 模型
+
+Hence, you can access flatpage objects via the Django database API, for example:
+这样，你就可以使用Django数据库API来存取简单页面对象，例如：
+
+By default, flatpages are rendered via the template flatpages/default.html, but you can override that for a particular flatpage with the template_name field on the FlatPage object.
+缺省情况下，系统使用模板 flatpages/default.html 来解析简单页面，但你也可以通过设定 FlatPage 对象的template_name 字段来更改特定简单页面的模板
+
+Creating the flatpages/default.html template is your responsibility.
+你必须自己创建 flatpages/default.html 模板
+
+In your template directory, just create a flatpages directory containing a default.html file.
+ 只需要在模板目录创建一个 flatpages 目录，并把default.html 文件置于其中
+
+Flatpage templates are passed a single context variable, flatpage, which is the flatpage object.
+简单页面模板只接受有一个上下文变量—— flatpage ，也就是该简单页面对象
+
+Here’s a sample flatpages/default.html template:
+以下是一个 flatpages/default.html 模板范例:
+
+Note that we’ve used the safe template filter to allow flatpage.content to include raw HTML and bypass auto-escaping.
+注意我们使用了safe模板过滤器来允许flatpage.content引入原始HTML而不必转义
+
+Redirects¶
+重定向
+
+Django’s redirects framework lets you manage redirects easily by storing them in a database and treating them as any other Django model object.
+通过将重定向存储在数据库中并将其视为 Django 模型对象，Django 重定向框架让你能够轻松地管理它们
+
+For example, you can use the redirects framework to tell Django, “Redirect any request to /music/ to /sections/arts/music/.” This comes in handy when you need to move things around on your site;
+ 比如说，你可以通过重定向框架告诉Django，把任何指向 /music/ 的请求重定向到 /sections/arts/music/ 
+
+Web developers should do whatever is necessary to avoid broken links.
+当你需要在站点中移动一些东西时，这项功能就派上用场了——网站开发者应该穷尽一切办法避免出现坏链接
+
+To install the redirects application, follow these steps:
+安装重定向应用程序必须遵循以下步骤：
+
+Add 'django.contrib.redirects' to your INSTALLED_APPS.
+将 'django.contrib.redirects' 添加到 INSTALLED_APPS 设置中
+
+Add 'django.contrib.redirects.middleware.RedirectFallbackMiddleware' to your MIDDLEWARE_CLASSES setting.
+将 'django.contrib.redirects.middleware.RedirectFallbackMiddleware' 添加到 MIDDLEWARE_CLASSES设置中
+
+Run the command manage.py syncdb to install the single required table into your database.
+运行 manage.py syncdb 命令将所需的表添加到数据库中
+
+manage.py syncdb creates a django_redirect table in your database.
+manage.py syncdb 在数据库中创建了一个 django_redirect 表
+
+This is a simple lookup table with site_id, old_path, and new_path fields.
+ 这是一个简单的查询表，只有site_id、old_path和new_path三个字段
+
+You can create redirects through either the Django admin interface or the Django database API.
+你可以通过 Django 超级管理界面或者 Django 数据库 API 来创建重定向
+
+For more, see the section “Adding, Changing, and Deleting Redirects.”
+ 要了解更多信息，请参阅“增加、变更和删除重定向”一节
+
+Once you’ve created redirects, the RedirectFallbackMiddleware class does all of the work.
+一旦创建了重定向， RedirectFallbackMiddleware 类将完成所有的工作
+
+Each time any Django application raises a 404 error, this middleware checks the redirects database for the requested URL as a last resort.
+ 每当 Django 应用引发一个 404 错误，作为终极手段，该中间件将为所请求的 URL 在重定向数据库中进行查找
+
+Specifically, it checks for a redirect with the given old_path with a site ID that corresponds to the SITE_ID setting.
+ 确切地说，它将使用给定的old_path 以及 SITE_ID 设置对应的站点 ID 查找重定向设置
+
+(See the earlier section “Sites” for more information on SITE_ID and the sites framework.) Then it follows these steps:
+ （查阅前面的“多站点”一节可了解关于SITE_ID 和多站点框架的更多细节） 然后，它将执行以下两个步骤：
+
+If it finds a match, and new_path is not empty, it redirects to new_path.
+如果找到了匹配项，并且 new_path 非空，它将重定向到 new_path 
+
+If it finds a match, and new_path is empty, it sends a 410 (“Gone”) HTTP header and an empty (contentless) response.
+如果找到了匹配项，但 new_path 为空，它将发送一个 410 (Gone) HTTP 头信息以及一个空（无内容）响应
+
+If it doesn’t find a match, the request continues to be processed as usual.
+如果未找到匹配项，该请求将如常处理
+
+The middleware only gets activated for 404 errors – not for 500 errors or responses of any other status code.
+该中间件仅为 404 错误激活，而不会为 500 错误或其他任何状态码的响应所激活
+
+Note that the order of MIDDLEWARE_CLASSES matters.
+注意必须考虑 MIDDLEWARE_CLASSES 的顺序
+
+Generally, you can put RedirectFallbackMiddleware toward the end of the list, because it’s a last resort.
+ 通常，你可以将 RedirectFallbackMiddleware 放置在列表的最后，因为它是一种终极手段
+
+Note
+注意
+
+If you’re using both the redirect and flatpage fallback middleware, consider which one (redirect or flatpage) you’d like checked first.
+如果同时使用重定向和简单页面回退中间件， 必须考虑先检查其中的哪一个（重定向或简单页面）
+
+We suggest flatpages before redirects (thus putting the flatpage middleware before the redirect middleware), but you might feel differently.
+ 我们建议将简单页面放在重定向之前（因此将简单页面中间件放置在重定向中间件之前），但你可能有不同想法
+
+You can add, change and delete redirects in two ways:
+你可以两种方式增加、变更和删除重定向：
+
+If you’ve activated the automatic Django admin interface, you should see a “Redirects” section on the admin index page.
+如果已经激活了全自动的 Django 超级管理界面，你应该能够在超级管理首页看到重定向区域
+
+Edit redirects as you would edit any other object in the system.
+ 可以像编辑系统中其它对象一样编辑重定向
+
+Redirects are represented by a standard Django model that lives in django/contrib/redirects/models.py.
+重定向表现为django/contrib/redirects/models.py 中的一个标准 Django 模型
+
+Hence, you can access redirect objects via the Django database API, for example:
+因此，你可以通过Django数据库API来存取重定向对象，例如：
+
+CSRF Protection¶
+CSRF 防护
+
+The django.contrib.csrf package protects against Cross-Site Request Forgery (CSRF).
+django.contrib.csrf 开发包能够防止遭受跨站请求伪造攻击 (CSRF).
+
+CSRF, also known as “session riding,” is a Web site security exploit.
+CSRF, 又叫会话跳转，是一种网站安全攻击技术
+
+It happens when a malicious Web site tricks a user into unknowingly loading a URL from a site at which that user is already authenticated, hence taking advantage of the user’s authenticated status.
+ 当某个恶意网站在用户未察觉的情况下将其从一个已经通过身份验证的站点诱骗至一个新的 URL 时，这种攻击就发生了，因此它可以利用用户已经通过身份验证的状态
+
+This can be a bit tricky to understand at first, so we walk through two examples in this section.
+ 乍一看，要理解这种攻击技术比较困难，因此我们在本节将使用两个例子来说明
+
+Suppose you’re logged in to a webmail account at example.com.
+假定你已经登录到 example.com 的网页邮件账号
+
+This webmail site has a Log Out button that points to the URL example.com/logout – that is, the only action you need to take in order to log out is to visit the page example.com/logout.
+该网站有一个指向example.com/logout的注销按钮
+
+A malicious site can coerce you to visit the URL example.com/logout by including that URL as a hidden  on its own (malicious) page.
+通过在（恶意）网页上用隐藏一个指向 URL example.com/logout 的  ,恶意网站可以强迫你访问该 URL 
+
+Thus, if you’re logged in to the example.com webmail account and visit the malicious page that has an  to example.com/logout, the act of visiting the malicious page will log you out from example.com.
+因此，如果你登录 example.com 的网页邮件账号之后，访问了带有指向 example.com/logout 之  的恶意站点，访问该恶意页面的动作将使你登出 example.com 
+
+Clearly, being logged out of a webmail site against your will is not a terrifying breach of security, but this same type of exploit can happen to any site that trusts users, such as an online banking site or an e-commerce site, where the exploit could be used to initiate an order or payment without the user’s knowledge.
+很明显，登出一个邮件网站也不是什么严重的安全问题
+
+In the previous example, example.com was partially at fault because it allowed a state change (i.e., logging the user out) to be requested via the HTTP GET method.
+在上一个例子中， example.com 应该负部分责任，因为它允许通过 HTTP GET 方法进行状态变更（即登入和登出）
+
+It’s much better practice to require an HTTP POST for any request that changes state on the server.
+ 如果对服务器的状态变更要求使用 HTTP POST 方法，情况就好得多了
+
+But even Web sites that require POST for state-changing actions are vulnerable to CSRF.
+ 但是，即便是强制要求使用POST 方法进行状态变更操作也易受到 CSRF 攻击
+
+Suppose example.com has upgraded its Log Out functionality so that it’s a  button that is requested via POST to the URL example.com/logout.
+假设 example.com 对登出功能进行了升级，登出  按钮是通过一个指向 URL example.com/logout 的 POST动作完成，同时在  中加入了以下隐藏的字段：
+
+This ensures that a simple POST to the URL example.com/logout won’t log a user out;
+这就确保了用简单的指向example.com/logout的POST 不会让用户登出
+
+in order for a user to log out, the user must request example.com/logout via POST and send the confirm POST variable with a value of 'true'.
+要让用户登出，用户必须通过 POST 向example.com/logout 发送请求 并且发送一个值为’true’的POST变量
+
+Well, despite the extra security, this arrangement can still be exploited by CSRF – the malicious page just needs to do a little more work.
+尽管增加了额外的安全机制，这种设计仍然会遭到 CSRF 的攻击——恶意页面仅需一点点改进而已
+
+Attackers can create an entire form targeting your site, hide it in an invisible , and then use JavaScript to submit that form automatically.
+ 攻击者可以针对你的站点设计整个表单，并将其藏身于一个不可见的  中，然后使用 Javascript 自动提交该表单
+
+How, then, can your site protect itself from this exploit?
+那么，是否可以让站点免受这种攻击呢
+
+The first step is to make sure all GET requests are free of side effects.
+ 第一步，首先确保所有 GET 方法没有副作用
+
+That way, if a malicious site includes one of your pages as an , it won’t have a negative effect.
+ 这样以来，如果某个恶意站点将你的页面包含为  ，它将不会产生负面效果
+
+That leaves POST requests.
+该技术没有考虑 POST 请求
+
+The second step is to give each POST  a hidden field whose value is secret and is generated from the user’s session ID.
+ 第二步就是给所有 POST 的form标签一个隐藏字段，它的值是保密的并根据用户进程的 ID 生成
+
+Then, when processing the form on the server side, check for that secret field and raise an error if it doesn’t validate.
+ 这样，从服务器端访问表单时，可以检查该保密的字段
+
+This is exactly what Django’s CSRF prevention layer does, as explained in the sections that follow.
+这正是 Django CSRF 防护层完成的工作，正如下面的小节所介绍的
+
+The django.contrib.csrf package contains only one module: middleware.py.
+django.contrib.csrf 开发包只有一个模块： middleware.py 
+
+This module contains a Django middleware class, CsrfMiddleware, which implements the CSRF protection.
+该模块包含了一个 Django 中间件类——CsrfMiddleware ，该类实现了 CSRF 防护功能
+
+To activate this CSRF protection, add 'django.contrib.csrf.middleware.CsrfMiddleware' to the MIDDLEWARE_CLASSES setting in your settings file.
+在设置文件中将 'django.contrib.csrf.middleware.CsrfMiddleware' 添加到 MIDDLEWARE_CLASSES 设置中可激活 CSRF 防护
+
+This middleware needs to process the response after SessionMiddleware, so CsrfMiddleware must appear before SessionMiddleware in the list (because the response middleware is processed last-to-first).
+ 该中间件必须在 SessionMiddleware 之后 执行，因此在列表中 CsrfMiddleware 必须出现在SessionMiddleware 之前 （因为响应中间件是自后向前执行的）
+
+Also, it must process the response before the response gets compressed or otherwise mangled, so CsrfMiddleware must come after GZipMiddleware.
+ 同时，它也必须在响应被压缩或解压之前对响应结果进行处理，因此 CsrfMiddleware 必须在 GZipMiddleware 之后执行
+
+Once you’ve added that to your MIDDLEWARE_CLASSES setting, you’re done.
+一旦将它添加到MIDDLEWARE_CLASSES设置中，你就完成了工作
+
+See the section “Order of MIDDLEWARE_CLASSES” in Chapter 15 for more explanation.
+ 参见第十五章的“MIDDLEWARE_CLASSES顺序”小节以了解更多
+
+In case you’re interested, here’s how CsrfMiddleware works.
+如果感兴趣的话，下面是 CsrfMiddleware 的工作模式
+
+It does these two things:
+ 它完成以下两项工作：
+
+It modifies outgoing requests by adding a hidden form field to all POST forms, with the name csrfmiddlewaretoken and a value that is a hash of the session ID plus a secret key.
+它修改当前处理的请求，向所有的 POST 表单增添一个隐藏的表单字段，使用名称是 csrfmiddlewaretoken，值为当前会话 ID 加上一个密钥的散列值
+
+The middleware does not modify the response if there’s no session ID set, so the performance penalty is negligible for requests that don’t use sessions.
+ 如果未设置会话 ID ，该中间件将 不会 修改响应结果，因此对于未使用会话的请求来说性能损失是可以忽略的
+
+On all incoming POST requests that have the session cookie set, it checks that csrfmiddlewaretoken is present and correct.
+对于所有含会话 cookie 集合的传入 POST 请求，它将检查是否存在 csrfmiddlewaretoken 及其是否正确
+
+If it isn’t, the user will get a 403 HTTP error.
+ 如果不是的话，用户将会收到一个 403 HTTP 错误
+
+The content of the 403 error page is the message “Cross Site Request Forgery detected.
+ 403 错误页面的内容是检测到了跨域请求伪装
+
+Request aborted.”
+ 终止请求
+
+This ensures that only forms originating from your Web site can be used to POST data back.
+该步骤确保只有源自你的站点的表单才能将数据 POST 回来
+
+This middleware deliberately targets only HTTP POST requests (and the corresponding POST forms).
+该中间件特意只针对 HTTP POST 请求（以及对应的 POST 表单）
+
+As we explained, GET requests ought never to have side effects;
+ 如我们所解释的，永远不应该因为使用了GET 请求而产生负面效应，你必须自己来确保这一点
+
+POST requests not accompanied by a session cookie are not protected, but they don’t need to be protected, because a malicious Web site could make these kind of requests anyway.
+未使用会话 cookie 的 POST 请求无法受到保护，但它们也不 需要 受到保护，因为恶意网站可用任意方法来制造这种请求
+
+To avoid altering non-HTML requests, the middleware checks the response’s Content-Type header before modifying it.
+为了避免转换非 HTML 请求，中间件在编辑响应结果之前对它的 Content-Type 头标进行检查
+
+Only pages that are served as text/html or application/xml+xhtml are modified.
+ 只有标记为text/html 或 application/xml+xhtml 的页面才会被修改
+
+CsrfMiddleware requires Django’s session framework to work.
+CsrfMiddleware 的运行需要 Django 的会话框架
+
+(See Chapter 14 for more on sessions.) If you’re using a custom session or authentication framework that manually manages session cookies, this middleware will not help you.
+ （参阅第 14 章了解更多关于会话的内容
+
+If your application creates HTML pages and forms in some unusual way (e.g., if it sends fragments of HTML in JavaScript document.write statements), you might bypass the filter that adds the hidden field to the form.
+如果你的应用程序以某种非常规的方法创建 HTML 页面（例如：在 Javascript 的document.write语句中发送 HTML 片段），你可能会绕开了向表单添加隐藏字段的过滤器
+
+In this case, the form submission will always fail.
+ 在此情况下，表单提交永远无法成功
+
+(This happens because CsrfMiddleware uses a regular expression to add the csrfmiddlewaretoken field to your HTML before the page is sent to the client, and the regular expression sometimes cannot handle wacky HTML.) If you suspect this might be happening, just view the source in your Web browser to see whether csrfmiddlewaretoken was inserted into your .
+ （这是因为在页面发送到客户端之前，CsrfMiddleware使用正则表达式来添加csrfmiddlewaretoken字段到你的HTML中，而正则表达式不能处理不规范的HTML
+
+For more CSRF information and examples, visit http://en.wikipedia.org/wiki/CSRF
+想了解更多关于 CSRF 的信息和例子的话，可以访问 http://en.wikipedia.org/wiki/CSRF 
+
+Humanizing Data¶
+人性化数据
+
+The package django.contrib.humanize holds a set of Django template filters useful for adding a “human touch” to data.
+包django.contrib.humanize包含了一些是数据更人性化的模板过滤器
+
+To activate these filters, add 'django.contrib.humanize' to your INSTALLED_APPS.
+ 要激活这些过滤器，请把'django.contrib.humanize'加入到你的INSTALLED_APPS中
+
+Once you’ve done that, use {% load humanize %} in a template, and you’ll have access to the filters described in the following sections.
+完成之后，向模版了加入{% load humanize %}就可以使用下面的过滤器了
+
+For numbers 1 through 9, this filter returns the number spelled out.
+对于 1 到 9 的数字，该过滤器返回了数字的拼写形式
+
+Otherwise, it returns the numeral.
+ 否则，它将返回数字
+
+This follows Associated Press style.
+ 这遵循的是美联社风格
+
+Examples:
+举例：
+
+You can pass in either an integer or a string representation of an integer.
+你可以传入一个整数或者表示整数的字符串
+
+This filter converts an integer to a string containing commas every three digits.
+该过滤器将整数转换为每三个数字用一个逗号分隔的字符串
+
+Examples:
+例子：
+
+You can pass in either an integer or a string representation of an integer.
+可以传入整数或者表示整数的字符串
+
+This filter converts a large integer to a friendly text representation.
+该过滤器将一个很大的整数转换成友好的文本表示方式
+
+It works best for numbers over 1 million.
+ 它对于超过一百万的数字最好用
+
+Examples:
+例子：
+
+Values up to 1 quadrillion (1,000,000,000,000,000) are supported.
+最大支持不超过一千的五次方（1,000,000,000,000,000）
+
+You can pass in either an integer or a string representation of an integer.
+可以传入整数或者表示整数的字符串
+
+This filter converts an integer to its ordinal as a string.
+该过滤器将整数转换为序数词的字符串形式
+
+Examples:
+例子：
+
+You can pass in either an integer or a string representation of an integer.
+可以传入整数或者表示整数的字符串
+
+Markup Filters¶
+标记过滤器
+
+The package django.contrib.markup includes a handful of Django template filters, each of which implements a common markup languages:
+包django.contrib.markup包含了一些列Django模板过滤器，每一个都实现了一中通用的标记语言
+
+In each case, the filter expects formatted markup as a string and returns a string representing the marked-up text.
+每种情形下，过滤器都期望字符串形式的格式化标记，并返回表示标记文本的字符串
+
+For example, the textile filter converts text that is marked up in Textile format to HTML:
+ 例如：textile过滤器吧Textile格式的文本转换为HTML
+
+To activate these filters, add 'django.contrib.markup' to your INSTALLED_APPS setting.
+要激活这些过滤器，仅需将 'django.contrib.markup' 添加到 INSTALLED_APPS 设置中
+
+Once you’ve done that, use {% load markup %} in a template, and you’ll have access to these filters.
+ 一旦完成了该项工作，在模板中通过 {% load markup %} 就能使用这些过滤器
+
+For more documentation, read the source code in django/contrib/markup/templatetags/markup.py.
+ 要想掌握更多信息的话，可阅读django/contrib/markup/templatetags/markup.py. 内的源代码
+
+What’s Next?¶
+下一章
+
+Many of these contributed frameworks (CSRF, the auth system, etc.) do their magic by providing a piece of middleware.
+这些继承框架（CSRF、身份验证系统等等）通过提供 中间件 来实现其奇妙的功能
+
+Middleware is code that runs before and/or after every request and can modify requests and responses at will, to extend the framework.
+中间件是在请求之前/后执行的可以修改请求和响应的代码，它扩展了框架
+
+In the next chapter, we’ll discuss Django’s built-in middleware and explain how you can write your own.
+ 在下一章，我们将介绍Django的中间件并解释怎样写出自己的中间件
+
+© Copyright 2012, Matt Behrens.
+www.shoucewang.com. All Rights Reserved. 手册网 版权所有
+

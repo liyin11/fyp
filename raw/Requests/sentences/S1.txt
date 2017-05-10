@@ -1,0 +1,60 @@
+Installation¶
+安装¶
+
+This part of the documentation covers the installation of Requests.
+这部分文档包含了 Requests 的安装过程，使用任何软件的第一步就是正确地安装它
+
+Pip Install Requests¶
+Pip Install Requests¶
+
+To install Requests, simply run this simple command in your terminal of choice:
+要安装 Requests，只要在你的终端中运行这个简单命令即可：
+
+If you don't have pip installed (tisk tisk!), this Python installation guide can guide you through the process.
+如果你没有安装 pip （啧啧），这个 Python installation guide 可以带你完成这一流程
+
+Get the Source Code¶
+获得源码¶
+
+Requests is actively developed on GitHub, where the code is always available.
+Requests 一直在 Github 上积极地开发，你可以一直从这里获取到代码
+
+You can either clone the public repository:
+你可以克隆公共版本库：
+
+Or, download the tarball:
+也可以下载 tarball:
+
+Once you have a copy of the source, you can embed it in your own Python package, or install it into your site-packages easily:
+获得代码之后，你就可以轻松的将它嵌入到你的 python 包里，或者安装到你的 site-packages:
+
+Requests is an elegant and simple HTTP library for Python, built for human beings.
+Requests is an elegant and simple HTTP library for Python, built for human beings. You are currently looking at the documentation of the development release.
+
+Stay Informed
+Stay Informed
+
+Receive updates on new releases and upcoming projects.
+Receive updates on new releases and upcoming projects.
+
+Join Mailing List.
+Join Mailing List.
+
+If you enjoy using this project, Say Thanks!
+Follow @kennethreitz
+
+More Kenneth Reitz projects:
+More Kenneth Reitz projects:
+
+Translations
+Translations
+
+Table Of Contents
+內容目录
+
+Related Topics
+Related Topics
+
+Quick search
+快速搜索
+

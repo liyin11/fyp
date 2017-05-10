@@ -1,0 +1,171 @@
+Feed exports¶
+Feed exports¶
+
+New in version 0.10.
+0.10 新版功能.
+
+One of the most frequently required features when implementing scrapers is being able to store the scraped data properly and, quite often, that means generating an “export file” with the scraped data (commonly called “export feed”) to be consumed by other systems.
+实现爬虫时最经常提到的需求就是能合适的保存爬取到的数据，或者说，生成一个带有爬取数据的”输出文件”(通常叫做”输出feed”)，来供其他系统使用
+
+Scrapy provides this functionality out of the box with the Feed Exports, which allows you to generate a feed with the scraped items, using multiple serialization formats and storage backends.
+Scrapy自带了Feed输出，并且支持多种序列化格式(serialization format)及存储方式(storage backends)
+
+Serialization formats¶
+序列化方式(Serialization formats)¶
+
+For serializing the scraped data, the feed exports use the Item exporters.
+feed输出使用到了 Item exporters 
+
+These formats are supported out of the box:
+其自带支持的类型有:
+
+But you can also extend the supported format through the FEED_EXPORTERS setting.
+您也可以通过 FEED_EXPORTERS 设置扩展支持的属性
+
+JSON¶
+JSON¶
+
+JSON lines¶
+JSON lines¶
+
+CSV¶
+CSV¶
+
+XML¶
+XML¶
+
+Pickle¶
+Pickle¶
+
+Marshal¶
+Marshal¶
+
+Storages¶
+存储(Storages)¶
+
+When using the feed exports you define where to store the feed using a URI (through the FEED_URI setting).
+使用feed输出时您可以通过使用 URI (通过 FEED_URI 设置) 来定义存储端
+
+The feed exports supports multiple storage backend types which are defined by the URI scheme.
+ feed输出支持URI方式支持的多种存储后端类型
+
+The storages backends supported out of the box are:
+自带支持的存储后端有:
+
+Some storage backends may be unavailable if the required external libraries are not available.
+有些存储后端会因所需的外部库未安装而不可用
+
+For example, the S3 backend is only available if the botocore or boto library is installed (Scrapy supports boto only on Python 2).
+例如，S3只有在 boto 库安装的情况下才可使用
+
+Storage URI parameters¶
+存储URI参数¶
+
+The storage URI can also contain parameters that get replaced when the feed is being created.
+存储URI也包含参数
+
+These parameters are:
+当feed被创建时这些参数可以被覆盖:
+
+Any other named parameter gets replaced by the spider attribute of the same name.
+其他命名的参数会被spider同名的属性所覆盖
+
+For example, %(site_id)s would get replaced by the spider.site_id attribute the moment the feed is being created.
+例如， 当feed被创建时， %(site_id)s 将会被 spider.site_id 属性所覆盖
+
+Here are some examples to illustrate:
+下面用一些例子来说明:
+
+Storage backends¶
+存储端(Storage backends)¶
+
+Local filesystem¶
+本地文件系统¶
+
+The feeds are stored in the local filesystem.
+将feed存储在本地系统
+
+Note that for the local filesystem storage (only) you can omit the scheme if you specify an absolute path like /tmp/export.csv.
+注意: (只有)存储在本地文件系统时，您可以指定一个绝对路径 /tmp/export.csv 并忽略协议(scheme)
+
+This only works on Unix systems though.
+不过这仅仅只能在Unix系统中工作
+
+FTP¶
+FTP¶
+
+The feeds are stored in a FTP server.
+将feed存储在FTP服务器
+
+S3¶
+S3¶
+
+The feeds are stored on Amazon S3.
+将feed存储在 Amazon S3 
+
+The AWS credentials can be passed as user/password in the URI, or they can be passed through the following settings:
+您可以通过在URI中传递user/pass来完成AWS认证，或者也可以通过下列的设置来完成:
+
+Standard output¶
+标准输出¶
+
+The feeds are written to the standard output of the Scrapy process.
+feed输出到Scrapy进程的标准输出
+
+Settings¶
+设定(Settings)¶
+
+These are the settings used for configuring the feed exports:
+这些是配置feed输出的设定:
+
+FEED_URI¶
+FEED_URI¶
+
+Default: None
+Default: None
+
+The URI of the export feed.
+输出feed的URI
+
+See Storage backends for supported URI schemes.
+支持的URI协议请参见 存储端(Storage backends) 
+
+This setting is required for enabling the feed exports.
+为了启用feed输出，该设定是必须的
+
+FEED_FORMAT¶
+FEED_FORMAT¶
+
+The serialization format to be used for the feed.
+输出feed的序列化格式
+
+See Serialization formats for possible values.
+可用的值请参见 序列化方式(Serialization formats) 
+
+FEED_EXPORT_ENCODING¶
+FEED_STORE_EMPTY¶
+
+Default: None
+Default: False
+
+The encoding to be used for the feed.
+是否输出空feed(没有item的feed)
+
+A list of fields to export, optional.
+包含项目支持的额外feed存储端的字典
+
+Example: FEED_EXPORT_FIELDS = ["foo", "bar", "baz"].
+ 字典的键(key)是URI协议(scheme)，值是存储类(storage class)的路径
+
+If an exporter requires a fixed set of fields (this is the case for CSV export format) and FEED_EXPORT_FIELDS is empty or None, then Scrapy tries to infer field names from the exported data - currently it uses field names from the first item.
+Default:
+
+Default: {}
+Default:: {}
+
+A dict containing additional feed storage backends supported by your project.
+包含项目支持的额外输出器(exporter)的字典
+
+The keys are URI schemes and the values are paths to storage classes.
+ 该字典的键(key)是URI协议(scheme)，值是 Item输出器(exporter) 类的路径
+

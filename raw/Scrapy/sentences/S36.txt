@@ -1,0 +1,261 @@
+Extensions¶
+扩展(Extensions)¶
+
+The extensions framework provides a mechanism for inserting your own custom functionality into Scrapy.
+扩展框架提供一个机制，使得你能将自定义功能绑定到Scrapy
+
+Extensions are just regular classes that are instantiated at Scrapy startup, when extensions are initialized.
+扩展只是正常的类，它们在Scrapy启动时被实例化、初始化
+
+Extension settings¶
+扩展设置(Extension settings)¶
+
+Extensions use the Scrapy settings to manage their settings, just like any other Scrapy code.
+扩展使用 Scrapy settings 管理它们的设置，这跟其他Scrapy代码一样
+
+It is customary for extensions to prefix their settings with their own name, to avoid collision with existing (and future) extensions.
+通常扩展需要给它们的设置加上前缀，以避免跟已有(或将来)的扩展冲突
+
+For example, a hypothetic extension to handle Google Sitemaps would use settings like GOOGLESITEMAP_ENABLED, GOOGLESITEMAP_DEPTH, and so on.
+ 比如，一个扩展处理 Google Sitemaps， 则可以使用类似 GOOGLESITEMAP_ENABLED、GOOGLESITEMAP_DEPTH 等设置
+
+Loading & activating extensions¶
+加载和激活扩展¶
+
+Extensions are loaded and activated at startup by instantiating a single instance of the extension class.
+扩展在扩展类被实例化时加载和激活
+
+Therefore, all the extension initialization code must be performed in the class constructor (__init__ method).
+ 因此，所有扩展的实例化代码必须在类的构造函数(__init__)中执行
+
+To make an extension available, add it to the EXTENSIONS setting in your Scrapy settings.
+要使得扩展可用，需要把它添加到Scrapy的 EXTENSIONS 配置中
+
+In EXTENSIONS, each extension is represented by a string: the full Python path to the extension’s class name.
+ 在 EXTENSIONS 中，每个扩展都使用一个字符串表示，即扩展类的全Python路径
+
+For example:
+ 比如:
+
+As you can see, the EXTENSIONS setting is a dict where the keys are the extension paths, and their values are the orders, which define the extension loading order.
+如你所见，EXTENSIONS 配置是一个dict，key是扩展类的路径，value是顺序, 它定义扩展加载的顺序
+
+The EXTENSIONS setting is merged with the EXTENSIONS_BASE setting defined in Scrapy (and not meant to be overridden) and then sorted by order to get the final sorted list of enabled extensions.
+扩展顺序不像中间件的顺序那么重要，而且扩展之间一般没有关联
+
+As extensions typically do not depend on each other, their loading order is irrelevant in most cases.
+如果你需要添加扩展而且它依赖别的扩展，你就可以使用该特性了
+
+Not all available extensions will be enabled.
+并不是所有可用的扩展都会被开启
+
+Some of them usually depend on a particular setting.
+一些扩展经常依赖一些特别的配置
+
+For example, the HTTP Cache extension is available by default but disabled unless the HTTPCACHE_ENABLED setting is set.
+ 比如，HTTP Cache扩展是可用的但默认是禁用的，除非 HTTPCACHE_ENABLED 配置项设置了
+
+Disabling an extension¶
+禁用扩展(Disabling an extension)¶
+
+In order to disable an extension that comes enabled by default (ie.
+为了禁用一个默认开启的扩展(比如，包含在 EXTENSIONS_BASE 中的扩展)， 需要将其顺序(order)设置为 None 
+
+those included in the EXTENSIONS_BASE setting) you must set its order to None.
+比如:
+
+Writing your own extension¶
+实现你的扩展¶
+
+Each extension is a Python class.
+实现你的扩展很简单
+
+The main entry point for a Scrapy extension (this also includes middlewares and pipelines) is the from_crawler class method which receives a Crawler instance.
+每个扩展是一个单一的Python class，它不需要实现任何特殊的方法
+
+Typically, extensions connect to signals and perform tasks triggered by them.
+Scrapy扩展(包括middlewares和pipelines)的主要入口是 from_crawler 类方法， 它接收一个 Crawler 类的实例，该实例是控制Scrapy crawler的主要对象
+
+Finally, if the from_crawler method raises the NotConfigured exception, the extension will be disabled.
+通常来说，扩展关联到 signals 并执行它们触发的任务
+
+Here we will implement a simple extension to illustrate the concepts described in the previous section.
+这里我们将实现一个简单的扩展来演示上面描述到的概念
+
+This extension will log a message every time:
+ 该扩展会在以下事件时记录一条日志：
+
+The extension will be enabled through the MYEXT_ENABLED setting and the number of items will be specified through the MYEXT_ITEMCOUNT setting.
+该扩展通过 MYEXT_ENABLED 配置项开启， items的数量通过 MYEXT_ITEMCOUNT 配置项设置
+
+Here is the code of such extension:
+以下是扩展的代码:
+
+Built-in extensions reference¶
+内置扩展介绍¶
+
+General purpose extensions¶
+通用扩展¶
+
+Log Stats extension¶
+记录统计扩展(Log Stats extension)¶
+
+Log basic stats like crawled pages and scraped items.
+记录基本的统计信息，比如爬取的页面和条目(items)
+
+Core Stats extension¶
+核心统计扩展(Core Stats extension)¶
+
+Enable the collection of core statistics, provided the stats collection is enabled (see Stats Collection).
+如果统计收集器(stats collection)启用了，该扩展开启核心统计收集(参考 数据收集(Stats Collection))
+
+Telnet console extension¶
+Telnet console 扩展¶
+
+Provides a telnet console for getting into a Python interpreter inside the currently running Scrapy process, which can be very useful for debugging.
+提供一个telnet控制台，用于进入当前执行的Scrapy进程的Python解析器， 这对代码调试非常有帮助
+
+The telnet console must be enabled by the TELNETCONSOLE_ENABLED setting, and the server will listen in the port specified in TELNETCONSOLE_PORT.
+telnet控制台通过 TELNETCONSOLE_ENABLED 配置项开启， 服务器会监听 TELNETCONSOLE_PORT 指定的端口
+
+Memory usage extension¶
+内存使用扩展(Memory usage extension)¶
+
+Note
+注解
+
+This extension does not work in Windows.
+This extension does not work in Windows.
+
+Monitors the memory used by the Scrapy process that runs the spider and:
+监控Scrapy进程内存使用量，并且：
+
+The notification e-mails can be triggered when a certain warning value is reached (MEMUSAGE_WARNING_MB) and when the maximum value is reached (MEMUSAGE_LIMIT_MB) which will also cause the spider to be closed and the Scrapy process to be terminated.
+当内存用量达到 MEMUSAGE_WARNING_MB 指定的值，发送提醒邮件
+
+This extension is enabled by the MEMUSAGE_ENABLED setting and can be configured with the following settings:
+该扩展通过 MEMUSAGE_ENABLED 配置项开启，可以使用以下选项：
+
+Memory debugger extension¶
+内存调试扩展(Memory debugger extension)¶
+
+An extension for debugging memory usage.
+该扩展用于调试内存使用量，它收集以下信息：
+
+To enable this extension, turn on the MEMDEBUG_ENABLED setting.
+开启该扩展，需打开 MEMDEBUG_ENABLED 配置项
+
+The info will be stored in the stats.
+ 信息将会存储在统计信息(stats)中
+
+Close spider extension¶
+关闭spider扩展¶
+
+Closes a spider automatically when some conditions are met, using a specific closing reason for each condition.
+当某些状况发生，spider会自动关闭
+
+The conditions for closing a spider can be configured through the following settings:
+关闭spider的情况可以通过下面的设置项配置：
+
+Default: 0
+默认值: 0
+
+An integer which specifies a number of seconds.
+一个整数值，单位为秒
+
+If the spider remains open for more than that number of second, it will be automatically closed with the reason closespider_timeout.
+如果一个spider在指定的秒数后仍在运行， 它将以 closespider_timeout 的原因被自动关闭
+
+If zero (or non set), spiders won’t be closed by timeout.
+ 如果值设置为0（或者没有设置），spiders不会因为超时而关闭
+
+Default: 0
+缺省值: 0
+
+An integer which specifies a number of items.
+一个整数值，指定条目的个数
+
+If the spider scrapes more than that amount if items and those items are passed by the item pipeline, the spider will be closed with the reason closespider_itemcount.
+如果spider爬取条目数超过了指定的数， 并且这些条目通过item pipeline传递，spider将会以 closespider_itemcount 的原因被自动关闭
+
+New in version 0.11.
+0.11 新版功能.
+
+Default: 0
+缺省值: 0
+
+An integer which specifies the maximum number of responses to crawl.
+一个整数值，指定最大的抓取响应(reponses)数
+
+If the spider crawls more than that, the spider will be closed with the reason closespider_pagecount.
+ 如果spider抓取数超过指定的值，则会以 closespider_pagecount 的原因自动关闭
+
+If zero (or non set), spiders won’t be closed by number of crawled responses.
+ 如果设置为0（或者未设置），spiders不会因为抓取的响应数而关闭
+
+New in version 0.11.
+0.11 新版功能.
+
+Default: 0
+缺省值: 0
+
+An integer which specifies the maximum number of errors to receive before closing the spider.
+一个整数值，指定spider可以接受的最大错误数
+
+If the spider generates more than that number of errors, it will be closed with the reason closespider_errorcount.
+ 如果spider生成多于该数目的错误，它将以 closespider_errorcount 的原因关闭
+
+If zero (or non set), spiders won’t be closed by number of errors.
+ 如果设置为0（或者未设置），spiders不会因为发生错误过多而关闭
+
+StatsMailer extension¶
+StatsMailer extension¶
+
+This simple extension can be used to send a notification e-mail every time a domain has finished scraping, including the Scrapy stats collected.
+这个简单的扩展可用来在一个域名爬取完毕时发送提醒邮件， 包含Scrapy收集的统计信息
+
+The email will be sent to all recipients specified in the STATSMAILER_RCPTS setting.
+ 邮件会发送个通过 STATSMAILER_RCPTS 指定的所有接收人
+
+Debugging extensions¶
+Debugging extensions¶
+
+Stack trace dump extension¶
+Stack trace dump extension¶
+
+Dumps information about the running process when a SIGQUIT or SIGUSR2 signal is received.
+当收到 SIGQUIT 或 SIGUSR2 信号，spider进程的信息将会被存储下来
+
+The information dumped is the following:
+ 存储的信息包括：
+
+After the stack trace and engine status is dumped, the Scrapy process continues running normally.
+当堆栈信息和engine状态存储后，Scrapy进程继续正常运行
+
+This extension only works on POSIX-compliant platforms (ie.
+该扩展只在POSIX兼容的平台上可运行（比如不能在Windows运行）， 因为 SIGQUIT 和 SIGUSR2 信号在Windows上不可用
+
+There are at least two ways to send Scrapy the SIGQUIT signal:
+至少有两种方式可以向Scrapy发送 SIGQUIT 信号:
+
+By pressing Ctrl-while a Scrapy process is running (Linux only?)
+在Scrapy进程运行时通过按Ctrl-(仅Linux可行
+
+By running this command (assuming  is the process id of the Scrapy process):
+运行该命令( 是Scrapy运行的进程):
+
+Debugger extension¶
+调试扩展(Debugger extension)¶
+
+Invokes a Python debugger inside a running Scrapy process when a SIGUSR2 signal is received.
+当收到 SIGUSR2 信号，将会在Scrapy进程中调用 Python debugger 
+
+After the debugger is exited, the Scrapy process continues running normally.
+ debugger退出后，Scrapy进程继续正常运行
+
+For more info see Debugging in Python.
+更多信息参考 Debugging in Python 
+
+This extension only works on POSIX-compliant platforms (ie.
+该扩展只在POSIX兼容平台上工作(比如不能再Windows上运行)
+

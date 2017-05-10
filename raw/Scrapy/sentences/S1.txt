@@ -1,0 +1,45 @@
+Installation guide¶
+安装指南¶
+
+Installing Scrapy¶
+安装Scrapy¶
+
+Scrapy runs on Python 2.7 and Python 3.3 or above (except on Windows where Python 3 is not supported yet).
+请先阅读 平台安装指南.
+
+If you’re already familiar with installation of Python packages, you can install Scrapy and its dependencies from PyPI with:
+下列的安装步骤假定您已经安装好下列程序:
+
+We strongly recommend that you install Scrapy in a dedicated virtualenv, to avoid conflicting with your system packages.
+您可以使用pip来安装Scrapy(推荐使用pip来安装Python package).
+
+For more detailed and platform specifics instructions, read on.
+使用pip安装:
+
+Some of these packages themselves depends on non-Python packages that might require additional installation steps depending on your platform.
+从 http://python.org/download/ 上安装Python 2.7.
+
+In case of any trouble related to these dependencies, please refer to their respective installation instructions:
+您需要修改 PATH 环境变量，将Python的可执行程序及额外的脚本添加到系统路径中
+
+Python packages can be installed either globally (a.k.a system wide), or in user-space.
+关闭并重新打开命令行窗口，使之生效
+
+We do not recommend installing scrapy system wide.
+运行接下来的命令来确认其输出所期望的Python版本:
+
+Instead, we recommend that you install scrapy within a so-called “virtual environment” (virtualenv).
+从 http://sourceforge.net/projects/pywin32/ 安装 pywin32
+
+To get started with virtual environments, see virtualenv installation instructions.
+请确认下载符合您系统的版本(win32或者amd64)
+
+Check this user guide on how to create your virtualenv.
+从 https://pip.pypa.io/en/latest/installing.html 安装 pip
+
+Note
+打开命令行窗口，确认 pip 被正确安装:
+
+If you use Linux or OS X, virtualenvwrapper is a handy tool to create virtualenvs.
+到目前为止Python 2.7 及 pip 已经可以正确运行了
+

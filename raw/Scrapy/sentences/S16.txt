@@ -1,0 +1,99 @@
+Telnet Console¶
+Telnet终端(Telnet Console)¶
+
+Scrapy comes with a built-in telnet console for inspecting and controlling a Scrapy running process.
+Scrapy提供了内置的telnet终端，以供检查，控制Scrapy运行的进程
+
+The telnet console is just a regular python shell running inside the Scrapy process, so you can do literally anything from it.
+ telnet仅仅是一个运行在Scrapy进程中的普通python终端
+
+The telnet console is a built-in Scrapy extension which comes enabled by default, but you can also disable it if you want.
+telnet终端是一个 自带的Scrapy扩展 
+
+For more information about the extension itself see Telnet console extension.
+ 该扩展默认为启用，不过您也可以关闭
+
+How to access the telnet console¶
+如何访问telnet终端¶
+
+The telnet console listens in the TCP port defined in the TELNETCONSOLE_PORT setting, which defaults to 6023.
+telnet终端监听设置中定义的 TELNETCONSOLE_PORT ，默认为 6023 
+
+To access the console you need to type:
+ 访问telnet请输入:
+
+You need the telnet program which comes installed by default in Windows, and most Linux distros.
+Windows及大多数Linux发行版都自带了所需的telnet程序
+
+Available variables in the telnet console¶
+telnet终端中可用的变量¶
+
+The telnet console is like a regular Python shell running inside the Scrapy process, so you can do anything from it including importing new modules, etc.
+telnet仅仅是一个运行在Scrapy进程中的普通python终端
+
+However, the telnet console comes with some default variables defined for convenience:
+telnet为了方便提供了一些默认定义的变量:
+
+Telnet console usage examples¶
+Telnet console usage examples¶
+
+Here are some example tasks you can do with the telnet console:
+下面是使用telnet终端的一些例子:
+
+View engine status¶
+查看引擎状态¶
+
+You can use the est() method of the Scrapy engine to quickly show its state using the telnet console:
+在终端中您可以使用Scrapy引擎的 est() 方法来快速查看状态:
+
+Pause, resume and stop the Scrapy engine¶
+暂停，恢复和停止Scrapy引擎¶
+
+To pause:
+暂停:
+
+To resume:
+恢复:
+
+To stop:
+停止:
+
+Telnet Console signals¶
+Telnet终端信号¶
+
+Sent just before the telnet console is opened.
+在telnet终端开启前发送该信号
+
+You can hook up to this signal to add, remove or update the variables that will be available in the telnet local namespace.
+您可以挂载(hook up)该信号来添加，移除或更新 telnet本地命名空间可用的变量
+
+In order to do that, you need to update the telnet_vars dict in your handler.
+ 您可以通过在您的处理函数(handler)中更新 telnet_vars 字典来实现该修改
+
+Telnet settings¶
+Telnet设定¶
+
+These are the settings that control the telnet console’s behaviour:
+以下是终端的一些设定:
+
+TELNETCONSOLE_PORT¶
+TELNETCONSOLE_PORT¶
+
+Default: [6023, 6073]
+Default: [6023, 6073]
+
+The port range to use for the telnet console.
+telnet终端使用的端口范围
+
+If set to None or 0, a dynamically assigned port is used.
+如果设为 None 或 0 ， 则动态分配端口
+
+TELNETCONSOLE_HOST¶
+TELNETCONSOLE_HOST¶
+
+Default: '127.0.0.1'
+默认: '127.0.0.1'
+
+The interface the telnet console should listen on
+telnet终端监听的接口(interface)
+

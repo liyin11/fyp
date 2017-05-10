@@ -1,0 +1,300 @@
+Frequently Asked Questions¶
+常见问题(FAQ)¶
+
+How does Scrapy compare to BeautifulSoup or lxml?¶
+Scrapy相BeautifulSoup或lxml比较,如何呢
+
+BeautifulSoup and lxml are libraries for parsing HTML and XML.
+BeautifulSoup 及 lxml 是HTML和XML的分析库
+
+Scrapy is an application framework for writing web spiders that crawl web sites and extract data from them.
+Scrapy则是 编写爬虫，爬取网页并获取数据的应用框架(application framework)
+
+Scrapy provides a built-in mechanism for extracting data (called selectors) but you can easily use BeautifulSoup (or lxml) instead, if you feel more comfortable working with them.
+Scrapy提供了内置的机制来提取数据(叫做 选择器(selectors))
+
+After all, they’re just parsing libraries which can be imported and used from any Python code.
+ 但如果您觉得使用更为方便，也可以使用 BeautifulSoup (或 lxml)
+
+In other words, comparing BeautifulSoup (or lxml) to Scrapy is like comparing jinja2 to Django.
+换句话说，拿Scrapy与 BeautifulSoup (或 lxml) 比较就好像是拿 jinja2 与 Django 相比
+
+Can I use Scrapy with BeautifulSoup?¶
+Scrapy支持那些Python版本
+
+Yes, you can.
+Scrapy仅仅支持Python 2.7
+
+As mentioned above, BeautifulSoup can be used for parsing HTML responses in Scrapy callbacks.
+ Python2.6的支持从Scrapy 0.20开始被废弃了
+
+BeautifulSoup supports several HTML/XML parsers.
+不
+
+See BeautifulSoup’s official documentation on which ones are available.
+但是Python 3.3+的支持已经在计划中了
+
+Note
+Scrapy支持那些Python版本
+
+Probably, but we don’t like that word.
+也许吧，不过我们不喜欢这个词
+
+We think Django is a great open source project and an example to follow, so we’ve used it as an inspiration for Scrapy.
+我们认为 Django 是一个很好的开源项目，同时也是 一个很好的参考对象，所以我们把其作为Scrapy的启发对象
+
+We believe that, if something is already done well, there’s no need to reinvent it.
+我们坚信，如果有些事情已经做得很好了，那就没必要再重复制造轮子
+
+This concept, besides being one of the foundations for open source and free software, not only applies to software but also to documentation, procedures, policies, etc.
+这个想法，作为 开源项目及免费软件的基石之一，不仅仅针对软件，也包括文档，过程，政策等等
+
+So, instead of going through each problem ourselves, we choose to copy ideas from those projects that have already solved them properly, and focus on the real problems we need to solve.
+ 所以，与其自行解决每个问题，我们选择从其他已经很好地解决问题的项目中复制想法(copy idea) ，并把注意力放在真正需要解决的问题上
+
+We’d be proud if Scrapy serves as an inspiration for other projects.
+如果Scrapy能启发其他的项目，我们将为此而自豪
+
+Feel free to steal from us!
+欢迎来抄(steal)我们
+
+Does Scrapy work with HTTP proxies?¶
+Scrapy支持HTTP代理么
+
+Yes.
+是的
+
+Support for HTTP proxies is provided (since Scrapy 0.8) through the HTTP Proxy downloader middleware.
+(从Scrapy 0.8开始)通过HTTP代理下载中间件对HTTP代理提供了支持
+
+See HttpProxyMiddleware.
+参考 HttpProxyMiddleware.
+
+How can I scrape an item with attributes in different pages?¶
+如何爬取属性在不同页面的item呢
+
+See Passing additional data to callback functions.
+参考 Passing additional data to callback functions.
+
+Scrapy crashes with: ImportError: No module named win32api¶
+Scrapy退出，ImportError: Nomodule named win32api¶
+
+You need to install pywin32 because of this Twisted bug.
+这是个Twisted bug ，您需要安装 pywin32 
+
+How can I simulate a user login in my spider?¶
+我要如何在spider里模拟用户登录呢
+
+See Using FormRequest.from_response() to simulate a user login.
+参考 使用FormRequest.from_response()方法模拟用户登录.
+
+Does Scrapy crawl in breadth-first or depth-first order?¶
+Scrapy是以广度优先还是深度优先进行爬取的呢
+
+By default, Scrapy uses a LIFO queue for storing pending requests, which basically means that it crawls in DFO order.
+默认情况下，Scrapy使用 LIFO 队列来存储等待的请求
+
+This order is more convenient in most cases.
+简单的说，就是 深度优先顺序 
+
+If you do want to crawl in true BFO order, you can do it by setting the following settings:
+深度优先对大多数情况下是更方便的
+
+My Scrapy crawler has memory leaks.
+我的Scrapy爬虫有内存泄露，怎么办
+
+What can I do?¶
+¶
+
+See Debugging memory leaks.
+参考 调试内存溢出.
+
+Also, Python has a builtin memory leak issue which is described in Leaks without leaks.
+另外，Python自己也有内存泄露，在 Leaks without leaks 有所描述
+
+How can I make Scrapy consume less memory?¶
+如何让Scrapy减少内存消耗
+
+See previous question.
+参考上一个问题
+
+Can I use Basic HTTP Authentication in my spiders?¶
+我能在spider中使用基本HTTP认证么
+
+Yes, see HttpAuthMiddleware.
+可以
+
+Why does Scrapy download pages in English instead of my native language?¶
+为什么Scrapy下载了英文的页面，而不是我的本国语言
+
+Try changing the default Accept-Language request header by overriding the DEFAULT_REQUEST_HEADERS setting.
+尝试通过覆盖 DEFAULT_REQUEST_HEADERS 设置来修改默认的 Accept-Language 请求头
+
+Where can I find some example Scrapy projects?¶
+我能在哪里找到Scrapy项目的例子
+
+See Examples.
+参考 例子.
+
+Can I run a spider without creating a project?¶
+我能在不创建Scrapy项目的情况下运行一个爬虫(spider)么
+
+Yes.
+是的
+
+You can use the runspider command.
+您可以使用 runspider 命令
+
+For example, if you have a spider written in a my_spider.py file you can run it with:
+例如，如果您有个 spider写在 my_spider.py 文件中，您可以运行:
+
+See runspider command for more info.
+详情请参考 runspider 命令
+
+I get “Filtered offsite request” messages.
+我收到了 “Filtered offsite request” 消息
+
+How can I fix them?¶
+如何修复
+
+Those messages (logged with DEBUG level) don’t necessarily mean there is a problem, so you may not need to fix them.
+这些消息(以 DEBUG 所记录)并不意味着有问题，所以你可以不修复它们
+
+Those messages are thrown by the Offsite Spider Middleware, which is a spider middleware (enabled by default) whose purpose is to filter out requests to domains outside the ones covered by the spider.
+这些消息由Offsite Spider中间件(Middleware)所抛出
+
+For more info see: OffsiteMiddleware.
+更多详情请参见: OffsiteMiddleware.
+
+What is the recommended way to deploy a Scrapy crawler in production?¶
+发布Scrapy爬虫到生产环境的推荐方式
+
+See Deploying Spiders.
+参见 Scrapyd.
+
+Can I use JSON for large exports?¶
+我能对大数据(large exports)使用JSON么
+
+It’ll depend on how large your output is.
+这取决于您的输出有多大
+
+See this warning in JsonItemExporter documentation.
+参考 JsonItemExporter 文档中的 这个警告
+
+Can I return (Twisted) deferreds from signal handlers?¶
+我能在信号处理器(signal handler)中返回(Twisted)引用么
+
+Some signals support returning deferreds from their handlers, others don’t.
+有些信号支持从处理器中返回引用，有些不行
+
+See the Built-in signals reference to know which ones.
+参考 内置信号参考手册(Built-in signals reference) 来了解详情
+
+What does the response status code 999 means?¶
+reponse返回的状态值999代表了什么
+
+999 is a custom response status code used by Yahoo sites to throttle requests.
+999是雅虎用来控制请求量所定义的返回值
+
+Try slowing down the crawling speed by using a download delay of 2 (or higher) in your spider:
+ 试着减慢爬取速度，将spider的下载延迟改为 2 或更高:
+
+Or by setting a global download delay in your project with the DOWNLOAD_DELAY setting.
+或在 DOWNLOAD_DELAY 中设置项目的全局下载延迟
+
+Can I call pdb.set_trace() from my spiders to debug them?¶
+我能在spider中调用 pdb.set_trace() 来调试么
+
+Yes, but you can also use the Scrapy shell which allows you to quickly analyze (and even modify) the response being processed by your spider, which is, quite often, more useful than plain old pdb.set_trace().
+可以，但你也可以使用Scrapy终端
+
+For more info see Invoking the shell from spiders to inspect responses.
+更多详情请参考 在spider中启动shell来查看response.
+
+Simplest way to dump all my scraped items into a JSON/CSV/XML file?¶
+将所有爬取到的item转存(dump)到JSON/CSV/XML文件的最简单的方法
+
+To dump into a JSON file:
+dump到JSON文件:
+
+To dump into a CSV file:
+dump到CSV文件:
+
+To dump into a XML file:
+dump到XML文件:
+
+For more information see Feed exports
+更多详情请参考 Feed exports
+
+What’s this huge cryptic __VIEWSTATE parameter used in some forms?¶
+在某些表单中巨大神秘的 __VIEWSTATE 参数是什么
+
+The __VIEWSTATE parameter is used in sites built with ASP.NET/VB.NET.
+__VIEWSTATE 参数存在于ASP.NET/VB.NET建立的站点中
+
+For more info on how it works see this page.
+关于这个参数的作用请参考 这篇文章 
+
+Also, here’s an example spider which scrapes one of these sites.
+这里有一个爬取这种站点的 样例爬虫 
+
+What’s the best way to parse big XML/CSV data feeds?¶
+分析大XML/CSV数据源的最好方法是
+
+Parsing big feeds with XPath selectors can be problematic since they need to build the DOM of the entire feed in memory, and this can be quite slow and consume a lot of memory.
+使用XPath选择器来分析大数据源可能会有问题
+
+In order to avoid parsing all the entire feed at once in memory, you can use the functions xmliter and csviter from scrapy.utils.iterators module.
+为了避免一次性读取整个数据源，您可以使用 scrapy.utils.iterators 中的 xmliter 及 csviter 方法
+
+In fact, this is what the feed spiders (see Spiders) use under the cover.
+ 实际上，这也是feed spider(参考 Spiders)中的处理方法
+
+Does Scrapy manage cookies automatically?¶
+Scrapy自动管理cookies么
+
+Yes, Scrapy receives and keeps track of cookies sent by servers, and sends them back on subsequent requests, like any regular web browser does.
+是的，Scrapy接收并保持服务器返回来的cookies，在之后的请求会发送回去，就像正常的网页浏览器做的那样
+
+For more info see Requests and Responses and CookiesMiddleware.
+更多详情请参考 Requests and Responses 及 CookiesMiddleware 
+
+How can I see the cookies being sent and received from Scrapy?¶
+如何才能看到Scrapy发出及接收到的Cookies呢
+
+Enable the COOKIES_DEBUG setting.
+启用 COOKIES_DEBUG 选项
+
+How can I instruct a spider to stop itself?¶
+要怎么停止爬虫呢
+
+Raise the CloseSpider exception from a callback.
+在回调函数中raise CloseSpider 异常
+
+For more info see: CloseSpider.
+ 更多详情请参见: CloseSpider 
+
+How can I prevent my Scrapy bot from getting banned?¶
+如何避免我的Scrapy机器人(bot)被禁止(ban)呢
+
+See Avoiding getting banned.
+参考 避免被禁止(ban).
+
+Should I use spider arguments or settings to configure my spider?¶
+我应该使用spider参数(arguments)还是设置(settings)来配置spider呢
+
+Both spider arguments and settings can be used to configure your spider.
+spider参数 及 设置(settings) 都可以用来配置您的spider
+
+There is no strict rule that mandates to use one or the other, but settings are more suited for parameters that, once set, don’t change much, while spider arguments are meant to change more often, even on each spider run and sometimes are required for the spider to run at all (for example, to set the start url of a spider).
+ 没有什么强制的规则来限定要使用哪个，但设置(settings)更适合那些一旦设置就不怎么会修改的参数， 而spider参数则意味着修改更为频繁，在每次spider运行都有修改，甚至是spider运行所必须的元素 (例如，设置spider的起始url)
+
+To illustrate with an example, assuming you have a spider that needs to log into a site to scrape data, and you only want to scrape data from a certain section of the site (which varies each time).
+这里以例子来说明这个问题
+
+In that case, the credentials to log in would be settings, while the url of the section to scrape would be a spider argument.
+假设您有一个spider需要登录某个网站来 爬取数据，并且仅仅想爬取特定网站的特定部分(每次都不一定相同)
+
+I’m scraping a XML document and my XPath selector doesn’t return any items¶
+我爬取了一个XML文档但是XPath选择器不返回任何的item¶
+

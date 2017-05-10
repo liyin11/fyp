@@ -1,0 +1,48 @@
+Scrapy at a glance¶
+初窥Scrapy¶
+
+Scrapy is an application framework for crawling web sites and extracting structured data which can be used for a wide range of useful applications, like data mining, information processing or historical archival.
+Scrapy是一个为了爬取网站数据，提取结构性数据而编写的应用框架
+
+Even though Scrapy was originally designed for web scraping, it can also be used to extract data using APIs (such as Amazon Associates Web Services) or as a general purpose web crawler.
+其最初是为了 页面抓取 (更确切来说, 网络抓取 )所设计的， 也可以应用在获取API所返回的数据(例如 Amazon Associates Web Services ) 或者通用的网络爬虫
+
+Walk-through of an example spider¶
+选择一个网站¶
+
+In order to show you what Scrapy brings to the table, we’ll walk you through an example of a Scrapy Spider using the simplest way to run a spider.
+当您需要从某个网站中获取信息，但该网站未提供API或能通过程序获取信息的机制时， Scrapy可以助你一臂之力
+
+Here’s the code for a spider that scrapes famous quotes from website http://quotes.toscrape.com, following the pagination:
+今日添加的种子列表可以通过这个页面找到:
+
+When this finishes you will have in the quotes.json file a list of the quotes in JSON format, containing text and author, looking like this (reformatted here for better readability):
+终于，我们可以运行spider来获取网站的数据，并以JSON格式存入到 scraped_data.json 文件中:
+
+This is using feed exports to generate the JSON file, you can easily change the export format (XML or CSV, for example) or the storage backend (FTP or Amazon S3, for example).
+命令中使用了 feed导出 来导出JSON文件
+
+You can also write an item pipeline to store the items in a database.
+您可以修改导出格式(XML或者CSV)或者存储后端(FTP或者 Amazon S3)，这并不困难
+
+What else?¶
+还有什么
+
+You’ve seen how to extract and store items from a website using Scrapy, but this is just the surface.
+您已经了解了如何通过Scrapy提取存储网页中的信息，但这仅仅只是冰山一角
+
+Scrapy provides a lot of powerful features for making scraping easy and efficient, such as:
+Scrapy提供了很多强大的特性来使得爬取更为简单高效, 例如:
+
+What’s next?¶
+接下来¶
+
+The next steps for you are to install Scrapy, follow through the tutorial to learn how to create a full-blown Scrapy project and join the community.
+下一步当然是 下载Scrapy 了， 您可以阅读 入门教程 并加入 社区 
+
+Thanks for your interest!
+感谢您的支持!
+
+© Copyright 2008-2016, Scrapy developers.
+© 版权所有 2008-2014, written by Scrapy developers, translated by Summer&Friends. Revision 5ed032cf.
+

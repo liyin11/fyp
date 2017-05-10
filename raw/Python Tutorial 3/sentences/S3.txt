@@ -1,0 +1,145 @@
+Besides the while statement just introduced, Python knows the usual control flow statements known from other languages, with some twists.
+可能会有零到多个 elif 部分，else 是可选的
+
+4.1.
+4.2. for 语句¶
+
+Perhaps the most well-known statement type is the if statement.
+Python 中的 for 语句和 C 或 Pascal 中的略有不同
+
+For example:
+通常的循环可能会依据一个等差数值步进过程（如 Pascal），或由用户来定义迭代步骤和中止条件（如 C ），Python 的 for 语句依据任意序列（链表或字符串）中的子项，按它们在序列中的顺序来进行迭代
+
+There can be zero or more elif parts, and the else part is optional.
+在迭代过程中修改迭代序列不安全（只有在使用链表这样的可变序列时才会有这样的情况）
+
+The keyword ‘elif‘ is short for ‘else if’, and is useful to avoid excessive indentation.
+如果你想要修改你迭代的序列（例如，复制选择项），你可以迭代它的复本
+
+An if ...
+使用切割标识就可以很方便的做到这一点:
+
+4.2.
+4.3. range() 函数¶
+
+The for statement in Python differs a bit from what you may be used to in C or Pascal.
+如果你需要一个数值序列，内置函数 range() 会很方便，它生成一个等差级数链表:
+
+If you need to modify the sequence you are iterating over while inside the loop (for example to duplicate selected items), it is recommended that you first make a copy.
+range(10) 生成了一个包含 10 个值的链表，它用链表的索引值填充了这个长度为 10 的列表，所生成的链表中不包括范围中的结束值
+
+Iterating over a sequence does not implicitly make a copy.
+也可以让 range() 操作从另一个数值开始，或者可以指定一个不同的步进值（甚至是负数，有时这也被称为 “步长”）:
+
+If you do need to iterate over a sequence of numbers, the built-in function range() comes in handy.
+如果你只是打印一个序列的话会发生奇怪的事情:
+
+The given end point is never part of the generated sequence;
+在不同方面 range() 函数返回的对象表现为它是一个列表，但事实上它并不是
+
+range(10) generates 10 values, the legal indices for items of a sequence of length 10.
+当你迭代它时，它是一个能够像期望的序列返回连续项的对象
+
+It is possible to let the range start at another number, or to specify a different increment (even negative;
+但为了节省空间，它并不真正构造列表
+
+To iterate over the indices of a sequence, you can combine range() and len() as follows:
+我们称此类对象是 可迭代的，即适合作为那些期望从某些东西中获得连续项直到结束的函数或结构的一个目标（参数）
+
+In most such cases, however, it is convenient to use the enumerate() function, see Looping Techniques.
+稍后我们会看到更多返回可迭代（对象）和以可迭代（对象）作为参数的函数
+
+In many ways the object returned by range() behaves as if it is a list, but in fact it isn’t.
+循环可以有一个 else 子句
+
+It is an object which returns the successive items of the desired sequence when you iterate over it, but it doesn’t really make the list, thus saving space.
+它在循环迭代完整个列表（对于 for ）或执行条件为 false （对于 while ）时执行，但循环被 break 中止的情况下不会执行
+
+We say such an object is iterable, that is, suitable as a target for functions and constructs that expect something from which they can obtain successive items until the supply is exhausted.
+(Yes, 这是正确的代码
+
+We have seen that the for statement is such an iterator.
+看仔细：else 语句是属于 for 循环之中， 不是 if 语句
+
+The function list() is another;
+)
+
+Later we will see more functions that return iterables and take iterables as argument.
+与循环一起使用时，else 子句与 try 语句的 else 子句比与 if 语句的具有更多的共同点：try 语句的 else 子句在未出现异常时运行，循环的 else 子句在未出现 break 时运行
+
+The break statement, like in C, breaks out of the smallest enclosing for or while loop.
+pass 语句什么也不做
+
+Loop statements may have an else clause;
+这通常用于创建最小结构的类:
+
+(Yes, this is the correct code.
+另一方面，pass 可以在创建新代码时用来做函数或控制体的占位符
+
+Look closely: the else clause belongs to the for loop, not the if statement.)
+可以让你在更抽象的级别上思考
+
+The continue statement, also borrowed from C, continues with the next iteration of the loop:
+关键字 def 引入了一个函数 定义
+
+The pass statement does nothing.
+函数引用的实际参数在函数调用时引入局部符号表，因此，实参总是 传值调用 （这里的 值 总是一个对象 引用 ，而不是该对象的值）
+
+It can be used when a statement is required syntactically but the program requires no action.
+[1] 一个函数被另一个函数调用时，一个新的局部符号表在调用过程中被创建
+
+This is commonly used for creating minimal classes:
+一个函数定义会在当前符号表内引入函数名
+
+Another place pass can be used is as a place-holder for a function or conditional body when you are working on new code, allowing you to keep thinking at a more abstract level.
+如果你使用过其他语言，你可能会反对说：fib 不是一个函数，而是一个方法，因为它并不返回任何值
+
+The pass is silently ignored:
+事实上，没有 return 语句的函数确实会返回一个值，虽然是一个相当令人厌烦的值（指 None ）
+
+We can create a function that writes the Fibonacci series to an arbitrary boundary:
+return 语句从函数中返回一个值，不带表达式的 return 返回 None
+
+The keyword def introduces a function definition.
+过程结束后也会返回 None
+
+The first statement of the function body can optionally be a string literal;
+语句 result.append(b) 称为链表对象 result 的一个 方法
+
+this string literal is the function’s documentation string, or docstring.
+方法是一个“属于”某个对象的函数，它被命名为 obj.methodename，这里的 obj 是某个对象（可能是一个表达式）， methodename 是某个在该对象类型定义中的方法的命名
+
+The execution of a function introduces a new symbol table used for the local variables of the function.
+不同的类型定义不同的方法
+
+More precisely, all variable assignments in a function store the value in the local symbol table;
+不同类型可能有同样名字的方法，但不会混淆
+
+whereas variable references first look in the local symbol table, then in the local symbol tables of enclosing functions, then in the global symbol table, and finally in the table of built-in names.
+（当你定义自己的对象类型和方法时，可能会出现这种情况，class 的定义方法详见 类 ）
+
+Thus, global variables cannot be directly assigned a value within a function (unless named in a global statement), although they may be referenced.
+示例中演示的 append() 方法由链表对象定义，它向链表中加入一个新元素
+
+Coming from other languages, you might object that fib is not a function but a procedure since it doesn’t return a value.
+这个函数可以通过几种不同的方式调用:
+
+It is simple to write a function that returns a list of the numbers of the Fibonacci series, instead of printing it:
+只给出必要的参数:
+
+This example, as usual, demonstrates some new Python features:
+ask_ok('Do you really want to quit
+
+It is also possible to define functions with a variable number of arguments.
+或者给出所有的参数:
+
+The most useful form is to specify a default value for one or more arguments.
+默认值在函数 定义 作用域被解析，如下所示:
+
+This function can be called in several ways:
+将会输出 5
+
+This example also introduces the in keyword.
+重要警告: 默认值只被赋值一次
+
+This tests whether or not a sequence contains a certain 

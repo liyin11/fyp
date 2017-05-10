@@ -1,0 +1,333 @@
+Quickstart¶
+快速上手¶
+
+Eager to get started?
+迫不及待了吗
+
+This page gives a good introduction in how to get started with Requests.
+本页内容为如何入门 Requests 提供了很好的指引
+
+First, make sure that:
+首先，确认一下：
+
+Let's get started with some simple examples.
+让我们从一些简单的示例开始吧
+
+Make a Request¶
+发送请求¶
+
+Making a request with Requests is very simple.
+使用 Requests 发送网络请求非常简单
+
+Begin by importing the Requests module:
+一开始要导入 Requests 模块：
+
+Now, let's try to get a webpage.
+然后，尝试获取某个网页
+
+For this example, let's get GitHub's public timeline:
+本例子中，我们来获取 Github 的公共时间线：
+
+Now, we have a Response object called r.
+现在，我们有一个名为 r 的 Response 对象
+
+We can get all the information we need from this object.
+我们可以从这个对象中获取所有我们想要的信息
+
+Requests' simple API means that all forms of HTTP request are as obvious.
+Requests 简便的 API 意味着所有 HTTP 请求类型都是显而易见的
+
+For example, this is how you make an HTTP POST request:
+例如，你可以这样发送一个 HTTP POST 请求：
+
+Nice, right?
+漂亮，对吧
+
+What about the other HTTP request types: PUT, DELETE, HEAD and OPTIONS?
+那么其他 HTTP 请求类型：PUT，DELETE，HEAD 以及 OPTIONS 又是如何的呢
+
+These are all just as simple:
+都是一样的简单：
+
+That's all well and good, but it's also only the start of what Requests can do.
+都很不错吧，但这也仅是 Requests 的冰山一角呢
+
+Passing Parameters In URLs¶
+传递 URL 参数¶
+
+You often want to send some sort of data in the URL's query string.
+你也许经常想为 URL 的查询字符串(query string)传递某种数据
+
+If you were constructing the URL by hand, this data would be given as key/value pairs in the URL after a question mark, e.g.
+如果你是手工构建 URL，那么数据会以键/值对的形式置于 URL 中，跟在一个问号的后面
+
+httpbin.org/get?key=val.
+例如， httpbin.org/get
+
+Requests allows you to provide these arguments as a dictionary, using the params keyword argument.
+key=val
+
+As an example, if you wanted to pass key1=value1 and key2=value2 to httpbin.org/get, you would use the following code:
+ Requests 允许你使用 params 关键字参数，以一个字典来提供这些参数
+
+You can see that the URL has been correctly encoded by printing the URL:
+通过打印输出该 URL，你能看到 URL 已被正确编码：
+
+Note that any dictionary key whose value is None will not be added to the URL's query string.
+注意字典里值为 None 的键都不会被添加到 URL 的查询字符串里
+
+You can also pass a list of items as a value:
+你还可以将一个列表作为值传入：
+
+Response Content¶
+响应内容¶
+
+We can read the content of the server's response.
+我们能读取服务器响应的内容
+
+Consider the GitHub timeline again:
+再次以 GitHub 时间线为例：
+
+Requests will automatically decode content from the server.
+Requests 会自动解码来自服务器的内容
+
+Most unicode charsets are seamlessly decoded.
+大多数 unicode 字符集都能被无缝地解码
+
+When you make a request, Requests makes educated guesses about the encoding of the response based on the HTTP headers.
+请求发出后，Requests 会基于 HTTP 头部对响应的编码作出有根据的推测
+
+The text encoding guessed by Requests is used when you access r.text.
+当你访问 r.text 之时，Requests 会使用其推测的文本编码
+
+You can find out what encoding Requests is using, and change it, using the r.encoding property:
+你可以找出 Requests 使用了什么编码，并且能够使用 r.encoding 属性来改变它：
+
+If you change the encoding, Requests will use the new value of r.encoding whenever you call r.text.
+如果你改变了编码，每当你访问 r.text ，Request 都将会使用 r.encoding 的新值
+
+You might want to do this in any situation where you can apply special logic to work out what the encoding of the content will be.
+你可能希望在使用特殊逻辑计算出文本的编码的情况下来修改编码
+
+For example, HTTP and XML have the ability to specify their encoding in their body.
+比如 HTTP 和 XML 自身可以指定编码
+
+In situations like this, you should use r.content to find the encoding, and then set r.encoding.
+这样的话，你应该使用 r.content 来找到编码，然后设置 r.encoding 为相应的编码
+
+This will let you use r.text with the correct encoding.
+这样就能使用正确的编码解析 r.text 了
+
+Requests will also use custom encodings in the event that you need them.
+在你需要的情况下，Requests 也可以使用定制的编码
+
+If you have created your own encoding and registered it with the codecs module, you can simply use the codec name as the value of r.encoding and Requests will handle the decoding for you.
+如果你创建了自己的编码，并使用 codecs 模块进行注册，你就可以轻松地使用这个解码器名称作为 r.encoding 的值， 然后由 Requests 来为你处理编码
+
+Binary Response Content¶
+二进制响应内容¶
+
+You can also access the response body as bytes, for non-text requests:
+你也能以字节的方式访问请求响应体，对于非文本请求：
+
+The gzip and deflate transfer-encodings are automatically decoded for you.
+Requests 会自动为你解码 gzip 和 deflate 传输编码的响应数据
+
+For example, to create an image from binary data returned by a request, you can use the following code:
+例如，以请求返回的二进制数据创建一张图片，你可以使用如下代码：
+
+JSON Response Content¶
+JSON 响应内容¶
+
+There's also a builtin JSON decoder, in case you're dealing with JSON data:
+Requests 中也有一个内置的 JSON 解码器，助你处理 JSON 数据：
+
+In case the JSON decoding fails, r.json() raises an exception.
+如果 JSON 解码失败， r.json 就会抛出一个异常
+
+For example, if the response gets a 204 (No Content), or if the response contains invalid JSON, attempting r.json() raises ValueError: No JSON object could be decoded.
+例如，相应内容是 401 (Unauthorized)，尝试访问 r.json 将会抛出 ValueError: No JSON object could be decoded 异常
+
+In the rare case that you'd like to get the raw socket response from the server, you can access r.raw.
+在罕见的情况下，你可能想获取来自服务器的原始套接字响应，那么你可以访问 r.raw
+
+If you want to do this, make sure you set stream=True in your initial request.
+ 如果你确实想这么干，那请你确保在初始请求中设置了 stream=True
+
+Once you do, you can do this:
+具体你可以这么做：
+
+In general, however, you should use a pattern like this to save what is being streamed to a file:
+但一般情况下，你应该以下面的模式将文本流保存到文件：
+
+Using Response.iter_content will handle a lot of what you would otherwise have to handle when using Response.raw directly.
+使用 Response.iter_content 将会处理大量你直接使用 Response.raw 不得不处理的
+
+When streaming a download, the above is the preferred and recommended way to retrieve the content.
+ 当流下载时，上面是优先推荐的获取内容方式
+
+Custom Headers¶
+定制请求头¶
+
+If you'd like to add HTTP headers to a request, simply pass in a dict to the headers parameter.
+如果你想为请求添加 HTTP 头部，只要简单地传递一个 dict 给 headers 参数就可以了
+
+For example, we didn't specify our user-agent in the previous example:
+例如，在前一个示例中我们没有指定 content-type:
+
+Note: Custom headers are given less precedence than more specific sources of information.
+注意: 定制 header 的优先级低于某些特定的信息源，例如：
+
+Furthermore, Requests does not change its behavior at all based on which custom headers are specified.
+更进一步讲，Requests 不会基于定制 header 的具体情况改变自己的行为
+
+The headers are simply passed on into the final request.
+只不过在最后的请求中，所有的 header 信息都会被传递进去
+
+Note: All header values must be a string, bytestring, or unicode.
+注意: 所有的 header 值必须是 string、bytestring 或者 unicode
+
+While permitted, it's advised to avoid passing unicode header values.
+尽管传递 unicode header 也是允许的，但不建议这样做
+
+More complicated POST requests¶
+更加复杂的 POST 请求¶
+
+Typically, you want to send some form-encoded data — much like an HTML form.
+通常，你想要发送一些编码为表单形式的数据——非常像一个 HTML 表单
+
+To do this, simply pass a dictionary to the data argument.
+要实现这个，只需简单地传递一个字典给 data 参数
+
+Your dictionary of data will automatically be form-encoded when the request is made:
+你的数据字典在发出请求时会自动编码为表单形式：
+
+There are many times that you want to send data that is not form-encoded.
+很多时候你想要发送的数据并非编码为表单形式的
+
+If you pass in a string instead of a dict, that data will be posted directly.
+如果你传递一个 string 而不是一个 dict，那么数据会被直接发布出去
+
+For example, the GitHub API v3 accepts JSON-Encoded POST/PATCH data:
+例如，Github API v3 接受编码为 JSON 的 POST/PATCH 数据：
+
+Instead of encoding the dict yourself, you can also pass it directly using the json parameter (added in version 2.4.2) and it will be encoded automatically:
+此处除了可以自行对 dict 进行编码，你还可以使用 json 参数直接传递，然后它就会被自动编码
+
+POST a Multipart-Encoded File¶
+POST一个多部分编码(Multipart-Encoded)的文件¶
+
+Requests makes it simple to upload Multipart-encoded files:
+Requests 使得上传多部分编码文件变得很简单：
+
+You can set the filename, content_type and headers explicitly:
+你可以显式地设置文件名，文件类型和请求头：
+
+If you want, you can send strings to be received as files:
+如果你想，你也可以发送作为文件来接收的字符串：
+
+In the event you are posting a very large file as a multipart/form-data request, you may want to stream the request.
+如果你发送一个非常大的文件作为 multipart/form-data 请求，你可能希望将请求做成数据流
+
+By default, requests does not support this, but there is a separate package which does - requests-toolbelt.
+默认下 requests 不支持, 但有个第三方包 requests-toolbelt 是支持的
+
+You should read the toolbelt's documentation for more details about how to use it.
+你可以阅读 toolbelt 文档 来了解使用方法
+
+For sending multiple files in one request refer to the advanced section.
+在一个请求中发送多文件参考 高级用法 一节
+
+Warning
+警告
+
+It is strongly recommended that you open files in binary mode.
+我们强烈建议你用二进制模式(binary mode)打开文件
+
+This is because Requests may attempt to provide the Content-Length header for you, and if it does this value will be set to the number of bytes in the file.
+这是因为 Requests 可能会试图为你提供 Content-Length header，在它这样做的时候，这个值会被设为文件的字节数（bytes）
+
+Errors may occur if you open the file in text mode.
+如果用文本模式(text mode)打开文件，就可能会发生错误
+
+Response Status Codes¶
+响应状态码¶
+
+We can check the response status code:
+我们可以检测响应状态码：
+
+Requests also comes with a built-in status code lookup object for easy reference:
+为方便引用，Requests还附带了一个内置的状态码查询对象：
+
+If we made a bad request (a 4XX client error or 5XX server error response), we can raise it with Response.raise_for_status():
+如果发送了一个错误请求(一个 4XX 客户端错误，或者 5XX 服务器错误响应)，我们可以通过 Response.raise_for_status() 来抛出异常：
+
+But, since our status_code for r was 200, when we call raise_for_status() we get:
+但是，由于我们的例子中 r 的 status_code 是 200 ，当我们调用 raise_for_status() 时，得到的是：
+
+All is well.
+一切都挺和谐哈
+
+Response Headers¶
+响应头¶
+
+We can view the server's response headers using a Python dictionary:
+我们可以查看以一个 Python 字典形式展示的服务器响应头：
+
+The dictionary is special, though: it's made just for HTTP headers.
+但是这个字典比较特殊：它是仅为 HTTP 头部而生的
+
+According to RFC 7230, HTTP Header names are case-insensitive.
+根据 RFC 2616， HTTP 头部是大小写不敏感的
+
+So, we can access the headers using any capitalization we want:
+因此，我们可以使用任意大写形式来访问这些响应头字段：
+
+It is also special in that the server could have sent the same header multiple times with different values, but requests combines them so they can be represented in the dictionary within a single mapping, as per RFC 7230:
+它还有一个特殊点，那就是服务器可以多次接受同一 header，每次都使用不同的值
+
+To send your own cookies to the server, you can use the cookies parameter:
+接收者可以合并多个相同名称的 header 栏位，把它们合为一个 "field-name: field-value" 配对，将每个后续的栏位值依次追加到合并的栏位值中，用逗号隔开即可，这样做不会改变信息的语义
+
+By default Requests will perform location redirection for all verbs except HEAD.
+如果某个响应中包含一些 cookie，你可以快速访问它们：
+
+We can use the history property of the Response object to track redirection.
+要想发送你的cookies到服务器，可以使用 cookies 参数：
+
+If you're using GET, OPTIONS, POST, PUT, PATCH or DELETE, you can disable redirection handling with the allow_redirects parameter:
+默认情况下，除了 HEAD, Requests 会自动处理所有重定向
+
+If you're using HEAD, you can enable redirection as well:
+可以使用响应对象的 history 方法来追踪重定向
+
+Note
+例如，Github 将所有的 HTTP 请求重定向到 HTTPS：
+
+timeout is not a time limit on the entire response download;
+如果你使用的是GET、OPTIONS、POST、PUT、PATCH 或者 DELETE，那么你可以通过 allow_redirects 参数禁用重定向处理：
+
+If a request exceeds the configured number of maximum redirections, a TooManyRedirects exception is raised.
+你可以告诉 requests 在经过以 timeout 参数设定的秒数时间之后停止等待响应：
+
+All exceptions that Requests explicitly raises inherit from requests.exceptions.RequestException.
+注意
+
+Ready for more?
+timeout 仅对连接过程有效，与响应体的下载无关
+
+Check out the advanced section.
+ timeout 并不是整个下载响应的时间限制，而是如果服务器在 timeout 秒内没有应答，将会引发一个异常（更精确地说，是在 timeout 秒内没有从基础套接字上接收到任何字节的数据时）
+
+Receive updates on new releases and upcoming projects.
+遇到网络问题（如：DNS 查询失败、拒绝连接等）时，Requests 会抛出一个 ConnectionError 异常
+
+Join Mailing List.
+如果 HTTP 请求返回了不成功的状态码， Response.raise_for_status() 会抛出一个 HTTPError 异常
+
+If you enjoy using this project, Say Thanks!
+若请求超时，则抛出一个 Timeout 异常
+
+Follow @kennethreitz
+若请求超过了设定的最大重定向次数，则会抛出一个 TooManyRedirects 异常
+

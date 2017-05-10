@@ -1,0 +1,138 @@
+First Steps with Sphinx
+初入Sphinx
+
+reStructuredText Primer
+reStructuredText入门
+
+Quiet mode that will skips interactive wizard to specify options.
+sphinx-build 脚本构建了一个Sphinx文档集
+
+This option requires -p, -a and -v options.
+用法如下:
+
+Display usage summary or Sphinx version.
+在这里，sourcedir 是指 源目录，builddir 是指你想指定的生成文档的目录
+
+Inside the root directory, two more directories will be created;
+最重要的选项: 它选择生成器
+
+“_templates” for custom HTML templates and “_static” for custom stylesheets and other static files.
+常见的生成器如下：
+
+Author names.
+如果给定，总是生成所有输出文件
+
+(see copyright).
+默认是只生成新的和更改的源文件的输出文件
+
+Version of project.
+不要使用已保存的 环境 （系统缓存所有交叉引用），会完全重新生成
+
+(see version).
+默认是仅仅读取和解析自上次运行后新的或者已更新的源文件
+
+Release of project.
+定义标签 tag
+
+(see release).
+这跟 only 指令（标识符）关系密切，如果设置标签就会只包含 only 指令（标识符）的内容
+
+Document language.
+New in version 0.6.
+
+Source file suffix.
+因为Sphinx在生成输出文件之前，必须读取和解析所有的源文件，被解析过的源文件会被缓存为”doctree pickles”
+
+(see source_suffix).
+通常，这些缓存文件会被放入于生成目录中的名为 .doctrees 的文件夹里
+
+Master document name.
+使用给定的配置文件目录，忽略源文件中的 conf.py 配置文件
+
+(see master_doc).
+值得注意的是配置文件中的其他文件以及路径可能会跟配置文件目录有关，所以也必须使用指定的路径
+
+Use epub.
+New in version 0.3.
+
+Enable sphinx.ext.doctest extension.
+New in version 0.5.
+
+Enable sphinx.ext.intersphinx extension.
+覆盖配置文件 conf.py 中一个配置值对
+
+Enable sphinx.ext.todo extension.
+Changed in version 0.6: The value can now be a dictionary value.
+
+Enable sphinx.ext.coverage extension.
+在HTML模版中，把 value 赋给 name 
+
+Enable sphinx.ext.mathjax extension.
+New in version 0.5.
+
+Enable sphinx.ext.ifconfig extension.
+运行在严格模式
+
+Enable sphinx.ext.viewcode extension.
+禁止带颜色的输出
+
+Create (or not create) makefile.
+不要在标准输出上输出任何东西，也包括警告
+
+Create (or not create) batchfile
+输出除标准错误外的警告（和错误）到指定的文件
+
+New in version 1.3: Add various options for sphinx-quickstart invocation.
+把警告转换成错误输出
+
+where sourcedir is the source directory, and builddir is the directory in which you want to place the built documentation.
+在命令行中，你可以在源目录以及生成目录后给出一个或者多个文件名
+
+Most of the time, you don’t need to specify any filenames.
+Sphinx 将会尝试构建给出的这些文件的输出（以及它们的依赖
+
+See Available builders for a list of all builders shipped with Sphinx.
+由 sphinx-quickstart 生成的 Makefile 和 make.bat 文件是只使用了 sphinx-build 的 -b 和 -d 参数
+
+Extensions can add their own builders.
+ 然而， 它们支持以下的变量（参数）来定制化：
+
+If given, always write all output files.
+latex_paper_size 的值
+
+Don’t use a saved environment (the structure caching all cross-references), but rebuild it completely.
+替代 sphinx-build 的命令
+
+Define the tag tag.
+指定生成的目录，而不是使用在 sphinx-quickstart 中选择的路径
+
+New in version 0.6.
+sphinx-build 的附加选项
+
+New in version 1.2: This option should be considered experimental.
+sphinx-apidoc 能够对一个python包生成完全的自动的API文档
+
+Don’t look for the conf.py in the source directory, but use the given configuration directory instead.
+packagedir 是指生成文档的包所在的路径， outputdir 生成的文档所存放的路径
+
+Note that various other files and paths given by configuration values are expected to be relative to the configuration directory, so they will have to be present at this location too.
+任何给定的 pathnames 是在生成过程中需要忽略的路径名（[pathnames]里的东西在生成文档中是忽略的
+
+New in version 0.3.
+sphinx-apidoc 有如下些选项:
+
+Don’t look for a configuration file;
+给出生成的文档所在的路径
+
+New in version 0.5.
+通常，sphinx-apidoc不会重新生成任何文件
+
+Override a configuration value set in the conf.py file.
+使用这个选项的话，不会有任何文件生成
+
+The value must be a number, string, list or dictionary value.
+（空运行，或者称为干运行
+
+For lists, you can separate elements with a comma like this: -D html_theme_path=path1,path2.
+这个选项指定了输出的文件的文件名后缀
+

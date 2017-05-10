@@ -1,0 +1,378 @@
+Chapter 2: Getting Started¶
+第二章：入门
+
+Installing Django is a multi-step process, due to the multiple moving parts in modern Web development environments.
+由于现代Web开发环境由多个部件组成，安装Django需要几个步骤
+
+In this chapter, we’ll walk you through how to install the framework and its few dependencies.
+ 这一章，我们将演示如何安装框架以及一些依赖关系
+
+Because Django is “just” Python code, it runs anywhere Python does – including on some cell phones!
+因为Django就是纯Python代码，它可以运行在任何Python可以运行的环境，甚至是手机上
+
+But this chapter just covers the common scenarios for Django installations.
+ 但是这章只提及Django安装的通用脚本
+
+We’ll assume you’re installing it either on a desktop/laptop machine or a server.
+ 我们假设你把它安装在桌面/笔记本电脑或服务器
+
+Later, in Chapter 12, we’ll cover how to deploy Django to a production site.
+往后，在第12章，我们将讨论如何部署Django到一个生产站点
+
+Installing Python¶
+Python 安装
+
+Django itself is written purely in Python, so the first step in installing the framework is to make sure you have Python installed.
+Django本身是纯Python编写的，所以安装框架的第一步是确保你已经安装了Python
+
+The core Django framework works with any Python version from 2.5 to 2.7, inclusive.
+如果你不确定要安装Python的什么版本，并且你完全拿不定主意的话,那就选2.x系列的最新版本吧
+
+If you’re not sure which version of Python to install and you have complete freedom over the decision, pick the latest one in the 2.x series: version 2.7.
+Django和 Python 3.0
+
+Django and Python 3.X:
+在写作本书的时候，Python3.0已经发布，但Django暂时还不支持
+
+Django 1.4 will drop support for Python 2.4, establishing a minimum requirement of 2.5.
+如果你是个Python新手并且正迷茫于到底是学习Python 2.x还是Python 3.x的话，我们建议你选择Python 2.x
+
+Django 1.5 will then drop Python 2.5 support, setting the minimum at 2.6.
+如果使用的是 Linux 或 Mac OS X ，系统可能已经预装了 Python 
+
+Additionally, Django 1.5 will begin the process of porting the codebase, and will experimentally support Python 3, through the 2/3 compatibility features in Python 2.6 and 2.7.
+在命令提示符下 (或 OS X 的终端中) 输入python ，如果看到如下信息，说明 Python 已经装好了： 在命令行窗口中输入python （或是在OS X的程序/工具/终端中）
+
+From https://www.djangoproject.com/weblog/2012/mar/13/py3k/
+ 如果你看到这样的信息,说明 python 已经安装好了.
+
+If you’re new to Python and are wondering whether to learn Python 2.x or Python 3.x, our advice is to start with 2.x and progress after 1.5 release with 3.x.
+否则, 你需要下载并安装Python. 它既快速又方便，而详细说明可参考http://www.python.org/download/
+
+If you’re on Linux or Mac OS X, you probably have Python already installed.
+任何时候，都有两个不同版本的Django供您选择
+
+Type python at a command prompt (or in Applications/Utilities/Terminal, in OS X).
+ 最新的官方发行版和有风险的主干版本
+
+If you see something like this, then Python is installed:
+ 安装的版本取决于您的优先选择
+
+Otherwise, you’ll need to download and install Python.
+我们推荐选定一个正式发布版本，但重要的是了解到主干开发版本的存在，因为在文档和社区成员中你会发现它被提到
+
+At any given time, two distinct versions of Django are available to you: the latest official release and the bleeding-edge “trunk” version.
+如果您在用Linux系统，其中包括Django的包，使用默认的版本是个好主意
+
+The version you decide to install depends on your priorities.
+ 这样，你将会通过系统的包管理得到安全的升级
+
+We’d recommend sticking with an official release, but it’s important to know that the “trunk” development version exists, because you’ll find it mentioned in the documentation and by members of the community.
+如果你的系统没有自带Django，你可以自己下载然后安装框架
+
+Official releases have a version number, such 1.4, and the latest one is always available at http://www.djangoproject.com/download/.
+Windows系统上，推荐使用7-Zip(http://www.djangoproject.com/r/7zip/)来解压缩.tar.gz文件
+
+If you’re on a Linux distribution that includes a package of Django, it’s a good idea to use the distributor’s version.
+如果你很好奇： Django将被安装到你的Python安装目录的site-package 目录（Python从该目录寻找第三方库）
+
+That way, you’ll get security updates along with the rest of your system packages.
+ 通常情况下，这个目录在/usr/lib/python2.4/site-packages
+
+If you don’t have access to a prepackaged version, you can download and install the framework manually.
+最新最好的django的开发版本称为trunk,可以从django的subversion处获得
+
+To do so, first download the tarball, which will be named something like Django-1.4.x.tar.gz.
+ 如果你想尝鲜，或者想为django贡献代码，那么你应当安装这个版本
+
+Here’s how the automate process looks on Unix systems using pip:
+Subversion 是一种与 CVS 类似的免费开源版本控制系统，Django 开发团队使用它管理 Django 代码库的更新
+
+Here’s how tar.gz install process looks on Unix systems:
+请记住，即使是使用trunk版本，也是有保障的
+
+On Windows, we recommend using 7-Zip (http://www.djangoproject.com/r/7zip/) to unzip .tar.gz files.
+遵循以下步骤以获取最新的 Django 主流代码：
+
+In case you’re curious: Django’s files will be installed into your Python installation’s dist-packages directory – a directory where Python looks for third-party libraries.
+确保安装了 Subversion 客户端
+
+Usually it’s in a place like (In Ubuntu 12.04) /usr/local/lib/python2.7/dist-packages/.
+ 可以从 http://subversion.tigris.org/ 免费下载该软件，并从http://svnbook.red-bean.com/ 获取出色的文档
+
+The latest and greatest Django development version is referred to as master, and it’s available from Django’s git repository.
+使用 svn co http://code.djangoproject.com/svn/django/trunk djtrunk 命令查看主体代码
+
+Git is a free, open source distributed revision-control system, and the Django team uses it to manage changes to the Django codebase.
+找到你的python的site-packages目录
+
+You can use a Git client to grab the very latest Django source code and, at any given time, you can update your local version of the Django code, known as your local checkout, to get the latest changes and improvements made by Django developers.
+ 一般为/usr/lib/python2.4/site-packages，如果你不确定，可以输入如下命令：
+
+When using master, keep in mind there’s no guarantee things won’t be broken at any given moment.
+上面的结果会包含site-packages的目录 在site-packages目录下，创建一个文件
+
+To grab the latest Django master, follow these steps:
+django.pth，编辑这个文件，包含djtrunk目录的全路径 利润，此文件包含如下行：
+
+Make sure you have a Git client installed.
+提示：
+
+Check out the master using the command git clone https://github.com/django/django.git djmaster.
+如果之前没有接触过 .pth 文件，你可以从 http://www.djangoproject.com/r/python/site-module/ 中获取更多相关知识
+
+Locate your Python installation’s dist-packages directory.
+从 Subversion 完成下载并执行了前述步骤后，就没有必要再执行 python setup.py install 了，你刚才已经手动完成了安装
+
+The resulting output should include your dist-packages directory.
+由于 Django 主干代码的更新经常包括 bug 修正和特性添加，如果真的着迷的话，你可能每隔一小段时间就想更新一次
+
+django.pth and edit it to contain the full path to your djmaster directory to it.
+最后，如果你使用trunk，你要知道使用的是哪个trunk版本
+
+For example, the file could just contain this line:
+ 如果你去社区寻求帮助，或是为Django框架提供改进，知道你使用的版本号是非常重要的
+
+If .pth files are new to you, you can learn more about them at http://www.djangoproject.com/r/python/site-module/.
+让我们花点时间去测试 Django 是否安装成功，并工作良好
+
+After downloading from Git and following the preceding steps, there’s no need to run python setup.py install– you’ve just done the work by hand!
+交互解释器示例
+
+Because the Django master changes often with bug fixes and feature additions, you’ll probably want to update it every once in a while.
+Python 交互解释器是命令行窗口的程序，通过它可以交互式地编写 Python 程序
+
+To update the code, just run the command git pull from within the djmaster directory.
+ 要启动它只需运行 python命令
+
+Finally, if you use master, you should know how to figure out which version of master you’re running.
+我们在交互解释器中演示Python示例将贯穿整本书
+
+Knowing your version number is important if you ever need to reach out to the community for help, or if you submit improvements to the framework.
+ 你可以用三个大于号 (>>> )来分辨出示例，三个大于号就表示交互提示符
+
+In these cases, you should tell people the master version, also known as a “revision number” or “changeset,” that you’re using.
+ 如果你要从本书中拷贝示例，请不要拷贝提示符
+
+To install django in a virtual environment with pip:
+这三个在新行开始插入的点，是Python Shell自行加入的，不属于我们的输入
+
+Notice the == necessary to specify a specific version.
+这会儿，你可以使用django写web应用了，因为django只要求python正确安装后就可以跑起来了
+
+For some post-installation positive feedback, take a moment to test whether the installation worked.
+Django支持四种数据库：
+
+Interactive Interpreter Examples
+大部分情况下，这四种数据库都会和Django框架很好的工作
+
+The Python interactive interpreter is a command-line program that lets you write a Python program interactively.
+设置数据库只需要两步：
+
+Throughout this book, we feature example Python interactive interpreter sessions.
+如果你只是玩一下，不想安装数据库服务，那么可以考虑使用SQLite
+
+You can recognize these examples by the triple greater-than signs (>>>), which designate the interpreter’s prompt.
+ 如果你用python2.5或更高版本的话，SQLite是唯一一个被支持的且不需要以上安装步骤的数据库
+
+If you’re copying examples from this book, don’t copy those greater-than signs.
+ 它仅对你的文件系统中的单一文件读写数据，并且Python2.5和以后版本内建了对它的支持
+
+Multiline statements in the interactive interpreter are padded with three dots (...).
+在Windows上，取得数据库驱动程序可能会令人沮丧
+
+For example:
+ 如果你急着用它，我们建议你使用python2.5
+
+Those three dots at the start of the additional lines are inserted by the Python shell – they’re not part of our input.
+使用 PostgreSQL 的话，你需要从 http://www.djangoproject.com/r/python-pgsql/ 下载 psycopg 这个开发包
+
+We include them here to be faithful to the actual output of the interpreter.
+ 我们建议使用psycopg2，因为它是新的，开发比较积极，且更容易安装
+
+If you copy our examples to follow along, don’t copy those dots.
+ 留意你所用的是 版本 1 还是 2，稍后你会需要这项信息
+
+At this point, you could very well begin writing a Web application with Django, because Django’s only hard-and-fast prerequisite is a working Python installation.
+如果你在用Linux，检查你的发行版的软件包管理系统是否提供了一套叫做python-psycopg2，psycopg2-python，python-postgresql这类名字的包
+
+If you just want to start playing with Django, skip ahead to the “Starting a Project” section – but keep in mind that all the examples in this book assume you have a working database set up.
+如果你正在使用Python 2.5版本或者更高，那么你很幸运： 不要求安装特定的数据库，因为Python支持和SQLite进行通信
+
+Django supports many database engines:
+如果你用的是Python2.4或更早的版本，你需要 SQLite 3_而不是_版本2，这个可从http://www.djangoproject.com/r/sqlite/pysqlitehttp://www.djangoproject.com/r/python-sqlite/ 确认一下你的pysqlite版本是2.0.3或者更高
+
+For the most part, all the engines here work equally well with the core Django framework.
+在 Windows 平台上，可以跳过单独的 SQLite 二进制包安装工作，因为它们已被静态链接到 pysqlite 二进制开发包中
+
+Setting up the database is a two-step process:
+如果你在用Linux，检查你的发行版的软件包管理系统是否提供了一套叫做python-sqlite3，sqlite-python，pysqlite这类名字的包
+
+If you’re using FirebirdSQL, you’ll need to install either the kinterbasdb or fdb package from http://pypi.python.org/pypi/fdb.
+你还需要从 http://www.djangoproject.com/r/python-mysql/ 下载安装 MySQLdb 
+
+If you’re on Linux, check whether your distribution’s package-management system offers a package called kinterbasdb or fdb.
+如果你正在使用Linux，检查下你系统的包管理器是否提供了叫做python-mysql,python-mysqldb,myspl-python或者相似的包
+
+If you’re using Postgresql, you’ll need the psycopg package.
+如果你用Oracle，你需要安装cx_Oracle库,可以从http://cx-oracle.sourceforge.net/获得
+
+Django 1.3 supports both version 1 and 2.
+ 要用4.3.1或更高版本，但要避开5.0，这是因为这个版本的驱动有bug
+
+As mentioned earlier, Django doesn’t actually require a database.
+尽管如此，还是要记住：
+
+With that said, bear in mind that some of the extra tools bundled with Django do require a database, so if you choose not to use a database, you’ll miss out on those features.
+Django 所捆绑的一些附加工具 一定 需要数据库，因此如果选择不使用数据库，你将不能使用那些功能
+
+(We highlight these features throughout this book.)
+ (我们将在本书中自始至终强调这些功能)
+
+Starting a Project¶
+开始一个项目
+
+Once you’ve installed Python, Django and (optionally) your database server/library, you can take the first step in developing a Django application by creating a project.
+一但你安装好了python，django和（可选的）数据库及相关库，你就可以通过创建一个project，迈出开发django应用的第一步
+
+A project is a collection of settings for an instance of Django, including database configuration, Django-specific options and application-specific settings.
+项目 是 Django 实例的一系列设置的集合，它包括数据库配置、Django 特定选项以及应用程序的特定设置
+
+If this is your first time using Django, you’ll have to take care of some initial setup.
+如果第一次使用 Django，必须进行一些初始化设置工作
+
+Create a new directory to start working in, perhaps something like /home/username/djcode/.
+ 新建一个工作目录，例如 /home/username/djcode/，然后进入该目录
+
+Where Should This Directory Live?
+这个目录应该放哪儿
+
+If your background is in PHP, you’re probably used to putting code under the Web server’s document root (in a place such as /var/www).
+有过 PHP 编程背景的话，你可能习惯于将代码都放在 Web 服务器的文档根目录 (例如 /var/www 这样的地方)
+
+With Django, you don’t do that.
+ 而在 Django 中，把任何Python代码和web server的文档根(root)放在一起并不是一个好主意
+
+It’s not a good idea to put any of this Python code within your Web server’s document root, because in doing so you risk the possibility that people will be able to view your raw source code over the Web.
+因为这样做有使人能通过网路看到你原代码的风险. 那就太糟了
+
+Put your code in some directory outside of the document root.
+把代码放置在文档根目录 之外 的某些目录中
+
+Change into the directory you created, and run the command django-admin.py startproject mysite.
+转到你创建的目录，运行命令django-admin.py startproject mysite
+
+This will create a mysite directory in your current directory.
+这样会在你的当前目录下创建一个目录
+
+Note
+注意
+
+django-admin.py should be on your system path if you installed Django via its setup.py utility.
+如果用的是 setup.py 工具安装的 Django ， django-admin.py 应该已被加入了系统路径中
+
+If you’re using trunk, you’ll find django-admin.py in djtrunk/django/bin.
+如果你使用一个trunk版本，你会在 djtrunk/django/bin 下发现 django-admin.py 
+
+Because you’ll be using django-admin.py often, consider adding it to your system path.
+你将来会常用到django-admin.py，考虑把它加到你的系统路径中去比较好
+
+On Unix, you can do so by symlinking from /usr/local/bin, using a command such as sudo ln -s /path/to/django/bin/django-admin.py /usr/local/bin/django-admin.py.
+ 在Unix中, 你也可以用来自/usr/local/bin 的符号连接, 用一个命令, 诸如sudo ln -s /path/to/django/bin/django-admin.py /usr/local/bin/django-admin.py . 在Windows中, 你需要修改你的 PATH 环境变量.
+
+If you installed Django from a packaged version for your Linux distribution, django-admin.py might be called django-admin instead.
+如果你的django是从linux发行版中安装的，那么，常会被django-admin.py替代
+
+If you see a “permission denied” message when running django-admin.py startproject, you’ll need to change the file’s permissions.
+如果在运行时，你看到权限拒绝的提示，你应当修改这个文件的权限
+
+To do this, navigate to the directory where django-admin.py is installed (e.g., cd /usr/local/bin) and run the command chmod +x django-admin.py.
+django-admin.py startproject 为此, 键入 cd /usr/local/bin转到django-admin.py所在的目录，运行命令chmod +x django-admin.py
+
+The startproject command creates a directory containing four files:
+startproject 命令创建一个目录，包含4个文件：
+
+These files are as follows:
+文件如下：
+
+Despite their small size, these files already constitute a working Django application.
+尽管这些的文件很小，但这些文件已经构成了一个可运行的Django应用
+
+For some more post-installation positive feedback, let’s run the Django development server to see our barebones application in action.
+为了安装后更多的体验，让我们运行一下django开发服务器看看我们的准系统
+
+The Django development server (also called the “runserver” after the command that launches it) is a built-in, lightweight Web server you can use while developing your site.
+django开发服务是可用在开发期间的，一个内建的，轻量的web服务
+
+It’s included with Django so you can develop your site rapidly, without having to deal with configuring your production server (e.g., Apache) until you’re ready for production.
+ 我们提供这个服务器是为了让你快速开发站点，也就是说在准备发布产品之前，无需进行产品级 Web 服务器（比如 Apache）的配置工作
+
+The development server watches your code and automatically reloads it, making it easy for you to change your code without needing to restart anything.
+ 开发服务器监测你的代码并自动加载它，这样你会很容易修改代码而不用重启动服务
+
+To start the server, change into your project directory (cd mysite), if you haven’t already, and run this command:
+如果你还没启动服务器的话，请切换到你的项目目录里 (cd mysite )，运行下面的命令：
+
+You’ll see something like this:
+你会看到些像这样的
+
+This launches the server locally, on port 8000, accessible only to connections from your own computer.
+这将会在端口8000启动一个本地服务器, 并且只能从你的这台电脑连接和访问
+
+Now that it’s running, visit http://127.0.0.1:8000/ with your Web browser.
+ 既然服务器已经运行起来了，现在用网页浏览器访问 http://127.0.0.1:8000/ 
+
+You’ll see a “Welcome to Django” page shaded in a pleasant pastel blue.
+ 你应该可以看到一个令人赏心悦目的淡蓝色Django欢迎页面
+
+It worked!
+ 它开始工作了
+
+One final, important note about the development server is worth mentioning before proceeding.
+在进一步学习之前， 一个重要的，关于开发网络服务器的提示很值得一说
+
+Although this server is convenient for development, resist the temptation to use it in anything resembling a production environment.
+ 虽然 django 自带的这个 web 服务器对于开发很方便，但是，千万不要在正式的应用布署环境中使用它
+
+The development server can handle only a single request at a time reliably, and it has not gone through a security audit of any sort.
+ 在同一时间，该服务器只能可靠地处理一次单个请求，并且没有进行任何类型的安全审计
+
+When the time comes to launch your site, see Chapter 12 for information on how to deploy Django.
+ 发布站点前，请参阅第 20 章了解如何部署 Django 
+
+Changing the Development Server’s Host or Port
+更改这个 Development Server 的主机地址或端口
+
+By default, the runserver command starts the development server on port 8000, listening only for local connections.
+默认情况下， runserver 命令在 8000 端口启动开发服务器，且仅监听本地连接
+
+If you want to change the server’s port, pass it as a command-line argument:
+ 要想要更改服务器端口的话，可将端口作为命令行参数传入：
+
+By specifying an IP address, you can tell the server to allow non-local connections.
+通过指定一个 IP 地址，你可以告诉服务器–允许非本地连接访问
+
+This is especially helpful if you’d like to share a development site with other members of your team.
+ 如果你想和其他开发人员共享同一开发站点的话，该功能特别有用
+
+The IP address 0.0.0.0 tells the server to listen on any network interface:
+ 0.0.0.0 这个 IP 地址，告诉服务器去侦听任意的网络接口
+
+When you’ve done this, other computers on your local network will be able to view your Django site by visiting your IP address in their Web browsers, e.g., http://192.168.1.103:8000/ .
+完成这些设置后，你本地网络中的其它计算机就可以在浏览器中访问你的 IP 地址了
+
+(Note that you’ll have to consult your network settings to determine your IP address on the local network.
+比如：http://192.168.1.103:8000/ . (注意，你将需要校阅一下你的网络配置来决定你在本地网络中的IP 地址) Unix用户可以在命令提示符中输入ifconfig来获取以上信息
+
+Unix users, try running “ifconfig” in a command prompt to get this information.
+ 使用Windows的用户，请尝试使用 ipconfig 命令
+
+What’s Next?¶
+接下来做什么
+
+Now that you have everything installed and the development server running, you’re ready to learn the basics of serving Web pages with Django.
+好了，你已经安装好所需的一切， 并且开发服务器也运行起来了，你已经准备好继续 学习基础知识–视图和URL配置 这一章的内容了
+
+© Copyright 2012, Matt Behrens.
+www.shoucewang.com. All Rights Reserved. 手册网 版权所有
+

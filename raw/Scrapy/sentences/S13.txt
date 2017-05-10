@@ -1,0 +1,42 @@
+Logging¶
+Logging¶
+
+Note
+Scrapy提供了log功能
+
+scrapy.log has been deprecated alongside its functions in favor of explicit calls to the Python standard logging.
+log服务必须通过显示调用 scrapy.log.start() 来开启，以捕捉顶层的Scrapy日志消息
+
+Keep reading to learn more about the new logging system.
+ 在此之上，每个crawler都拥有独立的log观察者(observer)(创建时自动连接(attach)),接收其spider的日志消息
+
+Scrapy calls scrapy.utils.log.configure_logging() to set some reasonable defaults and handle those settings in Logging settings when running commands, so it’s recommended to manually call it if you’re running Scrapy from scripts as described in Run Scrapy from a script.
+Scrapy提供5层logging级别:
+
+Log levels¶
+如何设置log级别¶
+
+Python’s builtin logging defines 5 different levels to indicate severity on a given log message.
+您可以通过终端选项(command line option) –loglevel/-L 或 LOG_LEVEL 来设置log级别
+
+How to log messages¶
+如何记录信息(log messages)¶
+
+Here’s a quick example of how to log a message using the logging.WARNING level:
+下面给出如何使用 WARNING 级别来记录信息的例子:
+
+Last examples use the root logger behind the scenes, which is a top level logger where all messages are propagated to (unless otherwise specified).
+在spider中添加log的推荐方式是使用Spider的 log() 方法
+
+Using logging helpers is merely a shortcut for getting the root logger explicitly, so this is also an equivalent of last snippets:
+该方法会自动在调用 scrapy.log.msg() 时赋值 spider 参数
+
+See also
+启动Scrapy顶层logger
+
+That logger is created using the Spider’s name, but you can use any custom Python logger you want.
+严重错误的Log级别
+
+By default, Scrapy sets and configures a handler for the root logger, based on the settings below.
+警告的Log级别 Log level for warnings
+

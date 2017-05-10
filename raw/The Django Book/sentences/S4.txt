@@ -1,0 +1,1119 @@
+Chapter 5: Models¶
+第五章：模型
+
+In Chapter 3, we covered the fundamentals of building dynamic Web sites with Django: setting up views and URLconfs.
+在第三章，我们讲述了用 Django 建造网站的基本途径： 建立视图和 URLConf 
+
+As we explained, a view is responsible for doing some arbitrary logic, and then returning a response.
+ 正如我们所阐述的，视图负责处理一些主观逻辑，然后返回响应结果
+
+In one of the examples, our arbitrary logic was to calculate the current date and time.
+ 作为例子之一，我们的主观逻辑是要计算当前的日期和时间
+
+In modern Web applications, the arbitrary logic often involves interacting with a database.
+在当代 Web 应用中，主观逻辑经常牵涉到与数据库的交互
+
+Behind the scenes, a database-driven Web site connects to a database server, retrieves some data out of it, and displays that data on a Web page.
+ 数据库驱动网站 在后台连接数据库服务器，从中取出一些数据，然后在 Web 页面用漂亮的格式展示这些数据
+
+The site might also provide ways for site visitors to populate the database on their own.
+ 这个网站也可能会向访问者提供修改数据库数据的方法
+
+Many complex Web sites provide some combination of the two.
+许多复杂的网站都提供了以上两个功能的某种结合
+
+Amazon.com, for instance, is a great example of a database-driven site.
+ 例如 Amazon.com 就是一个数据库驱动站点的良好范例
+
+Each product page is essentially a query into Amazon’s product database formatted as HTML, and when you post a customer review, it gets inserted into the database of reviews.
+ 本质上，每个产品页面都是数据库中数据以 HTML格式进行的展现，而当你发表客户评论时，该评论被插入评论数据库中
+
+Django is well suited for making database-driven Web sites, because it comes with easy yet powerful tools for performing database queries using Python.
+由于先天具备 Python 简单而强大的数据库查询执行方法，Django 非常适合开发数据库驱动网站
+
+This chapter explains that functionality: Django’s database layer.
+ 本章深入介绍了该功能： Django 数据库层
+
+(Note: While it’s not strictly necessary to know basic relational database theory and SQL in order to use Django’s database layer, it’s highly recommended.
+（注意： 尽管对 Django 数据库层的使用中并不特别强调这点，但是我们还是强烈建议您掌握一些数据库和 SQL 原理
+
+An introduction to those concepts is beyond the scope of this book, but keep reading even if you’re a database newbie.
+ 对这些概念的介绍超越了本书的范围，但就算你是数据库方面的菜鸟，我们也建议你继续阅读
+
+You’ll probably be able to follow along and grasp concepts based on the context.)
+ 你也许能够跟上进度，并在上下文学习过程中掌握一些概念
+
+The “Dumb” Way to Do Database Queries in Views¶
+在视图中进行数据库查询的笨方法
+
+Just as Chapter 3 detailed a “dumb” way to produce output within a view (by hard-coding the text directly within the view), there’s a “dumb” way to retrieve data from a database in a view.
+正如第三章详细介绍的那个在视图中输出 HTML 的笨方法（通过在视图里对文本直接硬编码HTML），在视图中也有笨方法可以从数据库中获取数据
+
+It’s simple: just use any existing Python library to execute an SQL query and do something with the results.
+ 很简单： 用现有的任何 Python 类库执行一条 SQL 查询并对结果进行一些处理
+
+In this example view, we use the MySQLdb library (available via http://www.djangoproject.com/r/python-mysql/) to connect to a MySQL database, retrieve some records, and feed them to a template for display as a Web page:
+在本例的视图中，我们使用了 MySQLdb 类库（可以从 http://www.djangoproject.com/r/python-mysql/ 获得）来连接 MySQL 数据库，取回一些记录，将它们提供给模板以显示一个网页：
+
+This approach works, but some problems should jump out at you immediately:
+这个方法可用，但很快一些问题将出现在你面前：
+
+As you might expect, Django’s database layer aims to solve these problems.
+正如你所期待的，Django数据库层正是致力于解决这些问题
+
+Here’s a sneak preview of how the previous view can be rewritten using Django’s database API:
+ 以下提前揭示了如何使用 Django 数据库 API 重写之前那个视图
+
+We’ll explain this code a little later in the chapter.
+我们将在本章稍后的地方解释这段代码
+
+For now, just get a feel for how it looks.
+ 目前而言，仅需对它有个大致的认识
+
+The MTV (or MVC) Development Pattern¶
+MTV 开发模式
+
+Before we delve into any more code, let’s take a moment to consider the overall design of a database-driven Django Web application.
+在钻研更多代码之前，让我们先花点时间考虑下 Django 数据驱动 Web 应用的总体设计
+
+As we mentioned in previous chapters, Django is designed to encourage loose coupling and strict separation between pieces of an application.
+我们在前面章节提到过，Django 的设计鼓励松耦合及对应用程序中不同部分的严格分割
+
+If you follow this philosophy, it’s easy to make changes to one particular piece of the application without affecting the other pieces.
+ 遵循这个理念的话，要想修改应用的某部分而不影响其它部分就比较容易了
+
+In view functions, for instance, we discussed the importance of separating the business logic from the presentation logic by using a template system.
+ 在视图函数中，我们已经讨论了通过模板系统把业务逻辑和表现逻辑分隔开的重要性
+
+With the database layer, we’re applying that same philosophy to data access logic.
+ 在数据库层中，我们对数据访问逻辑也应用了同样的理念
+
+Those three pieces together – data access logic, business logic, and presentation logic – comprise a concept that’s sometimes called the Model-View-Controller (MVC) pattern of software architecture.
+把数据存取逻辑、业务逻辑和表现逻辑组合在一起的概念有时被称为软件架构的 Model-View-Controller(MVC)模式
+
+In this pattern, “Model” refers to the data access layer, “View” refers to the part of the system that selects what to display and how to display it, and “Controller” refers to the part of the system that decides which view to use, depending on user input, accessing the model as needed.
+ 在这个模式中， Model 代表数据存取层，View 代表的是系统中选择显示什么和怎么显示的部分，Controller 指的是系统中根据用户输入并视需要访问模型，以决定使用哪个视图的那部分
+
+Why the Acronym?
+为什么用缩写
+
+The goal of explicitly defining patterns such as MVC is mostly to streamline communication among developers.
+像 MVC 这样的明确定义模式的主要用于改善开发人员之间的沟通
+
+Instead of having to tell your coworkers, “Let’s make an abstraction of the data access, then let’s have a separate layer that handles data display, and let’s put a layer in the middle that regulates this,” you can take advantage of a shared vocabulary and say, “Let’s use the MVC pattern here.”
+ 比起告诉同事，“让我们采用抽象的数据存取方式，然后单独划分一层来显示数据，并且在中间加上一个控制它的层”，一个通用的说法会让你收益，你只需要说：“我们在这里使用MVC模式吧
+
+Django follows this MVC pattern closely enough that it can be called an MVC framework.
+Django 紧紧地遵循这种 MVC 模式，可以称得上是一种 MVC 框架
+
+Here’s roughly how the M, V, and C break down in Django:
+ 以下是 Django 中 M、V 和 C 各自的含义：
+
+M, the data-access portion, is handled by Django’s database layer, which is described in this chapter.
+M ，数据存取部分，由django数据库层处理，本章要讲述的内容
+
+V, the portion that selects which data to display and how to display it, is handled by views and templates.
+V ，选择显示哪些数据要显示以及怎样显示的部分，由视图和模板处理
+
+C, the portion that delegates to a view depending on user input, is handled by the framework itself by following your URLconf and calling the appropriate Python function for the given URL.
+C ，根据用户输入委派视图的部分，由 Django 框架根据 URLconf 设置，对给定 URL 调用适当的 Python 函数
+
+Because the “C” is handled by the framework itself and most of the excitement in Django happens in models, templates and views, Django has been referred to as an MTV framework.
+由于 C 由框架自行处理，而 Django 里更关注的是模型（Model）、模板(Template)和视图（Views），Django 也被称为 MTV 框架 
+
+In the MTV development pattern,
+在 MTV 开发模式中：
+
+M stands for “Model,” the data access layer.
+M 代表模型（Model），即数据存取层
+
+This layer contains anything and everything about the data: how to access it, how to validate it, which behaviors it has, and the relationships between the data.
+ 该层处理与数据相关的所有事务： 如何存取、如何验证有效性、包含哪些行为以及数据之间的关系等
+
+T stands for “Template,” the presentation layer.
+T 代表模板(Template)，即表现层
+
+This layer contains presentation-related decisions: how something should be displayed on a Web page or other type of document.
+ 该层处理与表现相关的决定： 如何在页面或其他类型文档中进行显示
+
+V stands for “View,” the business logic layer.
+V 代表视图（View），即业务逻辑层
+
+This layer contains the logic that access the model and defers to the appropriate template(s).
+ 该层包含存取模型及调取恰当模板的相关逻辑
+
+You can think of it as the bridge between models and templates.
+ 你可以把它看作模型与模板之间的桥梁
+
+If you’re familiar with other MVC Web-development frameworks, such as Ruby on Rails, you may consider Django views to be the “controllers” and Django templates to be the “views.” This is an unfortunate confusion brought about by differing interpretations of MVC.
+如果你熟悉其它的 MVC Web开发框架，比方说 Ruby on Rails，你可能会认为 Django 视图是控制器，而 Django 模板是视图
+
+In Django’s interpretation of MVC, the “view” describes the data that gets presented to the user;
+ 很不幸，这是对 MVC 不同诠释所引起的错误认识
+
+it’s not necessarily just how the data looks, but which data is presented.
+ 在 Django 对 MVC 的诠释中，视图用来描述要展现给用户的数据
+
+In contrast, Ruby on Rails and similar frameworks suggest that the controller’s job includes deciding which data gets presented to the user, whereas the view is strictly how the data looks, not which data is presented.
+不是数据 _如何_展现 ,而且展现 哪些 数据
+
+Neither interpretation is more “correct” than the other.
+两种诠释中没有哪个更加正确一些
+
+The important thing is to understand the underlying concepts.
+ 重要的是要理解底层概念
+
+Configuring the Database¶
+数据库配置
+
+With all of that philosophy in mind, let’s start exploring Django’s database layer.
+记住这些理念之后，让我们来开始 Django 数据库层的探索
+
+First, we need to take care of some initial configuration;
+ 首先，我们需要做些初始配置
+
+we need to tell Django which database server to use and how to connect to it.
+我们需要告诉Django使用什么数据库以及如何连接数据库
+
+We’ll assume you’ve set up a database server, activated it, and created a database within it (e.g., using a CREATE DATABASE statement).
+我们假定你已经完成了数据库服务器的安装和激活，并且已经在其中创建了数据库（例如，用 CREATE DATABASE语句）
+
+If you’re using SQLite, no such setup is required, because SQLite uses standalone files on the filesystem to store its data.
+ 如果你使用SQLite，不需要这步安装，因为SQLite使用文件系统上的独立文件来存储数据
+
+As with TEMPLATE_DIRS in the previous chapter, database configuration lives in the Django settings file, called settings.py by default.
+象前面章节提到的 TEMPLATE_DIRS 一样，数据库配置也是在Django的配置文件里，缺省 是 settings.py 
+
+Edit that file and look for the database settings:
+ 打开这个文件并查找数据库配置：
+
+Here’s a rundown of each setting.
+配置纲要如下
+
+DATABASE_ENGINE tells Django which database engine to use.
+DATABASE_ENGINE 告诉Django使用哪个数据库引擎
+
+If you’re using a database with Django, DATABASE_ENGINE must be set to one of the strings shown in Table 5-1.
+ 如果你在 Django 中使用数据库， DATABASE_ENGINE必须是 Table 5-1 中所列出的值
+
+Note that for whichever database back-end you use, you’ll need to download and install the appropriate database adapter.
+要注意的是无论选择使用哪个数据库服务器，都必须下载和安装对应的数据库适配器
+
+Each one is available for free on the Web;
+ 访问表 5-1 中“所需适配器”一栏中的链接，可通过互联网免费获取这些适配器
+
+just follow the links in the “Required Adapter” column in Table 5-1.
+ 如果你使用Linux，你的发布包管理系统会提供合适的包
+
+If you’re on Linux, your distribution’s package-management system might offer convenient packages.
+ 比如说查找python-postgresql 或者python-psycopg 的软件包
+
+Example:
+配置示例：
+
+DATABASE_NAME tells Django the name of your database.
+DATABASE_NAME 将数据库名称告知 Django 
+
+For example:
+ 例如：
+
+If you’re using SQLite, specify the full filesystem path to the database file on your filesystem.
+如果使用 SQLite，请对数据库文件指定完整的文件系统路径
+
+For example:
+ 例如：
+
+As for where you put that SQLite database, we’re using the /home/django directory in this example, but you should pick a directory that works best for you.
+在这个例子中，我们将SQLite数据库放在/home/django目录下，你可以任意选用最合适你的目录
+
+DATABASE_USER tells Django which username to use when connecting to your database.
+DATABASE_USER 告诉 Django 用哪个用户连接数据库
+
+For example: If you’re using SQLite, leave this blank.
+ 例如： 如果用SQLite，空白即可
+
+DATABASE_PASSWORD tells Django which password to use when connecting to your database.
+DATABASE_PASSWORD 告诉Django连接用户的密码
+
+If you’re using SQLite or have an empty password, leave this blank.
+ SQLite 用空密码即可
+
+DATABASE_HOST tells Django which host to use when connecting to your database.
+DATABASE_HOST 告诉 Django 连接哪一台主机的数据库服务器
+
+If your database is on the same computer as your Django installation (i.e., localhost), leave this blank.
+ 如果数据库与 Django 安装于同一台计算机（即本机），可将此项保留空白
+
+If you’re using SQLite, leave this blank.
+ 如果你使用SQLite，此项留空
+
+MySQL is a special case here.
+此处的 MySQL 是一个特例
+
+If this value starts with a forward slash ('/') and you’re using MySQL, MySQL will connect via a Unix socket to the specified socket, for example:
+ 如果使用的是 MySQL 且该项设置值由斜杠（ '/' ）开头，MySQL 将通过 Unix socket 来连接指定的套接字，例如：
+
+Once you’ve entered those settings and saved settings.py, it’s a good idea to test your configuration.
+一旦在输入了那些设置并保存之后应当测试一下你的配置
+
+To do this, run python manage.py shell as in the last chapter, from within the mysite project directory.
+ 我们可以在mysite 项目目录下执行上章所提到的python manage.py shell 来进行测试
+
+(As we pointed out last chapter manage.py shell is a way to run the Python interpreter with the correct Django settings activated.
+ （我们上一章提到过在，manager.py shell 命令是以正确Django配置启用Python交互解释器的一种方法
+
+This is necessary in our case, because Django needs to know which settings file to use in order to get your database connection information.)
+ 这个方法在这里是很有必要的，因为Django需要知道加载哪个配置文件来获取数据库连接信息
+
+In the shell, type these commands to test your database configuration:
+输入下面这些命令来测试你的数据库配置：
+
+If nothing happens, then your database is configured properly.
+如果没有显示什么错误信息，那么你的数据库配置是正确的
+
+Otherwise, check the error message for clues about what’s wrong.
+ 否则，你就得 查看错误信息来纠正错误
+
+Table 5-2 shows some common errors.
+ 表 5-2 是一些常见错误
+
+Your First App¶
+第一个应用程序
+
+Now that you’ve verified the connection is working, it’s time to create a Django app – a bundle of Django code, including models and views, that lives together in a single Python package and represents a full Django application.
+你现在已经确认数据库连接正常工作了，让我们来创建一个 Django app-一个包含模型，视图和Django代码，并且形式为独立Python包的完整Django应用
+
+It’s worth explaining the terminology here, because this tends to trip up beginners.
+在这里要先解释一些术语，初学者可能会混淆它们
+
+We’d already created a project, in Chapter 2, so what’s the difference between a project and an app?
+ 在第二章我们已经创建了 project , 那么 project 和 _app_之间到底有什么不同呢
+
+The difference is that of configuration vs.
+它们的区别就是一个是配置另一个是 代码：
+
+A project is an instance of a certain set of Django apps, plus the configuration for those apps.
+一个project包含很多个Django app以及对它们的配置
+
+Technically, the only requirement of a project is that it supplies a settings file, which defines the database connection information, the list of installed apps, the TEMPLATE_DIRS, and so forth.
+技术上，project的作用是提供配置文件，比方说哪里定义数据库连接信息, 安装的app列表，TEMPLATE_DIRS ，等等
+
+An app is a portable set of Django functionality, usually including models and views, that lives together in a single Python package.
+一个app是一套Django功能的集合，通常包括模型和视图，按Python的包结构的方式存在
+
+For example, Django comes with a number of apps, such as a commenting system and an automatic admin interface.
+例如，Django本身内建有一些app，例如注释系统和自动管理界面
+
+A key thing to note about these apps is that they’re portable and reusable across multiple projects.
+ app的一个关键点是它们是很容易移植到其他project和被多个project复用
+
+There are very few hard-and-fast rules about how you fit your Django code into this scheme.
+对于如何架构Django代码并没有快速成套的规则
+
+If you’re building a simple Web site, you may use only a single app.
+ 如果你只是建造一个简单的Web站点，那么可能你只需要一个app就可以了
+
+If you’re building a complex Web site with several unrelated pieces such as an e-commerce system and a message board, you’ll probably want to split those into separate apps so that you’ll be able to reuse them individually in the future.
+ 但如果是一个包含许多不相关的模块的复杂的网站，例如电子商务和社区之类的站点，那么你可能需要把这些模块划分成不同的app，以便以后复用
+
+Indeed, you don’t necessarily need to create apps at all, as evidenced by the example view functions we’ve created so far in this book.
+不错，你可以不用创建app，这一点应经被我们之前编写的视图函数的例子证明了 
+
+In those cases, we simply created a file called views.py, filled it with view functions, and pointed our URLconf at those functions.
+ 在那些例子中，我们只是简单的创建了一个称为views.py的文件，编写了一些函数并在URLconf中设置了各个函数的映射
+
+No “apps” were needed.
+ 这些情况都不需要使用apps
+
+However, there’s one requirement regarding the app convention: if you’re using Django’s database layer (models), you must create a Django app.
+但是，系统对app有一个约定： 如果你使用了Django的数据库层（模型），你 必须创建一个Django app
+
+Models must live within apps.
+ 模型必须存放在apps中
+
+Thus, in order to start writing our models, we’ll need to create a new app.
+ 因此，为了开始建造 我们的模型，我们必须创建一个新的app
+
+Within the mysite project directory, type this command to create a books app:
+在mysite 项目文件下输入下面的命令来创建books app：
+
+This command does not produce any output, but it does create a books directory within the mysite directory.
+这个命令并没有输出什么，它只在 mysite 的目录里创建了一个 books 目录
+
+Let’s look at the contents of that directory:
+ 让我们来看看这个目录的内容：
+
+These files will contain the models and views for this app.
+这个目录包含了这个app的模型和视图
+
+Have a look at models.py and views.py in your favorite text editor.
+使用你最喜欢的文本编辑器查看一下 models.py 和 views.py 文件的内容
+
+Both files are empty, except for comments and an import in models.py.
+ 它们都是空的，除了 models.py 里有一个 import
+
+This is the blank slate for your Django app.
+这就是你Django app的基础
+
+Defining Models in Python¶
+在Python代码里定义模型
+
+As we discussed earlier in this chapter, the “M” in “MTV” stands for “Model.” A Django model is a description of the data in your database, represented as Python code.
+我们早些时候谈到
+
+It’s your data layout – the equivalent of your SQL CREATE TABLE statements – except it’s in Python instead of SQL, and it includes more than just database column definitions.
+MTV里的M代表模型
+
+Django uses a model to execute SQL code behind the scenes and return convenient Python data structures representing the rows in your database tables.
+ Django模型是用Python代码形式表述的数据在数据库中的定义
+
+Django also uses models to represent higher-level concepts that SQL can’t necessarily handle.
+ 对数据层来说它等同于 CREATE TABLE 语句，只不过执行的是Python代码而不是 SQL，而且还包含了比数据库字段定义更多的含义
+
+If you’re familiar with databases, your immediate thought might be, “Isn’t it redundant to define data models in Python instead of in SQL?” Django works the way it does for several reasons:
+如果你对数据库很熟悉，你可能马上就会想到，用Python 和 SQL来定义数据模型是不是有点多余
+
+Introspection requires overhead and is imperfect.
+自省（运行时自动识别数据库）会导致过载和有数据完整性问题
+
+In order to provide convenient data-access APIs, Django needs to know the database layout somehow, and there are two ways of accomplishing this.
+ 为了提供方便的数据访问API， Django需要以 某种方式 知道数据库层内部信息，有两种实现方式
+
+The first way would be to explicitly describe the data in Python, and the second way would be to introspect the database at runtime to determine the data models.
+ 第一种方式是用Python明确地定义数据模型，第二种方式是通过自省来自动侦测识别数据模型
+
+This second way seems cleaner, because the metadata about your tables lives in only one place, but it introduces a few problems.
+第二种方式看起来更清晰，因为数据表信息只存放在一个地方-数据库里，但是会带来一些问题
+
+First, introspecting a database at runtime obviously requires overhead.
+ 首先，运行时扫描数据库会带来严重的系统过载
+
+If the framework had to introspect the database each time it processed a request, or even only when the Web server was initialized, this would incur an unacceptable level of overhead.
+ 如果每个请求都要扫描数据库的表结构，或者即便是 服务启动时做一次都是会带来不能接受的系统过载
+
+(While some believe that level of overhead is acceptable, Django’s developers aim to trim as much framework overhead as possible.) Second, some databases, notably older versions of MySQL, do not store sufficient metadata for accurate and complete introspection.
+ （有人认为这个程度的系统过载是可以接受的，而Django开发者的目标是尽可能地降低框架的系统过载）
+
+Writing Python is fun, and keeping everything in Python limits the number of times your brain has to do a “context switch.” It helps productivity if you keep yourself in a single programming environment/mentality for as long as possible.
+编写Python代码是非常有趣的，保持用Python的方式思考会避免你的大脑在不同领域来回切换
+
+Having to write SQL, then Python, and then SQL again is disruptive.
+ 尽可能的保持在单一的编程环境/思想状态下可以帮助你提高生产率
+
+Having data models stored as code rather than in your database makes it easier to keep your models under version control.
+把数据模型用代码的方式表述来让你可以容易对它们进行版本控制
+
+This way, you can easily keep track of changes to your data layouts.
+ 这样，你可以很容易了解数据层 的变动情况
+
+SQL allows for only a certain level of metadata about a data layout.
+SQL只能描述特定类型的数据字段
+
+Most database systems, for example, do not provide a specialized data type for representing email addresses or URLs.
+ 例如，大多数数据库都没有专用的字段类型来描述Email地址、URL
+
+Django models do.
+ 而用Django的模型可以做到这一点
+
+The advantage of higher-level data types is higher productivity and more reusable code.
+ 好处就是高级的数据类型带来更高的效率和更好的代码复用
+
+SQL is inconsistent across database platforms.
+SQL还有在不同数据库平台的兼容性问题
+
+If you’re distributing a Web application, for example, it’s much more pragmatic to distribute a Python module that describes your data layout than separate sets of CREATE TABLE statements for MySQL, PostgreSQL, and SQLite.
+ 发布Web应用的时候，使用Python模块描述数据库结构信息可以避免为MySQL, PostgreSQL, and SQLite编写不同的CREATE TABLE
+
+A drawback of this approach, however, is that it’s possible for the Python code to get out of sync with what’s actually in the database.
+当然，这个方法也有一个缺点，就是Python代码和数据库表的同步问题
+
+If you make changes to a Django model, you’ll need to make the same changes inside your database to keep your database consistent with the model.
+ 如果你修改了一个Django模型， 你要自己来修改数据库来保证和模型同步
+
+We’ll discuss some strategies for handling this problem later in this chapter.
+ 我们将在稍后讲解解决这个问题的几种策略
+
+Finally, we should note that Django includes a utility that can generate models by introspecting an existing database.
+最后,我们要提醒你Django提供了实用工具来从现有的数据库表中自动扫描生成模型
+
+This is useful for quickly getting up and running with legacy data.
+ 这对已有的数据库来说是非常快捷有用的
+
+We’ll cover this in Chapter 18.
+ 我们将在第18章中对此进行讨论
+
+Your First Model¶
+第一个模型
+
+As an ongoing example in this chapter and the next chapter, we’ll focus on a basic book/author/publisher data layout.
+在本章和后续章节里，我们把注意力放在一个基本的 书籍/作者/出版商 数据库结构上
+
+We use this as our example because the conceptual relationships between books, authors, and publishers are well known, and this is a common data layout used in introductory SQL textbooks.
+ 我们这样做是因为 这是一个众所周知的例子，很多SQL有关的书籍也常用这个举例
+
+You’re also reading a book that was written by authors and produced by a publisher!
+ 你现在看的这本书也是由作者 创作再由出版商出版的哦
+
+We’ll suppose the following concepts, fields, and relationships:
+我们来假定下面的这些概念、字段和关系：
+
+The first step in using this database layout with Django is to express it as Python code.
+第一步是用Python代码来描述它们
+
+In the models.py file that was created by the startapp command, enter the following:
+ 打开由startapp 命令创建的models.py 并输入下面的内容：
+
+Let’s quickly examine this code to cover the basics.
+让我们来快速讲解一下这些代码的含义
+
+The first thing to notice is that each model is represented by a Python class that is a subclass of django.db.models.Model.
+ 首先要注意的事是每个数据模型都是 django.db.models.Model 的子类
+
+The parent class, Model, contains all the machinery necessary to make these objects capable of interacting with a database – and that leaves our models responsible solely for defining their fields, in a nice and compact syntax.
+它的父类 Model 包含了所有必要的和数据库交互的方法，并提供了一个简洁漂亮的定义数据库字段的语法
+
+Believe it or not, this is all the code we need to write to have basic data access with Django.
+ 信不信由你，这些就是我们需要编写的通过Django存取基本数据的所有代码
+
+Each model generally corresponds to a single database table, and each attribute on a model generally corresponds to a column in that database table.
+每个模型相当于单个数据库表，每个属性也是这个表中的一个字段
+
+The attribute name corresponds to the column’s name, and the type of field (e.g., CharField) corresponds to the database column type (e.g., varchar).
+ 属性名就是字段名，它的类型（例如CharField ）相当于数据库的字段类型 （例如 varchar ）
+
+For example, the Publisher model is equivalent to the following table (assuming PostgreSQL CREATE TABLE syntax):
+例如， Publisher 模块等同于下面这张表（用PostgreSQL的 CREATE TABLE 语法描述）：
+
+Indeed, Django can generate that CREATE TABLE statement automatically, as we’ll show you in a moment.
+事实上，正如过一会儿我们所要展示的，Django 可以自动生成这些 CREATE TABLE 语句
+
+The exception to the one-class-per-database-table rule is the case of many-to-many relationships.
+“每个数据库表对应一个类”这条规则的例外情况是多对多关系
+
+In our example models, Book has a ManyToManyField called authors.
+ 在我们的范例模型中， Book 有一个多对多字段 叫做 authors 
+
+This designates that a book has one or many authors, but the Book database table doesn’t get an authors column.
+ 该字段表明一本书籍有一个或多个作者，但 Book 数据库表却并没有 authors 字段
+
+Rather, Django creates an additional table – a many-to-many “join table” – that handles the mapping of books to authors.
+ 相反，Django创建了一个额外的表（多对多连接表）来处理书籍和作者之间的映射关系
+
+For a full list of field types and model syntax options, see Appendix B.
+请查看附录 B 了解所有的字段类型和模型语法选项
+
+Finally, note we haven’t explicitly defined a primary key in any of these models.
+最后需要注意的是，我们并没有显式地为这些模型定义任何主键
+
+Unless you instruct it otherwise, Django automatically gives every model an auto-incrementing integer primary key field called id.
+ 除非你单独指明，否则Django会自动为每个模型生成一个自增长的整数主键字段每个Django模型都要求有单独的主键
+
+Each Django model is required to have a single-column primary key.
+id
+
+Installing the Model¶
+模型安装
+
+We’ve written the code;
+完成这些代码之后，现在让我们来在数据库中创建这些表
+
+now let’s create the tables in our database.
+ 要完成该项工作，第一步是在 Django 项目中 _激活_这些模型
+
+In order to do that, the first step is to activate these models in our Django project.
+ 将 books app 添加到配置文件的已安装应用列表中即可完成此步骤
+
+Edit the settings.py file again, and look for the INSTALLED_APPS setting.
+再次编辑 settings.py 文件， 找到 INSTALLED_APPS 设置
+
+INSTALLED_APPS tells Django which apps are activated for a given project.
+ INSTALLED_APPS 告诉 Django 项目哪些 app 处于激活状态
+
+By default, it looks something like this:
+ 缺省情况下如下所示：
+
+Temporarily comment out all four of those strings by putting a hash character (#) in front of them.
+把这四个设置前面加#临时注释起来
+
+(They’re included by default as a common-case convenience, but we’ll activate and discuss them in subsequent chapters.) While you’re at it, comment out the default MIDDLEWARE_CLASSES setting, too;
+ （这四个app是经常使用到的，我们将在后续章节里讨论如何使用它们）
+
+the default values in MIDDLEWARE_CLASSES depend on some of the apps we just commented out.
+同时，注释掉MIDDLEWARE_CLASSES的默认设置条目，因为这些条目是依赖于刚才我们刚在INSTALLED_APPS注释掉的apps
+
+Then, add 'mysite.books' to the INSTALLED_APPS list, so the setting ends up looking like this:
+ 然后，添加‘mysite.books’ 到INSTALLED_APPS 的末尾，此时设置的内容看起来应该是这样的：
+
+(As we mentioned last chapter when setting TEMPLATE_DIRS, you’ll need to be sure to include the trailing comma in INSTALLED_APPS, because it’s a single-element tuple.
+(就像我们在上一章设置TEMPLATE_DIRS所提到的逗号，同样在INSTALLED_APPS的末尾也需添加一个逗号，因为这是个单元素的元组
+
+By the way, this book’s authors prefer to put a comma after every element of a tuple, regardless of whether the tuple has only a single element.
+ 另外，本书的作者喜欢在 每一个 tuple元素后面加一个逗号，不管它是不是 只有一个元素
+
+This avoids the issue of forgetting commas, and there’s no penalty for using that extra comma.)
+ 这是为了避免忘了加逗号，而且也没什么坏处
+
+Each app in INSTALLED_APPS is represented by its full Python path – that is, the path of packages, separated by dots, leading to the app package.
+'mysite.books'指示我们正在编写的books app
+
+Now that the Django app has been activated in the settings file, we can create the database tables in our database.
+现在我们可以创建数据库表了
+
+First, let’s validate the models by running this command:
+ 首先，用下面的命令验证模型的有效性：
+
+The validate command checks whether your models’ syntax and logic are correct.
+validate 命令检查你的模型的语法和逻辑是否正确
+
+If all is well, you’ll see the message 0 errors found.
+ 如果一切正常，你会看到 0 errors found 消息
+
+If you don’t, make sure you typed in the model code correctly.
+如果出错，请检查你输入的模型代码
+
+The error output should give you helpful information about what was wrong with the code.
+ 错误输出会给出非常有用的错误信息来帮助你修正你的模型
+
+Any time you think you have problems with your models, run python manage.py validate.
+一旦你觉得你的模型可能有问题，运行 python manage.py validate 
+
+It tends to catch all the common model problems.
+ 它可以帮助你捕获一些常见的模型定义错误
+
+If your models are valid, run the following command for Django to generate CREATE TABLE statements for your models in the books app (with colorful syntax highlighting available, if you’re using Unix):
+模型确认没问题了，运行下面的命令来生成 CREATE TABLE 语句（如果你使用的是Unix，那么可以启用语法高亮）：
+
+In this command, books is the name of the app.
+在这个命令行中， books 是app的名称
+
+It’s what you specified when you ran the command manage.py startapp.
+ 和你运行 manage.py startapp 中的一样
+
+When you run the command, you should see something like this:
+执行之后，输出如下：
+
+Note the following:
+注意：
+
+The sqlall command doesn’t actually create the tables or otherwise touch your database – it just prints output to the screen so you can see what SQL Django would execute if you asked it.
+sqlall 命令并没有在数据库中真正创建数据表，只是把SQL语句段打印出来，这样你可以看到Django究竟会做些什么
+
+If you wanted to, you could copy and paste this SQL into your database client, or use Unix pipes to pass it directly (e.g., python manage.py sqlall books | psql mydb).
+ 如果你想这么做的话，你可以把那些SQL语句复制到你的数据库客户端执行，或者通过Unix管道直接进行操作（例如，python manager.py sqlall books | psql mydb ）
+
+However, Django provides an easier way of committing the SQL to the database: the syncdb command:
+不过，Django提供了一种更为简易的提交SQL语句至数据库的方法： syncdb 命令
+
+Run that command, and you’ll see something like this:
+执行这个命令后，将看到类似以下的内容：
+
+The syncdb command is a simple “sync” of your models to your database.
+syncdb 命令是同步你的模型到数据库的一个简单方法
+
+It looks at all of the models in each app in your INSTALLED_APPS setting, checks the database to see whether the appropriate tables exist yet, and creates the tables if they don’t yet exist.
+ 它会根据 INSTALLED_APPS 里设置的app来检查数据库， 如果表不存在，它就会创建它
+
+Note that syncdb does not sync changes in models or deletions of models;
+ 需要注意的是， syncdb 并 _不能_将模型的修改或删除同步到数据库
+
+if you make a change to a model or delete a model, and you want to update the database, syncdb will not handle that.
+如果你修改或删除了一个模型，并想把它提交到数据库，syncdb并不会做出任何处理
+
+(More on this in the “Making Changes to a Database Schema” section in Chapter 10.)
+ （更多内容请查看本章最后的“修改数据库的架构”一段
+
+If you run python manage.py syncdb again, nothing happens, because you haven’t added any models to the books app or added any apps to INSTALLED_APPS.
+如果你再次运行 python manage.py syncdb ，什么也没发生，因为你没有添加新的模型或者 添加新的app
+
+Ergo, it’s always safe to run python manage.py syncdb – it won’t clobber things.
+因此，运行python manage.py syncdb总是安全的，因为它不会重复执行SQL语句
+
+If you’re interested, take a moment to dive into your database server’s command-line client and see the database tables Django created.
+如果你有兴趣，花点时间用你的SQL客户端登录进数据库服务器看看刚才Django创建的数据表
+
+You can manually run the command-line client (e.g., psql for PostgreSQL) or you can run the command python manage.py dbshell, which will figure out which command-line client to run, depending on your DATABASE_SERVER setting.
+ 你可以手动启动命令行客户端（例如，执行PostgreSQL的psql 命令），也可以执行 python manage.py dbshell ，这个命令将依据DATABASE_SERVER 的里设置自动检测使用哪种命令行客户端
+
+The latter is almost always more convenient.
+ 常言说，后来者居上
+
+Basic Data Access¶
+基本数据访问
+
+Once you’ve created a model, Django automatically provides a high-level Python API for working with those models.
+一旦你创建了模型，Django自动为这些模型提供了高级的Python API
+
+Try it out by running python manage.py shell and typing the following:
+ 运行 python manage.py shell 并输入下面的内容试试看：
+
+These few lines of code accomplish quite a bit.
+这短短几行代码干了不少的事
+
+Here are the highlights:
+ 这里简单的说一下：
+
+First, we import our Publisher model class.
+首先，导入Publisher模型类， 通过这个类我们可以与包含 出版社 的数据表进行交互
+
+We create a Publisher object by instantiating it with values for each field – name, address, etc.
+接着，创建一个Publisher 类的实例并设置了字段name, address 等的值
+
+To save the object to the database, call its save() method.
+调用该对象的 save() 方法，将对象保存到数据库中
+
+Behind the scenes, Django executes an SQL INSERT statement here.
+ Django 会在后台执行一条 INSERT 语句
+
+To retrieve publishers from the database, use the attribute Publisher.objects, which you can think of as a set of all publishers.
+最后，使用Publisher.objects 属性从数据库取出出版商的信息，这个属性可以认为是包含出版商的记录集
+
+Fetch a list of all Publisher objects in the database with the statement Publisher.objects.all().
+ 这个属性有许多方法， 这里先介绍调用Publisher.objects.all() 方法获取数据库中Publisher 类的所有对象
+
+Behind the scenes, Django executes an SQL SELECT statement here.
+这个操作的幕后，Django执行了一条SQL SELECT 语句
+
+One thing is worth mentioning, in case it wasn’t clear from this example.
+这里有一个值得注意的地方，在这个例子可能并未清晰地展示
+
+When you’re creating objects using the Django model API, Django doesn’t save the objects to the database until you call the save() method:
+ 当你使用Django modle API创建对象时Django并未将对象保存至数据库内，除非你调用save() 方法：
+
+If you want to create an object and save it to the database in a single step, use the objects.create() method.
+如果需要一步完成对象的创建与存储至数据库，就使用objects.create() 方法
+
+This example is equivalent to the example above:
+ 下面的例子与之前的例子等价：
+
+Naturally, you can do quite a lot with the Django database API – but first, let’s take care of a small annoyance.
+当然，你肯定想执行更多的Django数据库API试试看，不过，还是让我们先解决一点烦人的小问题
+
+Adding Model String Representations¶
+添加模块的字符串表现
+
+When we printed out the list of publishers, all we got was this unhelpful display that makes it difficult to tell the Publisher objects apart:
+当我们打印整个publisher列表时，我们没有得到想要的有用信息，无法把````对象区分开来：
+
+We can fix this easily by adding a method called __unicode__() to our Publisher class.
+我们可以简单解决这个问题，只需要为Publisher 对象添加一个方法 unicode() 
+
+A __unicode__() method tells Python how to display the “unicode” representation of an object.
+ unicode() 方法告诉Python如何将对象以unicode的方式显示出来
+
+You can see this in action by adding a __unicode__() method to the three models:
+ 为以上三个模型添加unicode()方法后，就可以看到效果了：
+
+As you can see, a __unicode__() method can do whatever it needs to do in order to return a representation of an object.
+就象你看到的一样， unicode() 方法可以进行任何处理来返回对一个对象的字符串表示
+
+Here, the __unicode__() methods for Publisher and Book simply return the object’s name and title, respectively, but the __unicode__() for Author is slightly more complex – it pieces together the first_name and last_name fields, separated by a space.
+ Publisher和Book对象的unicode()方法简单地返回各自的名称和标题，Author对象的unicode()方法则稍微复杂一些，它将first_name和last_name字段值以空格连接后再返回
+
+The only requirement for __unicode__() is that it return a Unicode object.
+对unicode()的唯一要求就是它要返回一个unicode对象 如果__unicode__() 方法未返回一个Unicode对象，而返回比如说一个整型数字，那么Python将抛出一个TypeError 错误，并提示：”coercing to Unicode: need string or buffer, int found” 
+
+Unicode objects
+Unicode对象
+
+What are Unicode objects?
+什么是Unicode对象呢
+
+You can think of a Unicode object as a Python string that can handle more than a million different types of characters, from accented versions of Latin characters to non-Latin characters to curly quotes and obscure symbols.
+你可以认为unicode对象就是一个Python字符串，它可以处理上百万不同类别的字符——从古老版本的Latin字符到非Latin字符，再到曲折的引用和艰涩的符号
+
+Normal Python strings are encoded, which means they use an encoding such as ASCII, ISO-8859-1 or UTF-8.
+普通的python字符串是经过_编码_的，意思就是它们使用了某种编码方式（如ASCII，ISO-8859-1或者UTF-8）来编码
+
+If you’re storing fancy characters (anything beyond the standard 128 ASCII characters such as 0-9 and A-Z) in a normal Python string, you have to keep track of which encoding your string is using, or the fancy characters might appear messed up when they’re displayed or printed.
+ 如果你把奇特的字符（其它任何超出标准128个如0-9和A-Z之类的ASCII字符）保存在一个普通的Python字符串里，你一定要跟踪你的字符串是用什么编码的，否则这些奇特的字符可能会在显示或者打印的时候出现乱码
+
+Problems occur when you have data that’s stored in one encoding and you try to combine it with data in a different encoding, or you try to display it in an application that assumes a certain encoding.
+ 当你尝试要将用某种编码保存的数据结合到另外一种编码的数据中，或者你想要把它显示在已经假定了某种编码的程序中的时候，问题就会发生
+
+We’ve all seen Web pages and e-mails that are littered with ”???
+ 我们都已经见到过网页和邮件被
+
+??????” or other characters in odd places;
+
+
+that generally suggests there’s an encoding problem.
+
+
+Unicode objects, however, have no encoding;
+但是Unicode对象并没有编码
+
+they use a consistent, universal set of characters called, well, “Unicode.” When you deal with Unicode objects in Python, you can mix and match them safely without having to worry about encoding issues.
+它们使用Unicode，一个一致的，通用的字符编码集
+
+Django uses Unicode objects throughout the framework.
+Django 在其内部的各个方面都使用到了 Unicode 对象
+
+Model objects are retrieved as Unicode objects, views interact with Unicode data, and templates are rendered as Unicode.
+ 模型 对象中，检索匹配方面的操作使用的是 Unicode 对象，视图 函数之间的交互使用的是 Unicode 对象，模板的渲染也是用的 Unicode 对象
+
+Generally, you won’t have to worry about making sure your encodings are right;
+ 通常，我们不必担心编码是否正确，后台会处理的很好
+
+Note that this has been a very high-level, dumbed down overview of Unicode objects, and you owe it to yourself to learn more about the topic.
+注意，我们这里只是对Unicode对象进行非常浅显的概述，若要深入了解你可能需要查阅相关的资料
+
+A good place to start is http://www.joelonsoftware.com/articles/Unicode.html .
+ 这是一个很好的起点：http://www.joelonsoftware.com/articles/Unicode.html
+
+For the __unicode__() changes to take effect, exit out of the Python shell and enter it again with python manage.py shell.
+为了让我们的修改生效，先退出Python Shell，然后再次运行 python manage.py shell 进入
+
+(This is the simplest way to make code changes take effect.) Now the list of Publisher objects is much easier to understand:
+（这是保证代码修改生效的最简单方法
+
+Make sure any model you define has a __unicode__() method – not only for your own convenience when using the interactive interpreter, but also because Django uses the output of __unicode__() in several places when it needs to display objects.
+请确保你的每一个模型里都包含 unicode() 方法，这不只是为了交互时方便，也是因为 Django会在其他一些地方用 unicode() 来显示对象
+
+Finally, note that __unicode__() is a good example of adding behavior to models.
+最后， unicode() 也是一个很好的例子来演示我们怎么添加 行为 到模型里
+
+A Django model describes more than the database table layout for an object;
+ Django的模型不只是为对象定义了数据库表的结构，还定义了对象的行为
+
+it also describes any functionality that object knows how to do.
+ unicode() 就是一个例子来演示模型知道怎么显示它们自己
+
+Inserting and Updating Data¶
+插入和更新数据
+
+You’ve already seen this done: to insert a row into your database, first create an instance of your model using keyword arguments, like so:
+你已经知道怎么做了： 先使用一些关键参数创建对象实例，如下：
+
+As we noted above, this act of instantiating a model class does not touch the database.
+这个对象实例并 没有 对数据库做修改
+
+The record isn’t saved into the database until you call save(), like this:
+ 在调用save() 方法之前，记录并没有保存至数据库，像这样：
+
+In SQL, this can roughly be translated into the following:
+在SQL里，这大致可以转换成这样：
+
+Because the Publisher model uses an autoincrementing primary key id, the initial call to save() does one more thing: it calculates the primary key value for the record and sets it to the id attribute on the instance:
+因为 Publisher 模型有一个自动增加的主键 id ，所以第一次调用 save() 还多做了一件事： 计算这个主键的值并把它赋值给这个对象实例：
+
+Subsequent calls to save() will save the record in place, without creating a new record (i.e., performing an SQL UPDATE statement instead of an INSERT):
+接下来再调用 save() 将不会创建新的记录，而只是修改记录内容（也就是 执行 UPDATE SQL语句，而不是INSERT 语句）：
+
+The preceding save() statement will result in roughly the following SQL:
+前面执行的 save() 相当于下面的SQL语句：
+
+Yes, note that all of the fields will be updated, not just the ones that have been changed.
+注意，并不是只更新修改过的那个字段，所有的字段都会被更新
+
+Depending on your application, this may cause a race condition.
+ 这个操作有可能引起竞态条件，这取决于你的应用程序
+
+See “Updating Multiple Objects in One Statement” below to find out how to execute this (slightly different) query:
+ 请参阅后面的“更新多个对象”小节以了解如何实现这种轻量的修改（只修改对象的部分字段）
+
+Selecting Objects¶
+选择对象
+
+Knowing how to create and update database records is essential, but chances are that the Web applications you’ll build will be doing more querying of existing objects than creating new ones.
+当然，创建新的数据库，并更新之中的数据是必要的，但是，对于 Web 应用程序来说，更多的时候是在检索查询数据库
+
+We’ve already seen a way to retrieve every record for a given model:
+ 我们已经知道如何从一个给定的模型中取出所有记录：
+
+This roughly translates to this SQL:
+这相当于这个SQL语句：
+
+Note
+注意
+
+Notice that Django doesn’t use SELECT * when looking up data and instead lists all fields explicitly.
+注意到Django在选择所有数据时并没有使用 SELECT ，而是显式列出了所有字段
+
+This is by design: in certain circumstances SELECT * can be slower, and (more important) listing fields more closely follows one tenet of the Zen of Python: “Explicit is better than implicit.”
+ 设计的时候就是这样：SELECT 会更慢，而且最重要的是列出所有字段遵循了Python 界的一个信条： 明言胜于暗示
+
+For more on the Zen of Python, try typing import this at a Python prompt.
+有关Python之禅(戒律) :-），在Python提示行输入 import this 试试看
+
+Let’s take a close look at each part of this Publisher.objects.all() line:
+让我们来仔细看看 Publisher.objects.all() 这行的每个部分：
+
+First, we have the model we defined, Publisher.
+首先，我们有一个已定义的模型 Publisher 
+
+No surprise here: when you want to look up data, you use the model for that data.
+没什么好奇怪的： 你想要查找数据， 你就用模型来获得数据
+
+Next, we have the objects attribute.
+然后，是objects属性
+
+This is called a manager.
+ 它被称为管理器，我们将在第10章中详细讨论它
+
+Managers are discussed in detail in Chapter 10.
+ 目前，我们只需了解管理器管理着所有针对数据包含、还有最重要的数据查询的表格级操作
+
+All models automatically get a objects manager;
+所有的模型都自动拥有一个 objects 管理器
+
+you’ll use it any time you want to look up model instances.
+你可以在想要查找数据时使用它
+
+Finally, we have all().
+最后，还有 all() 方法
+
+This is a method on the objects manager that returns all the rows in the database.
+这个方法返回返回数据库中所有的记录
+
+Though this object looks like a list, it’s actually a QuerySet – an object that represents a specific set of rows from the database.
+ 尽管这个对象 看起来 象一个列表（list），它实际是一个 QuerySet 对象， 这个对象是数据库中一些记录的集合
+
+Appendix C deals with QuerySets in detail.
+ 附录C将详细描述QuerySet
+
+For the rest of this chapter, we’ll just treat them like the lists they emulate.
+ 现在，我们就先当它是一个仿真列表对象好了
+
+Any database lookup is going to follow this general pattern – we’ll call methods on the manager attached to the model we want to query against.
+所有的数据库查找都遵循一个通用模式：
+
+Naturally, it’s rare to want to select everything from a database at once;
+我们很少会一次性从数据库中取出所有的数据
+
+in most cases, you’ll want to deal with a subset of your data.
+通常都只针对一部分数据进行操作
+
+In the Django API, you can filter your data using the filter() method:
+ 在Django API中，我们可以使用filter() 方法对数据进行过滤：
+
+filter() takes keyword arguments that get translated into the appropriate SQL WHERE clauses.
+filter() 根据关键字参数来转换成 WHERE SQL语句
+
+The preceding example would get translated into something like this:
+ 前面这个例子 相当于这样：
+
+You can pass multiple arguments into filter() to narrow down things further:
+你可以传递多个参数到 filter() 来缩小选取范围：
+
+Those multiple arguments get translated into SQL AND clauses.
+多个参数会被转换成 AND SQL从句， 因此上面的代码可以转化成这样：
+
+Notice that by default the lookups use the SQL = operator to do exact match lookups.
+注意，SQL缺省的 = 操作符是精确匹配的， 其他类型的查找也可以使用：
+
+That’s a double underscore there between name and contains.
+在 name 和 contains 之间有双下划线
+
+Like Python itself, Django uses the double underscore to signal that something “magic” is happening – here, the __contains part gets translated by Django into a SQL LIKE statement:
+和Python一样，Django也使用双下划线来表明会进行一些魔术般的操作
+
+Many other types of lookups are available, including icontains (case-insensitive LIKE), startswith and endswith, and range (SQL BETWEEN queries).
+其他的一些查找类型有：icontains(大小写无关的LIKE),startswith和endswith, 还有range(SQLBETWEEN查询）
+
+Appendix C describes all of these lookup types in detail.
+ 附录C详细描述了所有的查找类型
+
+The filter() examples above all returned a QuerySet, which you can treat like a list.
+上面的例子中filter() 函数返回一个记录集，这个记录集是一个列表
+
+Sometimes it’s more convenient to fetch only a single object, as opposed to a list.
+ 相对列表来说，有些时候我们更需要获取单个的对象， get() 方法就是在此时使用的：
+
+Instead of a list (rather, QuerySet), only a single object is returned.
+这样，就返回了单个对象，而不是列表（更准确的说，QuerySet)
+
+Because of that, a query resulting in multiple objects will cause an exception:
+ 所以，如果结果是多个对象，会导致抛出异常：
+
+A query that returns no objects also causes an exception:
+如果查询没有返回结果也会抛出异常：
+
+The DoesNotExist exception is an attribute of the model’s class – Publisher.DoesNotExist.
+这个 DoesNotExist 异常 是 Publisher 这个 model 类的一个属性，即 Publisher.DoesNotExist
+
+In your applications, you’ll want to trap these exceptions, like this:
+在你的应用中，你可以捕获并处理这个异常，像这样：
+
+As you play around with the previous examples, you might discover that the objects are being returned in a seemingly random order.
+在运行前面的例子中，你可能已经注意到返回的结果是无序的
+
+You aren’t imagining things;
+ 我们还没有告诉数据库 怎样对结果进行排序，所以我们返回的结果是无序的
+
+In your Django applications, you’ll probably want to order your results according to a certain value – say, alphabetically.
+在你的 Django 应用中，你或许希望根据某字段的值对检索结果排序，比如说，按字母顺序
+
+To do this, use the order_by() method:
+ 那么，使用order_by() 这个方法就可以搞定了
+
+This doesn’t look much different from the earlier all() example, but the SQL now includes a specific ordering:
+跟以前的 all() 例子差不多，SQL语句里多了指定排序的部分：
+
+You can order by any field you like:
+我们可以对任意字段进行排序：
+
+To order by multiple fields (where the second field is used to disambiguate ordering in cases where the first is the same), use multiple arguments:
+如果需要以多个字段为标准进行排序（第二个字段会在第一个字段的值相同的情况下被使用到），使用多个参数就可以了，如下：
+
+You can also specify reverse ordering by prefixing the field name with a - (that’s a minus character):
+我们还可以指定逆向排序，在前面加一个减号 - 前缀：
+
+While this flexibility is useful, using order_by() all the time can be quite repetitive.
+尽管很灵活，但是每次都要用 order_by() 显得有点啰嗦
+
+Most of the time you’ll have a particular field you usually want to order by.
+ 大多数时间你通常只会对某些 字段进行排序
+
+In these cases, Django lets you specify a default ordering in the model:
+ 在这种情况下，Django让你可以指定模型的缺省排序方式：
+
+Here, we’ve introduced a new concept: the class Meta, which is a class that’s embedded within the Publisher class definition (i.e., it’s indented to be within class Publisher).
+现在，让我们来接触一个新的概念
+
+You can use this Meta class on any model to specify various model-specific options.
+ class Meta，内嵌于 Publisher 这个类的定义中（如果 class Publisher是顶格的，那么 class Meta 在它之下要缩进4个空格－－按 Python 的传统 ）
+
+A full reference of Meta options is available in Appendix B, but for now, we’re concerned with the ordering option.
+你可以在任意一个 模型 类中使用 Meta 类，来设置一些与特定模型相关的选项
+
+If you specify this, it tells Django that unless an ordering is given explicitly with order_by(), all Publisher objects should be ordered by the name field whenever they’re retrieved with the Django database API.
+ 在 附录B 中有 Meta 中所有可选项的完整参考，现在，我们关注 ordering 这个选项就够了
+
+You’ve seen how you can filter data, and you’ve seen how you can order it.
+我们已经知道如何对数据进行过滤和排序
+
+Often, of course, you’ll need to do both.
+ 当然，通常我们需要同时进行过滤和排序查询的操作
+
+In these cases, you simply “chain” the lookups together:
+ 因此，你可以简单地写成这种“链式”的形式：
+
+As you might expect, this translates to a SQL query with both a WHERE and an ORDER BY:
+你应该没猜错，转换成SQL查询就是 WHERE 和 ORDER BY 的组合：
+
+Another common need is to look up only a fixed number of rows.
+另一个常用的需求就是取出固定数目的记录
+
+Imagine you have thousands of publishers in your database, but you want to display only the first one.
+ 想象一下你有成千上万的出版商在你的数据库里， 但是你只想显示第一个
+
+You can do this using Python’s standard list slicing syntax:
+ 你可以使用标准的Python列表裁剪语句：
+
+This translates roughly to:
+这相当于：
+
+Similarly, you can retrieve a specific subset of data using Python’s range-slicing syntax:
+类似的，你可以用Python的range-slicing语法来取出数据的特定子集：
+
+This returns two objects, translating roughly to:
+这个例子返回两个对象，等同于以下的SQL语句：
+
+Note that negative slicing is not supported:
+注意，不支持Python的负索引(negative slicing)：
+
+This is easy to get around, though.
+虽然不支持负索引，但是我们可以使用其他的方法
+
+Just change the order_by() statement, like this:
+ 比如，稍微修改 order_by() 语句来实现：
+
+We pointed out in the “Inserting and Updating Data” section that the model save() method updates all columns in a row.
+在“插入和更新数据”小节中，我们有提到模型的save()方法，这个方法会更新一行里的所有列
+
+Depending on your application, you may want to update only a subset of columns.
+ 而某些情况下，我们只需要更新行里的某几列
+
+For example, let’s say we want to update the Apress Publisher to change the name from 'Apress' to 'Apress Publishing'.
+例如说我们现在想要将Apress Publisher的名称由原来的”Apress”更改为”Apress Publishing”
+
+Using save(), it would look something like this:
+若使用save()方法，如：
+
+This roughly translates to the following SQL:
+这等同于如下SQL语句：
+
+(Note that this example assumes Apress has a publisher ID of 52.)
+（注意在这里我们假设Apress的ID为52）
+
+You can see in this example that Django’s save() method sets all of the column values, not just the name column.
+在这个例子里我们可以看到Django的save()方法更新了不仅仅是name列的值，还有更新了所有的列
+
+If you’re in an environment where other columns of the database might change due to some other process, it’s smarter to change only the column you need to change.
+ 若name以外的列有可能会被其他的进程所改动的情况下，只更改name列显然是更加明智的
+
+To do this, use the update() method on QuerySet objects.
+ 更改某一指定的列，我们可以调用结果集（QuerySet）对象的update()方法： 示例如下：
+
+The SQL translation here is much more efficient and has no chance of race conditions:
+与之等同的SQL语句变得更高效，并且不会引起竞态条件
+
+The update() method works on any QuerySet, which means you can edit multiple records in bulk.
+update()方法对于任何结果集（QuerySet）均有效，这意味着你可以同时更新多条记录
+
+Here’s how you might change the country from 'U.S.A.' to USA in each Publisher record:
+ 以下示例演示如何将所有Publisher的country字段值由’U.S.A’更改为’USA’：
+
+The update() method has a return value – an integer representing how many records changed.
+update()方法会返回一个整型数值，表示受影响的记录条数
+
+In the above example, we got 2.
+ 在上面的例子中，这个值是2
+
+Deleting Objects¶
+删除对象
+
+To delete an object from your database, simply call the object’s delete() method:
+删除数据库中的对象只需调用该对象的delete()方法即可：
+
+You can also delete objects in bulk by calling delete() on the result of any QuerySet.
+同样我们可以在结果集上调用delete()方法同时删除多条记录
+
+This is similar to the update() method we showed in the last section:
+这一点与我们上一小节提到的update()方法相似：
+
+Be careful deleting your data!
+删除数据时要谨慎
+
+As a precaution against deleting all of the data in a particular table, Django requires you to explicitly use all() if you want to delete everything in your table.
+ 为了预防误删除掉某一个表内的所有数据，Django要求在删除表内所有数据时显示使用all()
+
+For example, this won’t work:
+ 比如，下面的操作将会出错：
+
+But it’ll work if you add the all() method:
+而一旦使用all()方法，所有数据将会被删除：
+
+If you’re just deleting a subset of your data, you don’t need to include all().
+如果只需要删除部分的数据，就不需要调用all()方法
+
+To repeat a previous example:
+再看一下之前的例子：
+
+What’s Next?¶
+下一章
+
+Having read this chapter, you have enough knowledge of Django models to be able to write basic database applications.
+通过本章的学习，你应该可以熟练地使用Django模型来编写一些简单的数据库应用程序
+
+Chapter 10 will provide some information on more advanced usage of Django’s database layer.
+ 在第十章我们将讨论Django数据库层的高级应用
+
+Once you’ve defined your models, the next step is to populate your database with data.
+一旦你定义了你的模型，接下来就是要把数据导入数据库里了
+
+You might have legacy data, in which case Chapter 18 will give you advice about integrating with legacy databases.
+ 你可能已经有现成的数据了，请看第十八章以获得有关如何集成现有数据库的建议
+
+You might rely on site users to supply your data, in which case Chapter 7 will teach you how to process user-submitted form data.
+ 也可能数据是用户提供的，第七章中还会教你怎么处理用户提交的数据
+
+But in some cases, you or your team might need to enter data manually, in which case it would be helpful to have a Web-based interface for entering and managing data.
+有时候，你和你的团队成员也需要手工输入数据，这时候如果有一个基于Web的数据输入和管理的界面就会很有帮助
+
+The next chapter covers Django’s admin interface, which exists precisely for that reason.
+ 下一章将介绍解决手工录入问题的方法——Django管理界面
+
+© Copyright 2012, Matt Behrens.
+www.shoucewang.com. All Rights Reserved. 手册网 版权所有
+

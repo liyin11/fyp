@@ -1,0 +1,324 @@
+In the following examples, input and output are distinguished by the presence or absence of prompts (>>> and ...): to repeat the example, you must type everything after the prompt, when the prompt appears;
+下面的例子中，输入和输出分别由大于号和句号提示符（ >>> 和 ... ）标注：如果想重现这些例子，就要在解释器的提示符后，输入（提示符后面的）那些不包含提示符的代码行
+
+lines that do not begin with a prompt are output from the interpreter.
+需要注意的是在练习中遇到的从属提示符表示你需要在最后多输入一个空行，解释器才能知道这是一个多行命令的结束
+
+Many of the examples in this manual, even those entered at the interactive prompt, include comments.
+本手册中的很多示例——包括那些带有交互提示符的——都含有注释
+
+Comments in Python start with the hash character, #, and extend to the end of the physical line.
+Python 中的注释以 # 字符起始，直至实际的行尾（译注——这里原作者用了 physical line 以表示实际的换行而非编辑器的自动换行）
+
+A comment may appear at the start of a line or following whitespace or code, but not within a string literal.
+注释可以从行首开始，也可以在空白或代码之后，但是不出现在字符串中
+
+A hash character within a string literal is just a hash character.
+文本字符串中的 # 字符仅仅表示 # 
+
+Since comments are to clarify code and are not interpreted by Python, they may be omitted when typing in examples.
+代码中的注释不会被 Python 解释，录入示例的时候可以忽略它们
+
+Some examples:
+如下示例:
+
+3.1.
+3.1. 将 Python 当做计算器¶
+
+Let’s try some simple Python commands.
+我们来尝试一些简单的 Python 命令
+
+Start the interpreter and wait for the primary prompt, >>>.
+启动解释器然后等待主提示符 >>> 出现（不需要很久）
+
+3.1.1.
+3.1.1. 数字¶
+
+The interpreter acts as a simple calculator: you can type an expression at it and it will write the value.
+解释器表现得就像一个简单的计算器：可以向其录入一些表达式，它会给出返回值
+
+Expression syntax is straightforward: the operators +, -, * and / work just like in most other languages (for example, Pascal or C);
+表达式语法很直白：运算符 +，-，* 和 / 与其它语言一样(例如：Pascal 或 C)
+
+parentheses (()) can be used for grouping.
+括号 (()) 用于分组
+
+For example:
+例如:
+
+The integer numbers (e.g.
+整数(例如，2， 4， 20 )的类型是 int，带有小数部分的数字(例如，5.0， 1.6)的类型是 float
+
+, 4, 20) have type int, the ones with a fractional part (e.g.
+在本教程的后面我们会看到更多关于数字类型的内容
+
+Division (/) always returns a float.
+除法(/)永远返回一个浮点数
+
+To do floor division and get an integer result (discarding any fractional result) you can use the // operator;
+如要使用 floor 除法 并且得到整数结果（丢掉任何小数部分），你可以使用 // 运算符
+
+to calculate the remainder you can use %:
+要计算余数你可以使用 %
+
+With Python, it is possible to use the ** operator to calculate powers [1]:
+通过 Python，还可以使用 ** 运算符计算幂乘方 [1]:
+
+The equal sign (=) is used to assign a value to a variable.
+等号( '=' )用于给变量赋值
+
+Afterwards, no result is displayed before the next interactive prompt:
+赋值之后，在下一个提示符之前不会有任何结果显示:
+
+If a variable is not “defined” (assigned a value), trying to use it will give you an error:
+变量在使用前必须 “定义”(赋值)，否则会出错:
+
+There is full support for floating point;
+浮点数有完整的支持
+
+operators with mixed type operands convert the integer operand to floating point:
+整数和浮点数的混合计算中，整数会被转换为浮点数:
+
+In interactive mode, the last printed expression is assigned to the variable _.
+交互模式中，最近一个表达式的值赋给变量 _
+
+This means that when you are using Python as a desk calculator, it is somewhat easier to continue calculations, for example:
+这样我们就可以把它当作一个桌面计算器，很方便的用于连续计算，例如:
+
+This variable should be treated as read-only by the user.
+此变量对于用户是只读的
+
+Don’t explicitly assign a value to it — you would create an independent local variable with the same name masking the built-in variable with its magic behavior.
+不要尝试给它赋值 —— 你只会创建一个独立的同名局部变量，它屏蔽了系统内置变量的魔术效果
+
+In addition to int and float, Python supports other types of numbers, such as Decimal and Fraction.
+除了 int 和 float，Python 还支持其它数字类型，例如 Decimal 和 Fraction
+
+Python also has built-in support for complex numbers, and uses the j or J suffix to indicate the imaginary part (e.g.
+Python 还内建支持 复数 ，使用后缀 j 或 J 表示虚数部分（例如，3+5j）
+
+3.1.2.
+3.1.2. 字符串¶
+
+Besides numbers, Python can also manipulate strings, which can be expressed in several ways.
+相比数值，Python 也提供了可以通过几种不同方式表示的字符串
+
+They can be enclosed in single quotes ('...') or double quotes ("...") with the same result [2].
+它们可以用单引号 ('...') 或双引号 ("...") 标识 [2]
+
+\ can be used to escape quotes:
+\ 可以用来转义引号:
+
+In the interactive interpreter, the output string is enclosed in quotes and special characters are escaped with backslashes.
+在交互式解释器中，输出的字符串会用引号引起来，特殊字符会用反斜杠转义
+
+While this might sometimes look different from the input (the enclosing quotes could change), the two strings are equivalent.
+虽然可能和输入看上去不太一样，但是两个字符串是相等的
+
+The string is enclosed in double quotes if the string contains a single quote and no double quotes, otherwise it is enclosed in single quotes.
+如果字符串中只有单引号而没有双引号，就用双引号引用，否则用单引号引用
+
+The print() function produces a more readable output, by omitting the enclosing quotes and by printing escaped and special characters:
+print() 函数生成可读性更好的输出, 它会省去引号并且打印出转义后的特殊字符：
+
+If you don’t want characters prefaced by \ to be interpreted as special characters, you can use raw strings by adding an r before the first quote:
+如果你前面带有 \ 的字符被当作特殊字符，你可以使用 原始字符串，方法是在第一个引号前面加上一个 r:
+
+String literals can span multiple lines.
+字符串文本能够分成多行
+
+One way is using triple-quotes: """...""" or '''...'''.
+一种方法是使用三引号："""...""" 或者 '''...'''
+
+End of lines are automatically included in the string, but it’s possible to prevent this by adding a \ at the end of the line.
+行尾换行符会被自动包含到字符串中，但是可以在行尾加上 \ 来避免这个行为
+
+The following example:
+下面的示例： 可以使用反斜杠为行结尾的连续字符串，它表示下一行在逻辑上是本行的后续内容:
+
+produces the following output (note that the initial newline is not included):
+将生成以下输出（注意，没有开始的第一行）:
+
+Strings can be concatenated (glued together) with the + operator, and repeated with *:
+字符串可以由 + 操作符连接(粘到一起)，可以由 * 表示重复:
+
+Two or more string literals (i.e.
+相邻的两个字符串文本自动连接在一起
+
+the ones enclosed between quotes) next to each other are automatically concatenated.
+:
+
+This only works with two literals though, not with variables or expressions:
+它只用于两个字符串文本，不能用于字符串表达式:
+
+If you want to concatenate variables or a variable and a literal, use +:
+如果你想连接多个变量或者连接一个变量和一个字符串文本，使用 +:
+
+This feature is particularly useful when you want to break long strings:
+这个功能在你想切分很长的字符串的时候特别有用:
+
+Strings can be indexed (subscripted), with the first character having index 0.
+字符串也可以被截取(检索)
+
+There is no separate character type;
+类似于 C ，字符串的第一个字符索引为 0 
+
+a character is simply a string of size one:
+Python没有单独的字符类型
+
+Indices may also be negative numbers, to start counting from the right:
+索引也可以是负数，这将导致从右边开始计算
+
+Note that since -0 is the same as 0, negative indices start from -1.
+请注意 -0 实际上就是 0，所以它不会导致从右边开始计算
+
+In addition to indexing, slicing is also supported.
+除了索引，还支持 切片
+
+While indexing is used to obtain individual characters, slicing allows you to obtain substring:
+索引用于获得单个字符，切片 让你获得一个子字符串:
+
+Note how the start is always included, and the end always excluded.
+注意，包含起始的字符，不包含末尾的字符
+
+This makes sure that s[:i] + s[i:] is always equal to s:
+这使得 s[:i] + s[i:] 永远等于 s:
+
+Slice indices have useful defaults;
+切片的索引有非常有用的默认值
+
+an omitted first index defaults to zero, an omitted second index defaults to the size of the string being sliced.
+省略的第一个索引默认为零，省略的第二个索引默认为切片的字符串的大小
+
+One way to remember how slices work is to think of the indices as pointing between characters, with the left edge of the first character numbered 0.
+有个办法可以很容易地记住切片的工作方式：切片时的索引是在两个字符 之间 
+
+Then the right edge of the last character of a string of n characters has index n, for example:
+左边第一个字符的索引为 0，而长度为 n 的字符串其最后一个字符的右界索引为 n
+
+The first row of numbers gives the position of the indices 0...6 in the string;
+文本中的第一行数字给出字符串中的索引点 0...6
+
+the second row gives the corresponding negative indices.
+第二行给出相应的负索引
+
+The slice from i to j consists of all characters between the edges labeled i and j, respectively.
+切片是从 i 到 j 两个数值标示的边界之间的所有字符
+
+For non-negative indices, the length of a slice is the difference of the indices, if both are within bounds.
+对于非负索引，如果上下都在边界内，切片长度就是两个索引之差
+
+For example, the length of word[1:3] is 2.
+例如，word[1:3] 是 2 
+
+Attempting to use an index that is too large will result in an error:
+试图使用太大的索引会导致错误:
+
+However, out of range slice indexes are handled gracefully when used for slicing:
+Python 能够优雅地处理那些没有意义的切片索引：一个过大的索引值(即下标值大于字符串实际长度)将被字符串实际长度所代替，当上边界比下边界大时(即切片左值大于右值)就返回空字符串:
+
+Python strings cannot be changed — they are immutable.
+Python字符串不可以被更改 — 它们是 不可变的 
+
+Therefore, assigning to an indexed position in the string results in an error:
+因此，赋值给字符串索引的位置会导致错误:
+
+If you need a different string, you should create a new one:
+如果你需要一个不同的字符串，你应该创建一个新的:
+
+The built-in function len() returns the length of a string:
+内置函数 len() 返回字符串长度:
+
+See also
+See also
+
+3.1.3.
+3.1.3. 列表¶
+
+Python knows a number of compound data types, used to group together other values.
+Python 有几个 复合 数据类型，用于表示其它的值
+
+The most versatile is the list, which can be written as a list of comma-separated values (items) between square brackets.
+最通用的是 list (列表) ，它可以写作中括号之间的一列逗号分隔的值
+
+Lists might contain items of different types, but usually the items all have the same type.
+列表的元素不必是同一类型:
+
+Like strings (and all other built-in sequence type), lists can be indexed and sliced:
+就像字符串(以及其它所有内建的 序列 类型)一样，列表可以被索引和切片:
+
+All slice operations return a new list containing the requested elements.
+所有的切片操作都会返回一个包含请求的元素的新列表
+
+This means that the following slice returns a new (shallow) copy of the list:
+这意味着下面的切片操作返回列表一个新的（浅）拷贝副本:
+
+Lists also support operations like concatenation:
+列表也支持连接这样的操作:
+
+Unlike strings, which are immutable, lists are a mutable type, i.e.
+不像 不可变的 字符串，列表是 可变的，它允许修改元素:
+
+You can also add new items at the end of the list, by using the append() method (we will see more about methods later):
+你还可以使用 append() 方法 （后面我们会看到更多关于列表的方法的内容）在列表的末尾添加新的元素:
+
+Assignment to slices is also possible, and this can even change the size of the list or clear it entirely:
+也可以对切片赋值，此操作可以改变列表的尺寸，或清空它:
+
+The built-in function len() also applies to lists:
+内置函数 len() 同样适用于列表:
+
+It is possible to nest lists (create lists containing other lists), for example:
+允许嵌套列表(创建一个包含其它列表的列表)，例如:
+
+3.2.
+3.2. 编程的第一步¶
+
+Of course, we can use Python for more complicated tasks than adding two and two together.
+当然，我们可以使用 Python 完成比二加二更复杂的任务
+
+For instance, we can write an initial sub-sequence of the Fibonacci series as follows:
+例如，我们可以写一个生成 菲波那契 子序列的程序，如下所示:
+
+This example introduces several new features.
+这个例子介绍了几个新功能
+
+The first line contains a multiple assignment: the variables a and b simultaneously get the new values 0 and 1.
+第一行包括了一个 多重赋值：变量 a 和 b 同时获得了新的值 0 和 1 最后一行又使用了一次
+
+The while loop executes as long as the condition (here: b < 10) remains true.
+在这个演示中，变量赋值前，右边首先完成计算
+
+In Python, like in C, any non-zero integer value is true;
+右边的表达式从左到右计算
+
+The body of the loop is indented: indentation is Python’s way of grouping statements.
+条件（这里是 b < 10 ）为 true 时， while 循环执行
+
+At the interactive prompt, you have to type a tab or space(s) for each indented line.
+在 Python 中，类似于 C，任何非零整数都是 true
+
+In practice you will prepare more complicated input for Python with a text editor;
+0 是 false
+
+all decent text editors have an auto-indent facility.
+条件也可以是字符串或列表，实际上可以是任何序列
+
+The print() function writes the value of the argument(s) it is given.
+所有长度不为零的是 true，空序列是 false
+
+It differs from just writing the expression you want to write (as we did earlier in the calculator examples) in the way it handles multiple arguments, floating point quantities, and strings.
+示例中的测试是一个简单的比较
+
+Strings are printed without quotes, and a space is inserted between items, so you can format things nicely, like this:
+标准比较操作符与 C 相同： < ， > ， == ， <=， >= 和 !=
+
+The keyword argument end can be used to avoid the newline after the output, or end the output with a different string:
+循环 体 是 缩进 的：缩进是 Python 组织语句的方法
+
+Footnotes
+实践中建议你找个文本编辑来录入复杂的 Python 程序，大多数文本编辑器提供自动缩进
+
+2.
+字符串打印时不用引号包围，每两个子项之间插入空间，所以你可以把格式弄得很漂亮，像这样:
+

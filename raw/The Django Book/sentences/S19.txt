@@ -1,0 +1,558 @@
+Chapter 20: Security¶
+第二十章：安全
+
+The Internet can be a scary place.
+Internet并不安全
+
+These days, high-profile security gaffes seem to crop up on a daily basis.
+现如今，每天都会出现新的安全问题
+
+We’ve seen viruses spread with amazing speed, swarms of compromised computers wielded as weapons, a never-ending arms race against spammers, and many, many reports of identify theft from hacked Web sites.
+ 我们目睹过病毒飞速地蔓延，大量被控制的肉鸡作为武器来攻击其他人，与垃圾邮件的永无止境的军备竞赛，以及许许多多站点被黑的报告
+
+As Web developers, we have a duty to do what we can to combat these forces of darkness.
+作为Web开发人员，我们有责任来对抗这些黑暗的力量
+
+Every Web developer needs to treat security as a fundamental aspect of Web programming.
+ 每一个Web开发者都应该把安全看成是Web编程中的基础部分
+
+Unfortunately, it turns out that implementing security is hard – attackers need to find only a single vulnerability, but defenders have to protect every single one.
+ 不幸的是，要实现安全是困难的
+
+Django attempts to mitigate this difficulty.
+Django试图减轻这种难度
+
+It’s designed to automatically protect you from many of the common security mistakes that new (and even experienced) Web developers make.
+ 它被设计为自动帮你避免一些web开发新手（甚至是老手）经常会犯的错误
+
+Still, it’s important to understand what these problems are, how Django protects you, and – most important – the steps you can take to make your code even more secure.
+ 尽管如此，需要弄清楚，Django如何保护我们，以及我们可以采取哪些重要的方法来使得我们的代码更加安全
+
+First, though, an important disclaimer: We do not intend to present a definitive guide to every known Web security exploit, and so we won’t try to explain each vulnerability in a comprehensive manner.
+首先，一个重要的前提： 我们并不打算给出web安全的一个详尽的说明，因此我们也不会详细地解释每一个薄弱环节
+
+Instead, we’ll give a short synopsis of security problems as they apply to Django.
+ 在这里，我们会给出Django所面临的安全问题的一个大概
+
+The Theme of Web Security¶
+Web安全现状
+
+If you learn only one thing from this chapter, let it be this:
+如果你从这章中只学到了一件事情，那么它会是：
+
+Never – under any circumstances – trust data from the browser.
+在任何条件下都不要相信浏览器端提交的数据
+
+You never know who’s on the other side of that HTTP connection.
+你从不会知道HTTP连接的另一端会是谁
+
+It might be one of your users, but it just as easily could be a nefarious cracker looking for an opening.
+ 可能是一个正常的用户，但是同样可能是一个寻找漏洞的邪恶的骇客
+
+Any data of any nature that comes from the browser needs to be treated with a healthy dose of paranoia.
+从浏览器传过来的任何性质的数据，都需要近乎狂热地接受检查
+
+This includes data that’s both “in band” (i.e., submitted from Web forms) and “out of band” (i.e., HTTP headers, cookies, and other request information).
+ 这包括用户数据（比如Web表单提交的内容）和带外数据（比如，HTTP头、cookies以及其他信息）
+
+It’s trivial to spoof the request metadata that browsers usually add automatically.
+ 要修改那些浏览器自动添加的元数据，是一件很容易的事
+
+Every one of the vulnerabilities discussed in this chapter stems directly from trusting data that comes over the wire and then failing to sanitize that data before using it.
+在这一章所提到的所有的安全隐患都直接源自对传入数据的信任，并且在使用前不加处理
+
+You should make it a general practice to continuously ask, “Where does this data come from?”
+ 你需要不断地问自己，这些数据从何而来
+
+SQL Injection¶
+SQL注入
+
+SQL injection is a common exploit in which an attacker alters Web page parameters (such as GET/POST data or URLs) to insert arbitrary SQL snippets that a naive Web application executes in its database directly.
+SQL注入 是一个很常见的形式，在SQL注入中，攻击者改变web网页的参数（例如 GET /POST 数据或者URL地址），加入一些其他的SQL片段
+
+It’s probably the most dangerous – and, unfortunately, one of the most common – vulnerabilities out there.
+ 未加处理的网站会将这些信息在后台数据库直接运行
+
+This vulnerability most commonly crops up when constructing SQL “by hand” from user input.
+这种危险通常在由用户输入构造SQL语句时产生
+
+For example, imagine writing a function to gather a list of contact information from a contact search page.
+ 例如，假设我们要写一个函数，用来从通信录搜索页面收集一系列的联系信息
+
+To prevent spammers from reading every single e-mail in our system, we’ll force the user to type in someone’s username before providing her e-mail address:
+ 为防止垃圾邮件发送器阅读系统中的email，我们将在提供email地址以前，首先强制用户输入用户名
+
+Note
+备注
+
+In this example, and all similar “don’t do this” examples that follow, we’ve deliberately left out most of the code needed to make the functions actually work.
+在这个例子中，以及在以下所有的“不要这样做”的例子里，我们都去除了大量的代码，避免这些函数可以正常工作
+
+We don’t want this code to work if someone accidentally takes it out of context.
+ 我们可不想这些例子被拿出去使用
+
+Though at first this doesn’t look dangerous, it really is.
+尽管，一眼看上去，这一点都不危险，实际上却不尽然
+
+First, our attempt at protecting our entire e-mail list will fail with a cleverly constructed query.
+首先，我们对于保护email列表所采取的措施，遇到精心构造的查询语句就会失效
+
+Think about what happens if an attacker types "' OR 'a'='a" into the query box.
+ 想象一下，如果攻击者在查询框中输入 "' OR 'a'='a" 
+
+In that case, the query that the string interpolation will construct will be:
+ 此时，查询的字符串会构造如下：
+
+Because we allowed unsecured SQL into the string, the attacker’s added OR clause ensures that every single row is returned.
+由于我们允许不安全的SQL语句出现在字符串中，攻击者加入 OR 子句，使得每一行数据都被返回
+
+However, that’s the least scary attack.
+事实上，这是最温和的攻击方式
+
+Imagine what will happen if the attacker submits "';
+ 如果攻击者提交了 "'; DELETE FROM user_contacts WHERE 'a' = 'a'" ，我们最终将得到这样的查询：
+
+Yikes!
+哦
+
+Our entire contact list would be deleted instantly.
+我们整个通信录名单去哪儿了
+
+Although this problem is insidious and sometimes hard to spot, the solution is simple: never trust user-submitted data, and always escape it when passing it into SQL.
+尽管这个问题很阴险，并且有时很难发现，解决方法却很简单： 绝不信任用户提交的数据，并且在传递给SQL语句时，总是转义它
+
+The Django database API does this for you.
+Django的数据库API帮你做了
+
+It automatically escapes all special SQL parameters, according to the quoting conventions of the database server you’re using (e.g., PostgreSQL or MySQL).
+ 它会根据你所使用的数据库服务器（例如PostSQL或者MySQL）的转换规则，自动转义特殊的SQL参数
+
+For example, in this API call:
+举个例子，在下面这个API调用中：
+
+Django will escape the input accordingly, resulting in a statement like this:
+Django会自动进行转义，得到如下表达：
+
+Completely harmless.
+完全无害
+
+This applies to the entire Django database API, with a couple of exceptions:
+这被运用到了整个Django的数据库API中，只有一些例外：
+
+The where argument to the extra() method.
+传给 extra() 方法的 where 参数
+
+(See Appendix C.) That parameter accepts raw SQL by design.
+ (参考 附录 C
+
+Queries done “by hand” using the lower-level database API.
+使用底层数据库API的查询
+
+(See Chapter 10.)
+ (详见第十章)
+
+In each of these cases, it’s easy to keep yourself protected.
+以上列举的每一个示例都能够很容易的让您的应用得到保护
+
+In each case, avoid string interpolation in favor of passing in bind parameters.
+ 在每一个示例中，为了避免字符串被篡改而使用绑定参数 来代替
+
+That is, the example we started this section with should be written as follows:
+这样，本节开始的例子应该写成这样：
+
+The low-level execute method takes a SQL string with %s placeholders and automatically escapes and inserts parameters from the list passed as the second argument.
+底层 execute 方法采用了一个SQL字符串作为其第二个参数，这个SQL字符串包含若干’%s’占位符，execute方法能够自动对传入列表中的参数进行转义和插入
+
+You should always construct custom SQL this way.
+ 你应该用 always 这种方式构造自定义的SQL
+
+Unfortunately, you can’t use bind parameters everywhere in SQL;
+不幸的是，您并不是在SQL中能够处处都使用绑定参数，绑定参数不能够作为标识符（如表或列名等）
+
+they’re not allowed as identifiers (i.e., table or column names).
+ 因此，如果您需要这样做—我是说—动态构建 POST 变量中的数据库表的列表的话，您需要在您的代码中来对这些数据库表的名字进行转义
+
+Thus, if you need to, say, dynamically construct a list of tables from a POST variable, you’ll need to escape that name in your code.
+ Django提供了一个函数， django.db.backend.quote_name ，这个函数能够根据当前数据库引用结构对这些标识符进行转义
+
+Cross-Site Scripting (XSS)¶
+跨站点脚本 (XSS)
+
+Cross-site scripting (XSS), is found in Web applications that fail to escape user-submitted content properly before rendering it into HTML.
+在Web应用中， 跨站点脚本 (XSS)有时在被渲染成HTML之前，不能恰当地对用户提交的内容进行转义
+
+This allows an attacker to insert arbitrary HTML into your Web page, usually in the form of  tags.
+ 这使得攻击者能够向你的网站页面插入通常以  标签形式的任意HTML代码
+
+Attackers often use XSS attacks to steal cookie and session information, or to trick users into giving private information to the wrong person (aka phishing).
+攻击者通常利用XSS攻击来窃取cookie和会话信息，或者诱骗用户将其私密信息透漏给被人（又称 钓鱼 ）
+
+This type of attack can take a number of different forms and has almost infinite permutations, so we’ll just look at a typical example.
+这种类型的攻击能够采用多种不同的方式，并且拥有几乎无限的变体，因此我们还是只关注某个典型的例子吧
+
+Consider this extremely simple “Hello, World” view:
+ 让我们来想想这样一个极度简单的Hello World视图：
+
+This view simply reads a name from a GET parameter and passes that name into the generated HTML.
+这个视图只是简单的从GET参数中读取姓名然后将姓名传递给hello.html模板
+
+So, if we accessed http://example.com/hello/?name=Jacob, the page would contain this:
+ 因此，如果我们访问http://example.com/hello/
+
+But wait – what happens if we access http://example.com/hello/?name=Jacob</i>?
+但是，等等，如果我们访问 http://example.com/hello/
+
+Then we get this:
+name=Jacob 时又会发生什么呢
+
+Of course, an attacker wouldn’t use something as benign as  tags;
+当然，一个攻击者不会使用标签开始的类似代码，他可能会用任意内容去包含一个完整的HTML集来劫持您的页面
+
+he could include a whole set of HTML that hijacked your page with arbitrary content.
+ 这种类型的攻击已经运用于虚假银行站点以诱骗用户输入个人信息，事实上这就是一种劫持XSS的形式，用以使用户向攻击者提供他们的银行帐户信息
+
+The problem gets worse if you store this data in the database and later display it it on your site.
+如果您将这些数据保存在数据库中，然后将其显示在您的站点上，那么问题就变得更严重了
+
+For example, MySpace was once found to be vulnerable to an XSS attack of this nature.
+ 例如，一旦MySpace被发现这样的特点而能够轻易的被XSS攻击，后果不堪设想
+
+A user inserted JavaScript into his profile that automatically added him as your friend when you visited his profile page.
+ 某个用户向他的简介中插入JavaScript，使得您在访问他的简介页面时自动将其加为您的好友，这样在几天之内，这个人就能拥有上百万的好友
+
+Within a few days, he had millions of friends.
+ 在几天的时间里，他拥有了数以百万的朋友
+
+Now, this may sound relatively benign, but keep in mind that this attacker managed to get his code – not MySpace’s – running on your computer.
+现在，这种后果听起来还不那么恶劣，但是您要清楚——这个攻击者正设法将 他 的代码而不是MySpace的代码运行在 您 的计算机上
+
+This violates the assumed trust that all the code on MySpace is actually written by MySpace.
+ 这显然违背了假定信任——所有运行在MySpace上的代码应该都是MySpace编写的，而事实上却不如此
+
+MySpace was extremely lucky that this malicious code didn’t automatically delete viewers’ accounts, change their passwords, flood the site with spam, or any of the other nightmare scenarios this vulnerability unleashes.
+MySpace是极度幸运的，因为这些恶意代码并没有自动删除访问者的帐户，没有修改他们的密码，也并没有使整个站点一团糟，或者出现其他因为这个弱点而导致的其他噩梦
+
+The solution is simple: always escape any content that might have come from a user before inserting it into HTML.
+解决方案是简单的： 总是转义可能来自某个用户的任何内容
+
+To guard against this, Django’s template system automatically escapes all variable values.
+为了防止这种情况，Django的模板系统自动转义所有的变量值
+
+Let’s see what happens if we rewrite our example using the template system:
+ 让我们来看看如果我们使用模板系统重写我们的例子会发生什么
+
+With this in place, a request to http://example.com/hello/name=Jacob</i> will result in the following page:
+这样，一个到http://example.com/hello/name=Jacob 的请求将导致下面的页面：
+
+We covered Django’s auto-escaping back in Chapter 4, along with ways to turn it off.
+我们在第四章涵盖了Django的自动转义，一起想办法将其关闭
+
+But even if you’re using this feature, you should still get in the habit of asking yourself, at all times, “Where does this data come from?” No automatic solution will ever protect your site from XSS attacks 100% of the time.
+ 甚至，如果Django真的新增了这些特性，您也应该习惯性的问自己，一直以来，这些数据都来自于哪里呢
+
+Cross-Site Request Forgery¶
+伪造跨站点请求
+
+Cross-site request forgery (CSRF) happens when a malicious Web site tricks users into unknowingly loading a URL from a site at which they’re already authenticated – hence taking advantage of their authenticated status.
+伪造跨站点请求(CSRF)发生在当某个恶意Web站点诱骗用户不知不觉的从一个信任站点下载某个URL之时，这个信任站点已经被通过信任验证，因此恶意站点就利用了这个被信任状态
+
+Django has built-in tools to protect from this kind of attack.
+Django拥有内建工具来防止这种攻击
+
+Both the attack itself and those tools are covered in great detail in Chapter 16.
+ 包括攻击本身及其使用的工具都在有详细介绍
+
+Session Forging/Hijacking¶
+会话伪造/劫持
+
+This isn’t a specific attack, but rather a general class of attacks on a user’s session data.
+这不是某个特定的攻击，而是对用户会话数据的通用类攻击
+
+It can take a number of different forms:
+ 这种攻击可以采取多种形式：
+
+A man-in-the-middle attack, where an attacker snoops on session data as it travels over the wire (or wireless) network.
+中间人 攻击：检索所在有线（无线）网络，监听会话数据
+
+Session forging, where an attacker uses a session ID (perhaps obtained through a man-in-the-middle attack) to pretend to be another user.
+伪造会话 ：攻击者利用会话ID（可能是通过中间人攻击来获得）将自己伪装成另一个用户
+
+An example of these first two would be an attacker in a coffee shop using the shop’s wireless network to capture a session cookie.
+这两种攻击的一个例子可以是在一间咖啡店里的某个攻击者利用店内的无线网络来捕获某个会话cookie，然后她就可以利用那个cookie来假冒原始用户
+
+She could then use that cookie to impersonate the original user.
+ 她便可以使该cookie来模拟原始用户
+
+A cookie-forging attack, where an attacker overrides the supposedly read-only data stored in a cookie.
+伪造cookie ：就是指某个攻击者覆盖了在某个cookie中本应该是只读的数据
+
+Chapter 14 explains in detail how cookies work, and one of the salient points is that it’s trivial for browsers and malicious users to change cookies without your knowledge.
+ 第十四章__ 详细介绍了cookies如何工作，以及要点之一的是，它在你不知道的情况下无视浏览器和恶意用户私自改变cookies
+
+There’s a long history of Web sites that have stored a cookie like IsLoggedIn=1 or even LoggedInAsUser=jacob.
+Web站点以 IsLoggedIn=1 或者 LoggedInAsUser=jacob 这样的方式来保存cookie由来已久，使用这样的cookie是再简单不过的了
+
+On a more subtle level, though, it’s never a good idea to trust anything stored in cookies.
+一个更微妙的层面上，然而，相信在cookies中存储的任意信息绝对不是一个好主意
+
+You never know who’s been poking at them.
+ 你永远不知道谁一直在作怪
+
+Session fixation, where an attacker tricks a user into setting or reseting the user’s session ID.
+会话滞留 ：攻击者诱骗用户设置或者重设置该用户的会话ID
+
+For example, PHP allows session identifiers to be passed in the URL (e.g., http://example.com/?PHPSESSID=fa90197ca25f6ab40bb1374c510d7a32).
+例如，PHP允许在URL（如 http://example.com/
+
+An attacker who tricks a user into clicking a link with a hard-coded session ID will cause the user to pick up that session.
+PHPSESSID=fa90197ca25f6ab40bb1374c510d7a32 等）中传递会话标识符
+
+Session fixation has been used in phishing attacks to trick users into entering personal information into an account the attacker owns.
+会话滞留已经运用在钓鱼攻击中，以诱骗用户在攻击者拥有的账号里输入其个人信息
+
+He can later log into that account and retrieve the data.
+ 他可以稍后登陆账户并且检索数据
+
+Session poisoning, where an attacker injects potentially dangerous data into a user’s session – usually through a Web form that the user submits to set session data.
+会话中毒 ：攻击者通过用户提交设置会话数据的Web表单向该用户会话中注入潜在危险数据
+
+A canonical example is a site that stores a simple user preference (like a page’s background color) in a cookie.
+一个经典的例子就是一个站点在某个cookie中存储了简单的用户偏好（比如一个页面背景颜色）
+
+An attacker could trick a user into clicking a link to submit a “color” that actually contains an XSS attack.
+ 攻击者可以诱骗用户点击一个链接来提交背景颜色，实际上包含了一个XSS攻击
+
+If that color isn’t escaped, the user could again inject malicious code into the user’s environment.
+ 如果颜色没有转义，那么就可以再把恶意代码注入到用户环境中
+
+There are a number of general principles that can protect you from these attacks:
+有许多基本准则能够保护您不受到这些攻击：
+
+Never allow session information to be contained in the URL.
+不要在URL中包含任何session信息
+
+Django’s session framework (see Chapter 14) simply doesn’t allow sessions to be contained in the URL.
+Django的session框架（参见第十四章__ ）根本不会容许session包含在URL中
+
+Don’t store data in cookies directly.
+不要直接在cookie中保存数据
+
+Instead, store a session ID that maps to session data stored on the backend.
+ 相反，存储一个在后台映射到session数据存储的session ID
+
+If you use Django’s built-in session framework (i.e., request.session), this is handled automatically for you.
+如果使用Django内置的session框架（即 request.session ），它会自动进行处理
+
+The only cookie that the session framework uses is a single session ID;
+ 这个session框架仅在cookie中存储一个session ID，所有的session数据将会被存储在数据库中
+
+Remember to escape session data if you display it in the template.
+如果需要在模板中显示session数据，要记得对其进行转义
+
+See the earlier XSS section, and remember that it applies to any user-created content as well as any data from the browser.
+ 可参考之前的XSS部分，对所有用户提交的数据和浏览器提交的数据进行转义
+
+You should treat session information as being user created.
+ 对于session信息，应该像用户提交的数据一样对其进行处理
+
+Prevent attackers from spoofing session IDs whenever possible.
+任何可能的地方都要防止攻击者进行session欺骗
+
+Although it’s nearly impossible to detect someone who’s hijacked a session ID, Django does have built-in protection against a brute-force session attack.
+尽管去探测究竟是谁劫持了会话ID是几乎不可能的事儿，Django还是内置了保护措施来抵御暴力会话攻击
+
+Session IDs are stored as hashes (instead of sequential numbers), which prevents a brute-force attack, and a user will always get a new session ID if she tries a nonexistent one, which prevents session fixation.
+ 会话ID被存在哈希表里（取代了序列数字），这样就阻止了暴力攻击，并且如果一个用户去尝试一个不存在的会话那么她总是会得到一个新的会话ID，这样就阻止了会话滞留
+
+Notice that none of those principles and tools prevents man-in-the-middle attacks.
+请注意，以上没有一种准则和工具能够阻止中间人攻击
+
+These types of attacks are nearly impossible to detect.
+ 这些类型的攻击是几乎不可能被探测的
+
+If your site allows logged-in users to see any sort of sensitive data, you should always serve that site over HTTPS.
+ 如果你的站点允许登陆用户去查看任意敏感数据的话，你应该 总是 通过HTTPS来提供网站服务
+
+Additionally, if you have an SSL-enabled site, you should set the SESSION_COOKIE_SECURE setting to True;
+ 此外，如果你的站点使用SSL，你应该将 SESSION_COOKIE_SECURE 设置为 True ，这样就能够使Django只通过HTTPS发送会话cookie
+
+E-mail Header Injection¶
+邮件头部注入
+
+SQL injection’s less well-known sibling, e-mail header injection, hijacks Web forms that send e-mail.
+邮件头部注入 ：SQL注入的兄弟，是一种通过劫持发送邮件的Web表单的攻击方式
+
+An attacker can use this technique to send spam via your mail server.
+ 攻击者能够利用这种技术来通过你的邮件服务器发送垃圾邮件
+
+Any form that constructs e-mail headers from Web form data is vulnerable to this kind of attack.
+ 在这种攻击面前，任何方式的来自Web表单数据的邮件头部构筑都是非常脆弱的
+
+Let’s look at the canonical contact form found on many sites.
+让我们看看在我们许多网站中发现的这种攻击的形式
+
+Usually this sends a message to a hard-coded e-mail address and, hence, doesn’t appear vulnerable to spam abuse at first glance.
+ 通常这种攻击会向硬编码邮件地址发送一个消息，因此，第一眼看上去并不显得像面对垃圾邮件那么脆弱
+
+However, most of these forms also allow the user to type in his own subject for the e-mail (along with a “from” address, body, and sometimes a few other fields).
+但是，大多数表单都允许用户输入自己的邮件主题（同时还有from地址，邮件体，有时还有部分其他字段）
+
+This subject field is used to construct the “subject” header of the e-mail message.
+ 这个主题字段被用来构建邮件消息的主题头部
+
+If that header is unescaped when building the e-mail message, an attacker could submit something like "hello\ncc:spamvictim@example.com" (where "\n” is a newline character).
+如果那个邮件头部在构建邮件信息时没有被转义，那么攻击者可以提交类似"hello\ncc:spamvictim@example.com" （这里的 "\n" 是换行符）的东西
+
+That would make the constructed e-mail headers turn into:
+ 这有可能使得所构建的邮件头部变成：
+
+Like SQL injection, if we trust the subject line given by the user, we’ll allow him to construct a malicious set of headers, and he can use our contact form to send spam.
+就像SQL注入那样，如果我们信任了用户提供的主题行，那样同样也会允许他构建一个头部恶意集，他也就能够利用联系人表单来发送垃圾邮件
+
+We can prevent this attack in the same way we prevent SQL injection: always escape or validate user-submitted content.
+我们能够采用与阻止SQL注入相同的方式来阻止这种攻击： 总是校验或者转义用户提交的内容
+
+Django’s built-in mail functions (in django.core.mail) simply do not allow newlines in any fields used to construct headers (the from and to addresses, plus the subject).
+Django内建邮件功能（在 django.core.mail 中）根本不允许在用来构建邮件头部的字段中存在换行符（表单，收件地址，还有主题）
+
+If you try to use django.core.mail.send_mail with a subject that contains newlines, Django will raise a BadHeaderError exception.
+ 如果您试图使用 django.core.mail.send_mail 来处理包含换行符的主题时，Django将会抛出BadHeaderError异常
+
+If you do not use Django’s built-in mail functions to send e-mail, you’ll need to make sure that newlines in headers either cause an error or are stripped.
+如果你没有使用Django内建邮件功能来发送邮件，那么你需要确保包含在邮件头部的换行符能够引发错误或者被去掉
+
+You may want to examine the SafeMIMEText class in django.core.mail to see how Django does this.
+ 你或许想仔细阅读 django.core.mail 中的 SateMIMEText 类来看看Django是如何做到这一点的
+
+Directory Traversal¶
+目录遍历
+
+Directory traversal is another injection-style attack, wherein a malicious user tricks filesystem code into reading and/or writing files that the Web server shouldn’t have access to.
+目录遍历 ：是另外一种注入方式的攻击，在这种攻击中，恶意用户诱骗文件系统代码对Web服务器不应该访问的文件进行读取和/或写入操作
+
+An example might be a view that reads files from the disk without carefully sanitizing the file name:
+例子可以是这样的，某个视图试图在没有仔细对文件进行防毒处理的情况下从磁盘上读取文件：
+
+Though it looks like that view restricts file access to files beneath BASE_PATH (by using os.path.join), if the attacker passes in a filename containing ..
+尽管一眼看上去，视图通过 BASE_PATH （通过使用 os.path.join ）限制了对于文件的访问，但如果攻击者使用了包含 .. （两个句号，父目录的一种简写形式）的文件名，她就能够访问到 BASE_PATH 目录结构以上的文件
+
+(that’s two periods, a shorthand for “the parent directory”), she can access files “above” BASE_PATH.
+对她来说，发现究竟使用几个点号只是时间问题，比如这样：../../../../../etc/passwd
+
+Anything that reads files without proper escaping is vulnerable to this problem.
+任何不做适当转义地读取文件操作，都可能导致这样的问题
+
+Views that write files are just as vulnerable, but the consequences are doubly dire.
+ 允许 写 操作的视图同样容易发生问题，而且结果往往更加可怕
+
+Another permutation of this problem lies in code that dynamically loads modules based on the URL or other request information.
+这个问题的另一种表现形式，出现在根据URL和其他的请求信息动态地加载模块
+
+A well-publicized example came from the world of Ruby on Rails.
+ 一个众所周知的例子来自于Ruby on Rails
+
+Prior to mid-2006, Rails used URLs like http://example.com/person/poke/1 directly to load modules and call methods.
+ 在2006年上半年之前，Rails使用类似于 http://example.com/person/poke/1 这样的URL直接加载模块和调用函数
+
+The result was that a carefully constructed URL could automatically load arbitrary code, including a database reset script!
+ 结果是，精心构造的URL，可以自动地调用任意的代码，包括数据库的清空脚本
+
+If your code ever needs to read or write files based on user input, you need to sanitize the requested path very carefully to ensure that an attacker isn’t able to escape from the base directory you’re restricting access to.
+如果你的代码需要根据用户的输入来读写文件，你就需要确保，攻击者不能访问你所禁止访问的目录
+
+Note
+备注
+
+Needless to say, you should never write code that can read from any area of the disk!
+不用多说，你 永远 不要在编写可以读取任何位置上的文件的代码
+
+A good example of how to do this escaping lies in Django’s built-in static content-serving view (in django.views.static).
+Django内置的静态内容视图是做转义的一个好的示例（在 django.views.static 中）
+
+Here’s the relevant code:
+这是相关代码：
+
+Django doesn’t read files (unless you use the static.serve function, but that’s protected with the code just shown), so this vulnerability doesn’t affect the core code much.
+Django不读取文件（除非你使用 static.serve 函数，但也受到了上面这段代码的保护），因此这种危险对于核心代码的影响就要小得多
+
+In addition, the use of the URLconf abstraction means that Django will never load code you’ve not explicitly told it to load.
+更进一步，URLconf抽象层的使用，意味着不经过你明确的指定，Django 决不会 装载代码
+
+There’s no way to create a URL that causes Django to load something not mentioned in a URLconf.
+ 通过创建一个URL来让Django装载没有在URLconf中出现的东西，是不可能发生的
+
+Exposed Error Messages¶
+暴露错误消息
+
+During development, being able to see tracebacks and errors live in your browser is extremely useful.
+在开发过程中，通过浏览器检查错误和跟踪异常是非常有用的
+
+Django has “pretty” and informative debug messages specifically to make debugging easier.
+ Django提供了漂亮且详细的debug信息，使得调试过程更加容易
+
+However, if these errors get displayed once the site goes live, they can reveal aspects of your code or configuration that could aid an attacker.
+然而，一旦在站点上线以后，这些消息仍然被显示，它们就可能暴露你的代码或者是配置文件内容给攻击者
+
+Furthermore, errors and tracebacks aren’t at all useful to end users.
+还有，错误和调试消息对于最终用户而言是毫无用处的
+
+Django’s philosophy is that site visitors should never see application-related error messages.
+ Django的理念是，站点的访问者永远不应该看到与应用相关的出错消息
+
+If your code raises an unhandled exception, a site visitor should not see the full traceback – or any hint of code snippets or Python (programmer-oriented) error messages.
+ 如果你的代码抛出了一个没有处理的异常，网站访问者不应该看到调试信息或者 _任何_代码片段或者Python（面向开发者）出错消息
+
+Instead, the visitor should see a friendly “This page is unavailable” message.
+ 访问者应该只看到友好的无法访问的页面
+
+Naturally, of course, developers need to see tracebacks to debug problems in their code.
+当然，开发者需要在debug时看到调试信息
+
+So the framework should hide all error messages from the public, but it should display them to the trusted site developers.
+ 因此，框架就要将这些出错消息显示给受信任的网站开发者，而要向公众隐藏
+
+As we covered in Chapter 12, Django’s DEBUG setting controls the display of these error messages.
+正如我们在第12章所提到的，Django的DEBUG 设置控制这些错误信息的显示
+
+Make sure to set this to False when you’re ready to deploy.
+ 当你准备部署时请确认把这个设置为：False 
+
+Users deploying under Apache and mod_python (also see Chapter 12) should also make sure they have PythonDebug Off in their Apache conf files;
+在Apache和mod_python下开发的人员，还要保证在Apache的配置文件中关闭 PythonDebug Off 选项，这个会在Django被加载以前去除出错消息
+
+A Final Word on Security¶
+安全领域的总结
+
+We hope all this talk of security problems isn’t too intimidating.
+我们希望关于安全问题的讨论，不会太让你感到恐慌
+
+It’s true that the Web can be a wild world, but with a little bit of foresight, you can have a secure Web site.
+ Web是一个处处布满陷阱的世界，但是只要有一些远见，你就能拥有安全的站点
+
+Keep in mind that Web security is a constantly changing field;
+永远记住，Web安全是一个不断发展的领域
+
+if you’re reading the dead-tree version of this book, be sure to check more up to date security resources for any new vulnerabilities that have been discovered.
+如果你正在阅读这本书的停止维护的那些版本，请阅读最新版本的这个部分来检查最新发现的漏洞
+
+In fact, it’s always a good idea to spend some time each week or month researching and keeping current on the state of Web application security.
+ 事实上，每周或者每月花点时间挖掘Web应用安全，并且跟上最新的动态是一个很好的主意
+
+It’s a small investment to make, but the protection you’ll get for your site and your users is priceless.
+ 花费很少，但是对你网站和用户的保护确是无价的
+
+What’s Next?¶
+接下来
+
+You’ve reached the end of our regularly scheduled program.
+你已经完成了我们安排的程序
+
+The following appendixes all contain reference material that you might need as you work on your Django projects.
+ 以下的附录内容中包含了可能在你的Djang项目中用得上的引用资源.
+
+We wish you the best of luck in running your Django site, whether it’s a little toy for you and a few friends, or the next Google.
+在运行你的Django网站时，无论是为你或几个朋友的小网站，或者是下一个google，我们祝你好运
+
+© Copyright 2012, Matt Behrens.
+www.shoucewang.com. All Rights Reserved. 手册网 版权所有
+

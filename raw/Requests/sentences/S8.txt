@@ -1,0 +1,72 @@
+Support¶
+支持¶
+
+If you have questions or issues about Requests, there are several options:
+对于Requests，如果你有问题或者建议，可以通过下面几种方法得到支持：
+
+StackOverflow¶
+StackOverflow¶
+
+If your question does not contain sensitive (possibly proprietary) information or can be properly anonymized, please ask a question on StackOverflow and use the tag python-requests.
+如果你的问题不包含敏感或私有信息，或者你能将这些信息匿名化，那你就可以在 StackOverflow 上使用 python-requests 标签提问
+
+Send a Tweet¶
+发送推文¶
+
+If your question is less than 140 characters, feel free to send a tweet to @kennethreitz, @sigmavirus24, or @lukasaoz.
+如果你的问题在140个字符内描述，欢迎在 twitter 上发送推文至 @kennethreitz, @sigmavirus24, 或 @lukasaoz
+
+File an Issue¶
+提交 issue¶
+
+If you notice some unexpected behaviour in Requests, or want to see support for a new feature, file an issue on GitHub.
+如果你在 Requests 中注意到了一些意想不到的行为，或者希望看到一个新的功能支持，请 在 GitHub 上提交 issue.
+
+E-mail¶
+邮件¶
+
+I'm more than happy to answer any personal or in-depth questions about Requests.
+我很乐意回答关于 Requests 的个人或者更深入的问题
+
+Feel free to email requests@kennethreitz.com.
+你可以随时写信至 requests@kennethreitz.com.
+
+IRC¶
+IRC¶
+
+The official Freenode channel for Requests is #python-requests
+Requests 的官方 Freenode 频道是 #python-requests
+
+The core developers of requests are on IRC throughout the day.
+Requests 的核心开发人员白天会在 IRC 中出没，你可以在 #python-requests 中找到他们：
+
+Requests is an elegant and simple HTTP library for Python, built for human beings.
+Requests is an elegant and simple HTTP library for Python, built for human beings. You are currently looking at the documentation of the development release.
+
+Stay Informed
+Stay Informed
+
+Receive updates on new releases and upcoming projects.
+Receive updates on new releases and upcoming projects.
+
+Join Mailing List.
+Join Mailing List.
+
+If you enjoy using this project, Say Thanks!
+Follow @kennethreitz
+
+More Kenneth Reitz projects:
+More Kenneth Reitz projects:
+
+Translations
+Translations
+
+Table Of Contents
+內容目录
+
+Related Topics
+Related Topics
+
+Quick search
+快速搜索
+
