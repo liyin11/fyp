@@ -1,0 +1,78 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+8.2. Introducing sgmllib.py
+8.2. sgmllib.py 介绍
+
+HTML processing is broken into three steps: breaking down the HTML into its constituent pieces, fiddling with the pieces, and reconstructing the pieces into HTML again.
+HTML 处理分成三步：将 HTML 分解成它的组成片段，对片段进行加工，接着将片段再重新合成 HTML
+
+The first step is done by sgmllib.py, a part of the standard Python library.
+第一步是通过 sgmllib.py 来完成的，它是标准 Python 库的一部分
+
+The key to understanding this chapter is to realize that HTML is not just text, it is structured text.
+理解本章的关键是要知道 HTML 不只是文本，更是结构化文本
+
+The structure is derived from the more-or-less-hierarchical sequence of start tags and end tags.
+这种结构来源于开始与结束标记的或多或少分级序列
+
+Usually you don't work with HTML this way;
+通常您并不以这种方式处理 HTML ，而是以文本方式 在一个文本编辑中对其进行处理，或以可视的方式 在一个浏览器中进行浏览或页面编辑工具中进行编辑
+
+you work with it textually in a text editor, or visually in a web browser or web authoring tool.
+sgmllib.py 表现出了 HTML 的结构
+
+sgmllib.py contains one important class: SGMLParser.
+sgmllib.py 包含一个重要的类：SGMLParser
+
+SGMLParser parses HTML into useful pieces, like start tags and end tags.
+SGMLParser 将 HTML 分解成有用的片段，比如开始标记和结束标记
+
+As soon as it succeeds in breaking down some data into a useful piece, it calls a method on itself based on what it found.
+在它成功地分解出某个数据为一个有用的片段后，它会根据所发现的数据，调用一个自身内部的方法
+
+In order to use the parser, you subclass the SGMLParser class and override these methods.
+为了使用这个分析器，您需要子类化 SGMLParser 类，并且覆盖这些方法
+
+This is what I meant when I said that it presents HTML structurally: the structure of the HTML determines the sequence of method calls and the arguments passed to each method.
+这就是当我说它表示了 HTML 结构 的意思：HTML 的结构决定了方法调用的次序和传给每个方法的参数
+
+SGMLParser parses HTML into 8 kinds of data, and calls a separate method for each of them:
+SGMLParser 将 HTML 分析成 8 类数据，然后对每一类调用单独的方法：
+
+sgmllib.py comes with a test suite to illustrate this.
+sgmllib.py 所附带的一个测试套件举例说明了这一点
+
+You can run sgmllib.py, passing the name of an HTML file on the command line, and it will print out the tags and other elements as it parses them.
+您可以运行 sgmllib.py，在命令行下传入一个 HTML 文件的名字，然后它会在分析标记和其它元素的同时将它们打印出来
+
+It does this by subclassing the SGMLParser class and defining unknown_starttag, unknown_endtag, handle_data and other methods which simply print their arguments.
+它的实现是通过子类化 SGMLParser 类，然后定义 unknown_starttag，unknown_endtag，handle_data 和其它方法来实现的
+
+Here is a snippet from the table of contents of the HTML version of this book.
+下面是一个片段，来自本书的 HTML 版本的目录，toc.html
+
+Of course your paths may vary.
+当然，您的存储路径可能与我的有所不同
+
+(If you haven't downloaded the HTML version of the book, you can do so at http://diveintopython.org/.
+ (如果您还没有下载本书的 HTML 版本，可以从 http://diveintopython.org/ 下载
+
+Running this through the test suite of sgmllib.py yields this output:
+通过 sgmllib.py 的测试套件来运行它，会得到如下的输出结果:
+
+Here's the roadmap for the rest of the chapter:
+下面是本章其它部分的路标：
+
+Along the way, you'll also learn about locals, globals, and dictionary-based string formatting.
+继续阅读本章，您还可以学习到有关 locals、globals 和基于 dictionary 的字符串格式化的内容
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

@@ -1,0 +1,27 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+6.5. Working with Directories
+6.5. 与目录共事
+
+The os.path module has several functions for manipulating files and directories.
+os.path 模块有几个操作文件和目录的函数
+
+Here, we're looking at handling pathnames and listing the contents of a directory.
+这里，我们看看如何操作路径名和列出一个目录的内容
+
+There is one other way to get the contents of a directory.
+还有一种获得目录内容的方法
+
+It's very powerful, and it uses the sort of wildcards that you may already be familiar with from working on the command line.
+它非常强大，并使用了一些你在命令行上工作时可能已经熟悉的通配符
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

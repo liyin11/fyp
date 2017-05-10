@@ -1,0 +1,36 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+7.7. Summary
+7.7. 小结
+
+This is just the tiniest tip of the iceberg of what regular expressions can do.
+这只是正则表达式能够完成工作的很少一部分
+
+In other words, even though you're completely overwhelmed by them now, believe me, you ain't seen nothing yet.
+换句话说，即使你现在备受打击，相信我，你也不是什么也没见过了
+
+You should now be familiar with the following techniques:
+现在，你应该熟悉下列技巧：
+
+Regular expressions are extremely powerful, but they are not the correct solution for every problem.
+正则表达式非常强大，但是它并不能为每一个问题提供正确的解决方案
+
+You should learn enough about them to know when they are appropriate, when they will solve your problems, and when they will cause more problems than they solve.
+你应该学习足够多的知识，以辨别什么时候它们是合适的，什么时候它们会解决你的问题，什么时候它们产生的问题比要解决的问题还要多
+
+Some people, when confronted with a problem, think “I know, I'll use regular expressions.”.
+一些人，遇到一个问题时就想：“我知道，我将使用正则表达式
+
+Now they have two problems.
+”现在他有两个问题了
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

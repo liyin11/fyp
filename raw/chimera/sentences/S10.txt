@@ -1,0 +1,1251 @@
+Chapter 10. Modules and Packages
+第十章：模块与包¶
+
+Modules and packages are the core of any large project, and the Python installation itself.
+模块与包是任何大型程序的核心，就连Python安装程序本身也是一个包
+
+This chapter focuses on common programming techniques involving modules and packages, such as how to organize packages, splitting large modules into multiple files, and creating namespace packages.
+本章重点涉及有关模块和包的常用编程技术，例如如何组织包、把大型模块分割成多个文件、创建命名空间包
+
+Recipes that allow you to customize the operation of the import statement itself are also given.
+同时，也给出了让你自定义导入语句的秘籍
+
+Making a Hierarchical Package of Modules
+10.1 构建一个模块的层级包¶
+
+You want to organize your code into a package consisting of a hierarchical collection of modules.
+你想将你的代码组织成由很多分层模块构成的包
+
+Making a package structure is simple.
+封装成包是很简单的
+
+Just organize your code as you wish on the file-system and make sure that every directory defines an __init__.py file.
+在文件系统上组织你的代码，并确保每个目录都定义了一个__init__.py文件
+
+For example:
+ 例如：
+
+Once you have done this, you should be able to perform various import statements, such as the following:
+一旦你做到了这一点，你应该能够执行各种import语句，如下：
+
+Defining a hierarchy of modules is as easy as making a directory structure on the filesystem.
+定义模块的层次结构就像在文件系统上建立目录结构一样容易
+
+The purpose of the __init__.py files is to include optional initialization code that runs as different levels of a package are encountered.
+ 文件__init__.py的目的是要包含不同运行级别的包的可选的初始化代码
+
+For example, if you have the statement import graphics, the file graphics/__init__.py will be imported and form the contents of the graphics namespace.
+ 举个例子，如果你执行了语句import graphics， 文件graphics/__init__.py将被导入,建立graphics命名空间的内容
+
+For an import such as import graphics.formats.jpg, the files graphics/__init__.py and graphics/formats/__init__.py will both be imported prior to the final import of the graphics/formats/jpg.py file.
+像import graphics.format.jpg这样导入，文件graphics/__init__.py和文件graphics/graphics/formats/__init__.py将在文件graphics/formats/jpg.py导入之前导入
+
+More often that not, it’s fine to just leave the __init__.py files empty.
+绝大部分时候让__init__.py空着就好
+
+However, there are certain situations where they might include code.
+但是有些情况下可能包含代码
+
+For example, an __init__.py file can be used to automatically load submodules like this:
+ 举个例子，__init__.py能够用来自动加载子模块:
+
+For such a file, a user merely has to use a single import graphics.formats instead of a separate import for graphics.formats.jpg and graphics.formats.png.
+像这样一个文件,用户可以仅仅通过import grahpics.formats来代替import graphics.formats.jpg以及import graphics.formats.png
+
+Other common uses of __init__.py include consolidating definitions from multiple files into a single logical namespace, as is sometimes done when splitting modules.
+__init__.py的其他常用用法包括将多个文件合并到一个逻辑命名空间，这将在10.4小节讨论
+
+Astute programmers will notice that Python 3.3 still seems to perform package imports even if no __init__.py files are present.
+敏锐的程序员会发现，即使没有__init__.py文件存在，python仍然会导入包
+
+If you don’t define __init__.py, you actually create what’s known as a "namespace package," which is described in “Making Separate Directories of Code Import Under a Common Namespace”.
+如果你没有定义__init__.py时，实际上创建了一个所谓的“命名空间包”，这将在10.5小节讨论
+
+All things being equal, include the __init__.py files if you’re just starting out with the creation of a new package.
+万物平等，如果你着手创建一个新的包的话，包含一个__init__.py文件吧
+
+Controlling the Import of Everything
+10.2 控制模块被全部导入的内容¶
+
+You want precise control over the symbols that are exported from a module or package when a user uses the from module import * statement.
+当使用’from module import *‘ 语句时，希望对从模块或包导出的符号进行精确控制
+
+Define a variable __all__ in your module that explicitly lists the exported names.
+在你的模块中定义一个变量 __all__ 来明确地列出需要导出的内容
+
+For example:
+举个例子:
+
+Although the use of from module import * is strongly discouraged, it still sees frequent use in modules that define a large number of names.
+尽管强烈反对使用 ‘from module import *‘, 但是在定义了大量变量名的模块中频繁使用
+
+If you don’t do anything, this form of import will export all names that don’t start with an underscore.
+ 如果你不做任何事, 这样的导入将会导入所有不以下划线开头的
+
+On the other hand, if __all__ is defined, then only the names explicitly listed will be exported.
+ 另一方面,如果定义了 __all__ , 那么只有被列举出的东西会被导出
+
+If you define __all__ as an empty list, then nothing will be exported.
+如果你将 __all__ 定义成一个空列表, 没有东西将被导出
+
+An AttributeError is raised on import if __all__ contains undefined names.
+ 如果 __all__ 包含未定义的名字, 在导入时引起AttributeError
+
+Importing Package Submodules Using Relative Names
+10.3 使用相对路径名导入包中子模块¶
+
+You have code organized as a package and want to import a submodule from one of the other package submodules without hardcoding the package name into the import statement.
+将代码组织成包,想用import语句从另一个包名没有硬编码过的包的中导入子模块
+
+To import modules of a package from other modules in the same package, use a package-relative import.
+使用包的相对导入，使一个的模块导入同一个包的另一个模块 举个例子，假设在你的文件系统上有mypackage包，组织如下：
+
+If the module mypackage.A.spam wants to import the module grok located in the same directory, it should include an import statement like this:
+如果模块mypackage.A.spam要导入同目录下的模块grok，它应该包括的import语句如下：
+
+If the same module wants to import the module B.bar located in a different directory, it can use an import statement like this:
+如果模块mypackage.A.spam要导入不同目录下的模块B.bar，它应该使用的import语句如下：
+
+Both of the import statements shown operate relative to the location of the spam.py file and do not include the top-level package name.
+两个import语句都没包含顶层包名，而是使用了spam.py的相对路径
+
+Inside packages, imports involving modules in the same package can either use fully specified absolute names or a relative imports using the syntax shown.
+在包内，既可以使用相对路径也可以使用绝对路径来导入
+
+For example:
+ 举个例子：
+
+The downside of using an absolute name, such as mypackage.A, is that it hardcodes the top-level package name into your source code.
+像mypackage.A这样使用绝对路径名的不利之处是这将顶层包名硬编码到你的源码中
+
+This, in turn, makes your code more brittle and hard to work with if you ever want to reorganize it.
+如果你想重新组织它，你的代码将更脆，很难工作
+
+For example, if you ever changed the name of the package, you would have to go through all of your files and fix the source code.
+ 举个例子，如果你改变了包名，你就必须检查所有文件来修正源码
+
+Similarly, hardcoded names make it difficult for someone else to move the code around.
+ 同样，硬编码的名称会使移动代码变得困难
+
+For example, perhaps someone wants to install two different versions of a package, differentiating them only by name.
+举个例子，也许有人想安装两个不同版本的软件包，只通过名称区分它们
+
+If relative imports are used, it would all work fine, whereas everything would break with absolute names.
+ 如果使用相对导入，那一切都ok，然而使用绝对路径名很可能会出问题
+
+The .
+import语句的 . 和 ``..``看起来很滑稽, 但它指定目录名.为当前目录，..B为目录../B
+
+and ..
+这种语法只适用于import
+
+syntax on the import statement might look funny, but think of it as specifying a directory name.
+ 举个例子：
+
+Although it looks like you could navigate the filesystem using a relative import, they are not allowed to escape the directory in which a package is defined.
+尽管使用相对导入看起来像是浏览文件系统，但是不能到定义包的目录之外
+
+That is, combinations of dotted name patterns that would cause an import to occur from a non-package directory cause an error.
+也就是说，使用点的这种模式从不是包的目录中导入将会引发错误
+
+Finally, it should be noted that relative imports only work for modules that are located inside a proper package.
+最后，相对导入只适用于在合适的包中的模块
+
+In particular, they do not work inside simple modules located at the top level of scripts.
+尤其是在顶层的脚本的简单模块中，它们将不起作用
+
+They also won’t work if parts of a package are executed directly as a script.
+如果包的部分被作为脚本直接执行，那它们将不起作用 例如：
+
+On the other hand, if you execute the preceding script using the -m option to Python, the relative imports will work properly.
+另一方面，如果你使用Python的-m选项来执行先前的脚本，相对导入将会正确运行
+
+For example:
+ 例如：
+
+For more background on relative package imports, see PEP 328.
+更多的包的相对导入的背景知识,请看 PEP 328 .
+
+Splitting a Module into Multiple Files
+10.4 将模块分割成多个文件¶
+
+You have a module that you would like to split into multiple files.
+你想将一个模块分割成多个文件
+
+However, you would like to do it without breaking existing code by keeping the separate files unified as a single logical module.
+但是你不想将分离的文件统一成一个逻辑模块时使已有的代码遭到破坏
+
+A program module can be split into separate files by turning it into a package.
+程序模块可以通过变成包来分割成多个独立的文件
+
+Consider the following simple module:
+考虑下下面简单的模块：
+
+Suppose you want to split mymodule.py into two files, one for each class definition.
+假设你想mymodule.py分为两个文件，每个定义的一个类
+
+To do that, start by replacing the mymodule.py file with a directory called mymodule.
+要做到这一点，首先用mymodule目录来替换文件mymodule.py
+
+In that directory, create the following files:
+ 这这个目录下，创建以下文件：
+
+In the a.py file, put this code:
+在a.py文件中插入以下代码：
+
+In the b.py file, put this code:
+在b.py文件中插入以下代码：
+
+Finally, in the __init__.py file, glue the two files together:
+最后，在 __init__.py 中，将2个文件粘合在一起：
+
+If you follow these steps, the resulting mymodule package will appear to be a single logical module:
+如果按照这些步骤，所产生的包MyModule将作为一个单一的逻辑模块：
+
+The primary concern in this recipe is a design question of whether or not you want users to work with a lot of small modules or just a single module.
+在这个章节中的主要问题是一个设计问题，不管你是否希望用户使用很多小模块或只是一个模块
+
+For example, in a large code base, you could just break everything up into separate files and make users use a lot of import statements like this:
+举个例子，在一个大型的代码库中，你可以将这一切都分割成独立的文件，让用户使用大量的import语句，就像这样：
+
+This works, but it places more of a burden on the user to know where the different parts are located.
+这样能工作，但这让用户承受更多的负担，用户要知道不同的部分位于何处
+
+Often, it’s just easier to unify things and allow a single import like this:
+通常情况下，将这些统一起来，使用一条import将更加容易，就像这样：
+
+For this latter case, it’s most common to think of mymodule as being one large source file.
+对后者而言，让mymodule成为一个大的源文件是最常见的
+
+However, this recipe shows how to stitch multiple files together into a single logical namespace.
+但是，这一章节展示了如何合并多个文件合并成一个单一的逻辑命名空间
+
+The key to doing this is to create a package directory and to use the __init__.py file to glue the parts together.
+ 这样做的关键是创建一个包目录，使用 __init__.py 文件来将每部分粘合在一起
+
+When a module gets split, you’ll need to pay careful attention to cross-filename references.
+当一个模块被分割，你需要特别注意交叉引用的文件名
+
+For instance, in this recipe, class B needs to access class A as a base class.
+举个例子，在这一章节中，B类需要访问A类作为基类
+
+A package-relative import from .a import A is used to get it.
+用包的相对导入 from .a import A 来获取
+
+Package-relative imports are used throughout the recipe to avoid hardcoding the top-level module name into the source code.
+整个章节都使用包的相对导入来避免将顶层模块名硬编码到源代码中
+
+This makes it easier to rename the module or move it around elsewhere later (see “Importing Package Submodules Using Relative Names”).
+这使得重命名模块或者将它移动到别的位置更容易
+
+One extension of this recipe involves the introduction of "lazy" imports.
+作为这一章节的延伸，将介绍延迟导入
+
+As shown, the __init__.py file imports all of the required subcomponents all at once.
+如图所示，__init__.py文件一次导入所有必需的组件的
+
+However, for a very large module, perhaps you only want to load components as they are needed.
+但是对于一个很大的模块，可能你只想组件在需要时被加载
+
+To do that, here is a slight variation of __init__.py:
+ 要做到这一点，__init__.py有细微的变化：
+
+In this version, classes A and B have been replaced by functions that load the desired classes when they are first accessed.
+在这个版本中，类A和类B被替换为在第一次访问时加载所需的类的函数
+
+To a user, it won’t look much different.
+对于用户，这看起来不会有太大的不同
+
+For example:
+ 例如：
+
+The main downside of lazy loading is that inheritance and type checking might break.
+延迟加载的主要缺点是继承和类型检查可能会中断
+
+For example, you might have to change your code slightly:
+你可能会稍微改变你的代码，例如:
+
+For a real-world example of lazy loading, look at the source code for multiprocessing/__init__.py in the standard library.
+延迟加载的真实例子, 见标准库 multiprocessing/__init__.py 的源码.
+
+Making Separate Directories of Code Import Under a Common Namespace
+10.5 利用命名空间导入目录分散的代码¶
+
+You have a large base of code with parts possibly maintained and distributed by different people.
+你可能有大量的代码，由不同的人来分散地维护
+
+Each part is organized as a directory of files, like a package.
+每个部分被组织为文件目录，如一个包
+
+However, instead of having each part installed as a separated named package, you would like all of the parts to join together under a common package prefix.
+然而，你希望能用共同的包前缀将所有组件连接起来，不是将每一个部分作为独立的包来安装
+
+Essentially, the problem here is that you would like to define a top-level Python package that serves as a namespace for a large collection of separately maintained subpackages.
+从本质上讲，你要定义一个顶级Python包，作为一个大集合分开维护子包的命名空间
+
+This problem often arises in large application frameworks where the framework developers want to encourage users to distribute plug-ins or add-on packages.
+这个问题经常出现在大的应用框架中，框架开发者希望鼓励用户发布插件或附加包
+
+To unify separate directories under a common namespace, you organize the code just like a normal Python package, but you omit __init__.py files in the directories where the components are going to join together.
+在统一不同的目录里统一相同的命名空间，但是要删去用来将组件联合起来的__init__.py文件
+
+To illustrate, suppose you have two different directories of Python code like this:
+假设你有Python代码的两个不同的目录如下：
+
+In these directories, the name spam is being used as a common namespace.
+在这2个目录里，都有着共同的命名空间spam
+
+Observe that there is no __init__.py file in either directory.
+在任何一个目录里都没有__init__.py文件
+
+Now watch what happens if you add both foo-package and bar-package to the Python module path and try some imports:
+让我们看看，如果将foo-package和bar-package都加到python模块路径并尝试导入会发生什么
+
+You’ll observe that, by magic, the two different package directories merge together and you can import either spam.blah or spam.grok.
+两个不同的包目录被合并到一起，你可以导入spam.blah和spam.grok，并且它们能够工作
+
+The mechanism at work here is a feature known as a "namespace package." Essentially, a namespace package is a special kind of package designed for merging different directories of code together under a common namespace, as shown.
+在这里工作的机制被称为“包命名空间”的一个特征
+
+For large frameworks, this can be useful, since it allows parts of a framework to be broken up into separately installed downloads.
+从本质上讲，包命名空间是一种特殊的封装设计，为合并不同的目录的代码到一个共同的命名空间
+
+It also enables people to easily make third-party add-ons and other extensions to such frameworks.
+对于大的框架，这可能是有用的，因为它允许一个框架的部分被单独地安装下载
+
+The key to making a namespace package is to make sure there are no __init__.py files in the top-level directory that is to serve as the common namespace.
+包命名空间的关键是确保顶级目录中没有__init__.py文件来作为共同的命名空间
+
+The missing __init__.py file causes an interesting thing to happen on package import.
+缺失__init__.py文件使得在导入包的时候会发生有趣的事情：这并没有产生错误，解释器创建了一个由所有包含匹配包名的目录组成的列表
+
+Instead of causing an error, the interpreter instead starts creating a list of all directories that happen to contain a matching package name.
+特殊的包命名空间模块被创建，只读的目录列表副本被存储在其__path__变量中
+
+A special namespace package module is then created and a read-only copy of the list of directories is stored in its __path__ variable.
+ 举个例子：
+
+The directories on __path__ are used when locating further package subcomponents (e.g., when importing spam.grok or spam.blah).
+在定位包的子组件时，目录__path__将被用到(例如, 当导入spam.grok或者spam.blah的时候).
+
+An important feature of namespace packages is that anyone can extend the namespace with their own code.
+包命名空间的一个重要特点是任何人都可以用自己的代码来扩展命名空间
+
+For example, suppose you made your own directory of code like this:
+举个例子，假设你自己的代码目录像这样：
+
+If you added your directory of code to sys.path along with the other packages, it would just seamlessly merge together with the other spam package directories:
+如果你将你的代码目录和其他包一起添加到sys.path，这将无缝地合并到别的spam包目录中：
+
+As a debugging tool, the main way that you can tell if a package is serving as a namespace package is to check its __file__ attribute.
+一个包是否被作为一个包命名空间的主要方法是检查其__file__属性
+
+If it’s missing altogether, the package is a namespace.
+如果没有，那包是个命名空间
+
+This will also be indicated in the representation string by the word "namespace":
+这也可以由其字符表现形式中的“namespace”这个词体现出来
+
+Further information about namespace packages can be found in PEP 420.
+更多的包命名空间信息可以查看 PEP 420.
+
+Reloading Modules
+10.6 重新加载模块¶
+
+You want to reload an already loaded module because you’ve made changes to its source.
+你想重新加载已经加载的模块，因为你对其源码进行了修改
+
+To reload a previously loaded module, use imp.reload().
+使用imp.reload()来重新加载先前加载的模块
+
+For example:
+举个例子：
+
+Reloading a module is something that is often useful during debugging and development, but which is generally never safe in production code due to the fact that it doesn’t always work as you expect.
+重新加载模块在开发和调试过程中常常很有用
+
+Under the covers, the reload() operation wipes out the contents of a module’s underlying dictionary and refreshes it by re-executing the module’s source code.
+reload()擦除了模块底层字典的内容，并通过重新执行模块的源代码来刷新它
+
+The identity of the module object itself remains unchanged.
+模块对象本身的身份保持不变
+
+Thus, this operation updates the module everywhere that it has been imported in a program.
+因此，该操作在程序中所有已经被导入了的地方更新了模块
+
+However, reload() does not update definitions that have been imported using statements such as from module import name.
+尽管如此，reload()没有更新像”from module import name”这样使用import语句导入的定义
+
+To illustrate, consider the following code:
+举个例子：
+
+Now start an interactive session:
+现在启动交互式会话：
+
+Without quitting Python, go edit the source code to spam.py so that the function grok() looks like this:
+不退出Python修改spam.py的源码，将grok()函数改成这样：
+
+Now go back to the interactive session, perform a reload, and try this experiment:
+现在回到交互式会话，重新加载模块，尝试下这个实验：
+
+In this example, you’ll observe that there are two versions of the grok() function loaded.
+在这个例子中，你看到有2个版本的grok()函数被加载
+
+Generally, this is not what you want, and is just the sort of thing that eventually leads to massive headaches.
+通常来说，这不是你想要的，而是令人头疼的事
+
+For this reason, reloading of modules is probably something to be avoided in production code.
+因此，在生产环境中可能需要避免重新加载模块
+
+Save it for debugging or for interactive sessions where you’re experimenting with the interpreter and trying things out.
+在交互环境下调试，解释程序并试图弄懂它
+
+Making a Directory or Zip File Runnable As a Main Script
+10.7 运行目录或压缩文件¶
+
+You have a program that has grown beyond a simple script into an application involving multiple files.
+您有一个已成长为包含多个文件的应用，它已远不再是一个简单的脚本，你想向用户提供一些简单的方法运行这个程序
+
+If your application program has grown into multiple files, you can put it into its own directory and add a __main__.py file.
+如果你的应用程序已经有多个文件，你可以把你的应用程序放进它自己的目录并添加一个__main__.py文件
+
+For example, you can create a directory like this:
+ 举个例子，你可以像这样创建目录：
+
+If __main__.py is present, you can simply run the Python interpreter on the top-level directory like this:
+如果__main__.py存在，你可以简单地在顶级目录运行Python解释器：
+
+The interpreter will execute the __main__.py file as the main program.
+解释器将执行__main__.py文件作为主程序
+
+This technique also works if you package all of your code up into a zip file.
+如果你将你的代码打包成zip文件，这种技术同样也适用，举个例子：
+
+Creating a directory or zip file and adding a __main__.py file is one possible way to package a larger Python application.
+创建一个目录或zip文件并添加__main__.py文件来将一个更大的Python应用打包是可行的
+
+It’s a little bit different than a package in that the code isn’t meant to be used as a standard library module that’s installed into the Python library.
+这和作为标准库被安装到Python库的代码包是有一点区别的
+
+Instead, it’s just this bundle of code that you want to hand someone to execute.
+相反，这只是让别人执行的代码包
+
+Since directories and zip files are a little different than normal files, you may also want to add a supporting shell script to make execution easier.
+由于目录和zip文件与正常文件有一点不同，你可能还需要增加一个shell脚本，使执行更加容易
+
+For example, if the code was in a file named myapp.zip, you could make a top-level script like this:
+例如，如果代码文件名为myapp.zip，你可以创建这样一个顶级脚本：
+
+Reading Datafiles Within a Package
+10.8 读取位于包中的数据文件¶
+
+Your package includes a datafile that your code needs to read.
+你的包中包含代码需要去读取的数据文件
+
+You need to do this in the most portable way possible.
+你需要尽可能地用最便捷的方式来做这件事
+
+Suppose you have a package with files organized as follows:
+假设你的包中的文件组织成如下：
+
+Now suppose the file spam.py wants to read the contents of the file somedata.dat.
+现在假设spam.py文件需要读取somedata.dat文件中的内容
+
+To do it, use the following code:
+你可以用以下代码来完成：
+
+The resulting variable data will be a byte string containing the raw contents of the file.
+由此产生的变量是包含该文件的原始内容的字节字符串
+
+To read a datafile, you might be inclined to write code that uses built-in I/O functions, such as open().
+要读取数据文件，你可能会倾向于编写使用内置的I/ O功能的代码，如open()
+
+However, there are several problems with this approach.
+但是这种方法也有一些问题
+
+First, a package has very little control over the current working directory of the interpreter.
+首先，一个包对解释器的当前工作目录几乎没有控制权
+
+Thus, any I/O operations would have to be programmed to use absolute filenames.
+因此，编程时任何I/O操作都必须使用绝对文件名
+
+Since each module includes a __file__ variable with the full path, it’s not impossible to figure out the location, but it’s messy.
+由于每个模块包含有完整路径的__file__变量，这弄清楚它的路径不是不可能，但它很凌乱
+
+Second, packages are often installed as .zip or .egg files, which don’t preserve the files in the same way as a normal directory on the filesystem.
+第二，包通常安装作为.zip或.egg文件，这些文件并不像在文件系统上的一个普通目录里那样被保存
+
+Thus, if you tried to use open() on a datafile contained in an archive, it wouldn’t work at all.
+因此，你试图用open()对一个包含数据文件的归档文件进行操作，它根本不会工作
+
+The pkgutil.get_data() function is meant to be a high-level tool for getting a datafile regardless of where or how a package has been installed.
+pkgutil.get_data()函数是一个读取数据文件的高级工具，不用管包是如何安装以及安装在哪
+
+It will simply "work" and return the file contents back to you as a byte string.
+它只是工作并将文件内容以字节字符串返回给你
+
+The first argument to get_data() is a string containing the package name.
+get_data()的第一个参数是包含包名的字符串
+
+You can either supply it directly or use a special variable, such as __package__.
+你可以直接使用包名，也可以使用特殊的变量，比如__package__
+
+The second argument is the relative name of the file within the package.
+第二个参数是包内文件的相对名称
+
+If necessary, you can navigate into different directories using standard Unix filename conventions as long as the final directory is still located within the package.
+如果有必要，可以使用标准的Unix命名规范到不同的目录，只有最后的目录仍然位于包中
+
+Adding Directories to sys.path
+10.9 将文件夹加入到sys.path¶
+
+You have Python code that can’t be imported because it’s not located in a directory listed in sys.path.
+你无法导入你的Python代码因为它所在的目录不在sys.path里
+
+You would like to add new directories to Python’s path, but don’t want to hardwire it into your code.
+你想将添加新目录到Python路径，但是不想硬链接到你的代码
+
+There are two common ways to get new directories added to sys.path.
+有两种常用的方式将新目录添加到sys.path
+
+First, you can add them through the use of the PYTHONPATH environment variable.
+第一种，你可以使用PYTHONPATH环境变量来添加
+
+For example:
+例如：
+
+In a custom application, this environment variable could be set at program startup or through a shell script of some kind.
+在自定义应用程序中，这样的环境变量可在程序启动时设置或通过shell脚本
+
+The second approach is to create a .pth file that lists the directories like this:
+第二种方法是创建一个.pth文件，将目录列举出来，像这样：
+
+This .pth file needs to be placed into one of Python’s site-packages directories, which are typically located at /usr/local/lib/python3.3/site-packages or ~/.local/lib/python3.3/site-packages.
+这个.pth文件需要放在某个Python的site-packages目录，通常位于/usr/local/lib/python3.3/site-packages 或者 ~/.local/lib/python3.3/sitepackages
+
+On interpreter startup, the directories listed in the .pth file will be added to sys.path as long as they exist on the filesystem.
+当解释器启动时，.pth文件里列举出来的存在于文件系统的目录将被添加到sys.path
+
+Installation of a .pth file might require administrator access if it’s being added to the system-wide Python interpreter.
+安装一个.pth文件可能需要管理员权限，如果它被添加到系统级的Python解释器
+
+Faced with trouble locating files, you might be inclined to write code that manually adjusts the value of sys.path.
+比起费力地找文件，你可能会倾向于写一个代码手动调节sys.path的值
+
+For example:
+例如:
+
+Although this "works," it is extremely fragile in practice and should be avoided if possible.
+虽然这能“工作”，它是在实践中极为脆弱，应尽量避免使用
+
+Part of the problem with this approach is that it adds hardcoded directory names to your source.
+这种方法的问题是，它将目录名硬编码到了你的源代码
+
+This can cause maintenance problems if your code ever gets moved around to a new location.
+如果你的代码被移到一个新的位置，这会导致维护问题
+
+It’s usually much better to configure the path elsewhere in a manner that can be adjusted without making source code edits.
+更好的做法是在不修改源代码的情况下，将path配置到其他地方
+
+This adds an src directory to the path where that directory is located in the same directory as the code that’s executing the insertion step.
+这将src目录添加到path里，和执行插入步骤的代码在同一个目录里
+
+The site-packages directories are the locations where third-party modules and packages normally get installed.
+site-packages目录是第三方包和模块安装的目录
+
+If your code was installed in that manner, that’s where it would be placed.
+如果你手动安装你的代码，它将被安装到site-packages目录
+
+Although .pth files for configuring the path must appear in site-packages, they can refer to any directories on the system that you wish.
+虽然用于配置path的.pth文件必须放置在site-packages里，但它配置的路径可以是系统上任何你希望的目录
+
+Thus, you can elect to have your code in a completely different set of directories as long as those directories are included in a .pth file.
+因此，你可以把你的代码放在一系列不同的目录，只要那些目录包含在.pth文件里
+
+Importing Modules Using a Name Given in a String
+10.10 通过字符串名导入模块¶
+
+You have the name of a module that you would like to import, but it’s being held in a string.
+你想导入一个模块，但是模块的名字在字符串里
+
+You would like to invoke the import command on the string.
+你想对字符串调用导入命令
+
+Use the importlib.import_module() function to manually import a module or part of a package where the name is given as a string.
+使用importlib.import_module()函数来手动导入名字为字符串给出的一个模块或者包的一部分
+
+For example:
+举个例子：
+
+import_module simply performs the same steps as import, but returns the resulting module object back to you as a result.
+import_module只是简单地执行和import相同的步骤，但是返回生成的模块对象
+
+You just need to store it in a variable and use it like a normal module afterward.
+你只需要将其存储在一个变量，然后像正常的模块一样使用
+
+If you are working with packages, import_module() can also be used to perform relative imports.
+如果你正在使用的包，import_module()也可用于相对导入
+
+However, you need to give it an extra argument.
+但是，你需要给它一个额外的参数
+
+For example:
+例如：
+
+The problem of manually importing modules with import_module() most commonly arises when writing code that manipulates or wraps around modules in some way.
+使用import_module()手动导入模块的问题通常出现在以某种方式编写修改或覆盖模块的代码时候
+
+For example, perhaps you’re implementing a customized importing mechanism of some kind where you need to load a module by name and perform patches to the loaded code.
+例如，也许你正在执行某种自定义导入机制，需要通过名称来加载一个模块，通过补丁加载代码
+
+In older code, you will sometimes see the built-in __import__() function used to perform imports.
+在旧的代码，有时你会看到用于导入的内建函数__import__()
+
+Although this works, importlib.import_module() is usually easier to use.
+尽管它能工作，但是importlib.import_module() 通常更容易使用
+
+See “Loading Modules from a Remote Machine Using Import Hooks” for an advanced example of customizing the import process.
+自定义导入过程的高级实例见10.11小节
+
+Loading Modules from a Remote Machine Using Import Hooks
+10.11 通过钩子远程加载模块¶
+
+You would like to customize Python’s import statement so that it can transparently load modules from a remote machine.
+你想自定义Python的import语句，使得它能从远程机器上面透明的加载模块
+
+First, a serious disclaimer about security.
+首先要提出来的是安全问题
+
+The idea discussed in this recipe would be wholly bad without some kind of extra security and authentication layer.
+本届讨论的思想如果没有一些额外的安全和认知机制的话会很糟糕
+
+That said, the main goal is actually to take a deep dive into the inner workings of Python’s import statement.
+ 也就是说，我们的主要目的是深入分析Python的import语句机制
+
+If you get this recipe to work and understand the inner workings, you’ll have a solid foundation of customizing import for almost any other purpose.
+ 如果你理解了本节内部原理，你就能够为其他任何目的而自定义import
+
+With that out of the way, let’s carry on.
+ 有了这些，让我们继续向前走
+
+At the core of this recipe is a desire to extend the functionality of the import statement.
+本节核心是设计导入语句的扩展功能
+
+There are several approaches for doing this, but for the purposes of illustration, start by making the following directory of Python code:
+有很多种方法可以做这个， 不过为了演示的方便，我们开始先构造下面这个Python代码结构：
+
+The content of these files doesn’t matter, but put a few simple statements and functions in each file so you can test them and see output when they’re imported.
+这些文件的内容并不重要，不过我们在每个文件中放入了少量的简单语句和函数， 这样你可以测试它们并查看当它们被导入时的输出
+
+For example:
+例如：
+
+The goal here is to allow remote access to these files as modules.
+这里的目的是允许这些文件作为模块被远程访问
+
+Perhaps the easiest way to do this is to publish them on a web server.
+ 也许最简单的方式就是将它们发布到一个web服务器上面
+
+Simply go to the testcode directory and run Python like this:
+在testcode目录中像下面这样运行Python：
+
+Leave that server running and start up a separate Python interpreter.
+服务器运行起来后再启动一个单独的Python解释器
+
+Make sure you can access the remote files using urllib.
+ 确保你可以使用 urllib 访问到远程文件
+
+For example:
+例如：
+
+Loading source code from this server is going to form the basis for the remainder of this recipe.
+从这个服务器加载源代码是接下来本节的基础
+
+Specifically, instead of manually grabbing a file of source code using urlopen(), the import statement will be customized to do it transparently behind the scenes.
+ 为了替代手动的通过 urlopen() 来收集源文件， 我们通过自定义import语句来在后台自动帮我们做到
+
+The first approach to loading a remote module is to create an explicit loading function for doing it.
+加载远程模块的第一种方法是创建一个显示的加载函数来完成它
+
+For example:
+例如：
+
+This function merely downloads the source code, compiles it into a code object using compile(), and executes it in the dictionary of a newly created module object.
+这个函数会下载源代码，并使用 compile() 将其编译到一个代码对象中， 然后在一个新创建的模块对象的字典中来执行它
+
+Here’s how you would use the function:
+下面是使用这个函数的方式：
+
+As you can see, it "works" for simple modules.
+正如你所见，对于简单的模块这个是行得通的
+
+However, it’s not plugged into the usual import statement, and extending the code to support more advanced constructs, such as packages, would require additional work.
+ 不过它并没有嵌入到通常的import语句中，如果要支持更高级的结构比如包就需要更多的工作了
+
+A much slicker approach is to create a custom importer.
+一个更酷的做法是创建一个自定义导入器
+
+The first way to do this is to create what’s known as a meta path importer.
+第一种方法是创建一个元路径导入器
+
+Here is an example:
+如下：
+
+Here is an interactive session showing how to use the preceding code:
+下面是一个交互会话，演示了如何使用前面的代码：
+
+This particular solution involves installing an instance of a special finder object UrlMetaFinder as the last entry in sys.meta_path.
+这个特殊的方案会安装一个特别的查找器 UrlMetaFinder 实例， 作为 sys.meta_path 中最后的实体
+
+Whenever modules are imported, the finders in sys.meta_path are consulted in order to locate the module.
+ 当模块被导入时，会依据 sys.meta_path 中的查找器定位模块
+
+In this example, the UrlMetaFinder instance becomes a finder of last resort that’s triggered when a module can’t be found in any of the normal locations.
+ 在这个例子中，UrlMetaFinder 实例是最后一个查找器方案， 当模块在任何一个普通地方都找不到的时候就触发它
+
+As for the general implementation approach, the UrlMetaFinder class wraps around a user-specified URL.
+作为常见的实现方案，UrlMetaFinder 类包装在一个用户指定的URL上
+
+Internally, the finder builds sets of valid links by scraping them from the given URL.
+ 在内部，查找器通过抓取指定URL的内容构建合法的链接集合
+
+When imports are made, the module name is compared against this set of known links.
+ 导入的时候，模块名会跟已有的链接作对比
+
+If a match can be found, a separate UrlModuleLoader class is used to load source code from the remote machine and create the resulting module object.
+如果找到了一个匹配的， 一个单独的 UrlModuleLoader 类被用来从远程机器上加载源代码并创建最终的模块对象
+
+One reason for caching the links is to avoid unnecessary HTTP requests on repeated imports.
+ 这里缓存链接的一个原因是避免不必要的HTTP请求重复导入
+
+The second approach to customizing import is to write a hook that plugs directly into the sys.path variable, recognizing certain directory naming patterns.
+自定义导入的第二种方法是编写一个钩子直接嵌入到 sys.path 变量中去， 识别某些目录命名模式
+
+Add the following class and support functions to urlimport.py:
+ 在 urlimport.py 中添加如下的类和支持函数：
+
+To use this path-based finder, you simply add URLs to sys.path.
+要使用这个路径查找器，你只需要在 sys.path 中加入URL链接
+
+For example:
+例如：
+
+The key to this last example is the handle_url() function, which is added to the sys.path_hooks variable.
+关键点就是 handle_url() 函数，它被添加到了 sys.path_hooks 变量中
+
+When the entries on sys.path are being processed, the functions in sys.path_hooks are invoked.
+ 当 sys.path 的实体被处理时，会调用 sys.path_hooks 中的函数
+
+If any of those functions return a finder object, that finder is used to try to load modules for that entry on sys.path.
+ 如果任何一个函数返回了一个查找器对象，那么这个对象就被用来为 sys.path 实体加载模块
+
+It should be noted that the remotely imported modules work exactly like any other module.
+远程模块加载跟其他的加载使用方法几乎是一样的
+
+For instance:
+例如：
+
+Before discussing this recipe in further detail, it should be emphasized that Python’s module, package, and import mechanism is one of the most complicated parts of the entire language—often poorly understood by even the most seasoned Python programmers unless they’ve devoted effort to peeling back the covers.
+在详细讨论之前，有点要强调的是，Python的模块、包和导入机制是整个语言中最复杂的部分， 即使经验丰富的Python程序员也很少能精通它们
+
+There are several critical documents that are worth reading, including the documentation for the importlib module and PEP 302.
+ 我在这里推荐一些值的去读的文档和书籍，包括 importlib module 和 PEP 302. 文档内容在这里不会被重复提到，不过我在这里会讨论一些最重要的部分
+
+First, if you want to create a new module object, you use the imp.new_module() function.
+首先，如果你想创建一个新的模块对象，使用 imp.new_module() 函数：
+
+Module objects usually have a few expected attributes, including __file__ (the name of the file that the module was loaded from) and __package__ (the name of the enclosing package, if any).
+模块对象通常有一些期望属性，包括 __file__ （运行模块加载语句的文件名） 和 __package__ (包名)
+
+Second, modules are cached by the interpreter.
+其次，模块会被解释器缓存起来
+
+The module cache can be found in the dictionary sys.modules.
+模块缓存可以在字典 sys.modules 中被找到
+
+Because of this caching, it’s common to combine caching and module creation together into a single step.
+ 因为有了这个缓存机制，通常可以将缓存和模块的创建通过一个步骤完成：
+
+The main reason for doing this is that if a module with the given name already exists, you’ll get the already created module instead.
+如果给定模块已经存在那么就会直接获得已经被创建过的模块，例如：
+
+Since creating modules is easy, it is straightforward to write simple functions, such as the load_module() function in the first part of this recipe.
+由于创建模块很简单，很容易编写简单函数比如第一部分的 load_module() 函数
+
+A downside of this approach is that it is actually rather tricky to handle more complicated cases, such as package imports.
+ 这个方案的一个缺点是很难处理复杂情况比如包的导入
+
+In order to handle a package, you would have to reimplement much of the underlying logic that’s already part of the normal import statement (e.g., checking for directories, looking for __init__.py files, executing those files, setting up paths, etc.).
+ 为了处理一个包，你要重新实现普通import语句的底层逻辑（比如检查目录，查找__init__.py文件， 执行那些文件，设置路径等）
+
+This complexity is one of the reasons why it’s often better to extend the import statement directly rather than defining a custom function.
+这个复杂性就是为什么最好直接扩展import语句而不是自定义函数的一个原因
+
+Extending the import statement is straightforward, but involves a number of moving parts.
+扩展import语句很简单，但是会有很多移动操作
+
+At the highest level, import operations are processed by a list of "meta-path" finders that you can find in the list sys.meta_path.
+ 最高层上，导入操作被一个位于sys.meta_path列表中的“元路径”查找器处理
+
+If you output its value, you’ll see the following:
+ 如果你输出它的值，会看到下面这样：
+
+When executing a statement such as import fib, the interpreter walks through the finder objects on sys.meta_path and invokes their find_module() method in order to locate an appropriate module loader.
+当执行一个语句比如 import fib 时，解释器会遍历sys.mata_path中的查找器对象， 调用它们的 find_module() 方法定位正确的模块加载器
+
+It helps to see this by experimentation, so define the following class and try the following:
+ 可以通过实验来看看：
+
+Notice how the find_module() method is being triggered on every import.
+注意看 find_module() 方法是怎样在每一个导入就被触发的
+
+The role of the path argument in this method is to handle packages.
+ 这个方法中的path参数的作用是处理包
+
+When packages are imported, it is a list of the directories that are found in the package’s __path__ attribute.
+ 多个包被导入，就是一个可在包的 __path__ 属性中找到的路径列表
+
+These are the paths that need to be checked to find package subcomponents.
+ 要找到包的子组件就要检查这些路径
+
+For example, notice the path setting for xml.etree and xml.etree.ElementTree:
+ 比如注意对于 xml.etree 和 xml.etree.ElementTree 的路径配置：
+
+The placement of the finder on sys.meta_path is critical.
+在 sys.meta_path 上查找器的位置很重要，将它从队头移到队尾，然后再试试导入看：
+
+Now you don’t see any output because the imports are being handled by other entries in sys.meta_path.
+现在你看不到任何输出了，因为导入被sys.meta_path中的其他实体处理
+
+In this case, you would only see it trigger when nonexistent modules are imported:
+ 这时候，你只有在导入不存在模块的时候才能看到它被触发：
+
+The fact that you can install a finder to catch unknown modules is the key to the UrlMetaFinder class in this recipe.
+你之前安装过一个捕获未知模块的查找器，这个是 UrlMetaFinder 类的关键
+
+An instance of UrlMetaFinder is added to the end of sys.meta_path, where it serves as a kind of importer of last resort.
+ 一个 UrlMetaFinder 实例被添加到 sys.meta_path 的末尾，作为最后一个查找器方案
+
+If the requested module name can’t be located by any of the other import mechanisms, it gets handled by this finder.
+ 如果被请求的模块名不能定位，就会被这个查找器处理掉
+
+Some care needs to be taken when handling packages.
+ 处理包的时候需要注意，在path参数中指定的值需要被检查，看它是否以查找器中注册的URL开头
+
+Specifically, the value presented in the path argument needs to be checked to see if it starts with the URL registered in the finder.
+ 如果不是，该子模块必须归属于其他查找器并被忽略掉
+
+Additional handling of packages is found in the UrlPackageLoader class.
+对于包的其他处理可在 UrlPackageLoader 类中被找到
+
+This class, rather than importing the package name, tries to load the underlying __init__.py file.
+ 这个类不会导入包名，而是去加载对应的 __init__.py 文件
+
+It also sets the module __path__ attribute.
+ 它也会设置模块的 __path__ 属性，这一步很重要， 因为在加载包的子模块时这个值会被传给后面的 find_module() 调用
+
+This last part is critical, as the value set will be passed to subsequent find_module() calls when loading package submodules.
+ 基于路径的导入钩子是这些思想的一个扩展，但是采用了另外的方法
+
+Each entry in sys.path is additionally attached to a finder object.
+在 sys.path 中的每一个实体都会被额外的绑定到一个查找器对象上
+
+You can view these finders by looking at sys.path_importer_cache:
+ 你可以通过查看 sys.path_importer_cache 去看下这些查找器：
+
+sys.path_importer_cache tends to be much larger than sys.path because it records finders for all known directories where code is being loaded.
+sys.path_importer_cache 比 sys.path 会更大点， 因为它会为所有被加载代码的目录记录它们的查找器
+
+This includes subdirectories of packages which usually aren’t included on sys.path.
+ 这包括包的子目录，这些通常在 sys.path 中是不存在的
+
+To execute import fib, the directories on sys.path are checked in order.
+要执行 import fib ，会顺序检查 sys.path 中的目录
+
+For each directory, the name fib is presented to the associated finder found in sys.path_importer_cache.
+ 对于每个目录，名称“fib”会被传给相应的 sys.path_importer_cache 中的查找器
+
+This is also something that you can investigate by making your own finder and putting an entry in the cache.
+ 这个可以让你创建自己的查找器并在缓存中放入一个实体
+
+Try this experiment:
+试试这个：
+
+Here, you’ve installed a new cache entry for the name debug and installed the name debug as the first entry on sys.path.
+在这里，你可以为名字“debug”创建一个新的缓存实体并将它设置成 sys.path 上的第一个
+
+On all subsequent imports, you see your finder being triggered.
+ 在所有接下来的导入中，你会看到你的查找器被触发了
+
+However, since it returns (None, []), processing simply continues to the next entry.
+ 不过，由于它返回 (None, [])，那么处理进程会继续处理下一个实体
+
+The population of sys.path_importer_cache is controlled by a list of functions stored in sys.path_hooks.
+sys.path_importer_cache 的使用被一个存储在 sys.path_hooks 中的函数列表控制
+
+Try this experiment, which clears the cache and adds a new path checking function to sys.path_hooks:
+ 试试下面的例子，它会清除缓存并给 sys.path_hooks 添加一个新的路径检查函数
+
+As you can see, the check_path() function is being invoked for every entry on sys.path.
+正如你所见，check_path() 函数被每个 sys.path 中的实体调用
+
+However, since an ImportError exception is raised, nothing else happens (checking just moves to the next function on sys.path_hooks).
+ 不顾，由于抛出了 ImportError 异常， 啥都不会发生了（仅仅将检查转移到sys.path_hooks的下一个函数）
+
+Using this knowledge of how sys.path is processed, you can install a custom path checking function that looks for filename patterns, such as URLs.
+知道了怎样sys.path是怎样被处理的，你就能构建一个自定义路径检查函数来查找文件名，不然URL
+
+For instance:
+例如：
+
+This is the key mechanism at work in the last part of this recipe.
+这就是本节最后部分的关键点
+
+Essentially, a custom path checking function has been installed that looks for URLs in sys.path.
+事实上，一个用来在sys.path中查找URL的自定义路径检查函数已经构建完毕
+
+When they are encountered, a new UrlPathFinder instance is created and installed into sys.path_importer_cache.
+ 当它们被碰到的时候，一个新的 UrlPathFinder 实例被创建并被放入 sys.path_importer_cache. 之后，所有需要检查 sys.path 的导入语句都会使用你的自定义查找器
+
+Package handling with a path-based importer is somewhat tricky, and relates to the return value of the find_loader() method.
+基于路径导入的包处理稍微有点复杂，并且跟 find_loader() 方法返回值有关
+
+For simple modules, find_loader() returns a tuple (loader, None) where loader is an instance of a loader that will import the module.
+ 对于简单模块，find_loader() 返回一个元组(loader, None)， 其中的loader是一个用于导入模块的加载器实例
+
+For a normal package, find_loader() returns a tuple (loader, path) where loader is the loader instance that will import the package (and execute __init__.py) and path is a list of the directories that will make up the initial setting of the package’s __path__ attribute.
+对于一个普通的包，find_loader() 返回一个元组(loader, path)， 其中的loader是一个用于导入包（并执行__init__.py）的加载器实例， path是一个会初始化包的 __path__ 属性的目录列表
+
+For example, if the base URL was http://localhost:15000 and a user executed import grok, the path returned by find_loader() would be [ 'http://localhost:15000/grok' ].
+ 例如，如果基础URL是 http://localhost:15000 并且一个用户执行 import grok , 那么 find_loader() 返回的path就会是 [ ‘http://localhost:15000/grok‘ ]
+
+The find_loader() must additionally account for the possibility of a namespace package.
+find_loader() 还要能处理一个命名空间包
+
+A namespace package is a package where a valid package directory name exists, but no __init__.py file can be found.
+ 一个命名空间包中有一个合法的包目录名，但是不存在__init__.py文件
+
+For this case, find_loader() must return a tuple (None, path) where path is a list of directories that would have made up the package’s __path__ attribute had it defined an __init__.py file.
+ 这样的话，find_loader() 必须返回一个元组(None, path)， path是一个目录列表，由它来构建包的定义有__init__.py文件的__path__属性
+
+For this case, the import mechanism moves on to check further directories on sys.path.
+ 对于这种情况，导入机制会继续前行去检查sys.path中的目录
+
+If more namespace packages are found, all of the resulting paths are joined together to make a final namespace package.
+ 如果找到了命名空间包，所有的结果路径被加到一起来构建最终的命名空间包
+
+See “Making Separate Directories of Code Import Under a Common Namespace” for more information on namespace packages.
+ 关于命名空间包的更多信息请参考10.5小节
+
+There is a recursive element to package handling that is not immediately obvious in the solution, but also at work.
+所有的包都包含了一个内部路径设置，可以在__path__属性中看到，例如：
+
+As mentioned, the setting of __path__ is controlled by the return value of the find_loader() method.
+之前提到，__path__的设置是通过 find_loader() 方法返回值控制的
+
+However, the subsequent processing of __path__ is also handled by the functions in sys.path_hooks.
+ 不过，__path__接下来也被sys.path_hooks中的函数处理
+
+Thus, when package subcomponents are loaded, the entries in __path__ are checked by the handle_url() function.
+ 因此，但包的子组件被加载后，位于__path__中的实体会被 handle_url() 函数检查
+
+This causes new instances of UrlPathFinder to be created and added to sys.path_importer_cache.One remaining tricky part of the implementation concerns the behavior of the handle_url() function and its interaction with the _get_links() function used internally.
+ 这会导致新的 UrlPathFinder 实例被创建并且被加入到 sys.path_importer_cache 中
+
+You may not need this checking in other implementations, but for this example involving URLs, it was required.
+还有个难点就是 handle_url() 函数以及它跟内部使用的 _get_links() 函数之间的交互
+
+Finally, the invalidate_caches() method of both finders is a utility method that is supposed to clear internal caches should the source code change.
+最后，查找器的 invalidate_caches() 方法是一个工具方法，用来清理内部缓存
+
+This method is triggered when a user invokes importlib.invalidate_caches().
+ 这个方法再用户调用 importlib.invalidate_caches() 的时候被触发
+
+You might use it if you want the URL importers to reread the list of links, possibly for the purpose of being able to access newly added files.
+ 如果你想让URL导入者重新读取链接列表的话可以使用它
+
+In comparing the two approaches (modifying sys.meta_path or using a path hook), it helps to take a high-level view.
+对比下两种方案（修改sys.meta_path或使用一个路径钩子）
+
+Importers installed using sys.meta_path are free to handle modules in any manner that they wish.
+ 使用sys.meta_path的导入者可以按照自己的需要自由处理模块
+
+For instance, they could load modules out of a database or import them in a manner that is radically different than normal module/package handling.
+ 例如，它们可以从数据库中导入或以不同于一般模块/包处理方式导入
+
+This freedom also means that such importers need to do more bookkeeping and internal management.
+ 这种自由同样意味着导入者需要自己进行内部的一些管理
+
+This explains, for instance, why the implementation of UrlMetaFinder needs to do its own caching of links, loaders, and other details.
+ 另外，基于路径的钩子只是适用于对sys.path的处理
+
+On the other hand, path-based hooks are more narrowly tied to the processing of sys.path.
+ 通过这种扩展加载的模块跟普通方式加载的特性是一样的
+
+Assuming that your head hasn’t completely exploded at this point, a key to understanding and experimenting with this recipe may be the added logging calls.
+如果到现在为止你还是不是很明白，那么可以通过增加一些日志打印来测试下本节
+
+You can enable logging and try experiments such as this:
+像下面这样：
+
+Last, but not least, spending some time sleeping with PEP 302 and the documentation for importlib under your pillow may be advisable.
+最后，建议你花点时间看看 PEP 302 以及importlib的文档
+
+Patching Modules on Import
+10.12 导入模块的同时修改模块¶
+
+You want to patch or apply decorators to functions in an existing module.
+你想给某个已存在模块中的函数添加装饰器
+
+However, you only want to do it if the module actually gets imported and used elsewhere.
+ 不过，前提是这个模块已经被导入并且被使用过
+
+The essential problem here is that you would like to carry out actions in response to a module being loaded.
+这里问题的本质就是你想在模块被加载时执行某个动作
+
+Perhaps you want to trigger some kind of callback function that would notify you when a module was loaded.
+ 可能是你想在一个模块被加载时触发某个回调函数来通知你
+
+This problem can be solved using the same import hook machinery discussed in “Loading Modules from a Remote Machine Using Import Hooks”.
+这个问题可以使用10.11小节中同样的导入钩子机制来实现
+
+Here is a possible solution:
+下面是一个可能的方案：
+
+To use this code, you use the when_imported() decorator.
+这样，你就可以使用 when_imported() 装饰器了，例如：
+
+As a more practical example, maybe you want to apply decorators to existing definitions, such as shown here:
+作为一个更实际的例子，你可能想在已存在的定义上面添加装饰器，如下所示：
+
+This recipe relies on the import hooks that were discussed in “Loading Modules from a Remote Machine Using Import Hooks”, with a slight twist.
+本节技术依赖于10.11小节中讲述过的导入钩子，并稍作修改
+
+First, the role of the @when_imported decorator is to register handler functions that get triggered on import.
+@when_imported 装饰器的作用是注册在导入时被激活的处理器函数
+
+The decorator checks sys.modules to see if a module was already loaded.
+ 该装饰器检查sys.modules来查看模块是否真的已经被加载了
+
+If so, the handler is invoked immediately.
+ 如果是的话，该处理器被立即调用
+
+Otherwise, the handler is added to a list in the _post_import_hooks dictionary.
+不然，处理器被添加到 _post_import_hooks 字典中的一个列表中去
+
+The purpose of _post_import_hooks is simply to collect all handler objects that have been registered for each module.
+ _post_import_hooks 的作用就是收集所有的为每个模块注册的处理器对象
+
+In principle, more than one handler could be registered for a given module.
+ 一个模块可以注册多个处理器
+
+To trigger the pending actions in _post_import_hooks after module import, the PostImportFinder class is installed as the first item in sys.meta_path.
+要让模块导入后触发添加的动作，PostImportFinder 类被设置为sys.meta_path第一个元素
+
+If you recall from “Loading Modules from a Remote Machine Using Import Hooks”, sys.meta_path contains a list of finder objects that are consulted in order to locate modules.
+ 它会捕获所有模块导入操作
+
+In this recipe, however, the role of PostImportFinder is not to load modules, but to trigger actions upon the completion of an import.
+本节中的 PostImportFinder 的作用并不是加载模块，而是自带导入完成后触发相应的动作
+
+To do this, the actual import is delegated to the other finders on sys.meta_path.
+ 实际的导入被委派给位于sys.meta_path中的其他查找器
+
+Rather than trying to do this directly, the function imp.import_module() is called recursively in the PostImportLoader class.
+ PostImportLoader 类中的 imp.import_module() 函数被递归的调用
+
+To avoid getting stuck in an infinite loop, PostImportFinder keeps a set of all the modules that are currently in the process of being loaded.
+ 为了避免陷入无线循环，PostImportFinder 保持了一个所有被加载过的模块集合
+
+If a module name is part of this set, it is simply ignored by PostImportFinder.
+ 如果一个模块名存在就会直接被忽略掉
+
+After a module has been loaded with imp.import_module(), all handlers currently registered in _post_import_hooks are called with the newly loaded module as an argument.
+当一个模块被 imp.import_module() 加载后， 所有在_post_import_hooks被注册的处理器被调用，使用新加载模块作为一个参数
+
+One caution about this recipe is that it does not work for modules that have been explicitly reloaded using imp.reload().
+有一点需要注意的是本机不适用于那些通过 imp.reload() 被显式加载的模块
+
+That is, if you reload a previously loaded module, the post import handler function doesn’t get triggered again (all the more reason to not use reload() in production code).
+ 也就是说，如果你加载一个之前已被加载过的模块，那么导入处理器将不会再被触发
+
+On the other hand, if you delete the module from sys.modules and redo the import, you’ll see the handler trigger again.
+ 另外，要是你从sys.modules中删除模块然后再重新导入，处理器又会再一次触发
+
+More information about post-import hooks can be found in PEP 369 .
+更多关于导入后钩子信息请参考 PEP 369.
+
+Installing Packages Just for Yourself
+10.13 安装私有的包¶
+
+You want to install a third-party package, but you don’t have permission to install packages into the system Python.
+你想要安装一个第三方包，但是没有权限将它安装到系统Python库中去
+
+Alternatively, perhaps you just want to install a package for your own use, not all users on the system.
+ 或者，你可能想要安装一个供自己使用的包，而不是系统上面所有用户
+
+Python has a per-user installation directory that’s typically located in a directory such as ~/.local/lib/python3.3/site-packages.
+Python有一个用户安装目录，通常类似”~/.local/lib/python3.3/site-packages”
+
+To force packages to install in this directory, give the --user option to the installation command.
+ 要强制在这个目录中安装包，可使用安装选项“–user”
+
+For example:
+例如：
+
+or
+或者
+
+The user site-packages directory normally appears before the system site-packages directory on sys.path.
+在sys.path中用户的“site-packages”目录位于系统的“site-packages”目录之前
+
+Thus, packages you install using this technique take priority over the packages already installed on the system (although this is not always the case depending on the behavior of third-party package managers, such as distribute or pip).
+ 因此，你安装在里面的包就比系统已安装的包优先级高 （尽管并不总是这样，要取决于第三方包管理器，比如distribute或pip）
+
+Normally, packages get installed into the system-wide site-packages directory, which is found in a location such as /usr/local/lib/python3.3/site-packages.
+通常包会被安装到系统的site-packages目录中去，路径类似“/usr/local/lib/python3.3/site-packages”
+
+However, doing so typically requires administrator permissions and use of the sudo command.
+ 不过，这样做需要有管理员权限并且使用sudo命令
+
+Even if you have permission to execute such a command, using sudo to install a new, possibly unproven, package might give you some pause.
+ 就算你有这样的权限去执行命令，使用sudo去安装一个新的，可能没有被验证过的包有时候也不安全
+
+Installing packages into the per-user directory is often an effective workaround that allows you to create a custom installation.
+安装包到用户目录中通常是一个有效的方案，它允许你创建一个自定义安装
+
+As an alternative, you can also create a virtual environment, which is discussed in the next recipe.
+另外，你还可以创建一个虚拟环境，这个我们在下一节会讲到
+
+Creating a New Python Environment
+10.14 创建新的Python环境¶
+
+You want to create a new Python environment in which you can install modules and packages.
+你想创建一个新的Python环境，用来安装模块和包
+
+However, you want to do this without installing a new copy of Python or making changes that might affect the system Python installation.
+ 不过，你不想安装一个新的Python克隆，也不想对系统Python环境产生影响
+
+You can make a new "virtual" environment using the pyvenv command.
+你可以使用 pyvenv 命令创建一个新的“虚拟”环境
+
+This command is installed in the same directory as the Python interpreter or possibly in the Scripts directory on Windows.
+ 这个命令被安装在Python解释器同一目录，或Windows上面的Scripts目录中
+
+Here is an example:
+下面是一个例子：
+
+The name supplied to pyvenv is the name of a directory that will be created.
+传给 pyvenv 命令的名字是将要被创建的目录名
+
+Upon creation, the Spam directory will look something like this:
+当被创建后，Span目录像下面这样：
+
+In the bin directory, you’ll find a Python interpreter that you can use.
+在bin目录中，你会找到一个可以使用的Python解释器：
+
+A key feature of this interpreter is that its site-packages directory has been set to the newly created environment.
+这个解释器的特点就是他的site-packages目录被设置为新创建的环境
+
+Should you decide to install third-party packages, they will be installed here, not in the normal system site-packages directory.
+ 如果你要安装第三方包，它们会被安装在那里，而不是通常系统的site-packages目录
+
+The creation of a virtual environment mostly pertains to the installation and management of third-party packages.
+创建虚拟环境通常是为了安装和管理第三方包
+
+As you can see in the example, the sys.path variable contains directories from the normal system Python, but the site-packages directory has been relocated to a new directory.
+ 正如你在例子中看到的那样，sys.path 变量包含来自于系统Python的目录， 而 site-packages目录已经被重定位到一个新的目录
+
+With a new virtual environment, the next step is often to install a package manager, such as distribute or pip.
+有了一个新的虚拟环境，下一步就是安装一个包管理器，比如distribute或pip
+
+When installing such tools and subsequent packages, you just need to make sure you use the interpreter that’s part of the virtual environment.
+ 但安装这样的工具和包的时候，你需要确保你使用的是虚拟环境的解释器
+
+This should install the packages into the newly created site-packages directory.
+ 它会将包安装到新创建的site-packages目录中去
+
+Although a virtual environment might look like a copy of the Python installation, it really only consists of a few files and symbolic links.
+尽管一个虚拟环境看上去是Python安装的一个复制， 不过它实际上只包含了少量几个文件和一些符号链接
+
+All of the standard library files and interpreter executables come from the original Python installation.
+ 所有标准库函文件和可执行解释器都来自原来的Python安装
+
+Thus, creating such environments is easy, and takes almost no machine resources.
+ 因此，创建这样的环境是很容易的，并且几乎不会消耗机器资源
+
+By default, virtual environments are completely clean and contain no third-party add-ons.
+默认情况下，虚拟环境是空的，不包含任何额外的第三方库
+
+If you would like to include already installed packages as part of a virtual environment, create the environment using the --system-site-packages option.
+如果你想将一个已经安装的包作为虚拟环境的一部分， 可以使用“–system-site-packages”选项来创建虚拟环境，例如：
+
+More information about pyvenv and virtual environments can be found in PEP 405.
+跟多关于 pyvenv 和虚拟环境的信息可以参考 PEP 405.
+
+Distributing Packages
+10.15 分发包¶
+
+You’ve written a useful library, and you want to be able to give it away to others.
+你已经编写了一个有用的库，想将它分享给其他人
+
+If you’re going to start giving code away, the first thing to do is to give it a unique name and clean up its directory structure.
+如果你想分发你的代码，第一件事就是给它一个唯一的名字，并且清理它的目录结构
+
+For example, a typical library package might look something like this:
+ 例如，一个典型的函数库包会类似下面这样：
+
+To make the package something that you can distribute, first write a setup.py file that looks like this:
+要让你的包可以发布出去，首先你要编写一个 setup.py ，类似下面这样：
+
+Next, make a file MANIFEST.in that lists various nonsource files that you want to include in your package:
+下一步，就是创建一个 MANIFEST.in 文件，列出所有在你的包中需要包含进来的非源码文件：
+
+Make sure the setup.py and MANIFEST.in files appear in the top-level directory of your package.
+确保 setup.py 和 MANIFEST.in 文件放在你的包的最顶级目录中
+
+Once you have done this, you should be able to make a source distribution by typing a command such as this:
+ 一旦你已经做了这些，你就可以像下面这样执行命令来创建一个源码分发包了：
+
+This will create a file such as projectname-1.0.zip or projectname-1.0.tar.gz, depending on the platform.
+它会创建一个文件比如”projectname-1.0.zip” 或 “projectname-1.0.tar.gz”, 具体依赖于你的系统平台
+
+If it all works, this file is suitable for giving to others or uploading to the Python Package Index.
+如果一切正常， 这个文件就可以发送给别人使用或者上传至 Python Package Index.
+
+For pure Python code, writing a plain setup.py file is usually straightforward.
+对于纯Python代码，编写一个普通的 setup.py 文件通常很简单
+
+One potential gotcha is that you have to manually list every subdirectory that makes up the packages source code.
+ 一个可能的问题是你必须手动列出所有构成包源码的子目录
+
+A common mistake is to only list the top-level directory of a package and to forget to include package subcomponents.
+ 一个常见错误就是仅仅只列出一个包的最顶级目录，忘记了包含包的子组件
+
+This is why the specification for packages in setup.py includes the list packages=['projectname', 'projectname.utils'].
+ 这也是为什么在 setup.py 中对于包的说明包含了列表 packages=['projectname', 'projectname.utils']
+
+As most Python programmers know, there are many third-party packaging options, including setuptools, distribute, and so forth.
+大部分Python程序员都知道，有很多第三方包管理器供选择，包括setuptools、distribute等等
+
+Some of these are replacements for the distutils library found in the standard library.
+ 有些是为了替代标准库中的distutils
+
+Be aware that if you rely on these packages, users may not be able to install your software unless they also install the required package manager first.
+注意如果你依赖这些包， 用户可能不能安装你的软件，除非他们已经事先安装过所需要的包管理器
+
+Because of this, you can almost never go wrong by keeping things as simple as possible.
+ 正因如此，你更应该时刻记住越简单越好的道理
+
+At a bare minimum, make sure your code can be installed using a standard Python 3 installation.
+ 最好让你的代码使用标准的Python 3安装
+
+Additional features can be supported as an option if additional packages are available.
+ 如果其他包也需要的话，可以通过一个可选项来支持
+
+Packaging and distribution of code involving C extensions can get considerably more complicated.
+对于涉及到C扩展的代码打包与分发就更复杂点了
+
+Chapter 15 on C extensions has a few details on this.
+ 第15章对关于C扩展的这方面知识有一些详细讲解，特别是在15.2小节中
+

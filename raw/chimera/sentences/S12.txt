@@ -1,0 +1,1368 @@
+Chapter 12. Concurrency
+第十二章：并发编程¶
+
+Python has long supported different approaches to concurrent programming, including programming with threads, launching subprocesses, and various tricks involving generator functions.
+对于并发编程, Python有多种长期支持的方法, 包括多线程, 调用子进程, 以及各种各样的关于生成器函数的技巧. 这一章将会给出并发编程各种方面的技巧, 包括通用的多线程技术以及并行计算的实现方法.
+
+As experienced programmers know, concurrent programming is fraught with potential peril.
+像经验丰富的程序员所知道的那样, 大家担心并发的程序有潜在的危险. 因此, 本章的主要目标之一是给出更加可信赖和易调试的代码.
+
+Starting and Stopping Threads
+12.1 启动与停止线程¶
+
+You want to create and destroy threads for concurrent execution of code.
+你要为需要并发执行的代码创建/销毁线程
+
+The threading library can be used to execute any Python callable in its own thread.
+threading 库可以在单独的线程中执行任何的在 Python 中可以调用的对象
+
+To do this, you create a Thread instance and supply the callable that you wish to execute as a target.
+你可以创建一个 Thread 对象并将你要执行的对象以 target 参数的形式提供给该对象
+
+Here is a simple example:
+ 下面是一个简单的例子：
+
+When you create a thread instance, it doesn’t start executing until you invoke its start() method (which invokes the target function with the arguments you supplied).
+当你创建好一个线程对象后，该对象并不会立即执行，除非你调用它的 start() 方法（当你调用 start() 方法时，它会调用你传递进来的函数，并把你传递进来的参数传递给该函数）
+
+Threads are executed in their own system-level thread (e.g., a POSIX thread or Windows threads) that is fully managed by the host operating system.
+Python中的线程会在一个单独的系统级线程中执行（比如说一个 POSIX 线程或者一个 Windows 线程），这些线程将由操作系统来全权管理
+
+Once started, threads run independently until the target function returns.
+线程一旦启动，将独立执行直到目标函数返回
+
+You can query a thread instance to see if it’s still running:
+你可以查询一个线程对象的状态，看它是否还在执行：
+
+You can also request to join with a thread, which waits for it to terminate:
+你也可以将一个线程加入到当前线程，并等待它终止：
+
+The interpreter remains running until all threads terminate.
+Python解释器直到所有线程都终止前仍保持运行
+
+For long-running threads or background tasks that run forever, you should consider making the thread daemonic.
+对于需要长时间运行的线程或者需要一直运行的后台任务，你应当考虑使用后台线程
+
+For example:
+ 例如：
+
+Daemonic threads can’t be joined.
+后台线程无法等待，不过，这些线程会在主线程终止时自动销毁
+
+However, they are destroyed automatically when the main thread terminates.
+ 除了如上所示的两个操作，并没有太多可以对线程做的事情
+
+Beyond the two operations shown, there aren’t many other things you can do with threads.
+如果线程执行一些像I/O这样的阻塞操作，那么通过轮询来终止线程将使得线程之间的协调变得非常棘手
+
+For example, there are no operations to terminate a thread, signal a thread, adjust its scheduling, or perform any other high-level operations.
+比如，如果一个线程一直阻塞在一个I/O操作上，它就永远无法返回，也就无法检查自己是否已经被结束了
+
+If you want these features, you need to build them yourself.
+要正确处理这些问题，你需要利用超时循环来小心操作线程
+
+If you want to be able to terminate threads, the thread must be programmed to poll for exit at selected points.
+ 例子如下：
+
+Due to a global interpreter lock (GIL), Python threads are restricted to an execution model that only allows one thread to execute in the interpreter at any given time.
+由于全局解释锁（GIL）的原因，Python 的线程被限制到同一时刻只允许一个线程执行这样一个执行模型
+
+For this reason, Python threads should generally not be used for computationally intensive tasks where you are trying to achieve parallelism on multiple CPUs.
+所以，Python 的线程更适用于处理I/O和其他需要并发执行的阻塞操作（比如等待I/O、等待从数据库获取数据等等），而不是需要多处理器并行的计算密集型任务
+
+Sometimes you will see threads defined via inheritance from the Thread class.
+有时你会看到下边这种通过继承 Thread 类来实现的线程：
+
+Although this works, it introduces an extra dependency between the code and the threading library.
+尽管这样也可以工作，但这使得你的代码依赖于 threading 库，所以你的这些代码只能在线程上下文中使用
+
+That is, you can only use the resulting code in the context of threads, whereas the technique shown earlier involves writing code with no explicit dependency on threading.
+上文所写的那些代码、函数都是与 threading 库无关的，这样就使得这些代码可以被用在其他的上下文中，可能与线程有关，也可能与线程无关
+
+By freeing your code of such dependencies, it becomes usable in other contexts that may or may not involve threads.
+比如，你可以通过 multiprocessing 模块在一个单独的进程中执行你的代码：
+
+Again, this only works if the CountdownTask class has been written in a manner that is neutral to the actual means of concurrency (threads, processes, etc.).
+再次重申，这段代码仅适用于 CountdownTask 类是以独立于实际的并发手段（多线程、多进程等等）实现的情况
+
+Determining If a Thread Has Started
+12.2 判断线程是否已经启动¶
+
+You’ve launched a thread, but want to know when it actually starts running.
+你已经启动了一个线程，但是你想知道它是不是真的已经开始运行了
+
+A key feature of threads is that they execute independently and nondeterministically.
+线程的一个关键特性是每个线程都是独立运行且状态不可预测
+
+This can present a tricky synchronization problem if other threads in the program need to know if a thread has reached a certain point in its execution before carrying out further operations.
+如果程序中的其他线程需要通过判断某个线程的状态来确定自己下一步的操作，这时线程同步问题就会变得非常棘手
+
+To solve such problems, use the Event object from the threading library.
+为了解决这些问题，我们需要使用 threading 库中的 Event 对象
+
+Event instances are similar to a "sticky" flag that allows threads to wait for something to happen.
+Event 对象包含一个可由线程设置的信号标志，它允许线程等待某些事件的发生
+
+Initially, an event is set to 0.
+在初始情况下，event 对象中的信号标志被设置为假
+
+If the event is unset and a thread waits on the event, it will block (i.e., go to sleep) until the event gets set.
+如果有线程等待一个 event 对象，而这个 event 对象的标志为假，那么这个线程将会被一直阻塞直至该标志为真
+
+A thread that sets the event will wake up all of the threads that happen to be waiting (if any).
+一个线程如果将一个 event 对象的信号标志设置为真，它将唤醒所有等待这个 event 对象的线程
+
+If a thread waits on an event that has already been set, it merely moves on, continuing to execute.
+如果一个线程等待一个已经被设置为真的 event 对象，那么它将忽略这个事件，继续执行
+
+Here is some sample code that uses an Event to coordinate the startup of a thread:
+下边的代码展示了如何使用 Event 来协调线程的启动：
+
+When you run this code, the "countdown is running" message will always appear after the "countdown starting" message.
+当你执行这段代码，“countdown is running” 总是显示在 “countdown starting” 之后显示
+
+This is coordinated by the event that makes the main thread wait until the countdown() function has first printed the startup message.
+这是由于使用 event 来协调线程，使得主线程要等到 countdown() 函数输出启动信息后，才能继续执行
+
+Event objects are best used for one-time events.
+event 对象最好单次使用，就是说，你创建一个 event 对象，让某个线程等待这个对象，一旦这个对象被设置为真，你就应该丢弃它
+
+That is, you create an event, threads wait for the event to be set, and once set, the Event is discarded.
+尽管可以通过 clear() 方法来重置 event 对象，但是很难确保安全地清理 event 对象并对它重新赋值
+
+Although it is possible to clear an event using its clear() method, safely clearing an event and waiting for it to be set again is tricky to coordinate, and can lead to missed events, deadlock, or other problems (in particular, you can’t guarantee that a request to clear an event after setting it will execute before a released thread cycles back to wait on the event again).
+很可能会发生错过事件、死锁或者其他问题（特别是，你无法保证重置 event 对象的代码会在线程再次等待这个 event 对象之前执行）
+
+If a thread is going to repeatedly signal an event over and over, you’re probably better off using a Condition object instead.
+如果一个线程需要不停地重复使用 event 对象，你最好使用 Condition 对象来代替
+
+For example, this code implements a periodic timer that other threads can monitor to see whenever the timer expires:
+下面的代码使用 Condition 对象实现了一个周期定时器，每当定时器超时的时候，其他线程都可以监测到：
+
+A critical feature of Event objects is that they wake all waiting threads.
+event对象的一个重要特点是当它被设置为真时会唤醒所有等待它的线程
+
+If you are writing a program where you only want to wake up a single waiting thread, it is probably better to use a Semaphore or Condition object instead.
+如果你只想唤醒单个线程，最好是使用信号量或者 Condition 对象来替代
+
+For example, consider this code involving semaphores:
+考虑一下这段使用信号量实现的代码：
+
+If you run this, a pool of threads will start, but nothing happens because they’re all blocked waiting to acquire the semaphore.
+运行上边的代码将会启动一个线程池，但是并没有什么事情发生
+
+Each time the semaphore is released, only one worker will wake up and run.
+这是因为所有的线程都在等待获取信号量
+
+For example:
+每次信号量被释放，只有一个线程会被唤醒并执行，示例如下：
+
+Writing code that involves a lot of tricky synchronization between threads is likely to make your head explode.
+编写涉及到大量的线程间同步问题的代码会让你痛不欲生
+
+A more sane approach is to thread threads as communicating tasks using queues or as actors.
+比较合适的方式是使用队列来进行线程间通信或者每个把线程当作一个Actor，利用Actor模型来控制并发
+
+Queues are described in the next recipe.
+下一节将会介绍到队列，而Actor模型将在12.10节介绍
+
+Communicating Between Threads
+12.3 线程间通信¶
+
+You have multiple threads in your program and you want to safely communicate or exchange data between them.
+你的程序中有多个线程，你需要在这些线程之间安全地交换信息或数据
+
+Perhaps the safest way to send data from one thread to another is to use a Queue from the queue library.
+从一个线程向另一个线程发送数据最安全的方式可能就是使用 queue 库中的队列了
+
+To do this, you create a Queue instance that is shared by the threads.
+创建一个被多个线程共享的 Queue 对象，这些线程通过使用 put() 和 get() 操作来向队列中添加或者删除元素
+
+Threads then use put() or get() operations to add or remove items from the queue.
+ 例如：
+
+Queue instances already have all of the required locking, so they can be safely shared by as many threads as you wish.
+Queue 对象已经包含了必要的锁，所以你可以通过它在多个线程间多安全地共享数据
+
+When using queues, it can be somewhat tricky to coordinate the shutdown of the producer and consumer.
+当使用队列时，协调生产者和消费者的关闭问题可能会有一些麻烦
+
+A common solution to this problem is to rely on a special sentinel value, which when placed in the queue, causes consumers to terminate.
+一个通用的解决方法是在队列中放置一个特殊的值，当消费者读到这个值的时候，终止执行
+
+For example:
+例如：
+
+A subtle feature of this example is that the consumer, upon receiving the special sentinel value, immediately places it back onto the queue.
+本例中有一个特殊的地方：消费者在读到这个特殊值之后立即又把它放回到队列中，将之传递下去
+
+This propagates the sentinel to other consumers threads that might be listening on the same queue—thus shutting them all down one after the other.
+这样，所有监听这个队列的消费者线程就可以全部关闭了
+
+Although queues are the most common thread communication mechanism, you can build your own data structures as long as you add the required locking and synchronization.
+尽管队列是最常见的线程间通信机制，但是仍然可以自己通过创建自己的数据结构并添加所需的锁和同步机制来实现线程间通信
+
+The most common way to do this is to wrap your data structures with a condition variable.
+最常见的方法是使用 Condition 变量来包装你的数据结构
+
+For example, here is how you might build a thread-safe priority queue, as discussed in “Implementing a Priority Queue”.
+下边这个例子演示了如何创建一个线程安全的优先级队列，如同1.5节中介绍的那样
+
+Thread communication with a queue is a one-way and nondeterministic process.
+使用队列来进行线程间通信是一个单向、不确定的过程
+
+In general, there is no way to know when the receiving thread has actually received a message and worked on it.
+通常情况下，你没有办法知道接收数据的线程是什么时候接收到的数据并开始工作的
+
+However, Queue objects do provide some basic completion features, as illustrated by the task_done() and join() methods in this example:
+不过队列对象提供一些基本完成的特性，比如下边这个例子中的 task_done() 和 join() ：
+
+If a thread needs to know immediately when a consumer thread has processed a particular item of data, you should pair the sent data with an Event object that allows the producer to monitor its progress.
+如果一个线程需要在一个“消费者”线程处理完特定的数据项时立即得到通知，你可以把要发送的数据和一个 Event 放到一起使用，这样“生产者”就可以通过这个Event对象来监测处理的过程了
+
+For example:
+示例如下：
+
+Writing threaded programs based on simple queuing is often a good way to maintain sanity.
+基于简单队列编写多线程程序在多数情况下是一个比较明智的选择
+
+If you can break everything down to simple thread-safe queuing, you’ll find that you don’t need to litter your program with locks and other low-level synchronization.
+从线程安全队列的底层实现来看，你无需在你的代码中使用锁和其他底层的同步机制，这些只会把你的程序弄得乱七八糟
+
+Also, communicating with queues often leads to designs that can be scaled up to other kinds of message-based communication patterns later on.
+此外，使用队列这种基于消息的通信机制可以被扩展到更大的应用范畴，比如，你可以把你的程序放入多个进程甚至是分布式系统而无需改变底层的队列结构
+
+For instance, you might be able to split your program into multiple processes, or even a distributed system, without changing much of its underlying queuing architecture.
+ 
+
+One caution with thread queues is that putting an item in a queue doesn’t make a copy of the item.
+使用线程队列有一个要注意的问题是，向队列中添加数据项时并不会复制此数据项，线程间通信实际上是在线程间传递对象引用
+
+Thus, communication actually involves passing an object reference between threads.
+如果你担心对象的共享状态，那你最好只传递不可修改的数据结构（如：整型、字符串或者元组）或者一个对象的深拷贝
+
+If you are concerned about shared state, it may make sense to only pass immutable data structures (e.g., integers, strings, or tuples) or to make deep copies of the queued items.
+例如：
+
+Queue objects provide a few additional features that may prove to be useful in certain contexts.
+Queue 对象提供一些在当前上下文很有用的附加特性
+
+If you create a Queue with an optional size, such as Queue(N), it places a limit on the number of items that can be enqueued before the put() blocks the producer.
+比如在创建 Queue 对象时提供可选的 size 参数来限制可以添加到队列中的元素数量
+
+Adding an upper bound to a queue might make sense if there is mismatch in speed between a producer and consumer.
+对于“生产者”与“消费者”速度有差异的情况，为队列中的元素数量添加上限是有意义的
+
+For instance, if a producer is generating items at a much faster rate than they can be consumed.
+比如，一个“生产者”产生项目的速度比“消费者” “消费”的速度快，那么使用固定大小的队列就可以在队列已满的时候阻塞队列，以免未预期的连锁效应扩散整个程序造成死锁或者程序运行失常
+
+On the other hand, making a queue block when it’s full can also have an unintended cascading effect throughout your program, possibly causing it to deadlock or run poorly.
+在通信的线程之间进行“流量控制”是一个看起来容易实现起来困难的问题
+
+In general, the problem of "flow control" between communicating threads is a much harder problem than it seems.
+如果你发现自己曾经试图通过摆弄队列大小来解决一个问题，这也许就标志着你的程序可能存在脆弱设计或者固有的可伸缩问题
+
+If you ever find yourself trying to fix a problem by fiddling with queue sizes, it could be an indicator of a fragile design or some other inherent scaling problem.
+ get() 和 put() 方法都支持非阻塞方式和设定超时，例如：
+
+Both the get() and put() methods support nonblocking and timeouts.
+这些操作都可以用来避免当执行某些特定队列操作时发生无限阻塞的情况，比如，一个非阻塞的 put() 方法和一个固定大小的队列一起使用，这样当队列已满时就可以执行不同的代码
+
+For example:
+比如输出一条日志信息并丢弃
+
+Both of these options can be used to avoid the problem of just blocking indefinitely on a particular queuing operation.
+如果你试图让消费者线程在执行像 q.get() 这样的操作时，超时自动终止以便检查终止标志，你应该使用 q.get() 的可选参数 timeout ，如下：
+
+Lastly, there are utility methods q.qsize(), q.full(), q.empty() that can tell you the current size and status of the queue.
+最后，有 q.qsize() ， q.full() ， q.empty() 等实用方法可以获取一个队列的当前大小和状态
+
+However, be aware that all of these are unreliable in a multithreaded environment.
+但要注意，这些方法都不是线程安全的
+
+For example, a call to q.empty() might tell you that the queue is empty, but in the time that has elapsed since making the call, another thread could have added an item to the queue.
+可能你对一个队列使用 empty() 判断出这个队列为空，但同时另外一个线程可能已经向这个队列中插入一个数据项
+
+Frankly, it’s best to write your code not to rely on such functions.
+所以，你最好不要在你的代码中使用这些方法
+
+Locking Critical Sections
+12.4 给关键部分加锁¶
+
+Your program uses threads and you want to lock critical sections of code to avoid race conditions.
+你需要对多线程程序中的临界区加锁以避免竞争条件
+
+To make mutable objects safe to use by multiple threads, use Lock objects in the threading library, as shown here:
+要在多线程程序中安全使用可变对象，你需要使用 threading 库中的 Lock 对象，就像下边这个例子这样：
+
+A Lock guarantees mutual exclusion when used with the with statement—that is, only one thread is allowed to execute the block of statements under the with statement at a time.
+Lock 对象和 with 语句块一起使用可以保证互斥执行，就是每次只有一个线程可以执行 with 语句包含的代码块
+
+The with statement acquires the lock for the duration of the indented statements and releases the lock when control flow exits the indented block.
+with 语句会在这个代码块执行前自动获取锁，在执行结束后自动释放锁
+
+Thread scheduling is inherently nondeterministic.
+线程调度本质上是不确定的，因此，在多线程程序中错误地使用锁机制可能会导致随机数据损坏或者其他的异常行为，我们称之为竞争条件
+
+Because of this, failure to use locks in threaded programs can result in randomly corrupted data and bizarre behavior known as a "race condition." To avoid this, locks should always be used whenever shared mutable state is accessed by multiple threads.
+为了避免竞争条件，最好只在临界区（对临界资源进行操作的那部分代码）使用锁
+
+In older Python code, it is common to see locks explicitly acquired and released.
+在一些“老的” Python 代码中，显式获取和释放锁是很常见的
+
+For example, in this variant of the last example:
+下边是一个上一个例子的变种：
+
+The with statement is more elegant and less prone to error—especially in situations where a programmer might forget to call the release() method or if a program happens to raise an exception while holding a lock (the with statement guarantees that locks are always released in both cases).
+相比于这种显式调用的方法，with 语句更加优雅，也更不容易出错，特别是程序员可能会忘记调用 release() 方法或者程序在获得锁之后产生异常这两种情况（使用 with 语句可以保证在这两种情况下仍能正确释放锁）
+
+To avoid the potential for deadlock, programs that use locks should be written in a way such that each thread is only allowed to acquire one lock at a time.
+为了避免出现死锁的情况，使用锁机制的程序应该设定为每个线程一次只允许获取一个锁
+
+If this is not possible, you may need to introduce more advanced deadlock avoidance into your program, as described in “Locking with Deadlock Avoidance”.
+如果不能这样做的话，你就需要更高级的死锁避免机制，我们将在12.5节介绍
+
+In the threading library, you’ll find other synchronization primitives, such as RLock and Semaphore objects.
+在 threading 库中还提供了其他的同步原语，比如 RLoct 和 Semaphore 对象
+
+As a general rule of thumb, these are more special purpose and should not be used for simple locking of mutable state.
+但是根据以往经验，这些原语是用于一些特殊的情况，如果你只是需要简单地对可变对象进行锁定，那就不应该使用它们
+
+An RLock or re-entrant lock object is a lock that can be acquired multiple times by the same thread.
+一个 RLock （可重入锁）可以被同一个线程多次获取，主要用来实现基于监测对象模式的锁定和同步
+
+It is primarily used to implement code based locking or synchronization based on a construct known as a "monitor." With this kind of locking, only one thread is allowed to use an entire function or the methods of a class while the lock is held.
+在使用这种锁的情况下，当锁被持有时，只有一个线程可以使用完整的函数或者类中的方法
+
+For example, you could implement the SharedCounter class like this:
+比如，你可以实现一个这样的 SharedCounter 类：
+
+In this variant of the code, there is just a single class-level lock shared by all instances of the class.
+在上边这个例子中，没有对每一个实例中的可变对象加锁，取而代之的是一个被所有实例共享的类级锁
+
+Instead of the lock being tied to the per-instance mutable state, the lock is meant to synchronize the methods of the class.
+这个锁用来同步类方法，具体来说就是，这个锁可以保证一次只有一个线程可以调用这个类方法
+
+Specifically, this lock ensures that only one thread is allowed to be using the methods of the class at once.
+不过，与一个标准的锁不同的是，已经持有这个锁的方法在调用同样使用这个锁的方法时，无需再次获取锁
+
+However, unlike a standard lock, it is OK for methods that already have the lock to call other methods that also use the lock (e.g., see the decr() method).
+比如 decr 方法
+
+One feature of this implementation is that only one lock is created, regardless of how many counter instances are created.
+这种实现方式的一个特点是，无论这个类有多少个实例都只用一个锁
+
+Thus, it is much more memory-efficient in situations where there are a large number of counters.
+因此在需要大量使用计数器的情况下内存效率更高
+
+However, a possible downside is that it may cause more lock contention in programs that use a large number of threads and make frequent counter updates.
+不过这样做也有缺点，就是在程序中使用大量线程并频繁更新计数器时会有争用锁的问题
+
+A Semaphore object is a synchronization primitive based on a shared counter.
+ 信号量对象是一个建立在共享计数器基础上的同步原语
+
+If the counter is nonzero, the with statement decrements the count and a thread is allowed to proceed.
+如果计数器不为0，with 语句将计数器减1，线程被允许执行
+
+The counter is incremented upon the conclusion of the with block.
+with 语句执行结束后，计数器加１
+
+If the counter is zero, progress is blocked until the counter is incremented by another thread.
+如果计数器为0，线程将被阻塞，直到其他线程结束将计数器加1
+
+Although a semaphore can be used in the same manner as a standard Lock, the added complexity in implementation negatively impacts performance.
+尽管你可以在程序中像标准锁一样使用信号量来做线程同步，但是这种方式并不被推荐，因为使用信号量为程序增加的复杂性会影响程序性能
+
+Instead of simple locking, Semaphore objects are more useful for applications involving signaling between threads or throttling.
+相对于简单地作为锁使用，信号量更适用于那些需要在线程之间引入信号或者限制的程序
+
+For example, if you want to limit the amount of concurrency in a part of code, you might use a semaphore, as follows:
+比如，你需要限制一段代码的并发访问量，你就可以像下面这样使用信号量完成：
+
+If you’re interested in the underlying theory and implementation of thread synchronization primitives, consult almost any textbook on operating systems.
+如果你对线程同步原语的底层理论和实现感兴趣，可以参考操作系统相关书籍，绝大多数都有提及
+
+Locking with Deadlock Avoidance
+12.5 防止死锁的加锁机制¶
+
+You’re writing a multithreaded program where threads need to acquire more than one lock at a time while avoiding deadlock.
+你正在写一个多线程程序，其中线程需要一次获取多个锁，此时如何避免死锁问题
+
+In multithreaded programs, a common source of deadlock is due to threads that attempt to acquire multiple locks at once.
+在多线程程序中，死锁问题很大一部分是由于线程同时获取多个锁造成的
+
+For instance, if a thread acquires the first lock, but then blocks trying to acquire the second lock, that thread can potentially block the progress of other threads and make the program freeze.
+举个例子：一个线程获取了第一个锁，然后在获取第二个锁的 时候发生阻塞，那么这个线程就可能阻塞其他线程的执行，从而导致整个程序假死
+
+One solution to deadlock avoidance is to assign each lock in the program a unique number, and to enforce an ordering rule that only allows multiple locks to be acquired in ascending order.
+ 解决死锁问题的一种方案是为程序中的每一个锁分配一个唯一的id，然后只允许按照升序规则来使用多个锁，这个规则使用上下文管理器 是非常容易实现的，示例如下：
+
+To use this context manager, you simply allocate lock objects in the normal way, but use the acquire() function whenever you want to work with one or more locks.
+如何使用这个上下文管理器呢
+
+For example:
+你可以按照正常途径创建一个锁对象，但不论是单个锁还是多个锁中都使用 acquire() 函数来申请锁， 示例如下：
+
+If you run this program, you’ll find that it happily runs forever without deadlock—even though the acquisition of locks is specified in a different order in each function.
+如果你执行这段代码，你会发现它即使在不同的函数中以不同的顺序获取锁也没有发生死锁
+
+The key to this recipe lies in the first statement that sorts the locks according to object identifier.
+其关键在于，在第一段代码中，我们对这些锁进行了排序
+
+By sorting the locks, they always get acquired in a consistent order regardless of how the user might have provided them to acquire().
+通过排序，使得不管用户以什么样的顺序来请求锁，这些锁都会按照固定的顺序被获取
+
+The solution uses thread-local storage to solve a subtle problem with detecting potential deadlock if multiple acquire() operations are nested.
+如果有多个 acquire() 操作被嵌套调用，可以通过线程本地存储（TLS）来检测潜在的死锁问题
+
+For example, suppose you wrote the code like this:
+ 假设你的代码是这样写的：
+
+If you run this version of the program, one of the threads will crash with an exception such as this:
+如果你运行这个版本的代码，必定会有一个线程发生崩溃，异常信息可能像这样：
+
+This crash is caused by the fact that each thread remembers the locks it has already acquired.
+发生崩溃的原因在于，每个线程都记录着自己已经获取到的锁
+
+The acquire() function checks the list of previously acquired locks and enforces the ordering constraint that previously acquired locks must have an object ID that is less than the new locks being acquired.
+ acquire() 函数会检查之前已经获取的锁列表， 由于锁是按照升序排列获取的，所以函数会认为之前已获取的锁的id必定小于新申请到的锁，这时就会触发异常
+
+The issue of deadlock is a well-known problem with programs involving threads (as well as a common subject in textbooks on operating systems).
+死锁是每一个多线程程序都会面临的一个问题（就像它是每一本操作系统课本的共同话题一样）
+
+As a rule of thumb, as long as you can ensure that threads can hold only one lock at a time, your program will be deadlock free.
+根据经验来讲，尽可能保证每一个 线程只能同时保持一个锁，这样程序就不会被死锁问题所困扰
+
+However, once multiple locks are being acquired at the same time, all bets are off.
+一旦有线程同时申请多个锁，一切就不可预料了
+
+Detecting and recovering from deadlock is an extremely tricky problem with few elegant solutions.
+死锁的检测与恢复是一个几乎没有优雅的解决方案的扩展话题
+
+For example, a common deadlock detection and recovery scheme involves the use of a watchdog timer.
+一个比较常用的死锁检测与恢复的方案是引入看门狗计数器
+
+As threads run, they periodically reset the timer, and as long as everything is running smoothly, all is well.
+当线程正常 运行的时候会每隔一段时间重置计数器，在没有发生死锁的情况下，一切都正常进行
+
+However, if the program deadlocks, the watchdog timer will eventually expire.
+一旦发生死锁，由于无法重置计数器导致定时器 超时，这时程序会通过重启自身恢复到正常状态
+
+Deadlock avoidance is a different strategy where locking operations are carried out in a manner that simply does not allow the program to enter a deadlocked state.
+避免死锁是另外一种解决死锁问题的方式，在进程获取锁的时候会严格按照对象id升序排列获取，经过数学证明，这样保证程序不会进入 死锁状态
+
+The solution in which locks are always acquired in strict order of ascending object ID can be mathematically proven to avoid deadlock, although the proof is left as an exercise to the reader (the gist of it is that by acquiring locks in a purely increasing order, you can’t get cyclic locking dependencies, which are a necessary condition for deadlock to occur).
+证明就留给读者作为练习了
+
+As a final example, a classic thread deadlock problem is the so-called "dining philosopher’s problem." In this problem, five philosophers sit around a table on which there are five bowls of rice and five chopsticks.
+下面以一个关于线程死锁的经典问题：“哲学家就餐问题”，作为本节最后一个例子
+
+Each philosopher represents an independent thread and each chopstick represents a lock.
+题目是这样的：五位哲学家围坐在一张桌子前，每个人 面前有一碗饭和一只筷子
+
+In the problem, philosophers either sit and think or they eat rice.
+在这里每个哲学家可以看做是一个独立的线程，而每只筷子可以看做是一个锁
+
+However, in order to eat rice, a philosopher needs two chopsticks.
+每个哲学家可以处在静坐、 思考、吃饭三种状态中的一个
+
+Unfortunately, if all of the philosophers reach over and grab the chopstick to their left, they’ll all just sit there with one stick and eventually starve to death.
+需要注意的是，每个哲学家吃饭是需要两只筷子的，这样问题就来了：如果每个哲学家都拿起自己左边的筷子， 那么他们五个都只能拿着一只筷子坐在那儿，直到饿死
+
+It’s a gruesome scene.
+此时他们就进入了死锁状态
+
+Using the solution, here is a simple deadlock free implementation of the dining philosopher’s problem:
+下面是一个简单的使用死锁避免机制解决“哲学家就餐问题”的实现：
+
+Last, but not least, it should be noted that in order to avoid deadlock, all locking operations must be carried out using our acquire() function.
+最后，要特别注意到，为了避免死锁，所有的加锁操作必须使用 acquire() 函数
+
+If some fragment of code decided to acquire a lock directly, then the deadlock avoidance algorithm wouldn’t work.
+如果代码中的某部分绕过acquire 函数直接申请锁，那么整个死锁避免机制就不起作用了
+
+Storing Thread-Specific State
+12.6 保存线程的状态信息¶
+
+You need to store state that’s specific to the currently executing thread and not visible to other threads.
+你需要保存正在运行线程的状态，这个状态对于其他的线程是不可见的
+
+Sometimes in multithreaded programs, you need to store data that is only specific to the currently executing thread.
+有时在多线程编程中，你需要只保存当前运行线程的状态
+
+To do this, create a thread-local storage object using threading.local().
+ 要这么做，可使用 thread.local() 创建一个本地线程存储对象
+
+Attributes stored and read on this object are only visible to the executing thread and no others.
+ 对这个对象的属性的保存和读取操作都只会对执行线程可见，而其他线程并不可见
+
+As an interesting practical example of using thread-local storage, consider the LazyConnection context-manager class that was first defined in “Making Objects Support the Context-Management Protocol”.
+作为使用本地存储的一个有趣的实际例子， 考虑在8.3小节定义过的 LazyConnection 上下文管理器类
+
+Here is a slightly modified version that safely works with multiple threads:
+ 下面我们对它进行一些小的修改使得它可以适用于多线程：
+
+In this code, carefully observe the use of the self.local attribute.
+代码中，自己观察对于 self.local 属性的使用
+
+It is initialized as an instance of threading.local().
+ 它被初始化尾一个 threading.local() 实例
+
+The other methods then manipulate a socket that’s stored as self.local.sock.
+ 其他方法操作被存储为 self.local.sock 的套接字对象
+
+This is enough to make it possible to safely use an instance of LazyConnection in multiple threads.
+ 有了这些就可以在多线程中安全的使用 LazyConnection 实例了
+
+For example:
+例如：
+
+The reason it works is that each thread actually creates its own dedicated socket connection (stored as self.local.sock).
+它之所以行得通的原因是每个线程会创建一个自己专属的套接字连接（存储为self.local.sock）
+
+Thus, when the different threads perform socket operations, they don’t interfere with one another as they are being performed on different sockets.
+ 因此，当不同的线程执行套接字操作时，由于操作的是不同的套接字，因此它们不会相互影响
+
+Creating and manipulating thread-specific state is not a problem that often arises in most programs.
+在大部分程序中创建和操作线程特定状态并不会有什么问题
+
+However, when it does, it commonly involves situations where an object being used by multiple threads needs to manipulate some kind of dedicated system resource, such as a socket or file.
+ 不过，当出了问题的时候，通常是因为某个对象被多个线程使用到，用来操作一些专用的系统资源， 比如一个套接字或文件
+
+You can’t just have a single socket object shared by everyone because chaos would ensue if multiple threads ever started reading and writing on it at the same time.
+你不能让所有线程贡献一个单独对象， 因为多个线程同时读和写的时候会产生混乱
+
+Thread-local storage fixes this by making such resources only visible in the thread where they’re being used.
+ 本地线程存储通过让这些资源只能在被使用的线程中可见来解决这个问题
+
+In this recipe, the use of threading.local() makes the LazyConnection class support one connection per thread, as opposed to one connection for the entire process.
+本节中，使用 thread.local() 可以让 LazyConnection 类支持一个线程一个连接， 而不是对于所有的进程都只有一个连接
+
+Under the covers, an instance of threading.local() maintains a separate instance dictionary for each thread.
+其原理是，每个 threading.local() 实例为每个线程维护着一个单独的实例字典
+
+All of the usual instance operations of getting, setting, and deleting values just manipulate the per-thread dictionary.
+ 所有普通实例操作比如获取、修改和删除值仅仅操作这个字典
+
+The fact that each thread uses a separate dictionary is what provides the isolation of data.
+ 每个线程使用一个独立的字典就可以保证数据的隔离了
+
+Creating a Thread Pool
+12.7 创建一个线程池¶
+
+You want to create a pool of worker threads for serving clients or performing other kinds of work.
+你创建一个工作者线程池，用来相应客户端请求或执行其他的工作
+
+The concurrent.futures library has a ThreadPoolExecutor class that can be used for this purpose.
+concurrent.futures 函数库有一个 ThreadPoolExecutor 类可以被用来完成这个任务
+
+Here is an example of a simple TCP server that uses a thread-pool to serve clients:
+ 下面是一个简单的TCP服务器，使用了一个线程池来响应客户端：
+
+If you want to manually create your own thread pool, it’s usually easy enough to do it using a Queue.
+如果你想手动创建你自己的线程池， 通常可以使用一个Queue来轻松实现
+
+Here is a slightly different, but manual implementation of the same code:
+下面是一个稍微不同但是手动实现的例子：
+
+One advantage of using ThreadPoolExecutor over a manual implementation is that it makes it easier for the submitter to receive results from the called function.
+使用 ThreadPoolExecutor 相对于手动实现的一个好处在于它使得 任务提交者更方便的从被调用函数中获取返回值
+
+For example, you could write code like this:
+例如，你可能会像下面这样写：
+
+The result objects in the example handle all of the blocking and coordination needed to get data back from the worker thread.
+例子中返回的handle对象会帮你处理所有的阻塞与协作，然后从工作线程中返回数据给你
+
+Specifically, the operation a.result() blocks until the corresponding function has been executed by the pool and returned a value.
+ 特别的，a.result() 操作会阻塞进程直到对应的函数执行完成并返回一个结果
+
+Generally, you should avoid writing programs that allow unlimited growth in the number of threads.
+通常来讲，你应该避免编写线程数量可以无限制增长的程序
+
+For example, take a look at the following server:
+例如，看看下面这个服务器：
+
+Although this works, it doesn’t prevent some asynchronous hipster from launching an attack on the server that makes it create so many threads that your program runs out of resources and crashes (thus further demonstrating the "evils" of using threads).
+尽管这个也可以工作， 但是它不能抵御有人试图通过创建大量线程让你服务器资源枯竭而崩溃的攻击行为
+
+By using a pre-initialized thread pool, you can carefully put an upper limit on the amount of supported concurrency.
+ 通过使用预先初始化的线程池，你可以设置同时运行线程的上限数量
+
+You might be concerned with the effect of creating a large number of threads.
+你可能会关心创建大量线程会有什么后果
+
+However, modern systems should have no trouble creating pools of a few thousand threads.
+ 现代操作系统可以很轻松的创建几千个线程的线程池
+
+Moreover, having a thousand threads just sitting around waiting for work isn’t going to have much, if any, impact on the performance of other code (a sleeping thread does just that—nothing at all).
+ 甚至，同时几千个线程等待工作并不会对其他代码产生性能影响
+
+Of course, if all of those threads wake up at the same time and start hammering on the CPU, that’s a different story—especially in light of the Global Interpreter Lock (GIL).
+ 当然了，如果所有线程同时被唤醒并立即在CPU上执行，那就不同了——特别是有了全局解释器锁GIL
+
+Generally, you only want to use thread pools for I/O-bound processing.
+ 通常，你应该只在I/O处理相关代码中使用线程池
+
+One possible concern with creating large thread pools might be memory use.
+创建大的线程池的一个可能需要关注的问题是内存的使用
+
+For example, if you create 2,000 threads on OS X, the system shows the Python process using up more than 9 GB of virtual memory.
+ 例如，如果你在OS X系统上面创建2000个线程，系统显示Python进程使用了超过9GB的虚拟内存
+
+However, this is actually somewhat misleading.
+ 不过，这个计算通常是有误差的
+
+When creating a thread, the operating system reserves a region of virtual memory to hold the thread’s execution stack (often as large as 8 MB).
+当创建一个线程时，操作系统会预留一个虚拟内存区域来 放置线程的执行栈（通常是8MB大小）
+
+Only a small fragment of this memory is actually mapped to real memory, though.
+但是这个内存只有一小片段被实际映射到真实内存中
+
+Thus, if you look a bit closer, you might find the Python process is using far less real memory (e.g., for 2,000 threads, only 70 MB of real memory is used, not 9 GB).
+ 因此，Python进程使用到的真实内存其实很小 （比如，对于2000个线程来讲，只使用到了70MB的真实内存，而不是9GB）
+
+If the size of the virtual memory is a concern, you can dial it down using the threading.stack_size() function.
+ 如果你担心虚拟内存大小，可以使用 threading.stack_size() 函数来降低它
+
+For example:
+例如：
+
+If you add this call and repeat the experiment of creating 2,000 threads, you’ll find that the Python process is now only using about 210 MB of virtual memory, although the amount of real memory in use remains about the same.
+如果你加上这条语句并再次运行前面的创建2000个线程试验， 你会发现Python进程只使用到了大概210MB的虚拟内存，而真实内存使用量没有变
+
+Note that the thread stack size must be at least 32,768 bytes, and is usually restricted to be a multiple of the system memory page size (4096, 8192, etc.).
+ 注意线程栈大小必须至少为32768字节，通常是系统内存页大小（4096、8192等）的整数倍
+
+Performing Simple Parallel Programming
+12.8 简单的并行编程¶
+
+You have a program that performs a lot of CPU-intensive work, and you want to make it run faster by having it take advantage of multiple CPUs.
+你有个程序要执行CPU密集型工作，你想让他利用多核CPU的优势来运行的快一点
+
+The concurrent.futures library provides a ProcessPoolExecutor class that can be used to execute computationally intensive functions in a separately running instance of the Python interpreter.
+concurrent.futures 库提供了一个 ProcessPoolExecutor 类， 可被用来在一个单独的Python解释器中执行计算密集型函数
+
+However, in order to use it, you first need to have some computationally intensive work.
+ 不过，要使用它，你首先要有一些计算密集型的任务
+
+Let’s illustrate with a simple yet practical example.
+ 我们通过一个简单而实际的例子来演示它
+
+Suppose you have an entire directory of gzip-compressed Apache web server logs:
+进一步假设每个日志文件内容类似下面这样：
+
+Further suppose each log file contains lines like this:
+下面是一个脚本，在这些日志文件中查找出所有访问过robots.txt文件的主机：
+
+Here is a simple script that takes this data and identifies all hosts that have accessed the robots.txt file:
+前面的程序使用了通常的map-reduce风格来编写
+
+The preceding program is written in the commonly used map-reduce style.
+通过这个修改后，运行这个脚本产生同样的结果，但是在四核机器上面比之前快了3.5倍
+
+The function find_robots() is mapped across a collection of filenames and the results are combined into a single result (the all_robots set in the find_all_robots() function).
+ 实际的性能优化效果根据你的机器CPU数量的不同而不同
+
+Now, suppose you want to modify this program to use multiple CPUs.
+ProcessPoolExecutor 的典型用法如下：
+
+With this modification, the script produces the same result but runs about 3.5 times faster on our quad-core machine.
+其原理是，一个 ProcessPoolExecutor 创建N个独立的Python解释器， N是系统上面可用CPU的个数
+
+The actual performance will vary according to the number of CPUs available on your machine.
+你可以通过提供可选参数给 ProcessPoolExecutor(N) 来修改 处理器数量
+
+Typical usage of a ProcessPoolExecutor is as follows:
+被提交到池中的工作必须被定义为一个函数
+
+Under the covers, a ProcessPoolExecutor creates N independent running Python interpreters where N is the number of available CPUs detected on the system.
+另外，你可以使用 pool.submit() 来手动的提交单个任务：
+
+Work to be submitted to a pool must be defined in a function.
+如果你手动提交一个任务，结果是一个 Future 实例
+
+There are two methods for submission.
+ 要获取最终结果，你需要调用它的 result() 方法
+
+If you are are trying to parallelize a list comprehension or a map() operation, you use pool.map():
+ 它会阻塞进程直到结果被返回来
+
+Alternatively, you can manually submit single tasks using the pool.submit() method:
+如果不想阻塞，你还可以使用一个回调函数，例如：
+
+If you manually submit a job, the result is an instance of Future.
+回调函数接受一个 Future 实例，被用来获取最终的结果（比如通过调用它的result()方法）
+
+To obtain the actual result, you call its result() method.
+ 尽管处理池很容易使用，在设计大程序的时候还是有很多需要注意的地方，如下几点：
+
+Instead of blocking, you can also arrange to have a callback function triggered upon completion instead.
+一旦启动你不能控制子进程的任何行为，因此最好保持简单和纯洁——函数不要去修改环境
+
+The user-supplied callback function receives an instance of Future that must be used to obtain the actual result (i.e., by calling its result() method).
+它会克隆Python解释器，包括fork时的所有程序状态
+
+Although process pools can be easy to use, there are a number of important considerations to be made in designing larger programs.
+你应该在创建任何线程之前先创建并激活进程池（比如在程序启动的main线程中创建进程池）
+
+Dealing with the GIL (and How to Stop Worrying About It)
+12.9 Python的全局锁问题¶
+
+You’ve heard about the Global Interpreter Lock (GIL), and are worried that it might be affecting the performance of your multithreaded program.
+你已经听说过全局解释器锁GIL，担心它会影响到多线程程序的执行性能
+
+Although Python fully supports thread programming, parts of the C implementation of the interpreter are not entirely thread safe to a level of allowing fully concurrent execution.
+尽管Python完全支持多线程编程， 但是解释器的C语言实现部分在完全并行执行时并不是线程安全的
+
+In fact, the interpreter is protected by a so-called Global Interpreter Lock (GIL) that only allows one Python thread to execute at any given time.
+ 实际上，解释器被一个全局解释器锁保护着，它确保任何时候都只有一个Python线程执行
+
+The most noticeable effect of the GIL is that multithreaded Python programs are not able to fully take advantage of multiple CPU cores (e.g., a computationally intensive application using more than one thread only runs on a single CPU).
+ GIL最大的问题就是Python的多线程程序并不能利用多核CPU的优势 （比如一个使用了多个线程的计算密集型程序只会在一个单CPU上面运行）
+
+Before discussing common GIL workarounds, it is important to emphasize that the GIL tends to only affect programs that are heavily CPU bound (i.e., dominated by computation).
+在讨论普通的GIL之前，有一点要强调的是GIL只会影响到那些严重依赖CPU的程序（比如计算型的）
+
+If your program is mostly doing I/O, such as network communication, threads are often a sensible choice because they’re mostly going to spend their time sitting around waiting.
+ 如果你的程序大部分只会设计到I/O，比如网络交互，那么使用多线程就很合适， 因为它们大部分时间都在等待
+
+In fact, you can create thousands of Python threads with barely a concern.
+实际上，你完全可以放心的创建几千个Python线程， 现代操作系统运行这么多线程没有任何压力，没啥可担心的
+
+For CPU-bound programs, you really need to study the nature of the computation being performed.
+而对于依赖CPU的程序，你需要弄清楚执行的计算的特点
+
+For instance, careful choice of the underlying algorithm may produce a far greater speedup than trying to parallelize an unoptimal algorithm with threads.
+ 例如，优化底层算法要比使用多线程运行快得多
+
+Similarly, given that Python is interpreted, you might get a far greater speedup simply by moving performance-critical code into a C extension module.
+ 类似的，由于Python是解释执行的，如果你将那些性能瓶颈代码移到一个C语言扩展模块中， 速度也会提升的很快
+
+Extensions such as NumPy are also highly effective at speeding up certain kinds of calculations involving array data.
+如果你要操作数组，那么使用NumPy这样的扩展会非常的高效
+
+Last, but not least, you might investigate alternative implementations, such as PyPy, which features optimizations such as a JIT compiler (although, as of this writing, it does not yet support Python 3).
+ 最后，你还可以考虑下其他可选实现方案，比如PyPy，它通过一个JIT编译器来优化执行效率 （不过在写这本书的时候它还不能支持Python 3）
+
+It’s also worth noting that threads are not necessarily used exclusively for performance.
+还有一点要注意的是，线程不是专门用来优化性能的
+
+A CPU-bound program might be using threads to manage a graphical user interface, a network connection, or provide some other kind of service.
+ 一个CPU依赖型程序可能会使用线程来管理一个图形用户界面、一个网络连接或其他服务
+
+In this case, the GIL can actually present more of a problem, since code that holds it for an excessively long period will cause annoying stalls in the non-CPU-bound threads.
+ 这时候，GIL会产生一些问题，因为如果一个线程长期持有GIL的话会导致其他非CPU型线程一直等待
+
+In fact, a poorly written C extension can actually make this problem worse, even though the computation part of the code might run faster than before.
+ 事实上，一个写的不好的C语言扩展会导致这个问题更加严重， 尽管代码的计算部分会比之前运行的更快些
+
+Having said all of this, there are two common strategies for working around the limitations of the GIL.
+说了这么多，现在想说的是我们有两种策略来解决GIL的缺点
+
+First, if you are working entirely in Python, you can use the multiprocessing module to create a process pool and use it like a co-processor.
+ 首先，如果你完全工作于Python环境中，你可以使用 multiprocessing 模块来创建一个进程池， 并像协同处理器一样的使用它
+
+For example, suppose you have the following thread code:
+例如，假如你有如下的线程代码：
+
+Here’s how you would modify the code to use a pool:
+修改代码，使用进程池：
+
+This example with a pool works around the GIL using a neat trick.
+这个通过使用一个技巧利用进程池解决了GIL的问题
+
+Whenever a thread wants to perform CPU-intensive work, it hands the work to the pool.
+ 当一个线程想要执行CPU密集型工作时，会将任务发给进程池
+
+The pool, in turn, hands the work to a separate Python interpreter running in a different process.
+ 然后进程池会在另外一个进程中启动一个单独的Python解释器来工作
+
+While the thread is waiting for the result, it releases the GIL.
+ 当线程等待结果的时候会释放GIL
+
+Moreover, because the calculation is being performed in a separate interpreter, it’s no longer bound by the restrictions of the GIL.
+ 并且，由于计算任务在单独解释器中执行，那么就不会受限于GIL了
+
+On a multicore system, you’ll find that this technique easily allows you to take advantage of all the CPUs.
+ 在一个多核系统上面，你会发现这个技术可以让你很好的利用多CPU的优势
+
+The second strategy for working around the GIL is to focus on C extension programming.
+另外一个解决GIL的策略是使用C扩展编程技术
+
+The general idea is to move computationally intensive tasks to C, independent of Python, and have the C code release the GIL while it’s working.
+ 主要思想是将计算密集型任务转移给C，跟Python独立，在工作的时候在C代码中释放GIL
+
+This is done by inserting special macros into the C code like this:
+ 这可以通过在C代码中插入下面这样的特殊宏来完成：
+
+If you are using other tools to access C, such as the ctypes library or Cython, you may not need to do anything.
+如果你使用其他工具访问C语言，比如对于Cython的ctypes库，你不需要做任何事
+
+For example, ctypes releases the GIL when calling into C by default.
+ 例如，ctypes在调用C时会自动释放GIL
+
+Many programmers, when faced with thread performance problems, are quick to blame the GIL for all of their ills.
+许多程序员在面对线程性能问题的时候，马上就会怪罪GIL，什么都是它的问题
+
+However, doing so is shortsighted and naive.
+ 其实这样子太不厚道也太天真了点
+
+Just as a real-world example, mysterious "stalls" in a multithreaded network program might be caused by something entirely different (e.g., a stalled DNS lookup) rather than anything related to the GIL.
+ 作为一个真实的例子，在多线程的网络编程中神秘的 stalls 可能是因为其他原因比如一个DNS查找延时，而跟GIL毫无关系
+
+The bottom line is that you really need to study your code to know if the GIL is an issue or not.
+ 最后你真的需要先去搞懂你的代码是否真的被GIL影响到
+
+Again, realize that the GIL is mostly concerned with CPU-bound processing, not I/O.
+ 同时还要明白GIL大部分都应该只关注CPU的处理而不是I/O.
+
+If you are going to use a process pool as a workaround, be aware that doing so involves data serialization and communication with a different Python interpreter.
+如果你准备使用一个处理器池，注意的是这样做涉及到数据序列化和在不同Python解释器通信
+
+For this to work, the operation to be performed needs to be contained within a Python function defined by the def statement (i.e., no lambdas, closures, callable instances, etc.), and the function arguments and return value must be compatible with pickle.
+ 被执行的操作需要放在一个通过def语句定义的Python函数中，不能是lambda、闭包可调用实例等， 并且函数参数和返回值必须要兼容pickle
+
+Also, the amount of work to be performed must be sufficiently large to make up for the extra communication overhead.
+ 同样，要执行的任务量必须足够大以弥补额外的通信开销
+
+Another subtle aspect of pools is that mixing threads and process pools together can be a good way to make your head explode.
+另外一个难点是当混合使用线程和进程池的时候会让你很头疼
+
+If you are going to use both of these features together, it is often best to create the process pool as a singleton at program startup, prior to the creation of any threads.
+ 如果你要同时使用两者，最好在程序启动时，创建任何线程之前先创建一个单例的进程池
+
+Threads will then use the same process pool for all of their computationally intensive work.
+ 然后线程使用同样的进程池来进行它们的计算密集型工作
+
+For C extensions, the most important feature is maintaining isolation from the Python interpreter process.
+C扩展最重要的特征是它们和Python解释器是保持独立的
+
+That is, if you’re going to offload work from Python to C, you need to make sure the C code operates independently of Python.
+ 也就是说，如果你准备将Python中的任务分配到C中去执行， 你需要确保C代码的操作跟Python保持独立， 这就意味着不要使用Python数据结构以及不要调用Python的C API
+
+This means using no Python data structures and making no calls to Python’s C API.
+ 另外一个就是你要确保C扩展所做的工作是足够的，值得你这样做
+
+Another consideration is that you want to make sure your C extension does enough work to make it all worthwhile.
+ 也就是说C扩展担负起了大量的计算任务，而不是少数几个计算
+
+Needless to say, these solutions to working around the GIL don’t apply to all possible problems.
+这些解决GIL的方案并不能适用于所有问题
+
+For instance, certain kinds of applications don’t work well if separated into multiple processes, nor may you want to code parts in C.
+ 例如，某些类型的应用程序如果被分解为多个进程处理的话并不能很好的工作， 也不能将它的部分代码改成C语言执行
+
+For these kinds of applications, you may have to come up with your own solution (e.g., multiple processes accessing shared memory regions, multiple interpreters running in the same process, etc.).
+ 对于这些应用程序，你就要自己需求解决方案了 （比如多进程访问共享内存区，多解析器运行于同一个进程等）
+
+Alternatively, you might look at some other implementations of the interpreter, such as PyPy.
+ 或者，你还可以考虑下其他的解释器实现，比如PyPy
+
+See Recipes and for additional information on releasing the GIL in C extensions.
+了解更多关于在C扩展中释放GIL，请参考15.7和15.10小节
+
+Defining an Actor Task
+12.10 定义一个Actor任务¶
+
+You’d like to define tasks with behavior similar to "actors" in the so-called "actor model."
+你想定义跟actor模式中类似“actors”角色的任务
+
+The "actor model" is one of the oldest and most simple approaches to concurrency and distributed computing.
+actore模式是一种最古老的也是最简单的并行和分布式计算解决方案
+
+In fact, its underlying simplicity is part of its appeal.
+ 事实上，它天生的简单性是它如此受欢迎的重要原因之一
+
+In a nutshell, an actor is a concurrently executing task that simply acts upon messages sent to it.
+ 简单来讲，一个actor就是一个并发执行的任务，只是简单的执行发送给它的消息任务
+
+In response to these messages, it may decide to send further messages to other actors.
+ 响应这些消息时，它可能还会给其他actor发送更进一步的消息
+
+Communication with actors is one way and asynchronous.
+ actor之间的通信是单向和异步的
+
+Thus, the sender of a message does not know when a message actually gets delivered, nor does it receive a response or acknowledgment that the message has been processed.
+因此，消息发送者不知道消息是什么时候被发送， 也不会接收到一个消息已被处理的回应或通知
+
+Actors are straightforward to define using a combination of a thread and a queue.
+结合使用一个线程和一个队列可以很容易的定义actor，例如：
+
+In this example, Actor instances are things that you simply send a message to using their send() method.
+这个例子中，你使用actor实例的 send() 方法发送消息给它们
+
+Under the covers, this places the message on a queue and hands it off to an internal thread that runs to process the received messages.
+ 其机制是，这个方法会将消息放入一个队里中， 然后将其转交给处理被接受消息的一个内部线程
+
+The close() method is programmed to shut down the actor by placing a special sentinel value (ActorExit) on the queue.
+ close() 方法通过在队列中放入一个特殊的哨兵值（ActorExit）来关闭这个actor
+
+Users define new actors by inheriting from Actor and redefining the run() method to implement their custom processing.
+ 用户可以通过继承Actor并定义实现自己处理逻辑run()方法来定义新的actor
+
+The usage of the ActorExit exception is such that user-defined code can be programmed to catch the termination request and handle it if appropriate (the exception is raised by the get() method and propagated).
+ ActorExit 异常的使用就是用户自定义代码可以在需要的时候来捕获终止请求 （异常被get()方法抛出并传播出去）
+
+If you relax the requirement of concurrent and asynchronous message delivery, actor-like objects can also be minimally defined by generators.
+如果你放宽对于同步和异步消息发送的要求， 类actor对象还可以通过生成器来简化定义
+
+For example:
+例如：
+
+Part of the appeal of actors is their underlying simplicity.
+actor模式的魅力就在于它的简单性
+
+In practice, there is just one core operation, send().
+ 实际上，这里仅仅只有一个核心操作 send() . 甚至，对于在基于actor系统中的“消息”的泛化概念可以已多种方式被扩展
+
+Plus, the general concept of a "message" in actor-based systems is something that can be expanded in many different directions.
+ 例如，你可以以元组形式传递标签消息，让actor执行不同的操作，如下：
+
+As another example, here is a variation of an actor that allows arbitrary functions to be executed in a worker and results to be communicated back using a special Result object:
+作为另外一个例子，下面的actor允许在一个工作者中运行任意的函数， 并且通过一个特殊的Result对象返回结果：
+
+Last, but not least, the concept of "sending" a task a message is something that can be scaled up into systems involving multiple processes or even large distributed systems.
+最后，“发送”一个任务消息的概念可以被扩展到多进程甚至是大型分布式系统中去
+
+For example, the send() method of an actor-like object could be programmed to transmit data on a socket connection or deliver it via some kind of messaging infrastructure (e.g., AMQP, ZMQ, etc.).
+ 例如，一个类actor对象的 send() 方法可以被编程让它能在一个套接字连接上传输数据 或通过某些消息中间件（比如AMQP、ZMQ等）来发送
+
+Implementing Publish/Subscribe Messaging
+12.11 实现消息发布/订阅模型¶
+
+You have a program based on communicating threads and want them to implement publish/subscribe messaging.
+你有一个基于线程通信的程序，想让它们实现发布/订阅模式的消息通信
+
+To implement publish/subscribe messaging, you typically introduce a separate "exchange" or "gateway" object that acts as an intermediary for all messages.
+要实现发布/订阅的消息通信模式， 你通常要引入一个单独的“交换机”或“网关”对象作为所有消息的中介
+
+That is, instead of directly sending a message from one task to another, a message is sent to the exchange and it delivers it to one or more attached tasks.
+ 也就是说，不直接将消息从一个任务发送到另一个，而是将其发送给交换机， 然后由交换机将它发送给一个或多个被关联任务
+
+Here is one example of a very simple exchange implementation:
+下面是一个非常简单的交换机实现例子：
+
+An exchange is really nothing more than an object that keeps a set of active subscribers and provides methods for attaching, detaching, and sending messages.
+一个交换机就是一个普通对象，负责维护一个活跃的订阅者集合，并为绑定、解绑和发送消息提供相应的方法
+
+Each exchange is identified by a name, and the get_exchange() function simply returns the Exchange instance associated with a given name.
+ 每个交换机通过一个名称定位，get_exchange() 通过给定一个名称返回相应的 Exchange 实例
+
+Here is a simple example that shows how to use an exchange:
+下面是一个简单例子，演示了如何使用一个交换机：
+
+Although there are many different variations on this theme, the overall idea is the same.
+尽管对于这个问题有很多的变种，不过万变不离其宗
+
+Messages will be delivered to an exchange and the exchange will deliver them to attached subscribers.
+ 消息会被发送给一个交换机，然后交换机会将它们发送给被绑定的订阅者
+
+The concept of tasks or threads sending messages to one another (often via queues) is easy to implement and quite popular.
+通过队列发送消息的任务或线程的模式很容易被实现并且也非常普遍
+
+However, the benefits of using a public/subscribe (pub/sub) model instead are often overlooked.
+ 不过，使用发布/订阅模式的好处更加明显
+
+First, the use of an exchange can simplify much of the plumbing involved in setting up communicating threads.
+首先，使用一个交换机可以简化大部分涉及到线程通信的工作
+
+Instead of trying to wire threads together across multiple program modules, you only worry about connecting them to a known exchange.
+ 无需去写通过多进程模块来操作多个线程，你只需要使用这个交换机来连接它们
+
+In some sense, this is similar to how the logging library works.
+ 某种程度上，这个就跟日志模块的工作原理类似
+
+In practice, it can make it easier to decouple various tasks in the program.
+ 实际上，它可以轻松的解耦程序中多个任务
+
+Second, the ability of the exchange to broadcast messages to multiple subscribers opens up new communication patterns.
+其次，交换机广播消息给多个订阅者的能力带来了一个全新的通信模式
+
+For example, you could implement systems with redundant tasks, broadcasting, or fan-out.
+ 例如，你可以使用多任务系统、广播或扇出
+
+You could also build debugging and diagnostic tools that attach themselves to exchanges as ordinary subscribers.
+ 你还可以通过以普通订阅者身份绑定来构建调试和诊断工具
+
+For example, here is a simple diagnostic class that would display sent messages:
+ 例如，下面是一个简单的诊断类，可以显示被发送的消息：
+
+Last, but not least, a notable aspect of the implementation is that it works with a variety of task-like objects.
+最后，该实现的一个重要特点是它能兼容多个“task-like”对象
+
+For example, the receivers of a message could be actors (as described in “Defining an Actor Task”), coroutines, network connections, or just about anything that implements a proper send() method.
+ 例如，消息接受者可以是actor（12.10小节介绍）、协程、网络连接或任何实现了正确的 send() 方法的东西
+
+One potentially problematic aspect of an exchange concerns the proper attachment and detachment of subscribers.
+关于交换机的一个可能问题是对于订阅者的正确绑定和解绑
+
+In order to properly manage resources, every subscriber that attaches must eventually detach.
+ 为了正确的管理资源，每一个绑定的订阅者必须最终要解绑
+
+This leads to a programming model similar to this:
+ 在代码中通常会是像下面这样的模式：
+
+In some sense, this is similar to the usage of files, locks, and similar objects.
+某种意义上，这个和使用文件、锁和类似对象很像
+
+Experience has shown that it is quite easy to forget the final detach() step.
+ 通常很容易会忘记最后的 detach() 步骤
+
+To simplify this, you might consider the use of the context-management protocol.
+ 为了简化这个，你可以考虑使用上下文管理器协议
+
+For example, adding a subscribe() method to the exchange like this:
+ 例如，在交换机对象上增加一个 subscribe() 方法，如下：
+
+Finally, it should be noted that there are numerous possible extensions to the exchange idea.
+最后还应该注意的是关于交换机的思想有很多种的扩展实现
+
+For example, exchanges could implement an entire collection of message channels or apply pattern matching rules to exchange names.
+ 例如，交换机可以实现一整个消息通道集合或提供交换机名称的模式匹配规则
+
+Exchanges can also be extended into distributed computing applications (e.g., routing messages to tasks on different machines, etc.).
+ 交换机还可以被扩展到分布式计算程序中（比如，将消息路由到不同机器上面的任务中去）
+
+Using Generators As an Alternative to Threads
+12.12 使用生成器代替线程¶
+
+You want to implement concurrency using generators (coroutines) as an alternative to system threads.
+你想使用生成器（协程）替代系统线程来实现并发
+
+This is sometimes known as user-level threading or green threading.
+这个有时又被称为用户级线程或绿色线程
+
+To implement your own concurrency using generators, you first need a fundamental insight concerning generator functions and the yield statement.
+要使用生成器实现自己的并发，你首先要对生成器函数和 yield 语句有深刻理解
+
+Specifically, the fundamental behavior of yield is that it causes a generator to suspend its execution.
+ yield 语句会让一个生成器挂起它的执行，这样就可以编写一个调度器， 将生成器当做某种“任务”并使用任务协作切换来替换它们的执行
+
+By suspending execution, it is possible to write a scheduler that treats generators as a kind of "task" and alternates their execution using a kind of cooperative task switching.
+ 
+
+To illustrate this idea, consider the following two generator functions using a simple yield:
+要演示这种思想，考虑下面两个使用简单的 yield 语句的生成器函数：
+
+These functions probably look a bit funny using yield all by itself.
+这些函数在内部使用yield语句，下面是一个实现了简单任务调度器的代码：
+
+In this code, the TaskScheduler class runs a collection of generators in a round-robin manner—each one running until they reach a yield statement.
+TaskScheduler 类在一个循环中运行生成器集合——每个都运行到碰到yield语句为止
+
+For the sample, the output will be as follows:
+ 运行这个例子，输出如下：
+
+At this point, you’ve essentially implemented the tiny core of an "operating system" if you will.
+到此为止，我们实际上已经实现了一个“操作系统”的最小核心部分
+
+Generator functions are the tasks and the yield statement is how tasks signal that they want to suspend.
+ 生成器函数就是认为，而yield语句是任务挂起的信号
+
+The scheduler simply cycles over the tasks until none are left executing.
+ 调度器循环检查任务列表直到没有任务要执行为止
+
+In practice, you probably wouldn’t use generators to implement concurrency for something as simple as shown.
+实际上，你可能想要使用生成器来实现简单的并发
+
+Instead, you might use generators to replace the use of threads when implementing actors (see “Defining an Actor Task”) or network servers.
+ 那么，在实现actor或网络服务器的时候你可以使用生成器来替代线程的使用
+
+The following code illustrates the use of generators to implement a thread-free version of actors:
+下面的代码演示了使用生成器来实现一个不依赖线程的actor：
+
+The execution of this code might take a bit of study, but the key is the queue of pending messages.
+完全弄懂这段代码需要更深入的学习，但是关键点在于收集消息的队列
+
+Essentially, the scheduler runs as long as there are messages to deliver.
+ 本质上，调度器在有需要发送的消息时会一直运行着
+
+A remarkable feature is that the counter generator sends messages to itself and ends up in a recursive cycle not bound by Python’s recursion limit.
+ 计数生成器会给自己发送消息并在一个递归循环中结束
+
+Here is an advanced example showing the use of generators to implement a concurrent network application:
+下面是一个更加高级的例子，演示了使用生成器来实现一个并发网络应用程序：
+
+This code will undoubtedly require a certain amount of careful study.
+这段代码有点复杂
+
+However, it is essentially implementing a small operating system.
+不过，它实现了一个小型的操作系统
+
+There is a queue of tasks ready to run and there are waiting areas for tasks sleeping for I/O.
+ 有一个就绪的任务队列，并且还有因I/O休眠的任务等待区域
+
+Much of the scheduler involves moving tasks between the ready queue and the I/O waiting area.
+ 还有很多调度器负责在就绪队列和I/O等待区域之间移动任务
+
+When building generator-based concurrency frameworks, it is most common to work with the more general form of yield:
+在构建基于生成器的并发框架时，通常会使用更常见的yield形式：
+
+Functions that use yield in this manner are more generally referred to as "coroutines." Within a scheduler, the yield statement gets handled in a loop as follows:
+使用这种形式的yield语句的函数通常被称为“协程”
+
+The logic concerning the result is a bit convoluted.
+这里的逻辑稍微有点复杂
+
+However, the value passed to send() defines what gets returned when the yield statement wakes back up.
+不过，被传给 send() 的值定义了在yield语句醒来时的返回值
+
+So, if a yield is going to return a result in response to data that was previously yielded, it gets returned on the next send() operation.
+ 因此，如果一个yield准备在对之前yield数据的回应中返回结果时，会在下一次 send() 操作返回
+
+If a generator function has just started, sending in a value of None simply makes it advance to the first yield statement.
+ 如果一个生成器函数刚开始运行，发送一个None值会让它排在第一个yield语句前面
+
+In addition to sending in values, it is also possible to execute a close() method on a generator.
+除了发送值外，还可以在一个生成器上面执行一个 close() 方法
+
+This causes a silent GeneratorExit exception to be raised at the yield statement, which stops execution.
+ 它会导致在执行yield语句时抛出一个 GeneratorExit 异常，从而终止执行
+
+If desired, a generator can catch this exception and perform cleanup actions.
+ 如果进一步设计，一个生成器可以捕获这个异常并执行清理操作
+
+It’s also possible to use the throw() method of a generator to raise an arbitrary execution at the yield statement.
+ 同样还可以使用生成器的 throw() 方法在yield语句执行时生成一个任意的执行指令
+
+A task scheduler might use this to communicate errors into running generators.
+ 一个任务调度器可利用它来在运行的生成器中处理错误
+
+The yield from statement used in the last example is used to implement coroutines that serve as subroutines or procedures to be called from other generators.
+最后一个例子中使用的 yield from 语句被用来实现协程，可以被其它生成器作为子程序或过程来调用
+
+Essentially, control transparently transfers to the new function.
+ 本质上就是将控制权透明的传输给新的函数
+
+Unlike normal generators, a function that is called using yield from can return a value that becomes the result of the yield from statement.
+ 不像普通的生成器，一个使用 yield from 被调用的函数可以返回一个作为 yield from 语句结果的值
+
+More information about yield from can be found in PEP 380.
+ 关于 yield from 的更多信息可以在 PEP 380 中找到
+
+Finally, if programming with generators, it is important to stress that there are some major limitations.
+最后，如果使用生成器编程，要提醒你的是它还是有很多缺点的
+
+In particular, you get none of the benefits that threads provide.
+ 特别是，你得不到任何线程可以提供的好处
+
+For instance, if you execute any code that is CPU bound or which blocks for I/O, it will suspend the entire task scheduler until the completion of that operation.
+例如，如果你执行CPU依赖或I/O阻塞程序， 它会将整个任务挂起知道操作完成
+
+To work around this, your only real option is to delegate the operation to a separate thread or process where it can run independently.
+为了解决这个问题， 你只能选择将操作委派给另外一个可以独立运行的线程或进程
+
+Another limitation is that most Python libraries have not been written to work well with generator-based threading.
+ 另外一个限制是大部分Python库并不能很好的兼容基于生成器的线程
+
+If you take this approach, you may find that you need to write replacements for many standard library functions.
+ 如果你选择这个方案，你会发现你需要自己改写很多标准库函数
+
+As basic background on coroutines and the techniques utilized in this recipe, see PEP 342 and "A Curious Course on Coroutines and Concurrency".
+作为本节提到的协程和相关技术的一个基础背景，可以查看 PEP 342 和 “协程和并发的一门有趣课程”
+
+PEP 3156 also has a modern take on asynchronous I/O involving coroutines.
+PEP 3156 同样有一个关于使用协程的异步I/O模型
+
+In practice, it is extremelyunlikely that you will write a low-level coroutine scheduler yourself.
+ 特别的，你不可能自己去实现一个底层的协程调度器
+
+However, ideas surrounding coroutines are the basis for many popular libraries, including gevent, greenlet, Stackless Python, and similar projects.
+ 不过，关于协程的思想是很多流行库的基础， 包括 gevent, greenlet, Stackless Python 以及其他类似工程
+
+Polling Multiple Thread Queues
+12.13 多个线程队列轮询¶
+
+You have a collection of thread queues, and you would like to be able to poll them for incoming items, much in the same way as you might poll a collection of network connections for incoming data.
+你有一个线程队列集合，想为到来的元素轮询它们， 就跟你为一个客户端请求去轮询一个网络连接集合的方式一样
+
+A common solution to polling problems involves a little-known trick involving a hidden loopback network connection.
+对于轮询问题的一个常见解决方案中有个很少有人知道的技巧，包含了一个隐藏的回路网络连接
+
+Essentially, the idea is as follows: for each queue (or any object) that you want to poll, you create a pair of connected sockets.
+ 本质上讲其思想就是：对于每个你想要轮询的队列，你创建一对连接的套接字
+
+You then write on one of the sockets to signal the presence of data.
+ 然后你在其中一个套接字上面编写代码来标识存在的数据， 另外一个套接字被传给 select() 或类似的一个轮询数据到达的函数
+
+The other sockect is then passed to select() or a similar function to poll for the arrival of data.
+下面的例子演示了这个思想：
+
+In this code, a new kind of Queue instance is defined where there is an underlying pair of connected sockets.
+在这个代码中，一个新的 Queue 实例类型被定义，底层是一个被连接套接字对
+
+The socketpair() function on Unix machines can establish such sockets easily.
+ 在Unix机器上的 socketpair() 函数能轻松的创建这样的套接字
+
+On Windows, you have to fake it using code similar to that shown (it looks a bit weird, but a server socket is created and a client immediately connects to it afterward).
+ 在Windows上面，你必须使用类似代码来模拟它
+
+The normal get() and put() methods are then redefined slightly to perform a small bit of I/O on these sockets.
+ 然后定义普通的 get() 和 put() 方法在这些套接字上面来执行I/O操作
+
+The put() method writes a single byte of data to one of the sockets after putting data on the queue.
+ put() 方法再将数据放入队列后会写一个单字节到某个套接字中去
+
+The get() method reads a single byte of data from the other socket when removing an item from the queue.
+ 而 get() 方法在从队列中移除一个元素时会从另外一个套接字中读取到这个单字节数据
+
+The fileno() method is what makes the queue pollable using a function such as select().
+fileno() 方法使用一个函数比如 select() 来让这个队列可以被轮询
+
+Essentially, it just exposes the underlying file descriptor of the socket used by the get() function.
+ 它仅仅只是暴露了底层被 get() 函数使用到的socket的文件描述符而已
+
+Here is an example of some code that defines a consumer which monitors multiple queues for incoming items:
+下面是一个例子，定义了一个为到来的元素监控多个队列的消费者：
+
+If you try it, you’ll find that the consumer indeed receives all of the put items, regardless of which queues they are placed in.
+如果你试着运行它，你会发现这个消费者会接受到所有的被放入的元素，不管元素被放进了哪个队列中
+
+The problem of polling non-file-like objects, such as queues, is often a lot trickier than it looks.
+对于轮询非类文件对象，比如队列通常都是比较棘手的问题
+
+For instance, if you don’t use the socket technique shown, your only option is to write code that cycles through the queues and uses a timer, like this:
+ 例如，如果你不使用上面的套接字技术， 你唯一的选择就是编写代码来循环遍历这些队列并使用一个定时器
+
+This might work for certain kinds of problems, but it’s clumsy and introduces other weird performance problems.
+这样做其实不合理，还会引入其他的性能问题
+
+For example, if new data is added to a queue, it won’t be detected for as long as 10 milliseconds (an eternity on a modern processor).
+ 例如，如果新的数据被加入到一个队列中，至少要花10毫秒才能被发现
+
+You run into even further problems if the preceding polling is mixed with the polling of other objects, such as network sockets.
+如果你之前的轮询还要去轮询其他对象，比如网络套接字那还会有更多问题
+
+For example, if you want to poll both sockets and queues at the same time, you might have to use code like this:
+ 例如，如果你想同时轮询套接字和队列，你可能要像下面这样使用：
+
+The solution shown solves a lot of these problems by simply putting queues on equal status with sockets.
+这个方案通过将队列和套接字等同对待来解决了大部分的问题
+
+A single select() call can be used to poll for activity on both.
+ 一个单独的 select() 调用可被同时用来轮询
+
+It is not necessary to use timeouts or other time-based hacks to periodically check.
+ 使用超时或其他基于时间的机制来执行周期性检查并没有必要
+
+Moreover, if data gets added to a queue, the consumer will be notified almost instantaneously.
+ 甚至，如果数据被加入到一个队列，消费者几乎可以实时的被通知
+
+Although there is a tiny amount of overhead associated with the underlying I/O, it often is worth it to have better response time and simplified coding.
+ 尽管会有一点点底层的I/O损耗，使用它通常会获得更好的响应时间并简化编程
+
+Launching a Daemon Process on Unix
+12.14 在Unix系统上面启动守护进程¶
+
+You would like to write a program that runs as a proper daemon process on Unix or Unix-like systems.
+你想编写一个作为一个在Unix或类Unix系统上面运行的守护进程运行的程序
+
+Creating a proper daemon process requires a precise sequence of system calls and careful attention to detail.
+创建一个正确的守护进程需要一个精确的系统调用序列以及对于细节的控制
+
+The following code shows how to define a daemon process along with the ability to easily stop it once launched:
+ 下面的代码展示了怎样定义一个守护进程，可以启动后很容易的停止它
+
+To launch the daemon, the user would use a command like this:
+要启动这个守护进程，用户需要使用如下的命令：
+
+Daemon processes run entirely in the background, so the command returns immediately.
+守护进程可以完全在后台运行，因此这个命令会立即返回
+
+However, you can view its associated pid file and log, as just shown.
+ 不过，你可以像上面那样查看与它相关的pid文件和日志
+
+To stop the daemon, use:
+要停止这个守护进程，使用：
+
+This recipe defines a function daemonize() that should be called at program startup to make the program run as a daemon.
+本节定义了一个函数 daemonize() ，在程序启动时被调用使得程序以一个守护进程来运行
+
+The signature to daemonize() is using keyword-only arguments to make the purpose of the optional arguments more clear when used.
+ daemonize() 函数只接受关键字参数，这样的话可选参数在被使用时就更清晰了
+
+This forces the user to use a call such as this:
+ 它会强制用户像下面这样使用它：
+
+As opposed to a more cryptic call such as:
+而不是像下面这样含糊不清的调用：
+
+The steps involved in creating a daemon are fairly cryptic, but the general idea is as follows.
+创建一个守护进程的步骤看上去不是很易懂，但是大体思想是这样的， 首先，一个守护进程必须要从父进程中脱离
+
+First, a daemon has to detach itself from its parent process.
+ 这是由 os.fork() 操作来完成的，并立即被父进程终止
+
+After the child has been orphaned, the call to os.setsid() creates an entirely new process session and sets the child as the leader.
+在子进程变成孤儿后，调用 os.setsid() 创建了一个全新的进程会话，并设置子进程为首领
+
+This also sets the child as the leader of a new process group and makes sure there is no controlling terminal.
+ 它会设置这个子进程为新的进程组的首领，并确保不会再有控制终端
+
+If this all sounds a bit too magical, it has to do with getting the daemon to detach properly from the terminal and making sure that things like signals don’t interfere with its operation.
+ 如果这些听上去太魔幻，因为它需要将守护进程同终端分离开并确保信号机制对它不起作用
+
+The calls to os.chdir() and os.umask(0) change the current working directory and reset the file mode mask.
+调用 os.chdir() 和 os.umask(0) 改变了当前工作目录并重置文件权限掩码
+
+Changing the directory is usually a good idea so that the daemon is no longer working in the directory from which it was launched.
+ 修改目录通常是个好主意，因为这样可以使得它不再工作在被启动时的目录
+
+The second call to os.fork() is by far the more mysterious operation here.
+另外一个调用 os.fork() 在这里更加神秘点
+
+This step makes the daemon process give up the ability to acquire a new controlling terminal and provides even more isolation (essentially, the daemon gives up its session leadership and thus no longer has the permission to open controlling terminals).
+ 这一步使得守护进程失去了获取新的控制终端的能力并且让它更加独立 （本质上，该daemon放弃了它的会话首领低位，因此再也没有权限去打开控制终端了）
+
+Although you could probably omit this step, it’s typically recommended.
+ 尽管你可以忽略这一步，但是最好不要这么做
+
+Once the daemon process has been properly detached, it performs steps to reinitialize the standard I/O streams to point at files specified by the user.
+一旦守护进程被正确的分离，它会重新初始化标准I/O流指向用户指定的文件
+
+This part is actually somewhat tricky.
+ 这一部分有点难懂
+
+References to file objects associated with the standard I/O streams are found in multiple places in the interpreter (sys.stdout, sys.__stdout__, etc.).
+跟标准I/O流相关的文件对象的引用在解释器中多个地方被找到 （sys.stdout, sys.__stdout__等）
+
+Simply closing sys.stdout and reassigning it is not likely to work correctly, because there’s no way to know if it will fix all uses of sys.stdout.
+ 仅仅简单的关闭 sys.stdout 并重新指定它是行不通的， 因为没办法知道它是否全部都是用的是 sys.stdout 
+
+Instead, a separate file object is opened, and the os.dup2() call is used to have it replace the file descriptor currently being used by sys.stdout.
+ 这里，我们打开了一个单独的文件对象，并调用 os.dup2() ， 用它来代替被 sys.stdout 使用的文件描述符
+
+When this happens, the original file for sys.stdout will be closed and the new one takes its place.
+ 这样，sys.stdout 使用的原始文件会被关闭并由新的来替换
+
+It must be emphasized that any file encoding or text handling already applied to the standard I/O streams will remain in place.
+ 还要强调的是任何用于文件编码或文本处理的标准I/O流还会保留原状
+
+A common practice with daemon processes is to write the process ID of the daemon in a file for later use by other programs.
+守护进程的一个通常实践是在一个文件中写入进程ID，可以被其他程序后面使用到
+
+The last part of the daemonize() function writes this file, but also arranges to have the file removed on program termination.
+ daemonize() 函数的最后部分写了这个文件，但是在程序终止时删除了它
+
+The atexit.register() function registers a function to execute when the Python interpreter terminates.
+ atexit.register() 函数注册了一个函数在Python解释器终止时执行
+
+The definition of a signal handler for SIGTERM is also required for a graceful termination.
+ 一个对于SIGTERM的信号处理器的定义同样需要被优雅的关闭
+
+The signal handler merely raises SystemExit() and nothing more.
+ 信号处理器简单的抛出了 SystemExit() 异常
+
+This might look unnecessary, but without it, termination signals kill the interpreter without performing the cleanup actions registered with atexit.register().
+ 或许这一步看上去没必要，但是没有它， 终止信号会使得不执行 atexit.register() 注册的清理操作的时候就杀掉了解释器
+
+An example of code that kills the daemon can be found in the handling of the stop command at the end of the program.
+ 一个杀掉进程的例子代码可以在程序最后的 stop 命令的操作中看到
+
+More information about writing daemon processes can be found in Advanced Programming in the UNIX Environment, 2nd Edition, by W.
+更多关于编写守护进程的信息可以查看《UNIX 环境高级编程》, 第二版 by W. Richard Stevens and Stephen A. Rago (Addison-Wesley, 2005)
+
+Richard Stevens and Stephen A.
+ 尽管它是关注与C语言编程，但是所有的内容都适用于Python， 因为所有需要的POSIX函数都可以在标准库中找到
+

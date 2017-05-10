@@ -1,0 +1,48 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+11.2. How not to fetch data over HTTP
+11.2. 避免通过 HTTP 重复地获取数据
+
+Let's say you want to download a resource over HTTP, such as a syndicated Atom feed.
+假如说你想用 HTTP 下载资源，例如一个 Atom feed 汇聚
+
+But you don't just want to download it once;
+你不仅仅想下载一次
+
+you want to download it over and over again, every hour, to get the latest news from the site that's offering the news feed.
+而是想一次又一次地下载它，如每小时一次，从提供 news feed 的站点获得最新的消息
+
+Let's do it the quick-and-dirty way first, and then see how you can do better.
+让我们首先用一种直接而原始的方法来实现它，然后看看如何改进它
+
+So what's wrong with this?
+那么这种方法有何不妥之处吗
+
+Well, for a quick one-off during testing or development, there's nothing wrong with it.
+当然，在测试或开发中一次性的使用没有什么不妥
+
+I do it all the time.
+我经常这样
+
+I wanted the contents of the feed, and I got the contents of the feed.
+我想要 feed 汇聚的内容，我就获取 feed 的内容
+
+The same technique works for any web page.
+这种方法对其他 web 页面同样有效
+
+But once you start thinking in terms of a web service that you want to access on a regular basis -- and remember, you said you were planning on retrieving this syndicated feed once an hour -- then you're being inefficient, and you're being rude.
+但是一旦你开始按照 web 服务的方式去思考有规则的访问需求时 (记住，你说你计划每小时一次地重复获取这样的 feed ) 就会发现这样的做法效率实在是太低了，并且对服务器来说也太笨了
+
+Let's talk about some of the basic features of HTTP.
+下面先谈论一些 HTTP 的基本特性
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

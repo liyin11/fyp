@@ -1,0 +1,741 @@
+Chapter 4. Iterators and Generators
+第四章：迭代器与生成器¶
+
+Iteration is one of Python’s strongest features.
+迭代是Python最强大的功能之一
+
+At a high level, you might simply view iteration as a way to process items in a sequence.
+初看起来，你可能会简单的认为迭代只不过是处理序列中元素的一种方法
+
+However, there is so much more that is possible, such as creating your own iterator objects, applying useful iteration patterns in the itertools module, making generator functions, and so forth.
+ 然而，绝非仅仅就是如此，还有很多你可能不知道的， 比如创建你自己的迭代器对象，在itertools模块中使用有用的迭代模式，构造生成器函数等等
+
+This chapter aims to address common problems involving iteration.
+ 这一章目的就是向你展示跟迭代有关的各种常见问题
+
+Manually Consuming an Iterator
+4.1 手动遍历迭代器¶
+
+You need to process items in an iterable, but for whatever reason, you can’t or don’t want to use a for loop.
+你想遍历一个可迭代对象中的所有元素，但是却不想使用for循环
+
+To manually consume an iterable, use the next() function and write your code to catch the StopIteration exception.
+为了手动的遍历可迭代对象，使用 next() 函数并在代码中捕获 StopIteration 异常
+
+For example, this example manually reads lines from a file:
+ 比如，下面的例子手动读取一个文件中的所有行：
+
+Normally, StopIteration is used to signal the end of iteration.
+通常来讲， StopIteration 用来指示迭代的结尾
+
+However, if you’re using next() manually (as shown), you can also instruct it to return a terminating value, such as None, instead.
+ 然而，如果你手动使用上面演示的 next() 函数的话，你还可以通过返回一个指定值来标记结尾，比如 None 
+
+For example:
+ 下面是示例：
+
+In most cases, the for statement is used to consume an iterable.
+大多数情况下，我们会使用 for 循环语句用来遍历一个可迭代对象
+
+However, every now and then, a problem calls for more precise control over the underlying iteration mechanism.
+ 但是，偶尔也需要对迭代做更加精确的控制，这时候了解底层迭代机制就显得尤为重要了
+
+The following interactive example illustrates the basic mechanics of what happens during iteration:
+下面的交互示例向我们演示了迭代期间所发生的基本细节：
+
+Subsequent recipes in this chapter expand on iteration techniques, and knowledge of the basic iterator protocol is assumed.
+本章接下来几小节会更深入的讲解迭代相关技术，前提是你先要理解基本的迭代协议机制
+
+Be sure to tuck this first recipe away in your memory.
+ 所以确保你已经把这章的内容牢牢记在心中
+
+Delegating Iteration
+4.2 代理迭代¶
+
+You have built a custom container object that internally holds a list, tuple, or some other iterable.
+你构建了一个自定义容器对象，里面包含有列表、元组或其他可迭代对象
+
+You would like to make iteration work with your new container.
+ 你想直接在你的这个新容器对象上执行迭代操作
+
+Typically, all you need to do is define an __iter__() method that delegates iteration to the internally held container.
+实际上你只需要定义一个 __iter__() 方法，将迭代操作代理到容器内部的对象上去
+
+For example:
+比如：
+
+In this code, the __iter__() method simply forwards the iteration request to the internally held _children attribute.
+在上面代码中， __iter__() 方法只是简单的将迭代请求传递给内部的 _children 属性
+
+Python’s iterator protocol requires __iter__() to return a special iterator object that implements a __next__() method to carry out the actual iteration.
+Python的迭代器协议需要 __iter__() 方法返回一个实现了 __next__() 方法的迭代器对象
+
+If all you are doing is iterating over the contents of another container, you don’t really need to worry about the underlying details of how it works.
+ 如果你只是迭代遍历其他容器的内容，你无须担心底层是怎样实现的
+
+All you need to do is to forward the iteration request along.
+你所要做的只是传递迭代请求既可
+
+The use of the iter() function here is a bit of a shortcut that cleans up the code.
+这里的 iter() 函数的使用简化了代码， iter(s) 只是简单的通过调用 s.__iter__() 方法来返回对应的迭代器对象， 就跟 len(s) 会调用 s.__len__() 原理是一样的
+
+Creating New Iteration Patterns with Generators
+4.3 使用生成器创建新的迭代模式¶
+
+You want to implement a custom iteration pattern that’s different than the usual built-in functions (e.g., range(), reversed(), etc.).
+你想实现一个自定义迭代模式，跟普通的内置函数比如 range() , reversed() 不一样
+
+If you want to implement a new kind of iteration pattern, define it using a generator function.
+如果你想实现一种新的迭代模式，使用一个生成器函数来定义它
+
+Here’s a generator that produces a range of floating-point numbers:
+ 下面是一个生产某个范围内浮点数的生成器：
+
+To use such a function, you iterate over it using a for loop or use it with some other function that consumes an iterable (e.g., sum(), list(), etc.).
+为了使用这个函数， 你可以用for循环迭代它或者使用其他接受一个可迭代对象的函数(比如 sum() , list() 等)
+
+For example:
+示例如下：
+
+The mere presence of the yield statement in a function turns it into a generator.
+一个函数中需要有一个 yield 语句即可将其转换为一个生成器
+
+Unlike a normal function, a generator only runs in response to iteration.
+ 跟普通函数不同的是，生成器只能用于迭代操作
+
+Here’s an experiment you can try to see the underlying mechanics of how such a function works:
+ 下面是一个实验，向你展示这样的函数底层工作机制：
+
+The key feature is that a generator function only runs in response to "next" operations carried out in iteration.
+一个生成器函数主要特征是它只会回应在迭代中使用到的 next 操作
+
+Once a generator function returns, iteration stops.
+ 一旦生成器函数返回退出，迭代终止
+
+However, the for statement that’s usually used to iterate takes care of these details, so you don’t normally need to worry about them.
+我们在迭代中通常使用的for语句会自动处理这些细节，所以你无需担心
+
+Implementing the Iterator Protocol
+4.4 实现迭代器协议¶
+
+You are building custom objects on which you would like to support iteration, but would like an easy way to implement the iterator protocol.
+你想构建一个能支持迭代操作的自定义对象，并希望找到一个能实现迭代协议的简单方法
+
+By far, the easiest way to implement iteration on an object is to use a generator function.
+目前为止，在一个对象上实现迭代最简单的方式是使用一个生成器函数
+
+In “Delegating Iteration”, a Node class was presented for representing tree structures.
+ 在4.2小节中，使用Node类来表示树形数据结构
+
+Perhaps you want to implement an iterator that traverses nodes in a depth-first pattern.
+你可能想实现一个以深度优先方式遍历树形节点的生成器
+
+Here is how you could do it:
+ 下面是代码示例：
+
+In this code, the depth_first() method is simple to read and describe.
+在这段代码中，depth_first() 方法简单直观
+
+It first yields itself and then iterates over each child yielding the items produced by the child’s depth_first() method (using yield from).
+ 它首先返回自己本身并迭代每一个子节点并 通过调用子节点的 depth_first() 方法(使用 yield from 语句)返回对应元素
+
+Python’s iterator protocol requires __iter__() to return a special iterator object that implements a __next__() operation and uses a StopIteration exception to signal completion.
+Python的迭代协议要求一个 __iter__() 方法返回一个特殊的迭代器对象， 这个迭代器对象实现了 __next__() 方法并通过 StopIteration 异常标识迭代的完成
+
+However, implementing such objects can often be a messy affair.
+ 但是，实现这些通常会比较繁琐
+
+For example, the following code shows an alternative implementation of the depth_first() method using an associated iterator class:
+ 下面我们演示下这种方式，如何使用一个关联迭代器类重新实现 depth_first() 方法：
+
+The DepthFirstIterator class works in the same way as the generator version, but it’s a mess because the iterator has to maintain a lot of complex state about where it is in the iteration process.
+DepthFirstIterator 类和上面使用生成器的版本工作原理类似， 但是它写起来很繁琐，因为迭代器必须在迭代处理过程中维护大量的状态信息
+
+Frankly, nobody likes to write mind-bending code like that.
+ 坦白来讲，没人愿意写这么晦涩的代码
+
+Define your iterator as a generator and be done with it.
+将你的迭代器定义为一个生成器后一切迎刃而解
+
+Iterating in Reverse
+4.5 反向迭代¶
+
+You want to iterate in reverse over a sequence.
+你想反方向迭代一个序列
+
+Use the built-in reversed() function.
+使用内置的 reversed() 函数，比如：
+
+Reversed iteration only works if the object in question has a size that can be determined or if the object implements a __reversed__() special method.
+反向迭代仅仅当对象的大小可预先确定或者对象实现了 __reversed__() 的特殊方法时才能生效
+
+If neither of these can be satisfied, you’ll have to convert the object into a list first.
+ 如果两者都不符合，那你必须先将对象转换为一个列表才行，比如：
+
+Be aware that turning an iterable into a list as shown could consume a lot of memory if it’s large.
+要注意的是如果可迭代对象元素很多的话，将其预先转换为一个列表要消耗大量的内存
+
+Many programmers don’t realize that reversed iteration can be customized on user-defined classes if they implement the __reversed__() method.
+很多程序员并不知道可以通过在自定义类上实现 __reversed__() 方法来实现反向迭代
+
+For example:
+比如：
+
+Defining a reversed iterator makes the code much more efficient, as it’s no longer necessary to pull the data into a list and iterate in reverse on the list.
+定义一个反向迭代器可以使得代码非常的高效， 因为它不再需要将数据填充到一个列表中然后再去反向迭代这个列表
+
+Defining Generator Functions with Extra State
+4.6 带有外部状态的生成器函数¶
+
+You would like to define a generator function, but it involves extra state that you would like to expose to the user somehow.
+你想定义一个生成器函数，但是它会调用某个你想暴露给用户使用的外部状态值
+
+If you want a generator to expose extra state to the user, don’t forget that you can easily implement it as a class, putting the generator function code in the __iter__() method.
+如果你想让你的生成器暴露外部状态给用户， 别忘了你可以简单的将它实现为一个类，然后把生成器函数放到 __iter__() 方法中过去
+
+For example:
+比如：
+
+To use this class, you would treat it like a normal generator function.
+为了使用这个类，你可以将它当做是一个普通的生成器函数
+
+However, since it creates an instance, you can access internal attributes, such as the history attribute or the clear() method.
+ 然而，由于可以创建一个实例对象，于是你可以访问内部属性值， 比如 history 属性或者是 clear() 方法
+
+For example:
+代码示例如下：
+
+With generators, it is easy to fall into a trap of trying to do everything with functions alone.
+关于生成器，很容易掉进函数无所不能的陷阱
+
+This can lead to rather complicated code if the generator function needs to interact with other parts of your program in unusual ways (exposing attributes, allowing control via method calls, etc.).
+ 如果生成器函数需要跟你的程序其他部分打交道的话(比如暴露属性值，允许通过方法调用来控制等等)， 可能会导致你的代码异常的复杂
+
+If this is the case, just use a class definition, as shown.
+ 如果是这种情况的话，可以考虑使用上面介绍的定义类的方式
+
+Defining your generator in the __iter__() method doesn’t change anything about how you write your algorithm.
+ 在 __iter__() 方法中定义你的生成器不会改变你任何的算法逻辑
+
+The fact that it’s part of a class makes it easy for you to provide attributes and methods for users to interact with.
+ 由于它是类的一部分，所以允许你定义各种属性和方法来供用户使用
+
+One potential subtlety with the method shown is that it might require an extra step of calling iter() if you are going to drive iteration using a technique other than a for loop.
+一个需要注意的小地方是，如果你在迭代操作时不使用for循环语句，那么你得先调用 iter() 函数
+
+For example:
+比如：
+
+Taking a Slice of an Iterator
+4.7 迭代器切片¶
+
+You want to take a slice of data produced by an iterator, but the normal slicing operator doesn’t work.
+你想得到一个由迭代器生成的切片对象，但是标准切片操作并不能做到
+
+The itertools.islice() function is perfectly suited for taking slices of iterators and generators.
+函数 itertools.islice() 正好适用于在迭代器和生成器上做切片操作
+
+For example:
+比如：
+
+Iterators and generators can’t normally be sliced, because no information is known about their length (and they don’t implement indexing).
+迭代器和生成器不能使用标准的切片操作，因为它们的长度事先我们并不知道(并且也没有实现索引)
+
+The result of islice() is an iterator that produces the desired slice items, but it does this by consuming and discarding all of the items up to the starting slice index.
+ 函数 islice() 返回一个可以生成指定元素的迭代器，它通过遍历并丢弃直到切片开始索引位置的所有元素
+
+Further items are then produced by the islice object until the ending index has been reached.
+ 然后才开始一个个的返回元素，并直到切片结束索引位置
+
+It’s important to emphasize that islice() will consume data on the supplied iterator.
+这里要着重强调的一点是 islice() 会消耗掉传入的迭代器中的数据
+
+Since iterators can’t be rewound, that is something to consider.
+ 必须考虑到迭代器是不可逆的这个事实
+
+If it’s important to go back, you should probably just turn the data into a list first.
+ 所以如果你需要之后再次访问这个迭代器的话，那你就得先将它里面的数据放入一个列表中
+
+Skipping the First Part of an Iterable
+4.8 跳过可迭代对象的开始部分¶
+
+You want to iterate over items in an iterable, but the first few items aren’t of interest and you just want to discard them.
+你想遍历一个可迭代对象，但是它开始的某些元素你并不感兴趣，想跳过它们
+
+The itertools module has a few functions that can be used to address this task.
+itertools 模块中有一些函数可以完成这个任务
+
+The first is the itertools.dropwhile() function.
+ 首先介绍的是 itertools.dropwhile() 函数
+
+To use it, you supply a function and an iterable.
+使用时，你给它传递一个函数对象和一个可迭代对象
+
+The returned iterator discards the first items in the sequence as long as the supplied function returns True.
+ 它会返回一个迭代器对象，丢弃原有序列中直到函数返回Flase之前的所有元素，然后返回后面所有元素
+
+To illustrate, suppose you are reading a file that starts with a series of comment lines.
+为了演示，假定你在读取一个开始部分是几行注释的源文件
+
+For example:
+比如：
+
+If you want to skip all of the initial comment lines, here’s one way to do it:
+如果你想跳过开始部分的注释行的话，可以这样做：
+
+This example is based on skipping the first items according to a test function.
+这个例子是基于根据某个测试函数跳过开始的元素
+
+If you happen to know the exact number of items you want to skip, then you can use itertools.islice() instead.
+ 如果你已经明确知道了要跳过的元素的个数的话，那么可以使用 itertools.islice() 来代替
+
+For example:
+比如：
+
+In this example, the last None argument to islice() is required to indicate that you want everything beyond the first three items as opposed to only the first three items (e.g., a slice of [3:] as opposed to a slice of [:3]).
+在这个例子中， islice() 函数最后那个 None 参数指定了你要获取从第3个到最后的所有元素， 如果 None 和3的位置对调，意思就是仅仅获取前三个元素恰恰相反， (这个跟切片的相反操作 [3:] 和 [:3] 原理是一样的)
+
+The dropwhile() and islice() functions are mainly convenience functions that you can use to avoid writing rather messy code such as this:
+函数 dropwhile() 和 islice() 其实就是两个帮助函数，为的就是避免写出下面这种冗余代码：
+
+Discarding the first part of an iterable is also slightly different than simply filtering all of it.
+跳过一个可迭代对象的开始部分跟通常的过滤是不同的
+
+For example, the first part of this recipe might be rewritten as follows:
+ 比如，上述代码的第一个部分可能会这样重写：
+
+This will obviously discard the comment lines at the start, but will also discard all such lines throughout the entire file.
+这样写确实可以跳过开始部分的注释行，但是同样也会跳过文件中其他所有的注释行
+
+On the other hand, the solution only discards items until an item no longer satisfies the supplied test.
+ 换句话讲，我们的解决方案是仅仅跳过开始部分满足测试条件的行，在那以后，所有的元素不再进行测试和过滤了
+
+Last, but not least, it should be emphasized that this recipe works with all iterables, including those whose size can’t be determined in advance.
+最后需要着重强调的一点是，本节的方案适用于所有可迭代对象，包括那些事先不能确定大小的， 比如生成器，文件及其类似的对象
+
+Iterating Over All Possible Combinations or Permutations
+4.9 排列组合的迭代¶
+
+You want to iterate over all of the possible combinations or permutations of a collection of items.
+你想迭代遍历一个集合中元素的所有可能的排列或组合
+
+The itertools module provides three functions for this task.
+itertools模块提供了三个函数来解决这类问题
+
+The first of these—itertools.permutations()—takes a collection of items and produces a sequence of tuples that rearranges all of the items into all possible permutations (i.e., it shuffles them into all possible configurations).
+ 其中一个是 itertools.permutations() ， 它接受一个集合并产生一个元组序列，每个元组由集合中所有元素的一个可能排列组成
+
+For example:
+ 也就是说通过打乱集合中元素排列顺序生成一个元组，比如：
+
+If you want all permutations of a smaller length, you can give an optional length argument.
+如果你想得到指定长度的所有排列，你可以传递一个可选的长度参数
+
+For example:
+就像这样：
+
+Use itertools.combinations() to produce a sequence of combinations of items taken from the input.
+使用 itertools.combinations() 可得到输入集合中元素的所有的组合
+
+For example:
+比如：
+
+For combinations(), the actual order of the elements is not considered.
+对于 combinations() 来讲，元素的顺序已经不重要了
+
+That is, the combination ('a', 'b') is considered to be the same as ('b', 'a') (which is not produced).
+ 也就是说，组合 ('a', 'b') 跟 ('b', 'a') 其实是一样的(最终只会输出其中一个)
+
+When producing combinations, chosen items are removed from the collection of possible candidates (i.e., if 'a' has already been chosen, then it is removed from consideration).
+在计算组合的时候，一旦元素被选取就会从候选中剔除掉(比如如果元素’a’已经被选取了，那么接下来就不会再考虑它了)
+
+The itertools.combinations_with_replacement() function relaxes this, and allows the same item to be chosen more than once.
+ 而函数 itertools.combinations_with_replacement() 允许同一个元素被选择多次，比如：
+
+This recipe demonstrates only some of the power found in the itertools module.
+这一小节我们向你展示的仅仅是 itertools 模块的一部分功能
+
+Although you could certainly write code to produce permutations and combinations yourself, doing so would probably require more than a fair bit of thought.
+ 尽管你也可以自己手动实现排列组合算法，但是这样做得要花点脑力
+
+When faced with seemingly complicated iteration problems, it always pays to look at itertools first.
+ 当我们碰到看上去有些复杂的迭代问题时，最好可以先去看看itertools模块
+
+If the problem is common, chances are a solution is already available.
+ 如果这个问题很普遍，那么很有可能会在里面找到解决方案
+
+Iterating Over the Index-Value Pairs of a Sequence
+4.10 序列上索引值迭代¶
+
+You want to iterate over a sequence, but would like to keep track of which element of the sequence is currently being processed.
+你想在迭代一个序列的同时跟踪正在被处理的元素索引
+
+The built-in enumerate() function handles this quite nicely:
+内置的 enumerate() 函数可以很好的解决这个问题：
+
+For printing output with canonical line numbers (where you typically start the numbering at 1 instead of 0), you can pass in a start argument:
+为了按传统行号输出(行号从1开始)，你可以传递一个开始参数：
+
+This case is especially useful for tracking line numbers in files should you want to use a line number in an error message:
+这种情况在你遍历文件时想在错误消息中使用行号定位时候非常有用：
+
+enumerate() can be handy for keeping track of the offset into a list for occurrences of certain values, for example.
+enumerate() 对于跟踪某些值在列表中出现的位置是很有用的
+
+So, if you want to map words in a file to the lines in which they occur, it can easily be accomplished using enumerate() to map each word to the line offset in the file where it was found:
+ 所以，如果你想将一个文件中出现的单词映射到它出现的行号上去，可以很容易的利用 enumerate() 来完成：
+
+If you print word_summary after processing the file, it’ll be a dictionary (a defaultdict to be precise), and it’ll have a key for each word.
+如果你处理完文件后打印 word_summary ，会发现它是一个字典(准确来讲是一个 defaultdict )， 对于每个单词有一个 key ，每个 key 对应的值是一个由这个单词出现的行号组成的列表
+
+The value for each word-key will be a list of line numbers that word occurred on.
+ 如果某个单词在一行中出现过两次，那么这个行号也会出现两次， 同时也可以作为文本的一个简单统计
+
+enumerate() is a nice shortcut for situations where you might be inclined to keep your own counter variable.
+当你想额外定义一个计数变量的时候，使用 enumerate() 函数会更加简单
+
+You could write code like this:
+你可能会像下面这样写代码：
+
+But it’s usually much more elegant (and less error prone) to use enumerate() instead:
+但是如果使用 enumerate() 函数来代替就显得更加优雅了：
+
+The value returned by enumerate() is an instance of an enumerate object, which is an iterator that returns successive tuples consisting of a counter and the value returned by calling next() on the sequence you’ve passed in.
+enumerate() 函数返回的是一个 enumerate 对象实例， 它是一个迭代器，返回连续的包含一个计数和一个值的元组， 元组中的值通过在传入序列上调用 next() 返回
+
+Although a minor point, it’s worth mentioning that sometimes it is easy to get tripped up when applying enumerate() to a sequence of tuples that are also being unpacked.
+还有一点可能并不很重要，但是也值得注意， 有时候当你在一个已经解压后的元组序列上使用 enumerate() 函数时很容易调入陷阱
+
+To do it, you have to write code like this:
+ 你得像下面正确的方式这样写：
+
+Iterating Over Multiple Sequences Simultaneously
+4.11 同时迭代多个序列¶
+
+You want to iterate over the items contained in more than one sequence at a time.
+你想同时迭代多个序列，每次分别从一个序列中取一个元素
+
+To iterate over more than one sequence simultaneously, use the zip() function.
+为了同时迭代多个序列，使用 zip() 函数
+
+For example:
+比如：
+
+zip(a, b) works by creating an iterator that produces tuples (x, y) where x is taken from a and y is taken from b.
+zip(a, b) 会生成一个可返回元组 (x, y) 的迭代器，其中x来自a，y来自b
+
+Iteration stops whenever one of the input sequences is exhausted.
+ 一旦其中某个序列到底结尾，迭代宣告结束
+
+Thus, the length of the iteration is the same as the length of the shortest input.
+ 因此迭代长度跟参数中最短序列长度一致
+
+If this behavior is not desired, use itertools.zip_longest() instead.
+如果这个不是你想要的效果，那么还可以使用 itertools.zip_longest() 函数来代替
+
+For example:
+比如：
+
+zip() is commonly used whenever you need to pair data together.
+当你想成对处理数据的时候 zip() 函数是很有用的
+
+For example, suppose you have a list of column headers and column values like this:
+ 比如，假设你头列表和一个值列表，就像下面这样：
+
+Using zip(), you can pair the values together to make a dictionary like this:
+使用zip()可以让你将它们打包并生成一个字典：
+
+Alternatively, if you are trying to produce output, you can write code like this:
+或者你也可以像下面这样产生输出：
+
+It’s less common, but zip() can be passed more than two sequences as input.
+虽然不常见，但是 zip() 可以接受多于两个的序列的参数
+
+For this case, the resulting tuples have the same number of items in them as the number of input sequences.
+ 这时候所生成的结果元组中元素个数跟输入序列个数一样
+
+For example:
+比如;
+
+Last, but not least, it’s important to emphasize that zip() creates an iterator as a result.
+最后强调一点就是， zip() 会创建一个迭代器来作为结果返回
+
+If you need the paired values stored in a list, use the list() function.
+ 如果你需要将结对的值存储在列表中，要使用 list() 函数
+
+For example:
+比如：
+
+Iterating on Items in Separate Containers
+4.12 不同集合上元素的迭代¶
+
+You need to perform the same operation on many objects, but the objects are contained in different containers, and you’d like to avoid nested loops without losing the readability of your code.
+你想在多个对象执行相同的操作，但是这些对象在不同的容器中，你希望代码在不失可读性的情况下避免写重复的循环
+
+The itertools.chain() method can be used to simplify this task.
+itertools.chain() 方法可以用来简化这个任务
+
+It takes a list of iterables as input, and returns an iterator that effectively masks the fact that you’re really acting on multiple containers.
+ 它接受一个可迭代对象列表作为输入，并返回一个迭代器，有效的屏蔽掉在多个容器中迭代细节
+
+To illustrate, consider this example:
+ 为了演示清楚，考虑下面这个例子：
+
+A common use of chain() is in programs where you would like to perform certain operations on all of the items at once but the items are pooled into different working sets.
+使用 chain() 的一个常见场景是当你想对不同的集合中所有元素执行某些操作的时候
+
+For example:
+比如：
+
+This solution is much more elegant than using two separate loops, as in the following:
+这种解决方案要比像下面这样使用两个单独的循环更加优雅，
+
+itertools.chain() accepts one or more iterables as arguments.
+itertools.chain() 接受一个或多个可迭代对象最为输入参数
+
+It then works by creating an iterator that successively consumes and returns the items produced by each of the supplied iterables you provided.
+ 然后创建一个迭代器，依次连续的返回每个可迭代对象中的元素
+
+It’s a subtle distinction, but chain() is more efficient than first combining the sequences and iterating.
+ 这种方式要比先将序列合并再迭代要高效的多
+
+For example:
+比如：
+
+In the first case, the operation a + b creates an entirely new sequence and additionally requires a and b to be of the same type.
+第一种方案中， a + b 操作会创建一个全新的序列并要求a和b的类型一致
+
+chain() performs no such operation, so it’s far more efficient with memory if the input sequences are large and it can be easily applied when the iterables in question are of different types.
+ chian() 不会有这一步，所以如果输入序列非常大的时候会很省内存
+
+Creating Data Processing Pipelines
+4.13 创建数据处理管道¶
+
+You want to process data iteratively in the style of a data processing pipeline (similar to Unix pipes).
+你想以数据管道(类似Unix管道)的方式迭代处理数据
+
+For instance, you have a huge amount of data that needs to be processed, but it can’t fit entirely into memory.
+ 比如，你有个大量的数据需要处理，但是不能将它们一次性放入内存中
+
+Generator functions are a good way to implement processing pipelines.
+生成器函数是一个实现管道机制的好办法
+
+To illustrate, suppose you have a huge directory of log files that you want to process:
+ 为了演示，假定你要处理一个非常大的日志文件目录：
+
+Suppose each file contains lines of data like this:
+假设每个日志文件包含这样的数据：
+
+To process these files, you could define a collection of small generator functions that perform specific self-contained tasks.
+为了处理这些文件，你可以定义一个由多个执行特定任务独立任务的简单生成器函数组成的容器
+
+For example:
+就像这样：
+
+You can now easily stack these functions together to make a processing pipeline.
+现在你可以很容易的将这些函数连起来创建一个处理管道
+
+For example, to find all log lines that contain the word python, you would just do this:
+ 比如，为了查找包含单词python的所有日志行，你可以这样做：
+
+If you want to extend the pipeline further, you can even feed the data in generator expressions.
+如果将来的时候你想扩展管道，你甚至可以在生成器表达式中包装数据
+
+For example, this version finds the number of bytes transferred and sums the total:
+ 比如，下面这个版本计算出传输的字节数并计算其总和
+
+Processing data in a pipelined manner works well for a wide variety of other problems, including parsing, reading from real-time data sources, periodic polling, and so on.
+以管道方式处理数据可以用来解决各类其他问题，包括解析，读取实时数据，定时轮询等
+
+In understanding the code, it is important to grasp that the yield statement acts as a kind of data producer whereas a for loop acts as a data consumer.
+为了理解上述代码，重点是要明白 yield 语句作为数据的生产者而 for 循环语句作为数据的消费者
+
+When the generators are stacked together, each yield feeds a single item of data to the next stage of the pipeline that is consuming it with iteration.
+ 当这些生成器被连在一起后，每个 yield 会将一个单独的数据元素传递给迭代处理管道的下一阶段
+
+In the last example, the sum() function is actually driving the entire program, pulling one item at a time out of the pipeline of generators.
+ 在例子最后部分， sum() 函数是最终的程序驱动者，每次从生成器管道中提取出一个元素
+
+One nice feature of this approach is that each generator function tends to be small and self-contained.
+这种方式一个非常好的特点是每个生成器函数很小并且都是独立的
+
+As such, they are easy to write and maintain.
+这样的话就很容易编写和维护它们了
+
+In many cases, they are so general purpose that they can be reused in other contexts.
+ 很多时候，这些函数如果比较通用的话可以在其他场景重复使用
+
+The resulting code that glues the components together also tends to read like a simple recipe that is easily understood.
+ 并且最终将这些组件组合起来的代码看上去非常简单，也很容易理解
+
+The memory efficiency of this approach can also not be overstated.
+使用这种方式的内存效率也不得不提
+
+The code shown would still work even if used on a massive directory of files.
+上述代码即便是在一个超大型文件目录中也能工作的很好
+
+In fact, due to the iterative nature of the processing, very little memory would be used at all.
+ 事实上，由于使用了迭代方式处理，代码运行过程中只需要很小很小的内存
+
+There is a bit of extreme subtlety involving the gen_concatenate() function.
+在调用 gen_concatenate() 函数的时候你可能会有些不太明白
+
+The purpose of this function is to concatenate input sequences together into one long sequence of lines.
+ 这个函数的目的是将输入序列拼接成一个很长的行序列
+
+The itertools.chain() function performs a similar function, but requires that all of the chained iterables be specified as arguments.
+ itertools.chain() 函数同样有类似的功能，但是它需要将所有可迭代对象最为参数传入
+
+In the case of this particular recipe, doing that would involve a statement such as lines = itertools.chain(*files), which would cause the gen_opener() generator to be fully consumed.
+ 在上面这个例子中，你可能会写类似这样的语句 lines = itertools.chain(*files) ， 使得 gen_opener() 生成器能被全部消费掉
+
+Since that generator is producing a sequence of open files that are immediately closed in the next iteration step, chain() can’t be used.
+ 但由于 gen_opener() 生成器每次生成一个打开过的文件， 等到下一个迭代步骤时文件就关闭了，因此 chain() 在这里不能这样使用
+
+The solution shown avoids this issue.
+ 上面的方案可以避免这种情况
+
+Also appearing in the gen_concatenate() function is the use of yield from to delegate to a subgenerator.
+gen_concatenate() 函数中出现过 yield from 语句，它将 yield 操作代理到父生成器上去
+
+The statement yield from it simply makes gen_concatenate() emit all of the values produced by the generator it.
+ 语句 yield from it 简单的返回生成器 it 所产生的所有值
+
+This is described further in “Flattening a Nested Sequence”.
+ 关于这个我们在4.14小节会有更进一步的描述
+
+Last, but not least, it should be noted that a pipelined approach doesn’t always work for every data handling problem.
+最后还有一点需要注意的是，管道方式并不是万能的
+
+Sometimes you just need to work with all of the data at once.
+ 有时候你想立即处理所有数据
+
+However, even in that case, using generator pipelines can be a way to logically break a problem down into a kind of workflow.
+ 然而，即便是这种情况，使用生成器管道也可以将这类问题从逻辑上变为工作流的处理方式
+
+David Beazley has written extensively about these techniques in his "Generator Tricks for Systems Programmers" tutorial presentation.
+David Beazley 在他的 Generator Tricks for Systems Programmers 教程中对于这种技术有非常深入的讲解
+
+Consult that for even more examples.
+可以参考这个教程获取更多的信息
+
+Flattening a Nested Sequence
+4.14 展开嵌套的序列¶
+
+You have a nested sequence that you want to flatten into a single list of values.
+你想将一个多层嵌套的序列展开成一个单层列表
+
+This is easily solved by writing a recursive generator function involving a yield from statement.
+可以写一个包含 yield from 语句的递归生成器来轻松解决这个问题
+
+For example:
+比如：
+
+In the code, the isinstance(x, Iterable) simply checks to see if an item is iterable.
+在上面代码中， isinstance(x, Iterable) 检查某个元素是否是可迭代的
+
+If so, yield from is used to emit all of its values as a kind of subroutine.
+ 如果是的话， yield from 就会返回所有子例程的值
+
+The end result is a single sequence of output with no nesting.
+最终返回结果就是一个没有嵌套的简单序列了
+
+The extra argument ignore_types and the check for not isinstance(x, ignore_types) is there to prevent strings and bytes from being interpreted as iterables and expanded as individual characters.
+额外的参数 ignore_types 和检测语句 isinstance(x, ignore_types) 用来将字符串和字节排除在可迭代对象外，防止将它们再展开成单个的字符
+
+This allows nested lists of strings to work in the way that most people would expect.
+ 这样的话字符串数组就能最终返回我们所期望的结果了
+
+For example:
+比如：
+
+The yield from statement is a nice shortcut to use if you ever want to write generators that call other generators as subroutines.
+语句 yield from 在你想在生成器中调用其他生成器作为子例程的时候非常有用
+
+If you don’t use it, you need to write code that uses an extra for loop.
+ 如果你不使用它的话，那么就必须写额外的 for 循环了
+
+For example:
+比如：
+
+Although it’s only a minor change, the yield from statement just feels better and leads to cleaner code.
+尽管只改了一点点，但是 yield from 语句看上去感觉更好，并且也使得代码更简洁清爽
+
+As noted, the extra check for strings and bytes is there to prevent the expansion of those types into individual characters.
+之前提到的对于字符串和字节的额外检查是为了防止将它们再展开成单个字符
+
+If there are other types that you don’t want expanded, you can supply a different value for the ignore_types argument.
+ 如果还有其他你不想展开的类型，修改参数 ignore_types 即可
+
+Finally, it should be noted that yield from has a more important role in advanced programs involving coroutines and generator-based concurrency.
+最后要注意的一点是， yield from 在涉及到基于协程和生成器的并发编程中扮演着更加重要的角色
+
+See “Using Generators As an Alternative to Threads” for another example.
+ 可以参考12.12小节查看另外一个例子
+
+Iterating in Sorted Order Over Merged Sorted Iterables
+4.15 顺序迭代合并后的排序迭代对象¶
+
+You have a collection of sorted sequences and you want to iterate over a sorted sequence of them all merged together.
+你有一系列排序序列，想将它们合并后得到一个排序序列并在上面迭代遍历
+
+The heapq.merge() function does exactly what you want.
+heapq.merge() 函数可以帮你解决这个问题
+
+For example:
+比如：
+
+The iterative nature of heapq.merge means that it never reads any of the supplied sequences all at once.
+heapq.merge 可迭代特性意味着它不会立马读取所有序列
+
+This means that you can use it on very long sequences with very little overhead.
+ 这就意味着你可以在非常长的序列中使用它，而不会有太大的开销
+
+For instance, here is an example of how you would merge two sorted files:
+ 比如，下面是一个例子来演示如何合并两个排序文件：
+
+It’s important to emphasize that heapq.merge() requires that all of the input sequences already be sorted.
+有一点要强调的是 heapq.merge() 需要所有输入序列必须是排过序的
+
+In particular, it does not first read all of the data into a heap or do any preliminary sorting.
+ 特别的，它并不会预先读取所有数据到堆栈中或者预先排序，也不会对输入做任何的排序检测
+
+Nor does it perform any kind of validation of the inputs to check if they meet the ordering requirements.
+ 它仅仅是检查所有序列的开始部分并返回最小的那个，这个过程一直会持续直到所有输入序列中的元素都被遍历完
+
+Replacing Infinite while Loops with an Iterator
+4.16 迭代器代替while无限循环¶
+
+You have code that uses a while loop to iteratively process data because it involves a function or some kind of unusual test condition that doesn’t fall into the usual iteration pattern.
+你在代码中使用 while 循环来迭代处理数据，因为它需要调用某个函数或者和一般迭代模式不同的测试条件
+
+A somewhat common scenario in programs involving I/O is to write code like this:
+一个常见的IO操作程序可能会想下面这样：
+
+Such code can often be replaced using iter(), as follows:
+这种代码通常可以使用 iter() 来代替，如下所示：
+
+If you’re a bit skeptical that it might work, you can try a similar example involving files.
+如果你怀疑它到底能不能正常工作，可以试验下一个简单的例子
+
+For example:
+比如：
+
+A little-known feature of the built-in iter() function is that it optionally accepts a zero-argument callable and sentinel (terminating) value as inputs.
+iter 函数一个鲜为人知的特性是它接受一个可选的 callable 对象和一个标记(结尾)值作为输入参数
+
+When used in this way, it creates an iterator that repeatedly calls the supplied callable over and over again until it returns the value given as a sentinel.
+ 当以这种方式使用的时候，它会创建一个迭代器， 这个迭代器会不断调用 callable 对象直到返回值和标记值相等为止
+
+This particular approach works well with certain kinds of repeatedly called functions, such as those involving I/O.
+这种特殊的方法对于一些特定的会被重复调用的函数很有效果，比如涉及到I/O调用的函数
+
+For example, if you want to read data in chunks from sockets or files, you usually have to repeatedly execute read() or recv() calls followed by an end-of-file test.
+ 举例来讲，如果你想从套接字或文件中以数据块的方式读取数据，通常你得要不断重复的执行 read() 或 recv() ， 并在后面紧跟一个文件结尾测试来决定是否终止
+
+This recipe simply takes these two features and combines them together into a single iter() call.
+这节中的方案使用一个简单的 iter() 调用就可以将两者结合起来了
+
+The use of lambda in the solution is needed to create a callable that takes no arguments, yet still supplies the desired size argument to recv() or read().
+ 其中 lambda 函数参数是为了创建一个无参的 callable 对象，并为 recv 或 read() 方法提供了 size 参数
+

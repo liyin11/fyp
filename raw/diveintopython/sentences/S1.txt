@@ -1,0 +1,93 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+1.3. Python on Mac OS X
+1.3. Mac OS X 上的 Python
+
+On Mac OS X, you have two choices for installing Python: install it, or don't install it.
+在 Mac OS X 上，对于安装 Python 有两种选择：安装或不安装
+
+You probably want to install it.
+您可能想要安装它
+
+Mac OS X 10.2 and later comes with a command-line version of Python preinstalled.
+Mac OS X 10.2 及其后续版本已经预装了一个 Python 的命令行版本
+
+If you are comfortable with the command line, you can use this version for the first third of the book.
+如果您习惯使用命令行，那么您可以使用它学完本书的三分之一
+
+However, the preinstalled version does not come with an XML parser, so when you get to the XML chapter, you'll need to install the full version.
+然而，预安装的版本不带 XML 解析器，所以当您学到 XML 的章节时，您会需要安装完整版
+
+Rather than using the preinstalled version, you'll probably want to install the latest version, which also comes with a graphical interactive shell.
+您还可以安装优于预装版本的最新的包含图形界面 Shell 的完整版本
+
+To use the preinstalled version of Python, follow these steps:
+使用预装的 Python 版本的步骤：
+
+Open the /Applications folder.
+打开 /Applications 文件夹
+
+Open the Utilities folder.
+打开 Utilities 文件夹
+
+Double-click Terminal to open a terminal window and get to a command line.
+双击 Terminal 打开一个终端进入命令行窗口
+
+Type python at the command prompt.
+在提示符下键入 python
+
+Try it out:
+试验:
+
+Follow these steps to download and install the latest version of Python:
+下面介绍下载并安装 Python 最新版本的过程:
+
+Download the MacPython-OSX disk image from http://homepages.cwi.nl/~jack/macpython/download.html.
+从 http://homepages.cwi.nl/~jack/macpython/download.html 下载 MacPython-OSX 磁盘镜像 
+
+If your browser has not already done so, double-click MacPython-OSX-2.3-1.dmg to mount the disk image on your desktop.
+下载完毕，双击 MacPython-OSX-2.3-1.dmg 将磁盘镜像挂载到桌面
+
+Double-click the installer, MacPython-OSX.pkg.
+双击安装程序 MacPython-OSX.pkg.
+
+The installer will prompt you for your administrative username and password.
+安装程序将提示要求您的管理员用户名和口令
+
+Step through the installer program.
+按照安装程序的提示一步步执行
+
+After installation is complete, close the installer and open the /Applications folder.
+安装完毕后，关闭安装程序，打开 /Applications 文件夹
+
+Open the MacPython-2.3 folder
+打开 MacPython-2.3 文件夹
+
+Double-click PythonIDE to launch Python.
+双击 PythonIDE 来运行 Python 
+
+The MacPython IDE should display a splash screen, then take you to the interactive shell.
+MacPython IDE 将显示启动画面将您带进交互 shell
+
+If the interactive shell does not appear, select Window->Python Interactive (Cmd-0).
+如果交互 shell 没有出现，选择 Window->Python Interactive (Cmd-0)
+
+The opening window will look something like this:
+您将看到类似如下的信息:
+
+Note that once you install the latest version, the pre-installed version is still present.
+请注意，安装完最新版本后，预装版本仍然存在
+
+If you are running scripts from the command line, you need to be aware which version of Python you are using.
+如果您从命令行运行脚本，那您需要知道正在使用的是哪一个版本的 Python 
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

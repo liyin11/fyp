@@ -1,0 +1,1197 @@
+Chapter 11. Network and Web Programming
+第十一章：网络与Web编程¶
+
+This chapter is about various topics related to using Python in networked and distributed applications.
+本章是关于在网络应用和分布式应用中使用的各种主题
+
+Topics are split between using Python as a client to access existing services and using Python to implement networked services as a server.
+主题划分为使用Python编写客户端程序来访问已有的服务，以及使用Python实现网络服务端程序
+
+Common techniques for writing code involving cooperating or communicating with interpreters are also given.
+也给出了一些常见的技术，用于编写涉及协同或通信的的代码
+
+Interacting with HTTP Services As a Client
+11.1 作为客户端与HTTP服务交互¶
+
+You need to access various services via HTTP as a client.
+你需要通过HTTP协议以客户端的方式访问多种服务
+
+For example, downloading data or interacting with a REST-based API.
+例如，下载数据或者与基于REST的API进行交互
+
+For simple things, it’s usually easy enough to use the urllib.request module.
+对于简单的事情来说，通常使用 urllib.request 模块就够了
+
+For example, to send a simple HTTP GET request to a remote service, do something like this:
+例如，发送一个简单的HTTP GET请求到远程的服务上，可以这样做：
+
+If you need to send the query parameters in the request body using a POST method, encode them and supply them as an optional argument to urlopen() like this:
+如果你需要使用POST方法在请求主体中发送查询参数，可以将参数编码后作为可选参数提供给 urlopen() 函数，就像这样：
+
+If you need to supply some custom HTTP headers in the outgoing request such as a change to the user-agent field, make a dictionary containing their value and create a Request instance and pass it to urlopen() like this:
+如果你需要在发出的请求中提供一些自定义的HTTP头，例如修改 user-agent 字段,可以创建一个包含字段值的字典，并创建一个Request实例然后将其传给 urlopen() ，如下：
+
+If your interaction with a service is more complicated than this, you should probably look at the requests library.
+如果需要交互的服务比上面的例子都要复杂，也许应该去看看 requests 库（https://pypi.python.org/pypi/requests）
+
+For example, here is equivalent requests code for the preceding operations:
+例如，下面这个示例采用requests库重新实现了上面的操作：
+
+A notable feature of requests is how it returns the resulting response content from a request.
+关于requests库，一个值得一提的特性就是它能以多种方式从请求中返回响应结果的内容
+
+As shown, the resp.text attribute gives you the Unicode decoded text of a request.
+从上面的代码来看， resp.text 带给我们的是以Unicode解码的响应文本
+
+However, if you access resp.content, you get the raw binary content instead.
+但是，如果去访问 resp.content ，就会得到原始的二进制数据
+
+On the other hand, if you access resp.json, then you get the response content interpreted as JSON.
+另一方面，如果访问 resp.json ，那么就会得到JSON格式的响应内容
+
+Here is an example of using requests to make a HEAD request and extract a few fields of header data from the response:
+下面这个示例利用 requests 库发起一个HEAD请求，并从响应中提取出一些HTTP头数据的字段：
+
+Here is a requests example that executes a login into the Python Package index using basic authentication:
+下面是一个利用requests通过基本认证登录Pypi的例子：
+
+Here is an example of using requests to pass HTTP cookies from one request to the next:
+下面是一个利用requests将HTTP cookies从一个请求传递到另一个的例子：
+
+Last, but not least, here is an example of using requests to upload content:
+最后但并非最不重要的一个例子是用requests上传内容：
+
+For really simple HTTP client code, using the built-in urllib module is usually fine.
+对于真的很简单HTTP客户端代码，用内置的 urllib 模块通常就足够了
+
+However, if you have to do anything other than simple GET or POST requests, you really can’t rely on its functionality.
+但是，如果你要做的不仅仅只是简单的GET或POST请求，那就真的不能再依赖它的功能了
+
+This is where a third-party module, such as requests, comes in handy.
+这时候就是第三方模块比如 requests 大显身手的时候了
+
+For example, if you decided to stick entirely with the standard library instead of a library like requests, you might have to implement your code using the low-level http.client module instead.
+例如，如果你决定坚持使用标准的程序库而不考虑像 requests 这样的第三方库，那么也许就不得不使用底层的 http.client 模块来实现自己的代码
+
+For example, this code shows how to execute a HEAD request:
+比方说，下面的代码展示了如何执行一个HEAD请求：
+
+Similarly, if you have to write code involving proxies, authentication, cookies, and other details, using urllib is awkward and verbose.
+同样地，如果必须编写涉及代理、认证、cookies以及其他一些细节方面的代码，那么使用 urllib 就显得特别别扭和啰嗦
+
+For example, here is a sample of code that authenticates to the Python package index:
+比方说，下面这个示例实现在Python包索引上的认证：
+
+Frankly, all of this is much easier in requests.
+坦白说，所有的这些操作在 requests 库中都变得简单的多
+
+Testing HTTP client code during development can often be frustrating because of all the tricky details you need to worry about (e.g., cookies, authentication, headers, encodings, etc.).
+在开发过程中测试HTTP客户端代码常常是很令人沮丧的，因为所有棘手的细节问题都需要考虑（例如cookies、认证、HTTP头、编码方式等）
+
+To do this, consider using the httpbin service.
+要完成这些任务，考虑使用httpbin服务（http://httpbin.org）
+
+This site receives requests and then echoes information back to you in the form a JSON response.
+这个站点会接收发出的请求，然后以JSON的形式将相应信息回传回来
+
+Here is an interactive example:
+下面是一个交互式的例子：
+
+Working with a site such as httpbin.org is often preferable to experimenting with a real site—especially if there’s a risk it might shut down your account after three failed login attempts (i.e., don’t try to learn how to write an HTTP authentication client by logging into your bank).
+在要同一个真正的站点进行交互前，先在 httpbin.org 这样的网站上做实验常常是可取的办法
+
+Although it’s not discussed here, requests provides support for many more advanced HTTP-client protocols, such as OAuth.
+尽管本节没有涉及， request 库还对许多高级的HTTP客户端协议提供了支持，比如OAuth
+
+The requests documentation is excellent (and frankly better than anything that could be provided in this short space).
+ requests 模块的文档（http://docs.python-requests.org)质量很高（坦白说比在这短短的一节的篇幅中所提供的任何信息都好），可以参考文档以获得更多地信息
+
+Creating a TCP Server
+11.2 创建TCP服务器¶
+
+You want to implement a server that communicates with clients using the TCP Internet protocol.
+你想实现一个服务器，通过TCP协议和客户端通信
+
+An easy way to create a TCP server is to use the socketserver library.
+创建一个TCP服务器的一个简单方法是使用 socketserver 库
+
+For example, here is a simple echo server:
+例如，下面是一个简单的应答服务器：
+
+In this code, you define a special handler class that implements a handle() method for servicing client connections.
+在这段代码中，你定义了一个特殊的处理类，实现了一个 handle() 方法，用来为客户端连接服务
+
+The request attribute is the underlying client socket and client_address has client address.
+ request 属性是客户端socket，client_address 有客户端地址
+
+To test the server, run it and then open a separate Python process that connects to it:
+为了测试这个服务器，运行它并打开另外一个Python进程连接这个服务器：
+
+In many cases, it may be easier to define a slightly different kind of handler.
+很多时候，可以很容易的定义一个不同的处理器
+
+Here is an example that uses the StreamRequestHandler base class to put a file-like interface on the underlying socket:
+下面是一个使用 StreamRequestHandler 基类将一个类文件接口放置在底层socket上的例子：
+
+socketserver makes it relatively easy to create simple TCP servers.
+socketserver 可以让我们很容易的创建简单的TCP服务器
+
+However, you should be aware that, by default, the servers are single threaded and can only serve one client at a time.
+ 但是，你需要注意的是，默认情况下这种服务器是单线程的，一次只能为一个客户端连接服务
+
+If you want to handle multiple clients, either instantiate a ForkingTCPServer or ThreadingTCPServer object instead.
+ 如果你想处理多个客户端，可以初始化一个 ForkingTCPServer 或者是 ThreadingTCPServer 对象
+
+For example:
+例如：
+
+One issue with forking and threaded servers is that they spawn a new process or thread on each client connection.
+使用fork或线程服务器有个潜在问题就是它们会为每个客户端连接创建一个新的进程或线程
+
+There is no upper bound on the number of allowed clients, so a malicious hacker could potentially launch a large number of simultaneous connections in an effort to make your server explode.
+ 由于客户端连接数是没有限制的，因此一个恶意的黑客可以同时发送大量的连接让你的服务器奔溃
+
+If this is a concern, you can create a pre-allocated pool of worker threads or processes.
+如果你担心这个问题，你可以创建一个预先分配大小的工作线程池或进程池
+
+To do this, you create an instance of a normal nonthreaded server, but then launch the serve_forever() method in a pool of multiple threads.
+ 你先创建一个普通的非线程服务器，然后在一个线程池中使用 serve_forever() 方法来启动它们
+
+Normally, a TCPServer binds and activates the underlying socket upon instantiation.
+一般来讲，一个 TCPServer 在实例化的时候会绑定并激活相应的 socket 
+
+However, sometimes you might want to adjust the underlying socket by setting options.
+ 不过，有时候你想通过设置某些选项去调整底下的 socket` ，可以设置参数 bind_and_activate=False 
+
+To do this, supply the bind_and_activate=False argument, like this:
+如下：
+
+The socket option shown is actually a very common setting that allows the server to rebind to a previously used port number.
+上面的 socket 选项是一个非常普遍的配置项，它允许服务器重新绑定一个之前使用过的端口号
+
+It’s actually so common that it’s a class variable that can be set on TCPServer.
+ 由于要被经常使用到，它被放置到类变量中，可以直接在 TCPServer 上面设置
+
+Set it before instantiating the server, as shown in this example:
+ 在实例化服务器的时候去设置它的值，如下所示：
+
+In the solution, two different handler base classes were shown (BaseRequestHandler and StreamRequestHandler).
+在上面示例中，我们演示了两种不同的处理器基类（ BaseRequestHandler 和 StreamRequestHandler ）
+
+The StreamRequestHandler class is actually a bit more flexible, and supports some features that can be enabled through the specification of additional class variables.
+ StreamRequestHandler 更加灵活点，能通过设置其他的类变量来支持一些新的特性
+
+For example:
+比如：
+
+Finally, it should be noted that most of Python’s higher-level networking modules (e.g., HTTP, XML-RPC, etc.) are built on top of the socketserver functionality.
+最后，还需要注意的是巨大部分Python的高层网络模块（比如HTTP、XML-RPC等）都是建立在 socketserver 功能之上
+
+That said, it is also not difficult to implement servers directly using the socket library as well.
+ 也就是说，直接使用 socket 库来实现服务器也并不是很难
+
+Here is a simple example of directly programming a server with Sockets:
+ 下面是一个使用 socket 直接编程实现的一个服务器简单例子：
+
+Creating a UDP Server
+11.3 创建UDP服务器¶
+
+You want to implement a server that communicates with clients using the UDP Internet protocol.
+你想实现一个基于UDP协议的服务器来与客户端通信
+
+As with TCP, UDP servers are also easy to create using the socketserver library.
+跟TCP一样，UDP服务器也可以通过使用 socketserver 库很容易的被创建
+
+For example, here is a simple time server:
+ 例如，下面是一个简单的时间服务器：
+
+As before, you define a special handler class that implements a handle() method for servicing client connections.
+跟之前一样，你先定义一个实现 handle() 特殊方法的类，为客户端连接服务
+
+The request attribute is a tuple that contains the incoming datagram and underlying socket object for the server.
+ 这个类的 request 属性是一个包含了数据报和底层socket对象的元组
+
+The client_address contains the client address.
+client_address 包含了客户端地址
+
+To test the server, run it and then open a separate Python process that sends messages to it:
+我们来测试下这个服务器，首先运行它，然后打开另外一个Python进程向服务器发送消息：
+
+A typical UDP server receives an incoming datagram (message) along with a client address.
+一个典型的UPD服务器接收到达的数据报(消息)和客户端地址
+
+If the server is to respond, it sends a datagram back to the client.
+如果服务器需要做应答， 它要给客户端回发一个数据报
+
+For transmission of datagrams, you should use the sendto() and recvfrom() methods of a socket.
+对于数据报的传送， 你应该使用socket的 sendto() 和 recvfrom() 方法
+
+Although the traditional send() and recv() methods also might work, the former two methods are more commonly used with UDP communication.
+ 尽管传统的 send() 和 recv() 也可以达到同样的效果， 但是前面的两个方法对于UDP连接而言更普遍
+
+Given that there is no underlying connection, UDP servers are often much easier to write than a TCP server.
+由于没有底层的连接，UPD服务器相对于TCP服务器来讲实现起来更加简单
+
+However, UDP is also inherently unreliable (e.g., no "connection" is established and messages might be lost).
+ 不过，UDP天生是不可靠的（因为通信没有建立连接，消息可能丢失）
+
+Thus, it would be up to you to figure out how to deal with lost messages.
+ 因此需要由你自己来决定该怎样处理丢失消息的情况
+
+That’s a topic beyond the scope of this book, but typically you might need to introduce sequence numbers, retries, timeouts, and other mechanisms to ensure reliability if it matters for your application.
+这个已经不在本书讨论范围内了， 不过通常来说，如果可靠性对于你程序很重要，你需要借助于序列号、重试、超时以及一些其他方法来保证
+
+UDP is often used in cases where the requirement of reliable delivery can be relaxed.
+ UDP通常被用在那些对于可靠传输要求不是很高的场合
+
+For instance, in real-time applications such as multimedia streaming and games where there is simply no option to go back in time and recover a lost packet (the program simply skips it and keeps moving forward).
+例如，在实时应用如多媒体流以及游戏领域， 无需返回恢复丢失的数据包（程序只需简单的忽略它并继续向前运行）
+
+The UDPServer class is single threaded, which means that only one request can be serviced at a time.
+UDPServer 类是单线程的，也就是说一次只能为一个客户端连接服务
+
+In practice, this is less of an issue with UDP than with TCP connections.
+ 实际使用中，这个无论是对于UDP还是TCP都不是什么大问题
+
+However, should you want concurrent operation, instantiate a ForkingUDPServer or ThreadingUDPServer object instead:
+ 如果你想要并发操作，可以实例化一个 ForkingUDPServer 或 ThreadingUDPServer 对象：
+
+Implementing a UDP server directly using sockets is also not difficult.
+直接使用 socket 来是想一个UDP服务器也不难，下面是一个例子：
+
+Generating a Range of IP Addresses from a CIDR Address
+11.4 通过CIDR地址生成对应的IP地址集¶
+
+You have a CIDR network address such as "123.45.67.89/27," and you want to generate a range of all the IP addresses that it represents (e.g., "123.45.67.64," "123.45.67.65," …, "123.45.67.95").
+你有一个CIDR网络地址比如“123.45.67.89/27”，你想将其转换成它所代表的所有IP （比如，“123.45.67.64”, “123.45.67.65”, …, “123.45.67.95”)）
+
+The ipaddress module can be easily used to perform such calculations.
+可以使用 ipaddress 模块很容易的实现这样的计算
+
+For example:
+例如：
+
+Network objects also allow indexing like arrays.
+Network 也允许像数组一样的索引取值，例如：
+
+In addition, you can perform operations such as a check for network membership:
+另外，你还可以执行网络成员检查之类的操作：
+
+An IP address and network address can be specified together as an IP interface.
+一个IP地址和网络地址能通过一个IP接口来指定，例如：
+
+The ipaddress module has classes for representing IP addresses, networks, and interfaces.
+ipaddress 模块有很多类可以表示IP地址、网络和接口
+
+This can be especially useful if you want to write code that needs to manipulate network addresses in some way (e.g., parsing, printing, validating, etc.).
+ 当你需要操作网络地址（比如解析、打印、验证等）的时候会很有用
+
+Be aware that there is only limited interaction between the ipaddress module and other network-related modules, such as the socket library.
+要注意的是，ipaddress 模块跟其他一些和网络相关的模块比如 socket 库交集很少
+
+In particular, it is usually not possible to use an instance of IPv4Address as a substitute for address string.
+ 所以，你不能使用 IPv4Address 的实例来代替一个地址字符串，你首先得显式的使用 str() 转换它
+
+Instead, you have to explicitly convert it using str() first.
+例如：
+
+See "An Introduction to the ipaddress Module" for more information and advanced usage.
+更多相关内容，请参考 An Introduction to the ipaddress Module
+
+Creating a Simple REST-Based Interface
+11.5 创建一个简单的REST接口¶
+
+You want to be able to control or interact with your program remotely over the network using a simple REST-based interface.
+你想使用一个简单的REST接口通过网络远程控制或访问你的应用程序，但是你又不想自己去安装一个完整的web框架
+
+One of the easiest ways to build REST-based interfaces is to create a tiny library based on the WSGI standard, as described in PEP 3333.
+构建一个REST风格的接口最简单的方法是创建一个基于WSGI标准（PEP 3333）的很小的库，下面是一个例子：
+
+To use this dispatcher, you simply write different handlers, such as the following:
+为了使用这个调度器，你只需要编写不同的处理器，就像下面这样：
+
+To test your server, you can interact with it using a browser or urllib.
+要测试下这个服务器，你可以使用一个浏览器或 urllib 和它交互
+
+For example:
+例如：
+
+In REST-based interfaces, you are typically writing programs that respond to common HTTP requests.
+在编写REST接口时，通常都是服务于普通的HTTP请求
+
+However, unlike a full-fledged website, you’re often just pushing data around.
+但是跟那些功能完整的网站相比，你通常只需要处理数据
+
+This data might be encoded in a variety of standard formats such as XML, JSON, or CSV.
+ 这些数据以各种标准格式编码，比如XML、JSON或CSV
+
+Although it seems minimal, providing an API in this manner can be a very useful thing for a wide variety of applications.
+ 尽管程序看上去很简单，但是以这种方式提供的API对于很多应用程序来讲是非常有用的
+
+For example, long-running programs might use a REST API to implement monitoring or diagnostics.
+例如，长期运行的程序可能会使用一个REST API来实现监控或诊断
+
+Big data applications can use REST to build a query/data extraction system.
+ 大数据应用程序可以使用REST来构建一个数据查询或提取系统
+
+REST can even be used to control hardware devices, such as robots, sensors, mills, or lightbulbs.
+ REST还能用来控制硬件设备比如机器人、传感器、工厂或灯泡
+
+What’s more, REST APIs are well supported by various client-side programming environments, such as Javascript, Android, iOS, and so forth.
+ 更重要的是，REST API已经被大量客户端编程环境所支持，比如Javascript, Android, iOS等
+
+Thus, having such an interface can be a way to encourage the development of more complex applications that interface with your code.
+ 因此，利用这种接口可以让你开发出更加复杂的应用程序
+
+For implementing a simple REST interface, it is often easy enough to base your code on the Python WSGI standard.
+为了实现一个简单的REST接口，你只需让你的程序代码满足Python的WSGI标准即可
+
+WSGI is supported by the standard library, but also by most third-party web frameworks.
+ WSGI被标准库支持，同时也被绝大部分第三方web框架支持
+
+Thus, if you use it, there is a lot of flexibility in how your code might be used later.
+ 因此，如果你的代码遵循这个标准，在后面的使用过程中就会更加的灵活
+
+In WSGI, you simply implement applications in the form of a callable that accepts this calling convention:
+在WSGI中，你可以像下面这样约定的方式以一个可调用对象形式来实现你的程序
+
+The environ argument is a dictionary that contains values inspired by the CGI interface provided by various web servers such as Apache [see Internet RFC 3875].
+environ 属性是一个字典，包含了从web服务器如Apache[参考Internet RFC 3875]提供的CGI接口中获取的值
+
+To extract different fields, you would write code like this:
+ 要将这些不同的值提取出来，你可以像这么这样写：
+
+A few common values are shown here.
+我们展示了一些常见的值
+
+environ['REQUEST_METHOD'] is the type of request (e.g., GET, POST, HEAD, etc.).
+environ['REQUEST_METHOD'] 代表请求类型如GET、POST、HEAD等
+
+environ['PATH_INFO'] is the path or the resource being requested.
+ environ['PATH_INFO'] 表示被请求资源的路径
+
+The call to cgi.FieldStorage() extracts supplied query parameters from the request and puts them into a dictionary-like object for later use.
+ 调用 cgi.FieldStorage() 可以从请求中提取查询参数并将它们放入一个类字典对象中以便后面使用
+
+The start_response argument is a function that must be called to initiate a response.
+start_response 参数是一个为了初始化一个请求对象而必须被调用的函数
+
+The first argument is the resulting HTTP status.
+ 第一个参数是返回的HTTP状态值，第二个参数是一个(名,值)元组列表，用来构建返回的HTTP头
+
+The second argument is a list of (name, value) tuples that make up the HTTP headers of the response.
+例如：
+
+To return data, an WSGI application must return a sequence of byte strings.
+为了返回数据，一个WSGI程序必须返回一个字节字符串序列
+
+This can be done using a list like this:
+可以像下面这样使用一个列表来完成：
+
+Alternatively, you can use yield:
+或者，你还可以使用 yield ：
+
+It’s important to emphasize that byte strings must be used in the result.
+这里要强调的一点是最后返回的必须是字节字符串
+
+If the response consists of text, it will need to be encoded into bytes first.
+如果返回结果包含文本字符串，必须先将其编码成字节
+
+Of course, there is no requirement that the returned value be text—you could easily write an application function that creates images.
+ 当然，并没有要求你返回的一点是文本，你可以很轻松的编写一个生成图片的程序
+
+Although WSGI applications are commonly defined as a function, as shown, an instance may also be used as long as it implements a suitable __call__() method.
+尽管WSGI程序通常被定义成一个函数，不过你也可以使用类实例来实现，只要它实现了合适的 __call__() 方法
+
+For example:
+例如：
+
+This technique has been used to create the PathDispatcher class in the recipe.
+我们已经在上面使用这种技术创建 PathDispatcher 类
+
+The dispatcher does nothing more than manage a dictionary mapping (method, path) pairs to handler functions.
+ 这个分发器仅仅只是管理一个字典，将(方法,路径)对映射到处理器函数上面
+
+When a request arrives, the method and path are extracted and used to dispatch to a handler.
+ 当一个请求到来时，它的方法和路径被提取出来，然后被分发到对应的处理器上面去
+
+In addition, any query variables are parsed and put into a dictionary that is stored as environ['params'] (this latter step is so common, it makes a lot of sense to simply do it in the dispatcher in order to avoid a lot of replicated code).
+ 另外，任何查询变量会被解析后放到一个字典中，以 environ['params'] 形式存储
+
+To use the dispatcher, you simply create an instance and register various WSGI-style application functions with it, as shown in the recipe.
+使用分发器的时候，你只需简单的创建一个实例，然后通过它注册各种WSGI形式的函数
+
+Writing these functions should be extremely straightforward, as you follow the rules concerning the start_response() function and produce output as byte strings.
+ 编写这些函数应该超级简单了，只要你遵循 start_response() 函数的编写规则，并且最后返回字节字符串即可
+
+One thing to consider when writing such functions is the careful use of string templates.
+当编写这种函数的时候还需注意的一点就是对于字符串模板的使用
+
+Nobody likes to work with code that is a tangled mess of print() functions, XML, and various formatting operations.
+ 没人愿意写那种到处混合着 print() 函数 、XML和大量格式化操作的代码
+
+In the solution, triple-quoted string templates are being defined and used internally.
+ 我们上面使用了三引号包含的预先定义好的字符串模板
+
+This particular approach makes it easier to change the format of the output later (just change the template as opposed to any of the code that uses it).
+ 这种方式的可以让我们很容易的在以后修改输出格式(只需要修改模板本身，而不用动任何使用它的地方)
+
+Finally, an important part of using WSGI is that nothing in the implementation is specific to a particular web server.
+最后，使用WSGI还有一个很重要的部分就是没有什么地方是针对特定web服务器的
+
+That is actually the whole idea—since the standard is server and framework neutral, you should be able to plug your application into a wide variety of servers.
+ 因为标准对于服务器和框架是中立的，你可以将你的程序放入任何类型服务器中
+
+In the recipe, the following code is used for testing:
+ 我们使用下面的代码测试测试本节代码：
+
+This will create a simple server that you can use to see if your implementation works.
+上面代码创建了一个简单的服务器，然后你就可以来测试下你的实现是否能正常工作
+
+Later on, when you’re ready to scale things up to a larger level, you will change this code to work with a particular server.
+ 最后，当你准备进一步扩展你的程序的时候，你可以修改这个代码，让它可以为特定服务器工作
+
+WSGI is an intentionally minimal specification.
+WSGI本身是一个很小的标准
+
+As such, it doesn’t provide any support for more advanced concepts such as authentication, cookies, redirection, and so forth.
+因此它并没有提供一些高级的特性比如认证、cookies、重定向等
+
+These are not hard to implement yourself.
+ 这些你自己实现起来也不难
+
+However, if you want just a bit more support, you might consider third-party libraries, such as WebOb or Paste.
+不过如果你想要更多的支持，可以考虑第三方库，比如 WebOb 或者 Paste
+
+Implementing a Simple Remote Procedure Call with XML-RPC
+11.6 通过XML-RPC实现简单的远程调用¶
+
+You want an easy way to execute functions or methods in Python programs running on remote machines.
+你想找到一个简单的方式去执行运行在远程机器上面的Python程序中的函数或方法
+
+Perhaps the easiest way to implement a simple remote procedure call mechanism is to use XML-RPC.
+实现一个远程方法调用的最简单方式是使用XML-RPC
+
+Here is an example of a simple server that implements a simple key-value store:
+下面我们演示一下一个实现了键-值存储功能的简单服务器：
+
+Here is how you would access the server remotely from a client:
+下面我们从一个客户端机器上面来访问服务器：
+
+XML-RPC can be an extremely easy way to set up a simple remote procedure call service.
+XML-RPC 可以让我们很容易的构造一个简单的远程调用服务
+
+All you need to do is create a server instance, register functions with it using the register_function() method, and then launch it using the serve_forever() method.
+你所需要做的仅仅是创建一个服务器实例， 通过它的方法 register_function() 来注册函数，然后使用方法 serve_forever() 启动它
+
+This recipe packages it up into a class to put all of the code together, but there is no such requirement.
+ 在上面我们将这些步骤放在一起写到一个类中，不够这并不是必须的
+
+For example, you could create a server by trying something like this:
+比如你还可以像下面这样创建一个服务器：
+
+Functions exposed via XML-RPC only work with certain kinds of data such as strings, numbers, lists, and dictionaries.
+XML-RPC暴露出来的函数只能适用于部分数据类型，比如字符串、整形、列表和字典
+
+For everything else, some study is required.
+ 对于其他类型就得需要做些额外的功课了
+
+For instance, if you pass an instance through XML-RPC, only its instance dictionary is handled:
+ 例如，如果你想通过 XML-RPC 传递一个对象实例，实际上只有他的实例字典被处理：
+
+Similarly, handling of binary data is a bit different than you expect:
+类似的，对于二进制数据的处理也跟你想象的不太一样：
+
+As a general rule, you probably shouldn’t expose an XML-RPC service to the rest of the world as a public API.
+一般来讲，你不应该将 XML-RPC 服务以公共API的方式暴露出来
+
+It often works best on internal networks where you might want to write simple distributed programs involving a few different machines.
+ 对于这种情况，通常分布式应用程序会是一个更好的选择
+
+A downside to XML-RPC is its performance.
+XML-RPC的一个缺点是它的性能
+
+The SimpleXMLRPCServer implementation is only single threaded, and wouldn’t be appropriate for scaling a large application, although it can be made to run multithreaded, as shown in “Creating a TCP Server”.
+SimpleXMLRPCServer 的实现是单线程的， 所以它不适合于大型程序，尽管我们在11.2小节中演示过它是可以通过多线程来执行的
+
+Also, since XML-RPC serializes all data as XML, it’s inherently slower than other approaches.
+ 另外，由于 XML-RPC 将所有数据都序列化为XML格式，所以它会比其他的方式运行的慢一些
+
+However, one benefit of this encoding is that it’s understood by a variety of other programming languages.
+ 但是它也有优点，这种方式的编码可以被绝大部分其他编程语言支持
+
+By using it, clients written in languages other than Python will be able to access your service.
+ 通过使用这种方式，其他语言的客户端程序都能访问你的服务
+
+Despite its limitations, XML-RPC is worth knowing about if you ever have the need to make a quick and dirty remote procedure call system.
+虽然XML-RPC有很多缺点，但是如果你需要快速构建一个简单远程过程调用系统的话，它仍然值得去学习的
+
+Oftentimes, the simple solution is good enough.
+ 有时候，简单的方案就已经足够了
+
+Communicating Simply Between Interpreters
+11.7 在不同的Python解释器之间交互¶
+
+You are running multiple instances of the Python interpreter, possibly on different machines, and you would like to exchange data between interpreters using messages.
+你在不同的机器上面运行着多个Python解释器实例，并希望能够在这些解释器之间通过消息来交换数据
+
+It is easy to communicate between interpreters if you use the multiprocessing.connection module.
+通过使用 multiprocessing.connection 模块可以很容易的实现解释器之间的通信
+
+Here is a simple example of writing an echo server:
+ 下面是一个简单的应答服务器例子：
+
+Here is a simple example of a client connecting to the server and sending various messages:
+然后客户端连接服务器并发送消息的简单示例：
+
+Unlike a low-level socket, messages are kept intact (each object sent using send() is received in its entirety with recv()).
+跟底层socket不同的是，每个消息会完整保存（每一个通过send()发送的对象能通过recv()来完整接受）
+
+In addition, objects are serialized using pickle.
+ 另外，所有对象会通过pickle序列化
+
+So, any object compatible with pickle can be sent or received over the connection.
+因此，任何兼容pickle的对象都能在此连接上面被发送和接受
+
+There are many packages and libraries related to implementing various forms of message passing, such as ZeroMQ, Celery, and so forth.
+目前有很多用来实现各种消息传输的包和函数库，比如ZeroMQ、Celery等
+
+As an alternative, you might also be inclined to implement a message layer on top of low-level sockets.
+ 你还有另外一种选择就是自己在底层socket基础之上来实现一个消息传输层
+
+However, sometimes you just want a simple solution.
+ 但是你想要简单一点的方案，那么这时候 multiprocessing.connection 就派上用场了
+
+The multiprocessing.connection library is just that—using a few simple primitives, you can easily connect interpreters together and have them exchange messages.
+ 仅仅使用一些简单的语句即可实现多个解释器之间的消息通信
+
+If you know that the interpreters are going to be running on the same machine, you can use alternative forms of networking, such as UNIX domain sockets or Windows named pipes.
+如果你的解释器运行在同一台机器上面，那么你可以使用另外的通信机制，比如Unix域套接字或者是Windows命名管道
+
+To create a connection using a UNIX domain socket, simply change the address to a filename such as this:
+ 要想使用UNIX域套接字来创建一个连接，只需简单的将地址改写一个文件名即可：
+
+To create a connection using a Windows named pipe, use a filename such as this:
+要想使用Windows命名管道来创建连接，只需像下面这样使用一个文件名：
+
+As a general rule, you would not be using multiprocessing to implement public-facing services.
+一个通用准则是，你不要使用 multiprocessing 来实现一个对外的公共服务
+
+The authkey parameter to Client() and Listener() is there to help authenticate the end points of the connection.
+ Client() 和 Listener() 中的 authkey 参数用来认证发起连接的终端用户
+
+Connection attempts with a bad key raise an exception.
+ 如果密钥不对会产生一个异常
+
+In addition, the module is probably best suited for long-running connections (not a large number of short connections).
+此外，该模块最适合用来建立长连接（而不是大量的短连接）， 例如，两个解释器之间启动后就开始建立连接并在处理某个问题过程中会一直保持连接状态
+
+Don’t use multiprocessing if you need more low-level control over aspects of the connection.
+如果你需要对底层连接做更多的控制，比如需要支持超时、非阻塞I/O或其他类似的特性， 你最好使用另外的库或者是在高层socket上来实现这些特性
+
+Implementing Remote Procedure Calls
+11.8 实现远程方法调用¶
+
+You want to implement simple remote procedure call (RPC) on top of a message passing layer, such as sockets, multiprocessing connections, or ZeroMQ.
+你想在一个消息传输层如 sockets 、multiprocessing connections 或 ZeroMQ 的基础之上实现一个简单的远程过程调用（RPC）
+
+RPC is easy to implement by encoding function requests, arguments, and return values using pickle, and passing the pickled byte strings between interpreters.
+将函数请求、参数和返回值使用pickle编码后，在不同的解释器直接传送pickle字节字符串，可以很容易的实现RPC
+
+Here is an example of a simple RPC handler that could be incorporated into a server:
+ 下面是一个简单的PRC处理器，可以被整合到一个服务器中去：
+
+To use this handler, you need to add it into a messaging server.
+要使用这个处理器，你需要将它加入到一个消息服务器中
+
+There are many possible choices, but the multiprocessing library provides a simple option.
+你有很多种选择， 但是使用 multiprocessing 库是最简单的
+
+Here is an example RPC server:
+下面是一个RPC服务器例子：
+
+To access the server from a remote client, you need to create a corresponding RPC proxy class that forwards requests.
+为了从一个远程客户端访问服务器，你需要创建一个对应的用来传送请求的RPC代理类
+
+For example:
+例如
+
+To use the proxy, you wrap it around a connection to the server.
+要使用这个代理类，你需要将其包装到一个服务器的连接上面，例如：
+
+It should be noted that many messaging layers (such as multiprocessing) already serialize data using pickle.
+要注意的是很多消息层（比如 multiprocessing ）已经使用pickle序列化了数据
+
+If this is the case, the pickle.dumps() and pickle.loads() calls can be eliminated.
+ 如果是这样的话，对 pickle.dumps() 和 pickle.loads() 的调用要去掉
+
+The general idea of the RPCHandler and RPCProxy classes is relatively simple.
+RPCHandler 和 RPCProxy 的基本思路是很比较简单的
+
+If a client wants to call a remote function, such as foo(1, 2, z=3), the proxy class creates a tuple ('foo', (1, 2), {'z': 3}) that contains the function name and arguments.
+ 如果一个客户端想要调用一个远程函数，比如 foo(1, 2, z=3) ,代理类创建一个包含了函数名和参数的元组 ('foo', (1, 2), {'z': 3}) 
+
+This tuple is pickled and sent over the connection.
+ 这个元组被pickle序列化后通过网络连接发生出去
+
+This is performed in the do_rpc() closure that’s returned by the __getattr__() method of RPCProxy.
+ 这一步在 RPCProxy 的 __getattr__() 方法返回的 do_rpc() 闭包中完成
+
+The server receives and unpickles the message, looks up the function name to see if it’s registered, and executes it with the given arguments.
+ 服务器接收后通过pickle反序列化消息，查找函数名看看是否已经注册过，然后执行相应的函数
+
+The result (or exception) is then pickled and sent back.
+ 执行结果(或异常)被pickle序列化后返回发送给客户端
+
+As shown, the example relies on multiprocessing for communication.
+我们的实例需要依赖 multiprocessing 进行通信
+
+However, this approach could be made to work with just about any other messaging system.
+ 不过，这种方式可以适用于其他任何消息系统
+
+For example, if you want to implement RPC over ZeroMQ, just replace the connection objects with an appropriate ZeroMQ socket object.
+例如，如果你想在ZeroMQ之上实习RPC， 仅仅只需要将连接对象换成合适的ZeroMQ的socket对象即可
+
+Given the reliance on pickle, security is a major concern (because a clever hacker can create messages that make arbitrary functions execute during unpickling).
+由于底层需要依赖pickle，那么安全问题就需要考虑了 （因为一个聪明的黑客可以创建特定的消息，能够让任意函数通过pickle反序列化后被执行）
+
+In particular, you should never allow RPC from untrusted or unauthenticated clients.
+ 因此你永远不要允许来自不信任或未认证的客户端的RPC
+
+In particular, you definitely don’t want to allow access from just any machine on the Internet—this should really only be used internally, behind a firewall, and not exposed to the rest of the world.
+特别是你绝对不要允许来自Internet的任意机器的访问， 这种只能在内部被使用，位于防火墙后面并且不要对外暴露
+
+As an alternative to pickle, you might consider the use of JSON, XML, or some other data encoding for serialization.
+作为pickle的替代，你也许可以考虑使用JSON、XML或一些其他的编码格式来序列化消息
+
+For example, this recipe is fairly easy to adapt to JSON encoding if you simply replace pickle.loads() and pickle.dumps() with json.loads() and json.dumps().
+ 例如，本机实例可以很容易的改写成JSON编码方案
+
+For example:
+还需要将 pickle.loads() 和 pickle.dumps() 替换成 json.loads() 和 json.dumps() 即可：
+
+One complicated factor in implementing RPC is how to handle exceptions.
+实现RPC的一个比较复杂的问题是如何去处理异常
+
+At the very least, the server shouldn’t crash if an exception is raised by a method.
+至少，当方法产生异常时服务器不应该奔溃
+
+However, the means by which the exception gets reported back to the client requires some study.
+ 因此，返回给客户端的异常所代表的含义就要好好设计了
+
+If you’re using pickle, exception instances can often be serialized and reraised in the client.
+ 如果你使用pickle，异常对象实例在客户端能被反序列化并抛出
+
+If you’re using some other protocol, you might have to think of an alternative approach.
+如果你使用其他的协议，那得想想另外的方法了
+
+At the very least, you would probably want to return the exception string in the response.
+ 不过至少，你应该在响应中返回异常字符串
+
+This is the approach taken in the JSON example.
+我们在JSON的例子中就是使用的这种方式
+
+For another example of an RPC implementation, it can be useful to look at the implementation of the SimpleXMLRPCServer and ServerProxy classes used in XML-RPC, as described in “Implementing a Simple Remote Procedure Call with XML-RPC”.
+对于其他的RPC实现例子，我推荐你看看在XML-RPC中使用的 SimpleXMLRPCServer 和 ServerProxy 的实现， 也就是11.6小节中的内容
+
+Authenticating Clients Simply
+11.9 简单的客户端认证¶
+
+You want a simple way to authenticate the clients connecting to servers in a distributed system, but don’t need the complexity of something like SSL.
+你想在分布式系统中实现一个简单的客户端连接认证功能，又不想像SSL那样的复杂
+
+Simple but effective authentication can be performed by implementing a connection handshake using the hmac module.
+可以利用 hmac 模块实现一个连接握手，从而实现一个简单而高效的认证过程
+
+Here is sample code:
+下面是代码示例：
+
+The general idea is that upon connection, the server presents the client with a message of random bytes (returned by os.urandom(), in this case).
+基本原理是当连接建立后，服务器给客户端发送一个随机的字节消息（这里例子中使用了 os.urandom() 返回值）
+
+The client and server both compute a cryptographic hash of the random data using hmac and a secret key known only to both ends.
+ 客户端和服务器同时利用hmac和一个只有双方知道的密钥来计算出一个加密哈希值
+
+The client sends its computed digest back to the server, where it is compared and used to decide whether or not to accept or reject the connection.
+然后客户端将它计算出的摘要发送给服务器， 服务器通过比较这个值和自己计算的是否一致来决定接受或拒绝连接
+
+Comparison of resulting digests should be performed using the hmac.compare_digest() function.
+摘要的比较需要使用 hmac.compare_digest() 函数
+
+This function has been written in a way that avoids timing-analysis-based attacks and should be used instead of a normal comparison operator (==).
+ 使用这个函数可以避免遭到时间分析攻击，不要用简单的比较操作符（==）
+
+To use these functions, you would incorporate them into existing networking or messaging code.
+为了使用这些函数，你需要将它集成到已有的网络或消息代码中
+
+For example, with sockets, the server code might look something like this:
+例如，对于sockets，服务器代码应该类似下面：
+
+A common use of hmac authentication is in internal messaging systems and interprocess communication.
+hmac 认证的一个常见使用场景是内部消息通信系统和进程间通信
+
+For example, if you are writing a system that involves multiple processes communicating across a cluster of machines, you can use this approach to make sure that only allowed processes are allowed to connect to one another.
+ 例如，如果你编写的系统涉及到一个集群中多个处理器之间的通信， 你可以使用本节方案来确保只有被允许的进程之间才能彼此通信
+
+In fact, HMAC-based authentication is used internally by the multiprocessing library when it sets up communication with subprocesses.
+ 事实上，基于 hmac 的认证被 multiprocessing 模块使用来实现子进程直接的通信
+
+It’s important to stress that authenticating a connection is not the same as encryption.
+还有一点需要强调的是连接认证和加密是两码事
+
+Subsequent communication on an authenticated connection is sent in the clear, and would be visible to anyone inclined to sniff the traffic (although the secret key known to both sides is never transmitted).
+ 认证成功之后的通信消息是以明文形式发送的，任何人只要想监听这个连接线路都能看到消息（尽管双方的密钥不会被传输）
+
+The authentication algorithm used by hmac is based on cryptographic hashing functions, such as MD5 and SHA-1, and is described in detail in IETF RFC 2104.
+hmac认证算法基于哈希函数如MD5和SHA-1，关于这个在IETF RFC 2104中有详细介绍
+
+Adding SSL to Network Services
+11.10 在网络服务中加入SSL¶
+
+You want to implement a network service involving sockets where servers and clients authenticate themselves and encrypt the transmitted data using SSL.
+你想实现一个基于sockets的网络服务，客户端和服务器通过SSL协议认证并加密传输的数据
+
+The ssl module provides support for adding SSL to low-level socket connections.
+ssl 模块能为底层socket连接添加SSL的支持
+
+In particular, the ssl.wrap_socket() function takes an existing socket and wraps an SSL layer around it.
+ ssl.wrap_socket() 函数接受一个已存在的socket作为参数并使用SSL层来包装它
+
+For example, here’s an example of a simple echo server that presents a server certificate to connecting clients:
+ 例如，下面是一个简单的应答服务器，能在服务器端为所有客户端连接做认证
+
+Here’s an interactive session that shows how to connect to the server as a client.
+下面我们演示一个客户端连接服务器的交互例子
+
+The client requires the server to present its certificate and verifies it:
+客户端会请求服务器来认证并确认连接：
+
+The problem with all of this low-level socket hacking is that it doesn’t play well with existing network services already implemented in the standard library.
+这种直接处理底层socket方式有个问题就是它不能很好的跟标准库中已存在的网络服务兼容
+
+For example, most server code (HTTP, XML-RPC, etc.) is actually based on the socketserver library.
+ 例如，绝大部分服务器代码（HTTP、XML-RPC等）实际上是基于 socketserver 库的
+
+Client code is also implemented at a higher level.
+ 客户端代码在一个较高层上实现
+
+It is possible to add SSL to existing services, but a slightly different approach is needed.
+我们需要另外一种稍微不同的方式来将SSL添加到已存在的服务中：
+
+First, for servers, SSL can be added through the use of a mixin class like this:
+首先，对于服务器而言，可以通过像下面这样使用一个mixin类来添加SSL：
+
+To use this mixin class, you can mix it with other server classes.
+为了使用这个mixin类，你可以将它跟其他服务器类混合
+
+For example, here’s an example of defining an XML-RPC server that operates over SSL:
+例如，下面是定义一个基于SSL的XML-RPC服务器例子：
+
+To use this server, you can connect using the normal xmlrpc.client module.
+使用这个服务器时，你可以使用普通的 xmlrpc.client 模块来连接它
+
+Just specify a https: in the URL.
+ 只需要在URL中指定 https: 即可，例如：
+
+One complicated issue with SSL clients is performing extra steps to verify the server certificate or to present a server with client credentials (such as a client certificate).
+对于SSL客户端来讲一个比较复杂的问题是如何确认服务器证书或为服务器提供客户端认证（比如客户端证书）
+
+Unfortunately, there seems to be no standardized way to accomplish this, so research is often required.
+ 不幸的是，暂时还没有一个标准方法来解决这个问题，需要自己去研究
+
+However, here is an example of how to set up a secure XML-RPC connection that verifies the server’s certificate:
+ 不过，下面给出一个例子，用来建立一个安全的XML-RPC连接来确认服务器证书：
+
+As shown, the server presents a certificate to the client and the client verifies it.
+服务器将证书发送给客户端，客户端来确认它的合法性
+
+This verification can go both directions.
+这种确认可以是相互的
+
+If the server wants to verify the client, change the server startup to the following:
+ 如果服务器想要确认客户端，可以将服务器启动代码修改如下：
+
+To make the XML-RPC client present its certificates, change the ServerProxy initialization to this:
+为了让XML-RPC客户端发送证书，修改 ServerProxy 的初始化代码如下：
+
+Getting this recipe to work will test your system configuration skills and understanding of SSL.
+试着去运行本节的代码能测试你的系统配置能力和理解SSL
+
+Perhaps the biggest challenge is simply getting the initial configuration of keys, certificates, and other matters in order.
+ 可能最大的挑战是如何一步步的获取初始配置key、证书和其他所需依赖
+
+To clarify what’s required, each endpoint of an SSL connection typically has a private key and a signed certificate file.
+我解释下到底需要啥，每一个SSL连接终端一般都会有一个私钥和一个签名证书文件
+
+The certificate file contains the public key and is presented to the remote peer on each connection.
+ 这个证书包含了公钥并在每一次连接的时候都会发送给对方
+
+For public servers, certificates are normally signed by a certificate authority such as Verisign, Equifax, or similar organization (something that costs money).
+ 对于公共服务器，它们的证书通常是被权威证书机构比如Verisign、Equifax或其他类似机构（需要付费的）签名过的
+
+To verify server certificates, clients maintain a file containing the certificates of trusted certificate authorities.
+ 为了确认服务器签名，客户端回保存一份包含了信任授权机构的证书列表文件
+
+For example, web browsers maintain certificates corresponding to the major certificate authorities and use them to verify the integrity of certificates presented by web servers during HTTPS connections.
+ 例如，web浏览器保存了主要的认证机构的证书，并使用它来为每一个HTTPS连接确认证书的合法性
+
+For the purposes of this recipe, you can create what’s known as a self-signed certificate.
+对本小节示例而言，只是为了测试，我们可以创建自签名的证书，下面是主要步骤：
+
+When creating the certificate, the values for the various fields are often arbitrary.
+在创建证书的时候，各个值的设定可以是任意的，但是”Common Name“的值通常要包含服务器的DNS主机名
+
+However, the "Common Name" field often contains the DNS hostname of servers.
+ 如果你只是在本机测试，那么就使用”localhost“，否则使用服务器的域名
+
+The server certificate in server_cert.pem looks similar:
+服务器证书文件server_cert.pem内容类似下面这样：
+
+In server-related code, both the private key and certificate file will be presented to the various SSL-related wrapping functions.
+在服务器端代码中，私钥和证书文件会被传给SSL相关的包装函数
+
+The certificate is what gets presented to clients.
+证书来自于客户端， 私钥应该在保存在服务器中，并加以安全保护
+
+In client-related code, a special file of valid certificate authorities needs to be maintained to verify the server’s certificate.
+在客户端代码中，需要保存一个合法证书授权文件来确认服务器证书
+
+If you have no such file, then at the very least, you can put a copy of the server’s certificate on the client machine and use that as a means for verification.
+ 如果你没有这个文件，你可以在客户端复制一份服务器的证书并使用它来确认
+
+During connection, the server will present its certificate, and then you’ll use the stored certificate you already have to verify that it’s correct.
+ 连接建立后，服务器会提供它的证书，然后你就能使用已经保存的证书来确认它是否正确
+
+Servers can also elect to verify the identity of clients.
+服务器也能选择是否要确认客户端的身份
+
+To do that, clients need to have their own private key and certificate key.
+如果要这样做的话，客户端需要有自己的私钥和认证文件
+
+The server would also need to maintain a file of trusted certificate authorities for verifying the client certificates.
+ 服务器也需要保存一个被信任证书授权文件来确认客户端证书
+
+If you intend to add SSL support to a network service for real, this recipe really only gives a small taste of how to set it up.
+如果你要在真实环境中为你的网络服务加上SSL的支持，这小节只是一个入门介绍而已
+
+You will definitely want to consult the documentation for more of the finer points.
+ 你还应该参考其他的文档，做好花费不少时间来测试它正常工作的准备
+
+Be prepared to spend a significant amount of time experimenting with it to get things to work.
+反正，就是得慢慢折腾吧~ ^_^
+
+Passing a Socket File Descriptor Between Processes
+11.11 进程间传递Socket文件描述符¶
+
+You have multiple Python interpreter processes running and you want to pass an open file descriptor from one interpreter to the other.
+你有多个Python解释器进程在同时运行，你想将某个打开的文件描述符从一个解释器传递给另外一个
+
+For instance, perhaps there is a server process that is responsible for receiving connections, but the actual servicing of clients is to be handled by a different interpreter.
+ 比如，假设有个服务器进程相应连接请求，但是实际的相应逻辑是在另一个解释器中执行的
+
+To pass a file descriptor between processes, you first need to connect the processes together.
+为了在多个进程中传递文件描述符，你首先需要将它们连接到一起
+
+On Unix machines, you might use a Unix domain socket, whereas on Windows, you could use a named pipe.
+在Unix机器上，你可能需要使用Unix域套接字， 而在windows上面你需要使用命名管道
+
+However, rather than deal with such low-level mechanics, it is often easier to use the multiprocessing module to set up such a connection.
+不过你无需真的需要去操作这些底层， 通常使用 multiprocessing 模块来创建这样的连接会更容易一些
+
+Once a connection is established, you can use the send_handle() and recv_handle() functions in multiprocessing.reduction to send file descriptors between processes.
+一旦一个连接被创建，你可以使用 multiprocessing.reduction 中的 send_handle() 和 recv_handle() 函数在不同的处理器直接传递文件描述符
+
+The following example illustrates the basics:
+ 下面的例子演示了最基本的用法：
+
+In this example, two processes are spawned and connected by a multiprocessing Pipe object.
+在这个例子中，两个进程被创建并通过一个 multiprocessing 管道连接起来
+
+The server process opens a socket and waits for client connections.
+ 服务器进程打开一个socket并等待客户端连接请求
+
+The worker process merely waits to receive a file descriptor on the pipe using recv_handle().
+ 工作进程仅仅使用 recv_handle() 在管道上面等待接收一个文件描述符
+
+When the server receives a connection, it sends the resulting socket file descriptor to the worker using send_handle().
+ 当服务器接收到一个连接，它将产生的socket文件描述符通过 send_handle() 传递给工作进程
+
+The worker takes over the socket and echoes data back to the client until the connection is closed.
+ 工作进程接收到socket后向客户端回应数据，然后此次连接关闭
+
+If you connect to the running server using Telnet or a similar tool, here is an example of what you might see:
+如果你使用Telnet或类似工具连接到服务器，下面是一个演示例子：
+
+The most important part of this example is the fact that the client socket accepted in the server is actually serviced by a completely different process.
+此例最重要的部分是服务器接收到的客户端socket实际上被另外一个不同的进程处理
+
+The server merely hands it off, closes it, and waits for the next connection.
+ 服务器仅仅只是将其转手并关闭此连接，然后等待下一个连接
+
+Passing file descriptors between processes is something that many programmers don’t even realize is possible.
+对于大部分程序员来讲在不同进程之间传递文件描述符好像没什么必要
+
+However, it can sometimes be a useful tool in building scalable systems.
+ 但是，有时候它是构建一个可扩展系统的很有用的工具
+
+For example, on a multicore machine, you could have multiple instances of the Python interpreter and use file descriptor passing to more evenly balance the number of clients being handled by each interpreter.
+例如，在一个多核机器上面， 你可以有多个Python解释器实例，将文件描述符传递给其它解释器来实现负载均衡
+
+The send_handle() and recv_handle() functions shown in the solution really only work with multiprocessing connections.
+send_handle() 和 recv_handle() 函数只能够用于 multiprocessing 连接
+
+Instead of using a pipe, you can connect interpreters as shown in “Communicating Simply Between Interpreters”, and it will work as long as you use UNIX domain sockets or Windows pipes.
+ 使用它们来代替管道的使用（参考11.7节），只要你使用的是Unix域套接字或Windows管道
+
+For example, you could implement the server and worker as completely separate programs to be started separately.
+ 例如，你可以让服务器和工作者各自以单独的程序来启动
+
+Here is the implementation of the server:
+下面是服务器的实现例子：
+
+To run this server, you would run a command such as python3 servermp.py /tmp/servconn 15000.
+运行这个服务器，只需要执行 python3 servermp.py /tmp/servconn 15000 ，下面是相应的工作者代码：
+
+To run the worker, you would type python3 workermp.py /tmp/servconn.
+要运行工作者，执行执行命令 python3 workermp.py /tmp/servconn . 效果跟使用Pipe()例子是完全一样的
+
+The resulting operation should be exactly the same as the example that used Pipe().
+ 
+
+Under the covers, file descriptor passing involves creating a UNIX domain socket and the sendmsg() method of sockets.
+文件描述符的传递会涉及到UNIX域套接字的创建和套接字的 sendmsg() 方法
+
+Since this technique is not widely known, here is a different implementation of the server that shows how to pass descriptors using sockets:
+ 不过这种技术并不常见，下面是使用套接字来传递描述符的另外一种实现：
+
+Here is an implementation of the worker using sockets:
+下面是使用套接字的工作者实现：
+
+If you are going to use file-descriptor passing in your program, it is advisable to read more about it in an advanced text, such as Unix Network Programming by W.
+如果你想在你的程序中传递文件描述符，建议你参阅其他一些更加高级的文档， 比如 Unix Network Programming by W. Richard Stevens  (Prentice  Hall,  1990) . 在Windows上传递文件描述符跟Unix是不一样的，建议你研究下 multiprocessing.reduction 中的源代码看看其工作原理
+
+Understanding Event-Driven I/O
+11.12 理解事件驱动的IO¶
+
+You have heard about packages based on "event-driven" or "asynchronous" I/O, but you’re not entirely sure what it means, how it actually works under the covers, or how it might impact your program if you use it.
+你应该已经听过基于事件驱动或异步I/O的包，但是你还不能完全理解它的底层到底是怎样工作的， 或者是如果使用它的话会对你的程序产生什么影响
+
+At a fundamental level, event-driven I/O is a technique that takes basic I/O operations (e.g., reads and writes) and converts them into events that must be handled by your program.
+事件驱动I/O本质上来讲就是将基本I/O操作（比如读和写）转化为你程序需要处理的事件
+
+For example, whenever data was received on a socket, it turns into a "receive" event that is handled by some sort of callback method or function that you supply to respond to it.
+ 例如，当数据在某个socket上被接受后，它会转换成一个 receive 事件，然后被你定义的回调方法或函数来处理
+
+As a possible starting point, an event-driven framework might start with a base class that implements a series of basic event handler methods like this:
+ 作为一个可能的起始点，一个事件驱动的框架可能会以一个实现了一系列基本事件处理器方法的基类开始：
+
+Instances of this class then get plugged into an event loop that looks like this:
+这个类的实例作为插件被放入类似下面这样的事件循环中：
+
+The key to the event loop is the select() call, which polls file descriptors for activity.
+事件循环的关键部分是 select() `` 调用，它会不断轮询文件描述符从而激活它
+
+Prior to calling select(), the event loop simply queries all of the handlers to see which ones want to receive or send.
+ 在调用 ``select() 之前，时间循环会询问所有的处理器来决定哪一个想接受或发生
+
+It then supplies the resulting lists to select().
+ 然后它将结果列表提供给 select() 
+
+As a result, select() returns the list of objects that are ready to receive or send.
+然后 select() 返回准备接受或发送的对象组成的列表
+
+The corresponding handle_receive() or handle_send() methods are triggered.
+ 然后相应的 handle_receive() 或 handle_send() 方法被触发
+
+To write applications, specific instances of EventHandler classes are created.
+编写应用程序的时候，EventHandler 的实例会被创建
+
+For example, here are two simple handlers that illustrate two UDP-based network services:
+例如，下面是两个简单的基于UDP网络服务的处理器例子：
+
+To test this code, you can try connecting to it from another Python interpreter:
+测试这段代码，试着从另外一个Python解释器连接它：
+
+Implementing a TCP server is somewhat more complex, since each client involves the instantiation of a new handler object.
+实现一个TCP服务器会更加复杂一点，因为每一个客户端都要初始化一个新的处理器对象
+
+Here is an example of a TCP echo client.
+ 下面是一个TCP应答客户端例子：
+
+The key to the TCP example is the addition and removal of clients from the handler list.
+TCP例子的关键点是从处理器中列表增加和删除客户端的操作
+
+On each connection, a new handler is created for the client and added to the list.
+ 对每一个连接，一个新的处理器被创建并加到列表中
+
+When the connection is closed, each client must take care to remove themselves from the list.
+当连接被关闭后，每个客户端负责将其从列表中删除
+
+Virtually all event-driven frameworks operate in a manner that is similar to that shown in the solution.
+实际上所有的事件驱动框架原理跟上面的例子相差无几
+
+The actual implementation details and overall software architecture might vary greatly, but at the core, there is a polling loop that checks sockets for activity and which performs operations in response.
+实际的实现细节和软件架构可能不一样， 但是在最核心的部分，都会有一个轮询的循环来检查活动socket，并执行响应操作
+
+One potential benefit of event-driven I/O is that it can handle a very large number of simultaneous connections without ever using threads or processes.
+事件驱动I/O的一个可能好处是它能处理非常大的并发连接，而不需要使用多线程或多进程
+
+That is, the select() call (or equivalent) can be used to monitor hundreds or thousands of sockets and respond to events occuring on any of them.
+ 也就是说，select() 调用（或其他等效的）能监听大量的socket并响应它们中任何一个产生事件的
+
+Events are handled one at a time by the event loop, without the need for any other concurrency primitives.
+ 在循环中一次处理一个事件，并不需要其他的并发机制
+
+The downside to event-driven I/O is that there is no true concurrency involved.
+事件驱动I/O的缺点是没有真正的同步机制
+
+If any of the event handler methods blocks or performs a long-running calculation, it blocks the progress of everything.
+ 如果任何事件处理器方法阻塞或执行一个耗时计算，它会阻塞所有的处理进程
+
+There is also the problem of calling out to library functions that aren’t written in an event-driven style.
+ 调用那些并不是事件驱动风格的库函数也会有问题，同样要是某些库函数调用会阻塞，那么也会导致整个事件循环停止
+
+Problems with blocking or long-running calculations can be solved by sending the work out to a separate thread or process.
+对于阻塞或耗时计算的问题可以通过将事件发送个其他单独的现场或进程来处理
+
+However, coordinating threads and processes with an event loop is tricky.
+ 不过，在事件循环中引入多线程和多进程是比较棘手的， 下面的例子演示了如何使用 concurrent.futures 模块来实现：
+
+In this code, the run() method is used to submit work to the pool along with a callback function that should be triggered upon completion.
+在代码中，run() 方法被用来将工作提交给回调函数池，处理完成后被激发
+
+The actual work is then submitted to a ThreadPoolExecutor instance.
+ 实际工作被提交给 ThreadPoolExecutor 实例
+
+However, a really tricky problem concerns the coordination of the computed result and the event loop.
+ 不过一个难点是协调计算结果和事件循环，为了解决它，我们创建了一对socket并将其作为某种信号量机制来使用
+
+To do this, a pair of sockets are created under the covers and used as a kind of signaling mechanism.
+ 当线程池完成工作后，它会执行类中的 _complete() 方法
+
+When work is completed by the thread pool, it executes the _complete() method in the class.
+ 这个方法再某个socket上写入字节之前会讲挂起的回调函数和结果放入队列中
+
+This method queues up the pending callback and result before writing a byte of data on one of these sockets.
+ fileno() 方法返回另外的那个socket
+
+The fileno() method is programmed to return the other socket.
+ 因此，这个字节被写入时，它会通知事件循环， 然后 handle_receive() 方法被激活并为所有之前提交的工作执行回调函数
+
+Thus, when this byte is written, it will signal to the event loop that something has happened.
+ 坦白讲，说了这么多连我自己都晕了
+
+The handle_receive() method, when triggered, will then execute all of the callback functions for previously submitted work.
+ 
+
+Here is a simple server that shows how to use the thread pool to carry out a long-running calculation:
+下面是一个简单的服务器，演示了如何使用线程池来实现耗时的计算：
+
+To try this server, simply run it and try some experiments with another Python program:
+运行这个服务器，然后试着用其它Python程序来测试它：
+
+You should be able to run this program repeatedly from many different windows and have it operate without stalling other programs, even though it gets slower and slower as the numbers get larger.
+你应该能在不同窗口中重复的执行这个程序，并且不会影响到其他程序，尽管当数字便越来越大时候它会变得越来越慢
+
+Having gone through this recipe, should you use its code?
+已经阅读完了这一小节，那么你应该使用这里的代码吗
+
+Probably not.
+也许不会
+
+Instead, you should look for a more fully developed framework that accomplishes the same task.
+你应该选择一个可以完成同样任务的高级框架
+
+However, if you understand the basic concepts presented here, you’ll understand the core techniques used to make such frameworks operate.
+ 不过，如果你理解了基本原理，你就能理解这些框架所使用的核心技术
+
+As an alternative to callback-based programming, event-driven code will sometimes use coroutines.
+ 作为对回调函数编程的替代，事件驱动编码有时候会使用到协程，参考12.12小节的一个例子
+
+Sending and Receiving Large Arrays
+11.13 发送与接收大型数组¶
+
+You want to send and receive large arrays of contiguous data across a network connection, making as few copies of the data as possible.
+你要通过网络连接发送和接受连续数据的大型数组，并尽量减少数据的复制操作
+
+The following functions utilize memoryviews to send and receive large arrays:
+下面的函数利用 memoryviews 来发送和接受大数组：
+
+To test the program, first create a server and client program connected over a socket.
+为了测试程序，首先创建一个通过socket连接的服务器和客户端程序：
+
+In the client (in a separate interpreter):
+在客户端（另外一个解释器中）：
+
+Now, the whole idea of this recipe is that you can blast a huge array through the connection.
+本节的目标是你能通过连接传输一个超大数组
+
+In this case, arrays might be created by the array module or perhaps numpy.
+这种情况的话，可以通过 array 模块或 numpy 模块来创建数组：
+
+In data-intensive distributed computing and parallel programming applications, it’s not uncommon to write programs that need to send/receive large chunks of data.
+在数据密集型分布式计算和平行计算程序中，自己写程序来实现发送/接受大量数据并不常见
+
+However, to do this, you somehow need to reduce the data down to raw bytes for use with low-level network functions.
+ 不过，要是你确实想这样做，你可能需要将你的数据转换成原始字节，以便给低层的网络函数使用
+
+You may also need to slice the data into chunks, since most network-related functions aren’t able to send or receive huge blocks of data entirely all at once.
+ 你可能还需要将数据切割成多个块，因为大部分和网络相关的函数并不能一次性发送或接受超大数据块
+
+One approach is to serialize the data in some way—possibly by converting into a byte string.
+一种方法是使用某种机制序列化数据——可能将其转换成一个字节字符串
+
+However, this usually ends up making a copy of the data.
+ 不过，这样最终会创建数据的一个复制
+
+Even if you do this piecemeal, your code still ends up making a lot of little copies.
+ 就算你只是零碎的做这些，你的代码最终还是会有大量的小型复制操作
+
+This recipe gets around this by playing a sneaky trick with memoryviews.
+本节通过使用内存视图展示了一些魔法操作
+
+Essentially, a memoryview is an overlay of an existing array.
+ 本质上，一个内存视图就是一个已存在数组的覆盖层
+
+Not only that, memoryviews can be cast to different types to allow interpretation of the data in a different manner.
+不仅仅是那样， 内存视图还能以不同的方式转换成不同类型来表现数据
+
+This is the purpose of the following statement:
+ 这个就是下面这个语句的目的：
+
+It takes an array arr and casts into a memoryview of unsigned bytes.
+它接受一个数组 arr并将其转换为一个无符号字节的内存视图
+
+In this form, the view can be passed to socket-related functions, such as sock.send() or send.recv_into().
+这个视图能被传递给socket相关函数， 比如 socket.send() 或 send.recv_into() 
+
+Under the covers, those methods are able to work directly with the memory region.
+ 在内部，这些方法能够直接操作这个内存区域
+
+For example, sock.send() sends data directly from memory without a copy.
+例如，sock.send() 直接从内存中发生数据而不需要复制
+
+send.recv_into() uses the memoryview as the input buffer for the receive operation.
+ send.recv_into() 使用这个内存区域作为接受操作的输入缓冲区
+
+The remaining complication is the fact that the socket functions may only work with partial data.
+剩下的一个难点就是socket函数可能只操作部分数据
+
+In general, it will take many different send() and recv_into() calls to transmit the entire array.
+ 通常来讲，我们得使用很多不同的 send() 和 recv_into() 来传输整个数组
+
+Not to worry.
+ 不用担心，每次操作后，视图会通过发送或接受字节数量被切割成新的视图
+
+After each operation, the view is sliced by the number of sent or received bytes to produce a new view.
+ 新的视图同样也是内存覆盖层
+
+The new view is also a memory overlay.
+因此，还是没有任何的复制操作
+
+One issue here is that the receiver has to know in advance how much data will be sent so that it can either preallocate an array or verify that it can receive the data into an existing array.
+这里有个问题就是接受者必须事先知道有多少数据要被发送， 以便它能预分配一个数组或者确保它能将接受的数据放入一个已经存在的数组中
+
+If this is a problem, the sender could always arrange to send the size first, followed by the array data.
+ 如果没办法知道的话，发送者就得先将数据大小发送过来，然后再发送实际的数组数据
+

@@ -1,0 +1,60 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+2.6. Testing Modules
+2.6. 测试模块
+
+Python modules are objects and have several useful attributes.
+所有的 Python 模块都是对象，并且有几个有用的属性
+
+You can use this to easily test your modules as you write them.
+您可以使用这些属性方便地测试您所编写的模块
+
+Here's an example that uses the if __name__ trick.
+下面是一个使用 if __name__ 的技巧
+
+Some quick observations before you get to the good stuff.
+在继续学习新东西之前，有几个重要的观察结果
+
+First, parentheses are not required around the if expression.
+首先，if 表达式无需使用圆括号括起来
+
+Second, the if statement ends with a colon, and is followed by indented code.
+其次，if 语句以冒号结束，紧跟其后的是缩进代码
+
+So why is this particular if statement a trick?
+那么为什么说这个特殊的 if 语句是一个技巧呢
+
+Modules are objects, and all modules have a built-in attribute __name__.
+模块是对象，并且所有的模块都有一个内置属性 __name__
+
+A module's __name__ depends on how you're using the module.
+一个模块的 __name__ 的值取决于您如何应用模块
+
+If you import the module, then __name__ is the module's filename, without a directory path or file extension.
+如果 import 模块，那么 __name__ 的值通常为模块的文件名，不带路径或者文件扩展名
+
+But you can also run the module directly as a standalone program, in which case __name__ will be a special default value, __main__.
+但是您也可以像一个标准的程序一样直接运行模块，在这种情况下 __name__ 的值将是一个特别的缺省值，__main__
+
+Knowing this, you can design a test suite for your module within the module itself by putting it in this if statement.
+只要了解到这一点，您就可以在模块内部为您的模块设计一个测试套件，在其中加入这个 if 语句
+
+When you run the module directly, __name__ is __main__, so the test suite executes.
+当您直接运行模块，__name__ 的值是 __main__，所以测试套件执行
+
+When you import the module, __name__ is something else, so the test suite is ignored.
+当您导入模块，__name__ 的值就是别的东西了，所以测试套件被忽略
+
+This makes it easier to develop and debug new modules before integrating them into a larger program.
+这样使得在将新的模块集成到一个大程序之前开发和调试容易多了
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

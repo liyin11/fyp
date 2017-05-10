@@ -1,0 +1,45 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+11.7. Handling redirects
+11.7. 处理重定向
+
+You can support permanent and temporary redirects using a different kind of custom URL handler.
+你可以使用两种不同的自定义 URL 处理器来处理永久重定向和临时重定向
+
+First, let's see why a redirect handler is necessary in the first place.
+首先，让我们来看看重定向处理的必要性
+
+This is suboptimal, but easy to fix.
+这不太理想，但很容易改进
+
+urllib2 doesn't behave exactly as you want it to when it encounters a 301 or 302, so let's override its behavior.
+实际上当 urllib2 遇到 301 或 302 时的行为并不是我们所期望的，所以让我们来覆盖这些行为
+
+How?
+如何实现呢
+
+With a custom URL handler, just like you did to handle 304 codes.
+用一个自定义的处理器，正如你处理 304 代码所做的
+
+This class is defined in openanything.py.
+这个类定义在 openanything.py
+
+So what has this bought us?
+这将为我们带来什么
+
+You can now build a URL opener with the custom redirect handler, and it will still automatically follow redirects, but now it will also expose the redirect status code.
+现在你可以用自定义重定向处理器构造一个的 URL 开启器，并且它依然能自动跟踪重定向，也能展示出重定向状态代码
+
+The same redirect handler can also tell you that you shouldn't update your address book.
+同样的重定向处理也可以告诉你不该 更新你的地址簿
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

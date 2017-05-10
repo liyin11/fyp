@@ -1,0 +1,87 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+7.6. Case study: Parsing Phone Numbers
+7.6. 个案研究：解析电话号码
+
+So far you've concentrated on matching whole patterns.
+迄今为止，你主要是匹配整个模式，不论是匹配上，还是没有匹配上
+
+Either the pattern matches, or it doesn't.
+但是正则表达式还有比这更为强大的功能
+
+But regular expressions are much more powerful than that.
+当一个模式确实 匹配上时，你可以获取模式中特定的片断，你可以发现具体匹配的位置
+
+This example came from another real-world problem I encountered, again from a previous day job.
+这个例子来源于我遇到的另一个现实世界的问题，也是在以前的工作中遇到的
+
+The problem: parsing an American phone number.
+问题是：解析一个美国电话号码
+
+The client wanted to be able to enter the number free-form (in a single field), but then wanted to store the area code, trunk, number, and optionally an extension separately in the company's database.
+客户要能 (在一个单一的区域中) 输入任何数字，然后存储区号、干线号、电话号和一个可选的独立的分机号到公司数据库里
+
+I scoured the Web and found many examples of regular expressions that purported to do this, but none of them were permissive enough.
+为此，我通过网络找了很多正则表达式的例子，但是没有一个能够完全满足我的要求
+
+Here are the phone numbers I needed to be able to accept:
+这里列举了我必须能够接受的电话号码：
+
+Quite a variety!
+格式可真够多的
+
+In each of these cases, I need to know that the area code was 800, the trunk was 555, and the rest of the phone number was 1212.
+我需要知道区号是 800，干线号是 555，电话号的其他数字为 1212
+
+For those with an extension, I need to know that the extension was 1234.
+对于那些有分机号的，我需要知道分机号为 1234
+
+Let's work through developing a solution for phone number parsing.
+让我们完成电话号码解析这个工作，这个例子展示第一步
+
+The next example shows the regular expression to handle separators between the different parts of the phone number.
+下一个例子展示正则表达式处理一个电话号码内部，采用不同分隔符的情况
+
+The next example shows the regular expression for handling phone numbers without separators.
+下一个例子展示正则表达式处理没有 分隔符的电话号码的情况
+
+The next example shows how to handle leading characters in phone numbers.
+下一个例子展示如何解决电话号码前面有其他字符的情况
+
+Let's back up for a second.
+让我们往回看一下
+
+So far the regular expressions have all matched from the beginning of the string.
+迄今为止，正则表达式总是从一个字符串的开始匹配
+
+But now you see that there may be an indeterminate amount of stuff at the beginning of the string that you want to ignore.
+但是现在你看到了，有很多不确定的情况需要你忽略
+
+Rather than trying to match it all just so you can skip over it, let's take a different approach: don't explicitly match the beginning of the string at all.
+与其尽力全部匹配它们，还不如全部跳过它们，让我们采用一个不同的方法：根本不显式地匹配字符串的开始
+
+This approach is shown in the next example.
+下面的这个例子展示这个方法
+
+See how quickly a regular expression can get out of control?
+看看一个正则表达式能够失控得多快
+
+Take a quick glance at any of the previous iterations.
+回头看看前面的例子，你还能区别它们么
+
+While you still understand the final answer;
+当你还能够理解这个最终答案的时候 (这个正则表达式就是最终答案
+
+(and it is the final answer;
+即使你发现一种它不能处理的情况，我也真的不想知道它了)，在你忘记为什么你这么选择之前，让我们把它写成松散正则表达式的形式
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

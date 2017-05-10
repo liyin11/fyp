@@ -1,0 +1,39 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+11.8. Handling compressed data
+11.8. 处理压缩数据
+
+The last important HTTP feature you want to support is compression.
+你要支持的最后一个重要的 HTTP 特性是压缩
+
+Many web services have the ability to send data compressed, which can cut down the amount of data sent over the wire by 60% or more.
+许多 web 服务具有发送压缩数据的能力，这可以将网络线路上传输的大量数据消减 60% 以上
+
+This is especially true of XML web services, since XML data compresses very well.
+这尤其适用于 XML web 服务，因为 XML 数据 的压缩率可以很高
+
+Servers won't give you compressed data unless you tell them you can handle it.
+服务器不会为你发送压缩数据，除非你告诉服务器你可以处理压缩数据
+
+“But wait!” I hear you cry.
+“等等!” 我听见你在叫
+
+“This could be even easier!” I know what you're thinking.
+“还能更简单吗!” 我知道你在想什么
+
+You're thinking that opener.open returns a file-like object, so why not cut out the StringIO middleman and just pass f directly to GzipFile?
+你在，既然 opener.open 返回一个类文件对象，那么为什么不抛弃中间件 StringIO 而通过 f 直接访问 GzipFile 呢
+
+OK, maybe you weren't thinking that, but don't worry about it, because it doesn't work.
+OK，或许你没想到，但是别为此担心，因为那样无法工作
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

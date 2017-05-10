@@ -1,0 +1,39 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+8.7. Quoting attribute values
+8.7. 给属性值加引号
+
+A common question on comp.lang.python is “I have a bunch of HTML documents with unquoted attribute values, and I want to properly quote them all.
+在 comp.lang.python 上的一个常见问题是 “我有一些 HTML 文档，属性值没有用引号括起来，并且我想将它们全部括起来，我怎么才能实现它呢
+
+How can I do this?”[4] (This is generally precipitated by a project manager who has found the HTML-is-a-standard religion joining a large project and proclaiming that all pages must validate against an HTML validator.
+” [7] (一般这种事情的出现是由于一个项目经理加入到一个大的项目中来，而他又抱着 HTML 是一种标记语言的教条，要求所有的页面必须能够通过 HTML 校验器的验证
+
+Unquoted attribute values are a common violation of the HTML standard.) Whatever the reason, unquoted attribute values are easy to fix by feeding HTML through BaseHTMLProcessor.
+而属性值没有被引号括起来是一种常见的对 HTML 规范的违反
+
+BaseHTMLProcessor consumes HTML (since it's descended from SGMLParser) and produces equivalent HTML, but the HTML output is not identical to the input.
+BaseHTMLProcessor 消费 (consume) HTML (因为它是从 SGMLParser 派生来的) 并生成等价的 HTML
+
+Tags and attribute names will end up in lowercase, even if they started in uppercase or mixed case, and attribute values will be enclosed in double quotes, even if they started in single quotes or with no quotes at all.
+但是这个 HTML 输出与输入的并不一样
+
+It is this last side effect that you can take advantage of.
+标记和属性名最终会转化为小写字母，即使它们可能以大写字母开始或是大小写的混合形式
+
+[4] All right, it's not that common a question.
+[7] 好吧，其实并不是那么普通的一个问题
+
+It's not up there with “What editor should I use to write Python code?” (answer: Emacs) or “Is Python better or worse than Perl?” (answer: “Perl is worse than Python because people wanted it worse.” -Larry Wall, 10/14/1998) But questions about HTML processing pop up in one form or another about once a month, and among those questions, this is a popular one.
+在那不都是问 “我应该用何种编辑器来写 Python 代码?” (回答：Emacs) 或 “Python 比 Perl 是好还是坏?” (回答：“Perl 比 Python 差，因为人们想让它差的.” ――Larry Wall，1998 年 10 月 14 日) 但是关于 HTML 处理的问题，或者这种提法或者另一种提法，大约一个月就要出现一次，在这些问题之中，这个问题是最常见的一个
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

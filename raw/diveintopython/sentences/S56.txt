@@ -1,0 +1,75 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+8.9. Putting it all together
+8.9. 全部放在一起
+
+It's time to put everything you've learned so far to good use.
+到了将迄今为止我们已经学过并用得不错的东西放在一起的时候了
+
+I hope you were paying attention.
+我希望您专心些
+
+Why bother?
+何必这么麻烦
+
+After all, there are only 3 Dialectizer classes;
+毕竟只有三个 Dialectizer 类
+
+why not just use a case statement?
+为什么不只使用一个 case 语句
+
+(Well, there's no case statement in Python, but why not just use a series of if statements?) One reason: extensibility.
+ (噢，在 Python 中不存在 case 语句，但为什么不只使用一组 if 语句呢
+
+The translate function has absolutely no idea how many Dialectizer classes you've defined.
+) 理由之一是：可扩展性
+
+Imagine if you defined a new FooDialectizer tomorrow;
+这个 translate 函数完全不用关心我们定义了多少个方言变换器类
+
+translate would work by passing 'foo' as the dialectName.
+设想一下，如果我们明天定义了一个新的 FooDialectizer 类，把 'foo' 作为 dialectName 传给 translate ，translate 也能工作
+
+Even better, imagine putting FooDialectizer in a separate module, and importing it with from module import.
+甚至会更好
+
+You've already seen that this includes it in globals(), so translate would still work without modification, even though FooDialectizer was in a separate file.
+设想将 FooDialectizer 放进一个独立的模块中，使用 from module import 将其导入
+
+Now imagine that the name of the dialect is coming from somewhere outside the program, maybe from a database or from a user-inputted value on a form.
+现在设想一下方言的名字是从程序外面的某个地方来的，也许是从一个数据库中，或从一个表格中的用户输入的值中
+
+You can use any number of server-side Python scripting architectures to dynamically generate web pages;
+您可以使用任意多的服务端 Python 脚本架构来动态地生成网页
+
+this function could take a URL and a dialect name (both strings) in the query string of a web page request, and output the “translated” web page.
+这个函数将接收在页面请求的查询字符串中的一个 URL 和一个方言名字 (两个都是字符串) ，接着输出 “翻译” 后的网页
+
+Finally, imagine a Dialectizer framework with a plug-in architecture.
+最后，设想一下，使用了一种插件架构的 Dialectizer 框架
+
+You could put each Dialectizer class in a separate file, leaving only the translate function in dialect.py.
+您可以将每个 Dialectizer 类放在分别放在独立的文件中，在 dialect.py 中只留下 translate 函数
+
+Assuming a consistent naming scheme, the translate function could dynamic import the appropiate class from the appropriate file, given nothing but the dialect name.
+假定一种统一的命名模式，这个 translate 函数能够动态地从合适的文件中导入合适的类，除了方言名字外什么都不用给出
+
+(You haven't seen dynamic importing yet, but I promise to cover it in a later chapter.) To add a new dialect, you would simply add an appropriately-named file in the plug-ins directory (like foodialect.py which contains the FooDialectizer class).
+(虽然您还没有看过动态导入，但我保证在后面的一章中会涉及到它
+
+Calling the translate function with the dialect name 'foo' would find the module foodialect.py, import the class FooDialectizer, and away you go.
+) 如果要加入一种新的方言，您只要在插件目录下加入一个以合适的名字命名的文件 (像 foodialect.py，它包含了 FooDialectizer 类) 
+
+And just like that, you've “translated” a web page, given nothing but a URL and the name of a dialect.
+像这样，我们已经 “翻译” 了一个网页，除了给出一个 URL 和一种方言的名字外，什么都没有给出
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

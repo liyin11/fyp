@@ -1,0 +1,81 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+10.6. Handling command-line arguments
+10.6. 处理命令行参数
+
+Python fully supports creating programs that can be run on the command line, complete with command-line arguments and either short- or long-style flags to specify various options.
+Python 完全支持创建在命令行运行的程序，也支持通过命令行参数和短长样式来指定各种选项
+
+None of this is XML-specific, but this script makes good use of command-line processing, so it seemed like a good time to mention it.
+这些并非是 XML 特定的，但是这样的脚本可以充分使用命令行处理，看来是时候提一下它了
+
+It's difficult to talk about command-line processing without understanding how command-line arguments are exposed to your Python program, so let's write a simple program to see them.
+如果不理解命令行参数如何暴露给你的 Python 程序，讨论命令行处理是很困难的，所以让我们先写个简单点的程序来看一下
+
+If you have not already done so, you can download this and other examples used in this book.
+如果您还没有下载本书附带的样例程序, 可以 下载本程序和其他样例程序
+
+So as you can see, you certainly have all the information passed on the command line, but then again, it doesn't look like it's going to be all that easy to actually use it.
+所以正如你所看到的，你确实拥有了命令行传入的所有信息，但是接下来要实际使用它似乎不那么容易
+
+For simple programs that only take a single argument and have no flags, you can simply use sys.argv[1] to access the argument.
+对于只是接收单个参数或者没有标记的简单程序，你可以简单地使用 sys.argv[1] 来访问参数
+
+There's no shame in this;
+这没有什么羞耻的
+
+I do it all the time.
+我一直都是这样做的
+
+For more complex programs, you need the getopt module.
+对更复杂的程序，你需要 getopt 模块
+
+So what are all those parameters you pass to the getopt function?
+那么你传给 getopt 函数的参数是什么呢
+
+Well, the first one is simply the raw list of command-line flags and arguments (not including the first element, the script name, which you already chopped off before calling the main function).
+好的，第一个只不过是一个命令行标志和参数的原始列表 (不包括第一个元素――脚本名称，你在调用 main 函数之前就已经将它砍掉了)
+
+The second is the list of short command-line flags that the script accepts.
+第二个是脚本接收的短命令行标志的一个列表
+
+The first and third flags are simply standalone flags;
+第一个标志和第三个标志是简单的独立标志
+
+you specify them or you don't, and they do things (print help) or change state (turn on debugging).
+你选择是否指定它们，它们做某些事情 (打印帮助) 或者改变状态 (打开调试)
+
+However, the second flag (-g) must be followed by an argument, which is the name of the grammar file to read from.
+但是，第二个标志 (-g) 必须 跟随一个参数――进行读取的语法文件的名称
+
+In fact it can be a filename or a web address, and you don't know which yet (you'll figure it out later), but you know it has to be something.
+实际上，它可以是一个文件名或者一个 web 地址，这时还不知道 (后面会确定)，但是你要知道必须要有些东西
+
+So you tell getopt this by putting a colon after the g in that second parameter to the getopt function.
+所以，你可以通过在 getopt 函数的第二个参数的 g 后面放一个冒号，来向 getopt 说明这一点
+
+To further complicate things, the script accepts either short flags (like -h) or long flags (like --help), and you want them to do the same thing.
+更复杂的是，这个脚本既接收短标志 (像 -h)，也接受长标志 (像 --help)，并且你要它们做相同的事
+
+This is what the third parameter to getopt is for, to specify a list of the long flags that correspond to the short flags you specified in the second parameter.
+这就是 getopt 第三个参数存在的原因：它是指定长标志的一个列表，其中的长标志是和第二个参数中指定的短标志相对应的
+
+Three things of note here:
+这里有三点要注意：
+
+Confused yet?
+被搞昏没
+
+Let's look at the actual code and see if it makes sense in context.
+让我们看一下真实的代码，看看它在上下文中是否起作用
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

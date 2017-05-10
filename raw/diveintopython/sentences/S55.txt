@@ -1,0 +1,75 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+8.8. Introducing dialect.py
+8.8. dialect.py 介绍
+
+Dialectizer is a simple (and silly) descendant of BaseHTMLProcessor.
+Dialectizer 是 BaseHTMLProcessor 的简单 (和拙劣) 的派生类
+
+It runs blocks of text through a series of substitutions, but it makes sure that anything within a ...</pre> block passes through unaltered.
+它通过一系列的替换对文本块进行了处理，但是它确保在 ...</pre> 块之间的任何东西不被修改地通过
+
+To handle the  blocks, you define two methods in Dialectizer: start_pre and end_pre.
+为了处理  块，我们在 Dialectizer 中定义了两个方法：start_pre 和 end_pre
+
+At this point, it's worth digging a little further into SGMLParser.
+到了这个地方，有必要对 SGMLParser 更深入一层
+
+I've claimed repeatedly (and you've taken it on faith so far) that SGMLParser looks for and calls specific methods for each tag, if they exist.
+我已经多次声明 (到目前为止您应已经把它做为信条了) ，就是 SGMLParser 查找每一个标记并且如果存在特定的方法就调用它们
+
+For instance, you just saw the definition of start_pre and end_pre to handle  and </pre>.
+例如：我们刚刚看到处理  和 </pre> 的 start_pre 和 end_pre 的定义
+
+But how does this happen?
+但这是如何发生的呢
+
+Well, it's not magic, it's just good Python coding.
+嗯，也没什么神奇的，只不过是出色的 Python 编码
+
+Now back to our regularly scheduled program: Dialectizer.
+现在回到我们已经计划好的程序：Dialectizer
+
+When you left, you were in the process of defining specific handler methods for  and </pre> tags.
+当我们跑题时，我们定义了特别的处理方法来处理  和 </pre> 标记
+
+There's only one thing left to do, and that is to process text blocks with the pre-defined substitutions.
+还有一件事没有做，那就是用我们预定义的替换处理来处理文本块
+
+For that, you need to override the handle_data method.
+为了实现它，我们需要覆盖 handle_data 方法
+
+You're close to completely understanding Dialectizer.
+我们已经接近了对 Dialectizer 的全面理解
+
+The only missing link is the nature of the text substitutions themselves.
+唯一缺少的一个环节是文本替换的特性
+
+If you know any Perl, you know that when complex text substitutions are required, the only real solution is regular expressions.
+如果您知道点 Perl，您就会知道当需要复杂的文本替换时，唯一有效的解决方法就是正则表达式
+
+The classes later in dialect.py define a series of regular expressions that operate on the text between the HTML tags.
+在 dialect.py 文件后面的几个类中定义了一连串的正则表达式来操作 HTML 标记中的文本
+
+But you just had a whole chapter on regular expressions.
+我们已经学习过了正则表达式中的所有字符
+
+You don't really want to slog through regular expressions again, do you?
+我们不必重复学习正则表达式的艰难历程了，不是吗
+
+God knows I don't.
+上帝知道我反正不需要
+
+I think you've learned enough for one chapter.
+我想现在这章您已经学得差不多了
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

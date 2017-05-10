@@ -1,0 +1,1626 @@
+Chapter 9. Metaprogramming
+第九章：元编程¶
+
+One of the most important mantras of software development is "don’t repeat yourself." That is, any time you are faced with a problem of creating highly repetitive code (or cutting or pasting source code), it often pays to look for a more elegant solution.
+软件开发领域中最经典的口头禅就是“don’t repeat yourself”
+
+In Python, such problems are often solved under the category of "metaprogramming." In a nutshell, metaprogramming is about creating functions and classes whose main goal is to manipulate code (e.g., modifying, generating, or wrapping existing code).
+ 也就是说，任何时候当你的程序中存在高度重复(或者是通过剪切复制)的代码时，都应该想想是否有更好的解决方案
+
+The main features for this include decorators, class decorators, and metaclasses.
+ 在Python当中，通常都可以通过元编程来解决这类问题
+
+However, a variety of other useful topics—including signature objects, execution of code with exec(), and inspecting the internals of functions and classes—enter the picture.
+ 简而言之，元编程就是关于创建操作源代码(比如修改、生成或包装原来的代码)的函数和类
+
+The main purpose of this chapter is to explore various metaprogramming techniques and to give examples of how they can be used to customize the behavior of Python to your own whims.
+ 主要技术是使用装饰器、类装饰器和元类
+
+Putting a Wrapper Around a Function
+9.1 在函数上添加包装器¶
+
+You want to put a wrapper layer around a function that adds extra processing (e.g., logging, timing, etc.).
+你想在函数上添加一个包装器，增加额外的操作处理(比如日志、计时等)
+
+If you ever need to wrap a function with extra code, define a decorator function.
+如果你想使用额外的代码包装一个函数，可以定义一个装饰器函数，例如：
+
+Here is an example of using the decorator:
+下面是使用装饰器的例子：
+
+A decorator is a function that accepts a function as input and returns a new function as output.
+一个装饰器就是一个函数，它接受一个函数作为参数并返回一个新的函数
+
+Whenever you write code like this:
+ 当你像下面这样写：
+
+it’s the same as if you had performed these separate steps:
+跟像下面这样写其实效果是一样的：
+
+As an aside, built-in decorators such as @staticmethod, @classmethod, and @property work in the same way.
+顺便说一下，内置的装饰器比如 @staticmethod, @classmethod,@property 原理也是一样的
+
+For example, these two code fragments are equivalent:
+ 例如，下面这两个代码片段是等价的：
+
+The code inside a decorator typically involves creating a new function that accepts any arguments using *args and **kwargs, as shown with the wrapper() function in this recipe.
+在上面的 wrapper() 函数中， 装饰器内部定义了一个使用 *args 和 **kwargs 来接受任意参数的函数
+
+Inside this function, you place a call to the original input function and return its result.
+ 在这个函数里面调用了原始函数并将其结果返回，不过你还可以添加其他额外的代码(比如计时)
+
+However, you also place whatever extra code you want to add (e.g., timing).
+ 然后这个新的函数包装器被作为结果返回来代替原始函数
+
+It’s critical to emphasize that decorators generally do not alter the calling signature or return value of the function being wrapped.
+需要强调的是装饰器并不会修改原始函数的参数签名以及返回值
+
+The use of *args and **kwargs is there to make sure that any input arguments can be accepted.
+ 使用 *args 和 **kwargs 目的就是确保任何参数都能适用
+
+The return value of a decorator is almost always the result of calling func(*args, **kwargs), where func is the original unwrapped function.
+ 而返回结果值基本都是调用原始函数 func(*args, **kwargs) 的返回结果，其中func就是原始函数
+
+When first learning about decorators, it is usually very easy to get started with some simple examples, such as the one shown.
+刚开始学习装饰器的时候，会使用一些简单的例子来说明，比如上面演示的这个
+
+However, if you are going to write decorators for real, there are some subtle details to consider.
+ 不过实际场景使用时，还是有一些细节问题要注意的
+
+For example, the use of the decorator @wraps(func) in the solution is an easy to forget but important technicality related to preserving function metadata, which is described in the next recipe.
+ 比如上面使用 @wraps(func) 注解是很重要的， 它能保留原始函数的元数据(下一小节会讲到)，新手经常会忽略这个细节
+
+The next few recipes that follow fill in some details that will be important if you wish to write decorator functions of your own.
+ 接下来的几个小节我们会更加深入的讲解装饰器函数的细节问题，如果你想构造你自己的装饰器函数，需要认真看一下
+
+Preserving Function Metadata When Writing Decorators
+9.2 创建装饰器时保留函数元信息¶
+
+You’ve written a decorator, but when you apply it to a function, important metadata such as the name, doc string, annotations, and calling signature are lost.
+你写了一个装饰器作用在某个函数上，但是这个函数的重要的元信息比如名字、文档字符串、注解和参数签名都丢失了
+
+Whenever you define a decorator, you should always remember to apply the @wraps decorator from the functools library to the underlying wrapper function.
+任何时候你定义装饰器的时候，都应该使用 functools 库中的 @wraps 装饰器来注解底层包装函数
+
+For example:
+例如：
+
+Here is an example of using the decorator and examining the resulting function metadata:
+下面我们使用这个被包装后的函数并检查它的元信息：
+
+Copying decorator metadata is an important part of writing decorators.
+在编写装饰器的时候复制元信息是一个非常重要的部分
+
+If you forget to use @wraps, you’ll find that the decorated function loses all sorts of useful information.
+如果你忘记了使用 @wraps ， 那么你会发现被装饰函数丢失了所有有用的信息
+
+For instance, if omitted, the metadata in the last example would look like this:
+比如如果忽略 @wraps 后的效果是下面这样的：
+
+An important feature of the @wraps decorator is that it makes the wrapped function available to you in the __wrapped__ attribute.
+@wraps 有一个重要特征是它能让你通过属性 __wrapped__ 直接访问被包装函数
+
+For example, if you want to access the wrapped function directly, you could do this:
+例如:
+
+The presence of the __wrapped__ attribute also makes decorated functions properly expose the underlying signature of the wrapped function.
+__wrapped__ 属性还能让被装饰函数正确暴露底层的参数签名信息
+
+For example:
+例如：
+
+One common question that sometimes arises is how to make a decorator that directly copies the calling signature of the original function being wrapped (as opposed to using *args and **kwargs).
+一个很普遍的问题是怎样让装饰器去直接复制原始函数的参数签名信息， 如果想自己手动实现的话需要做大量的工作，最好就简单的使用 __wrapped__ 装饰器
+
+In general, this is difficult to implement without resorting to some trick involving the generator of code strings and exec().
+ 通过底层的 __wrapped__ 属性访问到函数签名信息
+
+Frankly, you’re usually best off using @wraps and relying on the fact that the underlying function signature can be propagated by access to the underlying __wrapped__ attribute.
+更多关于签名的内容可以参考9.16小节
+
+Unwrapping a Decorator
+9.3 解除一个装饰器¶
+
+A decorator has been applied to a function, but you want to "undo" it, gaining access to the original unwrapped function.
+一个装饰器已经作用在一个函数上，你想撤销它，直接访问原始的未包装的那个函数
+
+Assuming that the decorator has been implemented properly using @wraps (see “Preserving Function Metadata When Writing Decorators”), you can usually gain access to the original function by accessing the __wrapped__ attribute.
+假设装饰器是通过 @wraps (参考9.2小节)来实现的，那么你可以通过访问 __wrapped__ 属性来访问原始函数：
+
+Gaining direct access to the unwrapped function behind a decorator can be useful for debugging, introspection, and other operations involving functions.
+直接访问未包装的原始函数在调试、内省和其他函数操作时是很有用的
+
+However, this recipe only works if the implementation of a decorator properly copies metadata using @wraps from the functools module or sets the __wrapped__ attribute directly.
+ 但是我们这里的方案仅仅适用于在包装器中正确使用了 @wraps 或者直接设置了 __wrapped__ 属性的情况
+
+If multiple decorators have been applied to a function, the behavior of accessing __wrapped__ is currently undefined and should probably be avoided.
+如果有多个包装器，那么访问 __wrapped__ 属性的行为是不可预知的，应该避免这样做
+
+In Python 3.3, it bypasses all of the layers.
+ 在Python3.3中，它会略过所有的包装层，比如，假如你有如下的代码：
+
+Here is what happens when you call the decorated function and the original function through __wrapped__:
+下面我们在Python3.3下测试：
+
+However, this behavior has been reported as a bug (see http://bugs.python.org/issue17482) and may be changed to explose the proper decorator chain in a future release.
+下面我们在Python3.4下测试：
+
+Last, but not least, be aware that not all decorators utilize @wraps, and thus, they may not work as described.
+最后要说的是，并不是所有的装饰器都使用了 @wraps ，因此这里的方案并不全部适用
+
+In particular, the built-in decorators @staticmethod and @classmethod create descriptor objects that don’t follow this convention (instead, they store the original function in a __func__ attribute).
+ 特别的，内置的装饰器 @staticmethod 和 @classmethod 就没有遵循这个约定 (它们把原始函数存储在属性 __func__ 中)
+
+Defining a Decorator That Takes Arguments
+9.4 定义一个带参数的装饰器¶
+
+You want to write a decorator function that takes arguments.
+你想定义一个可以接受参数的装饰器
+
+Let’s illustrate the process of accepting arguments with an example.
+我们用一个例子详细阐述下接受参数的处理过程
+
+Suppose you want to write a decorator that adds logging to a function, but allows the user to specify the logging level and other details as arguments.
+ 假设你想写一个装饰器，给函数添加日志功能，当时允许用户指定日志的级别和其他的选项
+
+Here is how you might define the decorator:
+ 下面是这个装饰器的定义和使用示例：
+
+On first glance, the implementation looks tricky, but the idea is relatively simple.
+初看起来，这种实现看上去很复杂，但是核心思想很简单
+
+The outermost function logged() accepts the desired arguments and simply makes them available to the inner functions of the decorator.
+ 最外层的函数 logged() 接受参数并将它们作用在内部的装饰器函数上面
+
+The inner function decorate() accepts a function and puts a wrapper around it as normal.
+ 内层的函数 decorate() 接受一个函数作为参数，然后在函数上面放置一个包装器
+
+The key part is that the wrapper is allowed to use the arguments passed to logged().
+ 这里的关键点是包装器是可以使用传递给 logged() 的参数的
+
+Writing a decorator that takes arguments is tricky because of the underlying calling sequence involved.
+定义一个接受参数的包装器看上去比较复杂主要是因为底层的调用序列
+
+Specifically, if you have code like this:
+特别的，如果你有下面这个代码：
+
+The decoration process evaluates as follows:
+装饰器处理过程跟下面的调用是等效的;
+
+Carefully observe that the result of decorator(x, y, z) must be a callable which, in turn, takes a function as input and wraps it.
+decorator(x, y, z) 的返回结果必须是一个可调用对象，它接受一个函数作为参数并包装它， 可以参考9.7小节中另外一个可接受参数的包装器例子
+
+Defining a Decorator with User Adjustable Attributes
+9.5 可自定义属性的装饰器¶
+
+You want to write a decorator function that wraps a function, but has user adjustable attributes that can be used to control the behavior of the decorator at runtime.
+你想写一个装饰器来包装一个函数，并且允许用户提供参数在运行时控制装饰器行为
+
+Here is a solution that expands on the last recipe by introducing accessor functions that change internal variables through the use of nonlocal variable declarations.
+引入一个访问函数，使用 nolocal 来修改内部变量
+
+The accessor functions are then attached to the wrapper function as function attributes.
+ 然后这个访问函数被作为一个属性赋值给包装函数
+
+Here is an interactive session that shows the various attributes being changed after definition:
+下面是交互环境下的使用例子：
+
+The key to this recipe lies in the accessor functions [e.g., set_message() and set_level()] that get attached to the wrapper as attributes.
+这一小节的关键点在于访问函数(如 set_message() 和 set_level() )，它们被作为属性赋给包装器
+
+Each of these accessors allows internal parameters to be adjusted through the use of nonlocal assignments.
+ 每个访问函数允许使用 nonlocal 来修改函数内部的变量
+
+An amazing feature of this recipe is that the accessor functions will propagate through multiple levels of decoration (if all of your decorators utilize @functools.wraps).
+还有一个令人吃惊的地方是访问函数会在多层装饰器间传播(如果你的装饰器都使用了 @functools.wraps 注解)
+
+For example, suppose you introduced an additional decorator, such as the @timethis decorator from “Preserving Function Metadata When Writing Decorators”, and wrote code like this:
+ 例如，假设你引入另外一个装饰器，比如9.2小节中的 @timethis ，像下面这样：
+
+You’ll find that the accessor methods still work:
+你会发现访问函数依旧有效：
+
+You’ll also find that it all still works exactly the same way if the decorators are composed in the opposite order, like this:
+你还会发现即使装饰器像下面这样以相反的方向排放，效果也是一样的：
+
+Although it’s not shown, accessor functions to return the value of various settings could also be written just as easily by adding extra code such as this:
+还能通过使用lambda表达式代码来让访问函数的返回不同的设定值：
+
+One extremely subtle facet of this recipe is the choice to use accessor functions in the first place.
+一个比较难理解的地方就是对于访问函数的首次使用
+
+For example, you might consider an alternative formulation solely based on direct access to function attributes like this:
+例如，你可能会考虑另外一个方法直接访问函数的属性，如下：
+
+This approach would work to a point, but only if it was the topmost decorator.
+这个方法也可能正常工作，但前提是它必须是最外层的装饰器才行
+
+If you had another decorator applied on top (such as the @timethis example), it would shadow the underlying attributes and make them unavailable for modification.
+ 如果它的上面还有另外的装饰器(比如上面提到的 @timethis 例子)，那么它会隐藏底层属性，使得修改它们没有任何作用
+
+The use of accessor functions avoids this limitation.
+ 而通过使用访问函数就能避免这样的局限性
+
+Last, but not least, the solution shown in this recipe might be a possible alternative for decorators defined as classes, as shown in “Defining Decorators As Classes”.
+最后提一点，这一小节的方案也可以作为9.9小节中装饰器类的另一种实现方法
+
+Defining a Decorator That Takes an Optional Argument
+9.6 带可选参数的装饰器¶
+
+You would like to write a single decorator that can be used without arguments, such as @decorator, or with optional arguments, such as @decorator(x,y,z).
+你想写一个装饰器，既可以不传参数给它，比如 @decorator ， 也可以传递可选参数给它，比如 @decorator(x,y,z) 
+
+Here is a variant of the logging code shown in “Defining a Decorator with User Adjustable Attributes” that defines such a decorator:
+下面是9.5小节中日志装饰器的一个修改版本：
+
+As you can see from the example, the decorator can be used in both a simple form (i.e., @logged) or with optional arguments supplied (i.e., @logged(level=logging.CRITICAL, name='example')).
+可以看到，@logged 装饰器可以同时不带参数或带参数
+
+The problem addressed by this recipe is really one of programming consistency.
+这里提到的这个问题就是通常所说的编程一致性问题
+
+When using decorators, most programmers are used to applying them without any arguments at all or with arguments, as shown in the example.
+ 当我们使用装饰器的时候，大部分程序员习惯了要么不给它们传递任何参数，要么给它们传递确切参数
+
+Technically speaking, a decorator where all arguments are optional could be applied, like this:
+ 其实从技术上来讲，我们可以定义一个所有参数都是可选的装饰器，就像下面这样：
+
+However, this is not a form that’s especially common, and might lead to common usage errors if programmers forget to add the extra parentheses.
+但是，这种写法并不符合我们的习惯，有时候程序员忘记加上后面的括号会导致错误
+
+The recipe simply makes the decorator work with or without parentheses in a consistent way.
+ 这里我们向你展示了如何以一致的编程风格来同时满足没有括号和有括号两种情况
+
+To understand how the code works, you need to have a firm understanding of how decorators get applied to functions and their calling conventions.
+为了理解代码是如何工作的，你需要非常熟悉装饰器是如何作用到函数上以及它们的调用规则
+
+For a simple decorator such as this:
+ 对于一个像下面这样的简单装饰器：
+
+The calling sequence is as follows:
+这个调用序列跟下面等价：
+
+In this case, the function to be wrapped is simply passed to logged as the first argument.
+这时候，被装饰函数会被当做第一个参数直接传递给 logged 装饰器
+
+Thus, in the solution, the first argument of logged() is the function being wrapped.
+ 因此，logged() 中的第一个参数就是被包装函数本身
+
+All of the other arguments must have default values.
+所有其他参数都必须有默认值
+
+For a decorator taking arguments such as this:
+而对于一个下面这样有参数的装饰器：
+
+The calling sequence is as follows:
+调用序列跟下面等价：
+
+On the initial invocation of logged(), the function to be wrapped is not passed.
+初始调用 logged() 函数时，被包装函数并没有传递进来
+
+Thus, in the decorator, it has to be optional.
+ 因此在装饰器内，它必须是可选的
+
+This, in turn, forces the other arguments to be specified by keyword.
+这个反过来会迫使其他参数必须使用关键字来指定
+
+Furthermore, when arguments are passed, a decorator is supposed to return a function that accepts the function and wraps it (see “Defining a Decorator with User Adjustable Attributes”).
+ 并且，但这些参数被传递进来后，装饰器要返回一个接受一个函数参数并包装它的函数(参考9.5小节)
+
+To do this, the solution uses a clever trick involving functools.partial.
+ 为了这样做，我们使用了一个技巧，就是利用 functools.partial 
+
+Specifically, it simply returns a partially applied version of itself where all arguments are fixed except for the function to be wrapped.
+ 它会返回一个未完全初始化的自身，除了被包装函数外其他参数都已经确定下来了
+
+See “Making an N-Argument Callable Work As a Callable with Fewer Arguments” for more details about using partial().
+ 可以参考7.8小节获取更多 partial() 方法的知识
+
+Enforcing Type Checking on a Function Using a Decorator
+9.7 利用装饰器强制函数上的类型检查¶
+
+You want to optionally enforce type checking of function arguments as a kind of assertion or contract.
+作为某种编程规约，你想在对函数参数进行强制类型检查
+
+Before showing the solution code, the aim of this recipe is to have a means of enforcing type contracts on the input arguments to a function.
+在演示实际代码前，先说明我们的目标：能对函数参数类型进行断言，类似下面这样：
+
+Now, here is an implementation of the @typeassert decorator:
+下面是使用装饰器技术来实现 @typeassert ：
+
+You will find that this decorator is rather flexible, allowing types to be specified for all or a subset of a function’s arguments.
+可以看出这个装饰器非常灵活，既可以指定所有参数类型，也可以只指定部分
+
+Moreover, types can be specified by position or by keyword.
+ 并且可以通过位置或关键字来指定参数类型
+
+Here is an example:
+下面是使用示例：
+
+This recipe is an advanced decorator example that introduces a number of important and useful concepts.
+这节是高级装饰器示例，引入了很多重要的概念
+
+First, one aspect of decorators is that they only get applied once, at the time of function definition.
+首先，装饰器只会在函数定义时被调用一次
+
+In certain cases, you may want to disable the functionality added by a decorator.
+ 有时候你去掉装饰器的功能，那么你只需要简单的返回被装饰函数即可
+
+To do this, simply have your decorator function return the function unwrapped.
+ 下面的代码中，如果全局变量　__debug__ 被设置成了False(当你使用-O或-OO参数的优化模式执行程序时)， 那么就直接返回未修改过的函数本身：
+
+Next, a tricky part of writing this decorator is that it involves examining and working with the argument signature of the function being wrapped.
+其次，这里还对被包装函数的参数签名进行了检查，我们使用了 inspect.signature() 函数
+
+Your tool of choice here should be the inspect.signature() function.
+ 简单来讲，它运行你提取一个可调用对象的参数签名信息
+
+Simply stated, it allows you to extract signature information from a callable.
+例如：
+
+In the first part of our decorator, we use the bind_partial() method of signatures to perform a partial binding of the supplied types to argument names.
+装饰器的开始部分，我们使用了 bind_partial() 方法来执行从指定类型到名称的部分绑定
+
+Here is an example of what happens:
+ 下面是例子演示：
+
+In this partial binding, you will notice that missing arguments are simply ignored (i.e., there is no binding for argument y).
+在这个部分绑定中，你可以注意到缺失的参数被忽略了(比如并没有对y进行绑定)
+
+However, the most important part of the binding is the creation of the ordered dictionary bound_types.arguments.
+ 不过最重要的是创建了一个有序字典 bound_types.arguments 
+
+This dictionary maps the argument names to the supplied values in the same order as the function signature.
+ 这个字典会将参数名以函数签名中相同顺序映射到指定的类型值上面去
+
+In the case of our decorator, this mapping contains the type assertions that we’re going to enforce.
+ 在我们的装饰器例子中，这个映射包含了我们要强制指定的类型断言
+
+In the actual wrapper function made by the decorator, the sig.bind() method is used.
+在装饰器创建的实际包装函数中使用到了 sig.bind() 方法
+
+bind() is like bind_partial() except that it does not allow for missing arguments.
+ bind() 跟 bind_partial() 类似，但是它不允许忽略任何参数
+
+So, here is what happens:
+因此有了下面的结果：
+
+Using this mapping, it is relatively easy to enforce the required assertions.
+使用这个映射我们可以很轻松的实现我们的强制类型检查：
+
+A somewhat subtle aspect of the solution is that the assertions do not get applied to unsupplied arguments with default values.
+不过这个方案还有点小瑕疵，它对于有默认值的参数并不适用
+
+For example, this code works, even though the default value of items is of the "wrong" type:
+ 比如下面的代码可以正常工作，尽管items的类型是错误的：
+
+A final point of design discussion might be the use of decorator arguments versus function annotations.
+最后一点是关于适用装饰器参数和函数注解之间的争论
+
+For example, why not write the decorator to look at annotations like this?
+ 例如，为什么不像下面这样写一个装饰器来查找函数中的注解呢
+
+One possible reason for not using annotations is that each argument to a function can only have a single annotation assigned.
+一个可能的原因是如果使用了函数参数注解，那么就被限制了
+
+Thus, if the annotations are used for type assertions, they can’t really be used for anything else.
+ 如果注解被用来做类型检查就不能做其他事情了
+
+Likewise, the @typeassert decorator won’t work with functions that use annotations for a different purpose.
+而且 @typeassert 不能再用于使用注解做其他事情的函数了
+
+By using decorator arguments, as shown in the solution, the decorator becomes a lot more general purpose and can be used with any function whatsoever—even functions that use annotations.
+ 而使用上面的装饰器参数灵活性大多了，也更加通用
+
+More information about function signature objects can be found in PEP 362, as well as the documentation for the inspect module.
+可以在PEP 362以及 inspect 模块中找到更多关于函数参数对象的信息
+
+“Enforcing an Argument Signature on *args and **kwargs” also has an additional example.
+在9.16小节还有另外一个例子
+
+Defining Decorators As Part of a Class
+9.8 将装饰器定义为类的一部分¶
+
+You want to define a decorator inside a class definition and apply it to other functions or methods.
+你想在类中定义装饰器，并将其作用在其他函数或方法上
+
+Defining a decorator inside a class is straightforward, but you first need to sort out the manner in which the decorator will be applied.
+在类里面定义装饰器很简单，但是你首先要确认它的使用方式
+
+Specifically, whether it is applied as an instance or a class method.
+比如到底是作为一个实例方法还是类方法
+
+Here is an example that illustrates the difference:
+ 下面我们用例子来阐述它们的不同：
+
+Here is an example of how the two decorators would be applied:
+下面是一使用例子：
+
+If you look carefully, you’ll notice that one is applied from an instance a and the other is applied from the class A.
+仔细观察可以发现一个是实例调用，一个是类调用
+
+Defining decorators in a class might look odd at first glance, but there are examples of this in the standard library.
+在类中定义装饰器初看上去好像很奇怪，但是在标准库中有很多这样的例子
+
+In particular, the built-in @property decorator is actually a class with getter(), setter(), and deleter() methods that each act as a decorator.
+ 特别的，@property 装饰器实际上是一个类，它里面定义了三个方法 getter(), setter(), deleter() , 每一个方法都是一个装饰器
+
+For example:
+例如：
+
+The key reason why it’s defined in this way is that the various decorator methods are manipulating state on the associated property instance.
+它为什么要这么定义的主要原因是各种不同的装饰器方法会在关联的 property 实例上操作它的状态
+
+So, if you ever had a problem where decorators needed to record or combine information behind the scenes, it’s a sensible approach.
+ 因此，任何时候只要你碰到需要在装饰器中记录或绑定信息，那么这不失为一种可行方法
+
+A common confusion when writing decorators in classes is getting tripped up by the proper use of the extra self or cls arguments in the decorator code itself.
+在类中定义装饰器有个难理解的地方就是对于额外参数 self 或 cls 的正确使用
+
+Although the outermost decorator function, such as decorator1() or decorator2(), needs to provide a self or cls argument (since they’re part of a class), the wrapper function created inside doesn’t generally need to include an extra argument.
+ 尽管最外层的装饰器函数比如 decorator1() 或 decorator2() 需要提供一个 self 或 cls 参数， 但是在两个装饰器内部被创建的 wrapper() 函数并不需要包含这个 self 参数
+
+This is why the wrapper() function created in both decorators doesn’t include a self argument.
+ 你唯一需要这个参数是在你确实要访问包装器中这个实例的某些部分的时候
+
+The only time you would ever need this argument is in situations where you actually needed to access parts of an instance in the wrapper.
+其他情况下都不用去管它
+
+A final subtle facet of having decorators defined in a class concerns their potential use with inheritance.
+对于类里面定义的包装器还有一点比较难理解，就是在涉及到继承的时候
+
+For example, suppose you want to apply one of the decorators defined in class A to methods defined in a subclass B.
+ 例如，假设你想让在A中定义的装饰器作用在子类B中
+
+To do that, you would need to write code like this:
+你需要像下面这样写：
+
+In particular, the decorator in question has to be defined as a class method and you have to explicitly use the name of the superclass A when applying it.
+也就是说，装饰器要被定义成类方法并且你必须显式的使用父类名去调用它
+
+You can’t use a name such as @B.decorator2, because at the time of method definition, class B has not yet been created.
+ 你不能使用 @B.decorator2 ，因为在方法定义时，这个类B还没有被创建
+
+Defining Decorators As Classes
+9.9 将装饰器定义为类¶
+
+You want to wrap functions with a decorator, but the result is going to be a callable instance.
+你想使用一个装饰器去包装函数，但是希望返回一个可调用的实例
+
+You need your decorator to work both inside and outside class definitions.
+ 你需要让你的装饰器可以同时工作在类定义的内部和外部
+
+To define a decorator as an instance, you need to make sure it implements the __call__() and __get__() methods.
+为了将装饰器定义成一个实例，你需要确保它实现了 __call__() 和 __get__() 方法
+
+For example, this code defines a class that puts a simple profiling layer around another function:
+ 例如，下面的代码定义了一个类，它在其他函数上放置一个简单的记录层：
+
+To use this class, you use it like a normal decorator, either inside or outside of a class:
+你可以将它当做一个普通的装饰器来使用，在类里面或外面都可以：
+
+Here is an interactive session that shows how these functions work:
+在交互环境中的使用示例：
+
+Defining a decorator as a class is usually straightforward.
+将装饰器定义成类通常是很简单的
+
+However, there are some rather subtle details that deserve more explanation, especially if you plan to apply the decorator to instance methods.
+但是这里还是有一些细节需要解释下，特别是当你想将它作用在实例方法上的时候
+
+First, the use of the functools.wraps() function serves the same purpose here as it does in normal decorators—namely to copy important metadata from the wrapped function to the callable instance.
+首先，使用 functools.wraps() 函数的作用跟之前还是一样，将被包装函数的元信息复制到可调用实例中去
+
+Second, it is common to overlook the __get__() method shown in the solution.
+其次，通常很容易会忽视上面的 __get__() 方法
+
+If you omit the __get__() and keep all of the other code the same, you’ll find that bizarre things happen when you try to invoke decorated instance methods.
+如果你忽略它，保持其他代码不变再次运行， 你会发现当你去调用被装饰实例方法时出现很奇怪的问题
+
+For example:
+例如：
+
+The reason it breaks is that whenever functions implementing methods are looked up in a class, their __get__() method is invoked as part of the descriptor protocol, which is described in “Creating a New Kind of Class or Instance Attribute”.
+出错原因是当方法函数在一个类中被查找时，它们的 __get__() 方法依据描述器协议被调用， 在8.9小节已经讲述过描述器协议了
+
+In this case, the purpose of __get__() is to create a bound method object (which ultimately supplies the self argument to the method).
+在这里，__get__() 的目的是创建一个绑定方法对象 (最终会给这个方法传递self参数)
+
+Here is an example that illustrates the underlying mechanics:
+下面是一个例子来演示底层原理：
+
+In this recipe, the __get__() method is there to make sure bound method objects get created properly.
+__get__() 方法是为了确保绑定方法对象能被正确的创建
+
+type.MethodType() creates a bound method manually for use here.
+ type.MethodType() 手动创建一个绑定方法来使用
+
+Bound methods only get created if an instance is being used.
+只有当实例被使用的时候绑定方法才会被创建
+
+If the method is accessed on a class, the instance argument to __get__() is set to None and the Profiled instance itself is just returned.
+ 如果这个方法是在类上面来访问， 那么 __get__() 中的instance参数会被设置成None并直接返回 Profiled 实例本身
+
+This makes it possible for someone to extract its ncalls attribute, as shown.
+ 这样的话我们就可以提取它的 ncalls 属性了
+
+If you want to avoid some of this of this mess, you might consider an alternative formulation of the decorator using closures and nonlocal variables, as described in “Defining a Decorator with User Adjustable Attributes”.
+如果你想避免一些混乱，也可以考虑另外一个使用闭包和 nonlocal 变量实现的装饰器，这个在9.5小节有讲到
+
+For example:
+例如：
+
+This example almost works in exactly the same way except that access to ncalls is now provided through a function attached as a function attribute.
+这个方式跟之前的效果几乎一样，除了对于 ncalls 的访问现在是通过一个被绑定为属性的函数来实现，例如：
+
+Applying Decorators to Class and Static Methods
+9.10 为类和静态方法提供装饰器¶
+
+You want to apply a decorator to a class or static method.
+你想给类或静态方法提供装饰器
+
+Applying decorators to class and static methods is straightforward, but make sure that your decorators are applied before @classmethod or @staticmethod.
+给类或静态方法提供装饰器是很简单的，不过要确保装饰器在 @classmethod 或 @staticmethod 之前
+
+For example:
+例如：
+
+The resulting class and static methods should operate normally, but have the extra timing:
+装饰后的类和静态方法可正常工作，只不过增加了额外的计时功能：
+
+If you get the order of decorators wrong, you’ll get an error.
+如果你把装饰器的顺序写错了就会出错
+
+For example, if you use the following:
+例如，假设你像下面这样写：
+
+Then the static method will crash:
+那么你调用这个镜头方法时就会报错：
+
+The problem here is that @classmethod and @staticmethod don’t actually create objects that are directly callable.
+问题在于 @classmethod 和 @staticmethod 实际上并不会创建可直接调用的对象， 而是创建特殊的描述器对象(参考8.9小节)
+
+Instead, they create special descriptor objects, as described in “Creating a New Kind of Class or Instance Attribute”.
+因此当你试着在其他装饰器中将它们当做函数来使用时就会出错
+
+Thus, if you try to use them like functions in another decorator, the decorator will crash.
+ 确保这种装饰器出现在装饰器链中的第一个位置可以修复这个问题
+
+One situation where this recipe is of critical importance is in defining class and static methods in abstract base classes, as described in “Defining an Interface or Abstract Base Class”.
+当我们在抽象基类中定义类方法和静态方法(参考8.12小节)时，这里讲到的知识就很有用了
+
+For example, if you want to define an abstract class method, you can use this code:
+ 例如，如果你想定义一个抽象类方法，可以使用类似下面的代码：
+
+In this code, the order of @classmethod and @abstractmethod matters.
+在这段代码中，@classmethod 跟 @abstractmethod 两者的顺序是有讲究的，如果你调换它们的顺序就会出错
+
+Writing Decorators That Add Arguments to Wrapped Functions
+9.11 装饰器为被包装函数增加参数¶
+
+You want to write a decorator that adds an extra argument to the calling signature of the wrapped function.
+你想在装饰器中给被包装函数增加额外的参数，但是不能影响这个函数现有的调用规则
+
+Extra arguments can be injected into the calling signature using keyword-only arguments.
+可以使用关键字参数来给被包装函数增加额外参数
+
+Consider the following decorator:
+考虑下面的装饰器：
+
+Adding arguments to the signature of wrapped functions is not the most common example of using decorators.
+通过装饰器来给被包装函数增加参数的做法并不常见
+
+However, it might be a useful technique in avoiding certain kinds of code replication patterns.
+ 尽管如此，有时候它可以避免一些重复代码
+
+For example, if you have code like this:
+例如，如果你有下面这样的代码：
+
+You can refactor it into the following:
+那么你可以将其重构成这样：
+
+The implementation of this recipe relies on the fact that keyword-only arguments are easy to add to functions that also accept *args and **kwargs parameters.
+这种实现方案之所以行得通，在于强制关键字参数很容易被添加到接受 *args 和 **kwargs 参数的函数中
+
+By using a keyword-only argument, it gets singled out as a special case and removed from subsequent calls that only use the remaining positional and keyword arguments.
+ 通过使用强制关键字参数，它被作为一个特殊情况被挑选出来， 并且接下来仅仅使用剩余的位置和关键字参数去调用这个函数时，这个特殊参数会被排除在外
+
+One tricky part here concerns a potential name clash between the added argument and the arguments of the function being wrapped.
+还有一个难点就是如何去处理被添加的参数与被包装函数参数直接的名字冲突
+
+For example, if the @optional_debug decorator was applied to a function that already had a debug argument, then it would break.
+ 例如，如果装饰器 @optional_debug 作用在一个已经拥有一个 debug 参数的函数上时会有问题
+
+If that’s a concern, an extra check could be added:
+ 这里我们增加了一步名字检查
+
+A final refinement to this recipe concerns the proper management of function signatures.
+上面的方案还可以更完美一点，因为精明的程序员应该发现了被包装函数的函数签名其实是错误的
+
+An astute programmer will realize that the signature of wrapped functions is wrong.
+例如：
+
+This can be fixed by making the following modification:
+通过如下的修改，可以解决这个问题：
+
+With this change, the signature of the wrapper will now correctly reflect the presence of the debug argument.
+通过这样的修改，包装后的函数签名就能正确的显示 debug 参数的存在了
+
+For example:
+例如：
+
+See “Enforcing an Argument Signature on *args and **kwargs” for more information about function signatures.
+参考9.16小节获取更多关于函数签名的信息
+
+Using Decorators to Patch Class Definitions
+9.12 使用装饰器扩充类的功能¶
+
+You want to inspect or rewrite portions of a class definition to alter its behavior, but without using inheritance or metaclasses.
+你想通过反省或者重写类定义的某部分来修改它的行为，但是你又不希望使用继承或元类的方式
+
+This might be a perfect use for a class decorator.
+这种情况可能是类装饰器最好的使用场景了
+
+For example, here is a class decorator that rewrites the __getattribute__ special method to perform logging.
+例如，下面是一个重写了特殊方法 __getattribute__ 的类装饰器， 可以打印日志：
+
+Here is what happens if you try to use the class in the solution:
+下面是使用效果：
+
+Class decorators can often be used as a straightforward alternative to other more advanced techniques involving mixins or metaclasses.
+类装饰器通常可以作为其他高级技术比如混入或元类的一种非常简洁的替代方案
+
+For example, an alternative implementation of the solution might involve inheritance, as in the following:
+ 比如，上面示例中的另外一种实现使用到继承：
+
+This works, but to understand it, you have to have some awareness of the method resolution order, super(), and other aspects of inheritance, as described in “Calling a Method on a Parent Class”.
+这种方案也行得通，但是为了去理解它，你就必须知道方法调用顺序、super() 以及其它8.7小节介绍的继承知识
+
+In some sense, the class decorator solution is much more direct in how it operates, and it doesn’t introduce new dependencies into the inheritance hierarchy.
+ 某种程度上来讲，类装饰器方案就显得更加直观，并且它不会引入新的继承体系
+
+As it turns out, it’s also just a bit faster, due to not relying on the super() function.
+它的运行速度也更快一些， 因为他并不依赖 super() 函数
+
+If you are applying multiple class decorators to a class, the application order might matter.
+如果你系想在一个类上面使用多个类装饰器，那么就需要注意下顺序问题
+
+For example, a decorator that replaces a method with an entirely new implementation would probably need to be applied before a decorator that simply wraps an existing method with some extra logic.
+ 例如，一个装饰器A会将其装饰的方法完整替换成另一种实现， 而另一个装饰器B只是简单的在其装饰的方法中添加点额外逻辑
+
+See “Implementing a Data Model or Type System” for another example of class decorators in action.
+你还可以回顾一下8.13小节另外一个关于类装饰器的有用的例子
+
+Using a Metaclass to Control Instance Creation
+9.13 使用元类控制实例的创建¶
+
+You want to change the way in which instances are created in order to implement singletons, caching, or other similar features.
+你想通过改变实例创建方式来实现单例、缓存或其他类似的特性
+
+As Python programmers know, if you define a class, you call it like a function to create instances.
+Python程序员都知道，如果你定义了一个类，就能像函数一样的调用它来创建实例，例如：
+
+If you want to customize this step, you can do it by defining a metaclass and reimplementing its __call__() method in some way.
+如果你想自定义这个步骤，你可以定义一个元类并自己实现 __call__() 方法
+
+To illustrate, suppose that you didn’t want anyone creating instances at all:
+为了演示，假设你不想任何人创建这个类的实例：
+
+In this case, users can call the defined static method, but it’s impossible to create an instance in the normal way.
+这样的话，用户只能调用这个类的静态方法，而不能使用通常的方法来创建它的实例
+
+For example:
+例如：
+
+Now, suppose you want to implement the singleton pattern (i.e., a class where only one instance is ever created).
+现在，假如你想实现单例模式（只能创建唯一实例的类），实现起来也很简单：
+
+In this case, only one instance ever gets created.
+那么Spam类就只能创建唯一的实例了，演示如下：
+
+Finally, suppose you want to create cached instances, as described in “Creating Cached Instances”.
+最后，假设你想创建8.25小节中那样的缓存实例
+
+Here’s a metaclass that implements it:
+下面我们可以通过元类来实现：
+
+Here’s an example showing the behavior of this class:
+然后我也来测试一下：
+
+Using a metaclass to implement various instance creation patterns can often be a much more elegant approach than other solutions not involving metaclasses.
+利用元类实现多种实例创建模式通常要比不使用元类的方式优雅得多
+
+For example, if you didn’t use a metaclass, you might have to hide the classes behind some kind of extra factory function.
+假设你不使用元类，你可能需要将类隐藏在某些工厂函数后面
+
+For example, to get a singleton, you might use a hack such as the following:
+ 比如为了实现一个单例，你你可能会像下面这样写：
+
+Although the solution involving metaclasses involves a much more advanced concept, the resulting code feels cleaner and less hacked together.
+尽管使用元类可能会涉及到比较高级点的技术，但是它的代码看起来会更加简洁舒服，而且也更加直观
+
+See “Creating Cached Instances” for more information on creating cached instances, weak references, and other details.
+更多关于创建缓存实例、弱引用等内容，请参考8.25小节
+
+Capturing Class Attribute Definition Order
+9.14 捕获类的属性定义顺序¶
+
+You want to automatically record the order in which attributes and methods are defined inside a class body so that you can use it in various operations (e.g., serializing, mapping to databases, etc.).
+你想自动记录一个类中属性和方法定义的顺序， 然后可以利用它来做很多操作（比如序列化、映射到数据库等等）
+
+Capturing information about the body of class definition is easily accomplished through the use of a metaclass.
+利用元类可以很容易的捕获类的定义信息
+
+Here is an example of a metaclass that uses an OrderedDict to capture definition order of descriptors:
+下面是一个例子，使用了一个OrderedDict来记录描述器的定义顺序：
+
+In this metaclass, the definition order of descriptors is captured by using an OrderedDict during the execution of the class body.
+在这个元类中，执行类主体时描述器的定义顺序会被一个 OrderedDict``捕获到， 生成的有序名称从字典中提取出来并放入类属性 ``_order 中
+
+The resulting order of names is then extracted from the dictionary and stored into a class attribute _order.
+这样的话类中的方法可以通过多种方式来使用它
+
+This can then be used by methods of the class in various ways.
+ 例如，下面是一个简单的类，使用这个排序字典来实现将一个类实例的数据序列化为一行CSV数据：
+
+Here is an interactive session illustrating the use of the Stock class in the example:
+我们在交互式环境中测试一下这个Stock类：
+
+The entire key to this recipe is the __prepare__() method, which is defined in the OrderedMeta metaclass.
+本节一个关键点就是OrderedMeta元类中定义的 `` __prepare__()`` 方法
+
+This method is invoked immediately at the start of a class definition with the class name and base classes.
+ 这个方法会在开始定义类和它的父类的时候被执行
+
+It must then return a mapping object to use when processing the class body.
+它必须返回一个映射对象以便在类定义体中被使用到
+
+By returning an OrderedDict instead of a normal dictionary, the resulting definition order is easily captured.
+ 我们这里通过返回了一个OrderedDict而不是一个普通的字典，可以很容易的捕获定义的顺序
+
+It is possible to extend this functionality even further if you are willing to make your own dictionary-like objects.
+如果你想构造自己的类字典对象，可以很容易的扩展这个功能
+
+For example, consider this variant of the solution that rejects duplicate definitions:
+比如，下面的这个修改方案可以防止重复的定义：
+
+Here’s what happens if you use this metaclass and make a class with duplicate entries:
+下面我们测试重复的定义会出现什么情况：
+
+A final important part of this recipe concerns the treatment of the modified dictionary in the metaclass __new__() method.
+最后还有一点很重要，就是在 __new__() 方法中对于元类中被修改字典的处理
+
+Even though the class was defined using an alternative dictionary, you still have to convert this dictionary to a proper dict instance when making the final class object.
+ 尽管类使用了另外一个字典来定义，在构造最终的 class 对象的时候， 我们仍然需要将这个字典转换为一个正确的 dict 实例
+
+This is the purpose of the d = dict(clsdict) statement.
+ 通过语句 d = dict(clsdict) 来完成这个效果
+
+Being able to capture definition order is a subtle but important feature for certain kinds of applications.
+对于很多应用程序而已，能够捕获类定义的顺序是一个看似不起眼却又非常重要的特性
+
+For instance, in an object relational mapper, classes might be written in a manner similar to that shown in the example:
+ 例如，在对象关系映射中，我们通常会看到下面这种方式定义的类：
+
+Underneath the covers, the code might want to capture the definition order to map objects to tuples or rows in a database table (e.g., similar to the functionality of the as_csv() method in the example).
+在框架底层，我们必须捕获定义的顺序来将对象映射到元组或数据库表中的行（就类似于上面例子中的 as_csv() 的功能）
+
+The solution shown is very straightforward and often simpler than alternative approaches (which typically involve maintaining hidden counters within the descriptor classes).
+ 这节演示的技术非常简单，并且通常会比其他类似方法（通常都要在描述器类中维护一个隐藏的计数器）要简单的多
+
+Defining a Metaclass That Takes Optional Arguments
+9.15 定义有可选参数的元类¶
+
+You want to define a metaclass that allows class definitions to supply optional arguments, possibly to control or configure aspects of processing during type creation.
+你想定义一个元类，允许类定义时提供可选参数，这样可以控制或配置类型的创建过程
+
+When defining classes, Python allows a metaclass to be specified using the metaclass keyword argument in the class statement.
+在定义类的时候，Python允许我们使用 ``metaclass``关键字参数来指定特定的元类
+
+For example, with abstract base classes:
+ 例如使用抽象基类：
+
+However, in custom metaclasses, additional keyword arguments can be supplied, like this:
+然而，在自定义元类中我们还可以提供其他的关键字参数，如下所示：
+
+To support such keyword arguments in a metaclass, make sure you define them on the __prepare__(), __new__(), and __init__() methods using keyword-only arguments, like this:
+为了使元类支持这些关键字参数，你必须确保在 __prepare__() , __new__() 和 __init__() 方法中 都使用强制关键字参数
+
+Adding optional keyword arguments to a metaclass requires that you understand all of the steps involved in class creation, because the extra arguments are passed to every method involved.
+给一个元类添加可选关键字参数需要你完全弄懂类创建的所有步骤， 因为这些参数会被传递给每一个相关的方法
+
+The __prepare__() method is called first and used to create the class namespace prior to the body of any class definition being processed.
+ __prepare__() 方法在所有类定义开始执行前首先被调用，用来创建类命名空间
+
+Normally, this method simply returns a dictionary or other mapping object.
+ 通常来讲，这个方法只是简单的返回一个字典或其他映射对象
+
+The __new__() method is used to instantiate the resulting type object.
+ __new__() 方法被用来实例化最终的类对象
+
+It is called after the class body has been fully executed.
+它在类的主体被执行完后开始执行
+
+The __init__() method is called last and used to perform any additional initialization steps.
+ __init__() 方法最后被调用，用来执行其他的一些初始化工作
+
+When writing metaclasses, it is somewhat common to only define a __new__() or __init__() method, but not both.
+当我们构造元类的时候，通常只需要定义一个 __new__() 或 __init__() 方法，但不是两个都定义
+
+However, if extra keyword arguments are going to be accepted, then both methods must be provided and given compatible signatures.
+ 但是，如果需要接受其他的关键字参数的话，这两个方法就要同时提供，并且都要提供对应的参数签名
+
+The default __prepare__() method accepts any set of keyword arguments, but ignores them.
+ 默认的 __prepare__() 方法接受任意的关键字参数，但是会忽略它们， 所以只有当这些额外的参数可能会影响到类命名空间的创建时你才需要去定义 __prepare__() 方法
+
+The use of keyword-only arguments in this recipe reflects the fact that such arguments will only be supplied by keyword during class creation.
+通过使用强制关键字参数，在类的创建过程中我们必须通过关键字来指定这些参数
+
+The specification of keyword arguments to configure a metaclass might be viewed as an alternative to using class variables for a similar purpose.
+使用关键字参数配置一个元类还可以视作对类变量的一种替代方式
+
+For example:
+例如：
+
+The advantage to supplying such parameters as an argument is that they don’t pollute the class namespace with extra names that only pertain to class creation and not the subsequent execution of statements in the class.
+将这些属性定义为参数的好处在于它们不会污染类的名称空间， 这些属性仅仅只从属于类的创建阶段，而不是类中的语句执行阶段
+
+In addition, they are available to the __prepare__() method, which runs prior to processing any statements in the class body.
+ 另外，它们在 __prepare__() 方法中是可以被访问的，因为这个方法会在所有类主体执行前被执行
+
+Class variables, on the other hand, would only be accessible in the __new__() and __init__() methods of a metaclass.
+ 但是类变量只能在元类的 __new__() 和 __init__() 方法中可见
+
+Enforcing an Argument Signature on *args and **kwargs
+9.16 *args和**kwargs的强制参数签名¶
+
+You’ve written a function or method that uses *args and **kwargs, so that it can be general purpose, but you would also like to check the passed arguments to see if they match a specific function calling signature.
+你有一个函数或方法，它使用*args和**kwargs作为参数，这样使得它比较通用， 但有时候你想检查传递进来的参数是不是某个你想要的类型
+
+For any problem where you want to manipulate function calling signatures, you should use the signature features found in the inspect module.
+对任何涉及到操作函数调用签名的问题，你都应该使用 inspect 模块中的签名特性
+
+Two classes, Signature and Parameter, are of particular interest here.
+ 我们最主要关注两个类：Signature 和 Parameter 
+
+Here is an interactive example of creating a function signature:
+下面是一个创建函数前面的交互例子：
+
+Once you have a signature object, you can easily bind it to *args and **kwargs using the signature’s bind() method, as shown in this simple example:
+一旦你有了一个签名对象，你就可以使用它的 bind() 方法很容易的将它绑定到 *args 和 **kwargs 上去
+
+As you can see, the binding of a signature to the passed arguments enforces all of the usual function calling rules concerning required arguments, defaults, duplicates, and so forth.
+可以看出来，通过将签名和传递的参数绑定起来，可以强制函数调用遵循特定的规则，比如必填、默认、重复等等
+
+Here is a more concrete example of enforcing function signatures.
+下面是一个强制函数签名更具体的例子
+
+In this code, a base class has defined an extremely general-purpose version of __init__(), but subclasses are expected to supply an expected signature.
+在代码中，我们在基类中先定义了一个非常通用的 __init__() 方法， 然后我们强制所有的子类必须提供一个特定的参数签名
+
+Here is an example of how the Stock class works:
+下面是使用这个 Stock 类的示例：
+
+The use of functions involving *args and **kwargs is very common when trying to make general-purpose libraries, write decorators or implement proxies.
+在我们需要构建通用函数库、编写装饰器或实现代理的时候，对于 *args 和 **kwargs 的使用是很普遍的
+
+However, one downside of such functions is that if you want to implement your own argument checking, it can quickly become an unwieldy mess.
+ 但是，这样的函数有一个缺点就是当你想要实现自己的参数检验时，代码就会笨拙混乱
+
+As an example, see “Simplifying the Initialization of Data Structures”.
+在8.11小节里面有这样一个例子
+
+The use of a signature object simplifies this.
+ 这时候我们可以通过一个签名对象来简化它
+
+In the last example of the solution, it might make sense to create signature objects through the use of a custom metaclass.
+在最后的一个方案实例中，我们还可以通过使用自定义元类来创建签名对象
+
+Here is an alternative implementation that shows how to do this:
+下面演示怎样来实现：
+
+When defining custom signatures, it is often useful to store the signature in a special attribute __signature__, as shown.
+当我们自定义签名的时候，将签名存储在特定的属性 __signature__ 中通常是很有用的
+
+If you do this, code that uses the inspect module to perform introspection will see the signature and report it as the calling convention.
+ 这样的话，在使用 inspect 模块执行内省的代码就能发现签名并将它作为调用约定
+
+Enforcing Coding Conventions in Classes
+9.17 在类上强制使用编程规约¶
+
+Your program consists of a large class hierarchy and you would like to enforce certain kinds of coding conventions (or perform diagnostics) to help maintain programmer sanity.
+你的程序包含一个很大的类继承体系，你希望强制执行某些编程规约（或者代码诊断）来帮助程序员保持清醒
+
+If you want to monitor the definition of classes, you can often do it by defining a metaclass.
+如果你想监控类的定义，通常可以通过定义一个元类
+
+A basic metaclass is usually defined by inheriting from type and redefining its __new__() method or __init__() method.
+一个基本元类通常是继承自 type 并重定义它的 __new__() 方法 或者是 __init__() 方法
+
+For example:
+比如：
+
+Alternatively, if __init__() is defined:
+另一种是，定义 __init__() 方法：
+
+To use a metaclass, you would generally incorporate it into a top-level base class from which other objects inherit.
+为了使用这个元类，你通常要将它放到到一个顶级父类定义中，然后其他的类继承这个顶级父类
+
+For example:
+例如：
+
+A key feature of a metaclass is that it allows you to examine the contents of a class at the time of definition.
+元类的一个关键特点是它允许你在定义的时候检查类的内容
+
+Inside the redefined __init__() method, you are free to inspect the class dictionary, base classes, and more.
+在重新定义 __init__() 方法中， 你可以很轻松的检查类字典、父类等等
+
+Moreover, once a metaclass has been specified for a class, it gets inherited by all of the subclasses.
+并且，一旦某个元类被指定给了某个类，那么就会被继承到所有子类中去
+
+Thus, a sneaky framework builder can specify a metaclass for one of the top-level classes in a large hierarchy and capture the definition of all classes under it.
+ 因此，一个框架的构建者就能在大型的继承体系中通过给一个顶级父类指定一个元类去捕获所有下面子类的定义
+
+As a concrete albeit whimsical example, here is a metaclass that rejects any class definition containing methods with mixed-case names (perhaps as a means for annoying Java programmers):
+作为一个具体的应用例子，下面定义了一个元类，它会拒绝任何有混合大小写名字作为方法的类定义（可能是想气死Java程序员^_^）：
+
+As a more advanced and useful example, here is a metaclass that checks the definition of redefined methods to make sure they have the same calling signature as the original method in the superclass.
+作为更高级和实用的例子，下面有一个元类，它用来检测重载方法，确保它的调用参数跟父类中原始方法有着相同的参数签名
+
+If you run this code, you will get output such as the following:
+如果你运行这段代码，就会得到下面这样的输出结果：
+
+Such warnings might be useful in catching subtle program bugs.
+这种警告信息对于捕获一些微妙的程序bug是很有用的
+
+For example, code that relies on keyword argument passing to a method will break if a subclass changes the argument names.
+例如，如果某个代码依赖于传递给方法的关键字参数， 那么当子类改变参数名字的时候就会调用出错
+
+In large object-oriented programs, it can sometimes be useful to put class definitions under the control of a metaclass.
+在大型面向对象的程序中，通常将类的定义放在元类中控制是很有用的
+
+The metaclass can observe class definitions and be used to alert programmers to potential problems that might go unnoticed (e.g., using slightly incompatible method signatures).
+ 元类可以监控类的定义，警告编程人员某些没有注意到的可能出现的问题
+
+One might argue that such errors would be better caught by program analysis tools or IDEs.
+有人可能会说，像这样的错误可以通过程序分析工具或IDE去做会更好些
+
+To be sure, such tools are useful.
+诚然，这些工具是很有用
+
+However, if you’re creating a framework or library that’s going to be used by others, you often don’t have any control over the rigor of their development practices.
+ 但是，如果你在构建一个框架或函数库供其他人使用，那么你没办法去控制使用者要使用什么工具
+
+Thus, for certain kinds of applications, it might make sense to put a bit of extra checking in a metaclass if such checking would result in a better user experience.
+ 因此，对于这种类型的程序，如果可以在元类中做检测或许可以带来更好的用户体验
+
+The choice of redefining __new__() or __init__() in a metaclass depends on how you want to work with the resulting class.
+在元类中选择重新定义 __new__() 方法还是 __init__() 方法取决于你想怎样使用结果类
+
+__new__() is invoked prior to class creation and is typically used when a metaclass wants to alter the class definition in some way (by changing the contents of the class dictionary).
+ __new__() 方法在类创建之前被调用，通常用于通过某种方式（比如通过改变类字典的内容）修改类的定义
+
+The __init__() method is invoked after a class has been created, and is useful if you want to write code that works with the fully formed class object.
+ 而 __init__() 方法是在类被创建之后被调用，当你需要完整构建类对象的时候会很有用
+
+In the last example, this is essential since it is using the super() function to search for prior definitions.
+ 在最后一个例子中，这是必要的，因为它使用了 super() 函数来搜索之前的定义
+
+This only works once the class instance has been created and the underlying method resolution order has been set.
+ 它只能在类的实例被创建之后，并且相应的方法解析顺序也已经被设置好了
+
+The last example also illustrates the use of Python’s function signature objects.
+最后一个例子还演示了Python的函数签名对象的使用
+
+Essentially, the metaclass takes each callable definition in a class, searches for a prior definition (if any), and then simply compares their calling signatures using inspect.signature().
+ 实际上，元类会管理中每个一个调用定义，搜索前一个定义（如果有的话）， 然后通过使用 inspect.signature() 来简单的比较它们的调用签名
+
+Last, but not least, the line of code that uses super(self, self) is not a typo.
+最后一点，代码中有一行使用了 super(self, self) 并不是排版错误
+
+When working with a metaclass, it’s important to realize that the self is actually a class object.
+ 当使用元类的时候，我们要时刻记住一点就是 self 实际上是一个类对象
+
+So, that statement is actually being used to find definitions located further up the class hierarchy that make up the parents of self.
+ 因此，这条语句其实就是用来寻找位于继承体系中构建 self 父类的定义
+
+Defining Classes Programmatically
+9.18 以编程方式定义类¶
+
+You’re writing code that ultimately needs to create a new class object.
+你在写一段代码，最终需要创建一个新的类对象
+
+You’ve thought about emitting emit class source code to a string and using a function such as exec() to evaluate it, but you’d prefer a more elegant solution.
+你考虑将类的定义源代码以字符串的形式发布出去
+
+You can use the function types.new_class() to instantiate new class objects.
+你可以使用函数 types.new_class() 来初始化新的类对象
+
+All you need to do is provide the name of the class, tuple of parent classes, keyword arguments, and a callback that populates the class dictionary with members.
+ 你需要做的只是提供类的名字、父类元组、关键字参数，以及一个用成员变量填充类字典的回调函数
+
+For example:
+例如：
+
+This makes a normal class object that works just like you expect:
+这种方式会构建一个普通的类对象，并且按照你的期望工作：
+
+A subtle facet of the solution is the assignment to Stock.__module__ after the call to types.new_class().
+这种方法中，一个比较难理解的地方是在调用完 types.new_class() 对 Stock.__module__ 的赋值
+
+Whenever a class is defined, its __module__ attribute contains the name of the module in which it was defined.
+ 每次当一个类被定义后，它的 __module__ 属性包含定义它的模块名
+
+This name is used to produce the output made by methods such as __repr__().
+ 这个名字用于生成 __repr__() 方法的输出
+
+It’s also used by various libraries, such as pickle.
+它同样也被用于很多库，比如 pickle 
+
+Thus, in order for the class you make to be "proper," you need to make sure this attribute is set accordingly.
+ 因此，为了让你创建的类是“正确”的，你需要确保这个属性也设置正确了
+
+If the class you want to create involves a different metaclass, it would be specified in the third argument to types.new_class().
+如果你想创建的类需要一个不同的元类，可以通过 types.new_class() 第三个参数传递给它
+
+For example:
+例如：
+
+The third argument may also contain other keyword arguments.
+第三个参数还可以包含其他的关键字参数
+
+For example, a class definition like this
+比如，一个类的定义如下：
+
+would translate to a new_class() call similar to this:
+那么可以将其翻译成如下的 new_class() 调用形式：
+
+The fourth argument to new_class() is the most mysterious, but it is a function that receives the mapping object being used for the class namespace as input.
+new_class() 第四个参数最神秘，它是一个用来接受类命名空间的映射对象的函数
+
+This is normally a dictionary, but it’s actually whatever object gets returned by the __prepare__() method, as described in “Capturing Class Attribute Definition Order”.
+ 通常这是一个普通的字典，但是它实际上是 __prepare__() 方法返回的任意对象，这个在9.14小节已经介绍过了
+
+This function should add new entries to the namespace using the update() method (as shown) or other mapping operations.
+ 这个函数需要使用上面演示的 update() 方法给命名空间增加内容
+
+Being able to manufacture new class objects can be useful in certain contexts.
+很多时候如果能构造新的类对象是很有用的
+
+One of the more familiar examples involves the collections.namedtuple() function.
+ 有个很熟悉的例子是调用 collections.namedtuple() 函数，例如：
+
+namedtuple() uses exec() instead of the technique shown here.
+namedtuple() 使用 exec() 而不是上面介绍的技术
+
+However, here is a simple variant that creates a class directly:
+但是，下面通过一个简单的变化， 我们直接创建一个类：
+
+The last part of this code uses a so-called "frame hack" involving sys._getframe() to obtain the module name of the caller.
+这段代码的最后部分使用了一个所谓的”框架魔法”，通过调用 sys._getframe() 来获取调用者的模块名
+
+Another example of frame hacking appears in “Interpolating Variables in Strings”.
+ 另外一个框架魔法例子在2.15小节中有介绍过
+
+The following example shows how the preceding code works:
+下面的例子演示了前面的代码是如何工作的：
+
+One important aspect of the technique used in this recipe is its proper support for metaclasses.
+这项技术一个很重要的方面是它对于元类的正确使用
+
+You might be inclined to create a class directly by instantiating a metaclass directly.
+ 你可能像通过直接实例化一个元类来直接创建一个类：
+
+The problem is that this approach skips certain critical steps, such as invocation of the metaclass __prepare__() method.
+这种方法的问题在于它忽略了一些关键步骤，比如对于元类中 __prepare__() 方法的调用
+
+By using types.new_class() instead, you ensure that all of the necessary initialization steps get carried out.
+ 通过使用 types.new_class() ，你可以保证所有的必要初始化步骤都能得到执行
+
+For instance, the callback function that’s given as the fourth argument to types.new_class() receives the mapping object that’s returned by the __prepare__() method.
+ 比如，types.new_class() 第四个参数的回调函数接受 __prepare__() 方法返回的映射对象
+
+If you only want to carry out the preparation step, use types.prepare_class().
+如果你仅仅只是想执行准备步骤，可以使用 types.prepare_class() 
+
+For example:
+例如：
+
+This finds the appropriate metaclass and invokes its __prepare__() method.
+它会查找合适的元类并调用它的 __prepare__() 方法
+
+The metaclass, remaining keyword arguments, and prepared namespace are then returned.
+ 然后这个元类保存它的关键字参数，准备命名空间后被返回
+
+For more information, see PEP 3115, as well as the Python documentation.
+更多信息, 请参考 PEP 3115 , 以及 Python documentation .
+
+Initializing Class Members at Definition Time
+9.19 在定义的时候初始化类的成员¶
+
+You want to initialize parts of a class definition once at the time a class is defined, not when instances are created.
+你想在类被定义的时候就初始化一部分类的成员，而不是要等到实例被创建后
+
+Performing initialization or setup actions at the time of class definition is a classic use of metaclasses.
+在类定义时就执行初始化或设置操作是元类的一个典型应用场景
+
+Essentially, a metaclass is triggered at the point of a definition, at which point you can perform additional steps.
+本质上讲，一个元类会在定义时被触发， 这时候你可以执行一些额外的操作
+
+Here is an example that uses this idea to create classes similar to named tuples from the collections module:
+下面是一个例子，利用这个思路来创建类似于 collections 模块中的命名元组的类：
+
+This code allows simple tuple-based data structures to be defined, like this:
+这段代码可以用来定义简单的基于元组的数据结构，如下所示：
+
+Here’s how they work:
+下面演示它如何工作：
+
+In this recipe, the StructTupleMeta class takes the listing of attribute names in the _fields class attribute and turns them into property methods that access a particular tuple slot.
+这一小节中，类 StructTupleMeta 获取到类属性 _fields 中的属性名字列表， 然后将它们转换成相应的可访问特定元组槽的方法
+
+The operator.itemgetter() function creates an accessor function and the property() function turns it into a property.
+函数 operator.itemgetter() 创建一个访问器函数， 然后 property() 函数将其转换成一个属性
+
+The trickiest part of this recipe is knowing when the different initialization steps occur.
+本节最难懂的部分是知道不同的初始化步骤是什么时候发生的
+
+The __init__() method in StructTupleMeta is only called once for each class that is defined.
+ StructTupleMeta 中的 __init__() 方法只在每个类被定义时被调用一次
+
+The cls argument is the class that has just been defined.
+ cls 参数就是那个被定义的类
+
+Essentially, the code is using the _fields class variable to take the newly defined class and add some new parts to it.
+实际上，上述代码使用了 _fields 类变量来保存新的被定义的类， 然后给它再添加一点新的东西
+
+The StructTuple class serves as a common base class for users to inherit from.
+StructTuple 类作为一个普通的基类，供其他使用者来继承
+
+The __new__() method in that class is responsible for making new instances.
+ 这个类中的 __new__() 方法用来构造新的实例
+
+The use of __new__() here is a bit unusual, but is partly related to the fact that we’re modifying the calling signature of tuples so that we can create instances with code that uses a normal-looking calling convention like this:
+ 这里使用 __new__() 并不是很常见，主要是因为我们要修改元组的调用签名， 使得我们可以像普通的实例调用那样创建实例
+
+Unlike __init__(), the __new__() method gets triggered before an instance is created.
+跟 __init__() 不同的是，__new__() 方法在实例被创建之前被触发
+
+Since tuples are immutable, it’s not possible to make any changes to them once they have been created.
+ 由于元组是不可修改的，所以一旦它们被创建了就不可能对它做任何改变
+
+An __init__() function gets triggered too late in the instance creation process to do what we want.
+而 __init__() 会在实例创建的最后被触发， 这样的话我们就可以做我们想做的了
+
+That’s why __new__() has been defined.
+这也是为什么 __new__() 方法已经被定义了
+
+Although this is a short recipe, careful study will reward the reader with a deep insight about how Python classes are defined, how instances are created, and the points at which different methods of metaclasses and classes are invoked.
+尽管本节很短，还是需要你能仔细研读，深入思考Python类是如何被定义的，实例是如何被创建的， 还有就是元类和类的各个不同的方法究竟在什么时候被调用
+
+PEP 422 may provide an alternative means for performing the task described in this recipe.
+PEP 422 提供了一个解决本节问题的另外一种方法
+
+However, as of this writing, it has not been adopted or accepted.
+ 但是，截止到我写这本书的时候，它还没被采纳和接受
+
+Nevertheless, it might be worth a look in case you’re working with a version of Python newer than Python 3.3.
+ 尽管如此，如果你使用的是Python 3.3或更高的版本，那么还是值得去看一下的
+
+Implementing Multiple Dispatch with Function Annotations
+9.20 利用函数注解实现方法重载¶
+
+You’ve learned about function argument annotations and you have a thought that you might be able to use them to implement multiple-dispatch (method overloading) based on types.
+你已经学过怎样使用函数参数注解，那么你可能会想利用它来实现基于类型的方法重载
+
+However, you’re not quite sure what’s involved (or if it’s even a good idea).
+ 但是你不确定应该怎样去实现（或者到底行得通不）
+
+This recipe is based on a simple observation—namely, that since Python allows arguments to be annotated, perhaps it might be possible to write code like this:
+本小节的技术是基于一个简单的技术，那就是Python允许参数注解，代码可以像下面这样写：
+
+Here is the start of a solution that does just that, using a combination of metaclasses and descriptors:
+下面是我们第一步的尝试，使用到了一个元类和描述器：
+
+To use this class, you write code like this:
+为了使用这个类，你可以像下面这样写：
+
+Here is an interactive session that verifies that it works:
+下面是一个交互示例来验证它能正确的工作：
+
+Honestly, there might be too much magic going on in this recipe to make it applicable to real-world code.
+坦白来讲，相对于通常的代码而已本节使用到了很多的魔法代码
+
+However, it does dive into some of the inner workings of metaclasses and descriptors, and reinforces some of their concepts.
+ 但是，它却能让我们深入理解元类和描述器的底层工作原理， 并能加深对这些概念的印象
+
+Thus, even though you might not apply this recipe directly, some of its underlying ideas might influence other programming techniques involving metaclasses, descriptors, and function annotations.
+因此，就算你并不会立即去应用本节的技术， 它的一些底层思想却会影响到其它涉及到元类、描述器和函数注解的编程技术
+
+The main idea in the implementation is relatively simple.
+本节的实现中的主要思路其实是很简单的
+
+The MutipleMeta metaclass uses its __prepare__() method to supply a custom class dictionary as an instance of MultiDict.
+MutipleMeta 元类使用它的 __prepare__() 方法 来提供一个作为 MultiDict 实例的自定义字典
+
+Unlike a normal dictionary, MultiDict checks to see whether entries already exist when items are set.
+这个跟普通字典不一样的是， MultiDict 会在元素被设置的时候检查是否已经存在，如果存在的话，重复的元素会在 MultiMethod 实例中合并
+
+Instances of MultiMethod collect methods by building a mapping from type signatures to functions.
+MultiMethod 实例通过构建从类型签名到函数的映射来收集方法
+
+During construction, function annotations are used to collect these signatures and build the mapping.
+ 在这个构建过程中，函数注解被用来收集这些签名然后构建这个映射
+
+This takes place in the MultiMethod.register() method.
+ 这个过程在 MultiMethod.register() 方法中实现
+
+One critical part of this mapping is that for multimethods, types must be specified on all of the arguments or else an error occurs.
+ 这种映射的一个关键特点是对于多个方法，所有参数类型都必须要指定，否则就会报错
+
+To make MultiMethod instances emulate a callable, the __call__() method is implemented.
+为了让 MultiMethod 实例模拟一个调用，它的 __call__() 方法被实现了
+
+This method builds a type tuple from all of the arguments except self, looks up the method in the internal map, and invokes the appropriate method.
+ 这个方法从所有排除 slef 的参数中构建一个类型元组，在内部map中查找这个方法， 然后调用相应的方法
+
+The __get__() is required to make MultiMethod instances operate correctly inside class definitions.
+为了能让 MultiMethod 实例在类定义时正确操作，__get__() 是必须得实现的
+
+In the implementation, it’s being used to create proper bound methods.
+ 它被用来构建正确的绑定方法
+
+For example:
+比如：
+
+To be sure, there are a lot of moving parts to this recipe.
+不过本节的实现还有一些限制，其中一个是它不能使用关键字参数
+
+However, it’s all a little unfortunate considering how many limitations there are.
+例如：
+
+There might be some way to add such support, but it would require a completely different approach to method mapping.
+也许有其他的方法能添加这种支持，但是它需要一个完全不同的方法映射方式
+
+The problem is that the keyword arguments don’t arrive in any kind of particular order.
+ 问题在于关键字参数的出现是没有顺序的
+
+When mixed up with positional arguments, you simply get a jumbled mess of arguments that you have to somehow sort out in the __call__() method.
+当它跟位置参数混合使用时， 那你的参数就会变得比较混乱了，这时候你不得不在 __call__() 方法中先去做个排序
+
+This recipe is also severely limited in its support for inheritance.
+同样对于继承也是有限制的，例如，类似下面这种代码就不能正常工作：
+
+The reason it fails is that the x:A annotation fails to match instances that are subclasses (such as instances of B).
+原因是因为 x:A 注解不能成功匹配子类实例（比如B的实例），如下：
+
+As an alternative to using metaclasses and annotations, it is possible to implement a similar recipe using decorators.
+作为使用元类和注解的一种替代方案，可以通过描述器来实现类似的效果
+
+For example:
+例如：
+
+To use the decorator version, you would write code like this:
+为了使用描述器版本，你需要像下面这样写：
+
+The decorator solution also suffers the same limitations as the previous implementation (namely, no support for keyword arguments and broken inheritance).
+描述器方案同样也有前面提到的限制（不支持关键字参数和继承）
+
+All things being equal, it’s probably best to stay away from multiple dispatch in general-purpose code.
+所有事物都是平等的，有好有坏，也许最好的办法就是在普通代码中避免使用方法重载
+
+There are special situations where it might make sense, such as in programs that are dispatching methods based on some kind of pattern matching.
+ 不过有些特殊情况下还是有意义的，比如基于模式匹配的方法重载程序中
+
+For example, perhaps the visitor pattern described in “Implementing the Visitor Pattern” could be recast into a class that used multiple dispatch in some way.
+ 举个例子，8.21小节中的访问者模式可以修改为一个使用方法重载的类
+
+However, other than that, it’s usually never a bad idea to stick with a more simple approach (simply use methods with different names).
+ 但是，除了这个以外，通常不应该使用方法重载（就简单的使用不同名称的方法就行了）
+
+Ideas concerning different ways to implement multiple dispatch have floated around the Python community for years.
+在Python社区对于实现方法重载的讨论已经由来已久
+
+As a decent starting point for that discussion, see Guido van Rossum’s blog post "Five-Minute Multimethods in Python".
+ 对于引发这个争论的原因，可以参考下Guido van Rossum的这篇博客： Five-Minute Multimethods in Python
+
+Avoiding Repetitive Property Methods
+9.21 避免重复的属性方法¶
+
+You are writing classes where you are repeatedly having to define property methods that perform common tasks, such as type checking.
+你在类中需要重复的定义一些执行相同逻辑的属性方法，比如进行类型检查，怎样去简化这些重复代码呢
+
+Consider a simple class where attributes are being wrapped by property methods:
+考虑下一个简单的类，它的属性由属性方法包装：
+
+As you can see, a lot of code is being written simply to enforce some type assertions on attribute values.
+可以看到，为了实现属性值的类型检查我们写了很多的重复代码
+
+Whenever you see code like this, you should explore different ways of simplifying it.
+ 只要你以后看到类似这样的代码，你都应该想办法去简化它
+
+One possible approach is to make a function that simply defines the property for you and returns it.
+ 一个可行的方法是创建一个函数用来定义属性并返回它
+
+For example:
+例如：
+
+This recipe illustrates an important feature of inner function or closures—namely, their use in writing code that works a lot like a macro.
+本节我们演示内部函数或者闭包的一个重要特性，它们很像一个宏
+
+The typed_property() function in this example may look a little weird, but it’s really just generating the property code for you and returning the resulting property object.
+例子中的函数 typed_property() 看上去有点难理解，其实它所做的仅仅就是为你生成属性并返回这个属性对象
+
+Thus, when it’s used in a class, it operates exactly as if the code appearing inside typed_property() was placed into the class definition itself.
+ 因此，当在一个类中使用它的时候，效果跟将它里面的代码放到类定义中去是一样的
+
+Even though the property getter and setter methods are accessing local variables such as name, expected_type, and storage_name, that is fine—those values are held behind the scenes in a closure.
+ 尽管属性的 getter 和 setter 方法访问了本地变量如 name , expected_type 以及 storate_name ，这个很正常，这些变量的值会保存在闭包当中
+
+This recipe can be tweaked in an interesting manner using the functools.partial() function.
+我们还可以使用 functools.partial() 来稍稍改变下这个例子，很有趣
+
+For example, you can do this:
+例如，你可以像下面这样：
+
+Here the code is starting to look a lot like some of the type system descriptor code shown in “Implementing a Data Model or Type System”.
+其实你可以发现，这里的代码跟8.13小节中的类型系统描述器代码有些相似
+
+Defining Context Managers the Easy Way
+9.22 定义上下文管理器的简单方法¶
+
+You want to implement new kinds of context managers for use with the with statement.
+你想自己去实现一个新的上下文管理器，以便使用with语句
+
+One of the most straightforward ways to write a new context manager is to use the @contextmanager decorator in the contextlib module.
+实现一个新的上下文管理器的最简单的方法就是使用 contexlib 模块中的 @contextmanager 装饰器
+
+Here is an example of a context manager that times the execution of a code block:
+ 下面是一个实现了代码块计时功能的上下文管理器例子：
+
+In the timethis() function, all of the code prior to the yield executes as the __enter__() method of a context manager.
+在函数 timethis() 中，yield 之前的代码会在上下文管理器中作为 __enter__() 方法执行， 所有在 yield 之后的代码会作为 __exit__() 方法执行
+
+All of the code after the yield executes as the __exit__() method.
+ 如果出现了异常，异常会在yield语句那里抛出
+
+Here is a slightly more advanced context manager that implements a kind of transaction on a list object:
+下面是一个更加高级一点的上下文管理器，实现了列表对象上的某种事务：
+
+The idea here is that changes made to a list only take effect if an entire code block runs to completion with no exceptions.
+这段代码的作用是任何对列表的修改只有当所有代码运行完成并且不出现异常的情况下才会生效
+
+Here is an example that illustrates:
+ 下面我们来演示一下：
+
+Normally, to write a context manager, you define a class with an __enter__() and __exit__() method, like this:
+通常情况下，如果要写一个上下文管理器，你需要定义一个类，里面包含一个 __enter__() 和一个 __exit__() 方法，如下所示：
+
+Although this isn’t hard, it’s a lot more tedious than writing a simple function using @contextmanager.
+尽管这个也不难写，但是相比较写一个简单的使用 @contextmanager 注解的函数而言还是稍显乏味
+
+@contextmanager is really only used for writing self-contained context-management functions.
+@contextmanager 应该仅仅用来写自包含的上下文管理函数
+
+If you have some object (e.g., a file, network connection, or lock) that needs to support the with statement, you still need to implement the __enter__() and __exit__() methods separately.
+ 如果你有一些对象(比如一个文件、网络连接或锁)，需要支持 with 语句，那么你就需要单独实现 __enter__() 方法和 __exit__() 方法
+
+Executing Code with Local Side Effects
+9.23 在局部变量域中执行代码¶
+
+You are using exec() to execute a fragment of code in the scope of the caller, but after execution, none of its results seem to be visible.
+你想在使用范围内执行某个代码片段，并且希望在执行后所有的结果都不可见
+
+To better understand the problem, try a little experiment.
+为了理解这个问题，先试试一个简单场景
+
+First, execute a fragment of code in the global namespace:
+首先，在全局命名空间内执行一个代码片段：
+
+Now, try the same experiment inside a function:
+然后，再在一个函数中执行同样的代码：
+
+As you can see, it fails with a NameError almost as if the exec() statement never actually executed.
+可以看出，最后抛出了一个NameError异常，就跟在 exec() 语句从没执行过一样
+
+This can be a problem if you ever want to use the result of the exec() in a later calculation.
+ 要是你想在后面的计算中使用到 exec() 执行结果的话就会有问题了
+
+To fix this kind of problem, you need to use the locals() function to obtain a dictionary of the local variables prior to the call to exec().
+为了修正这样的错误，你需要在调用 exec() 之前使用 locals() 函数来得到一个局部变量字典
+
+Immediately afterward, you can extract modified values from the locals dictionary.
+ 之后你就能从局部字典中获取修改过后的变量值了
+
+For example:
+例如：
+
+Correct use of exec() is actually quite tricky in practice.
+实际上对于 exec() 的正确使用是比较难的
+
+In fact, in most situations where you might be considering the use of exec(), a more elegant solution probably exists (e.g., decorators, closures, metaclasses, etc.).
+大多数情况下当你要考虑使用 exec() 的时候， 还有另外更好的解决方案（比如装饰器、闭包、元类等等）
+
+However, if you still must use exec(), this recipe outlines some subtle aspects of using it correctly.
+然而，如果你仍然要使用 exec() ，本节列出了一些如何正确使用它的方法
+
+By default, exec() executes code in the local and global scope of the caller.
+ 默认情况下，exec() 会在调用者局部和全局范围内执行代码
+
+However, inside functions, the local scope passed to exec() is a dictionary that is a copy of the actual local variables.
+然而，在函数里面， 传递给 exec() 的局部范围是拷贝实际局部变量组成的一个字典
+
+Thus, if the code in exec() makes any kind of modification, that modification is never reflected in the actual local variables.
+ 因此，如果 exec() 如果执行了修改操作，这种修改后的结果对实际局部变量值是没有影响的
+
+Here is another example that shows this effect:
+ 下面是另外一个演示它的例子：
+
+When you call locals() to obtain the local variables, as shown in the solution, you get the copy of the locals that is passed to exec().
+上面代码里，当你调用 locals() 获取局部变量时，你获得的是传递给 exec() 的局部变量的一个拷贝
+
+By inspecting the value of the dictionary after execution, you can obtain the modified values.
+ 通过在代码执行后审查这个字典的值，那就能获取修改后的值了
+
+Here is an experiment that shows this:
+下面是一个演示例子：
+
+Carefully observe the output of the last step.
+仔细观察最后一步的输出，除非你将 loc 中被修改后的值手动赋值给x，否则x变量值是不会变的
+
+With any use of locals(), you need to be careful about the order of operations.
+在使用 locals() 的时候，你需要注意操作顺序
+
+Each time it is invoked, locals() will take the current value of local variables and overwrite the corresponding entries in the dictionary.
+每次它被调用的时候， locals() 会获取局部变量值中的值并覆盖字典中相应的变量
+
+Observe the outcome of this experiment:
+ 请注意观察下下面这个试验的输出结果：
+
+Notice how the last call to locals() caused x to be overwritten.
+注意最后一次调用 locals() 的时候x的值是如何被覆盖掉的
+
+As an alternative to using locals(), you might make your own dictionary and pass it to exec().
+作为 locals() 的一个替代方案，你可以使用你自己的字典，并将它传递给 exec() 
+
+For example:
+例如：
+
+For most uses of exec(), this is probably good practice.
+大部分情况下，这种方式是使用 exec() 的最佳实践
+
+You just need to make sure that the global and local dictionaries are properly initialized with names that the executed code will access.
+ 你只需要保证全局和局部字典在后面代码访问时已经被初始化
+
+Last, but not least, before using exec(), you might ask yourself if other alternatives are available.
+还有一点，在使用 exec() 之前，你可能需要问下自己是否有其他更好的替代方案
+
+Many problems where you might consider the use of exec() can be replaced by closures, decorators, metaclasses, or other metaprogramming features.
+ 大多数情况下当你要考虑使用 exec() 的时候， 还有另外更好的解决方案，比如装饰器、闭包、元类，或其他一些元编程特性
+
+Parsing and Analyzing Python Source
+9.24 解析与分析Python源码¶
+
+You want to write programs that parse and analyze Python source code.
+你想写解析并分析Python源代码的程序
+
+Most programmers know that Python can evaluate or execute source code provided in the form of a string.
+大部分程序员知道Python能够计算或执行字符串形式的源代码
+
+For example:
+例如：
+
+However, the ast module can be used to compile Python source code into an abstract syntax tree (AST) that can be analyzed.
+尽管如此，ast 模块能被用来将Python源码编译成一个可被分析的抽象语法树（AST）
+
+For example:
+例如：
+
+Analyzing the source tree requires a bit of study on your part, but it consists of a collection of AST nodes.
+分析源码树需要你自己更多的学习，它是由一系列AST节点组成的
+
+The easiest way to work with these nodes is to define a visitor class that implements various visit_NodeName() methods where NodeName() matches the node of interest.
+ 分析这些节点最简单的方法就是定义一个访问者类，实现很多 visit_NodeName() 方法， NodeName() 匹配那些你感兴趣的节点
+
+Here is an example of such a class that records information about which names are loaded, stored, and deleted.
+下面是这样一个类，记录了哪些名字被加载、存储和删除的信息
+
+If you run this program, you’ll get output like this:
+如果你运行这个程序，你会得到下面这样的输出：
+
+Finally, ASTs can be compiled and executed using the compile() function.
+最后，AST可以通过 compile() 函数来编译并执行
+
+For example:
+例如：
+
+The fact that you can analyze source code and get information from it could be the start of writing various code analysis, optimization, or verification tools.
+当你能够分析源代码并从中获取信息的时候，你就能写很多代码分析、优化或验证工具了
+
+For instance, instead of just blindly passing some fragment of code into a function like exec(), you could turn it into an AST first and look at it in some detail to see what it’s doing.
+ 例如，相比盲目的传递一些代码片段到类似 exec() 函数中，你可以先将它转换成一个AST， 然后观察它的细节看它到底是怎样做的
+
+You could also write tools that look at the entire source code for a module and perform some sort of static analysis over it.
+ 你还可以写一些工具来查看某个模块的全部源码，并且在此基础上执行某些静态分析
+
+It should be noted that it is also possible to rewrite the AST to represent new code if you really know what you’re doing.
+需要注意的是，如果你知道自己在干啥，你还能够重写AST来表示新的代码
+
+Here is an example of a decorator that lowers globally accessed names into the body of a function by reparsing the function body’s source code, rewriting the AST, and recreating the function’s code object:
+ 下面是一个装饰器例子，可以通过重新解析函数体源码、 重写AST并重新创建函数代码对象来将全局访问变量降为函数体作用范围，
+
+To use this code, you would write code such as the following:
+为了使用这个代码，你可以像下面这样写：
+
+The decorator rewrites the source code of the countdown() function to look like this:
+装饰器会将 countdown() 函数重写为类似下面这样子：
+
+In a performance test, it makes the function run about 20% faster.
+在性能测试中，它会让函数运行快20%
+
+Now, should you go applying this decorator to all of your functions?
+现在，你是不是想为你所有的函数都加上这个装饰器呢
+
+Probably not.
+或许不会
+
+However, it’s a good illustration of some very advanced things that might be possible through AST manipulation, source code manipulation, and other techniques.
+ 但是，这却是对于一些高级技术比如AST操作、源码操作等等的一个很好的演示说明
+
+This recipe was inspired by a similar recipe at ActiveState that worked by manipulating Python’s byte code.
+本节受另外一个在 ActiveState 中处理Python字节码的章节的启示
+
+Working with the AST is a higher-level approach that might be a bit more straightforward.
+ 使用AST是一个更加高级点的技术，并且也更简单些
+
+See the next recipe for more information about byte code.
+参考下面一节获得字节码的更多信息
+
+Disassembling Python Byte Code
+9.25 拆解Python字节码¶
+
+You want to know in detail what your code is doing under the covers by disassembling it into lower-level byte code used by the interpreter.
+你想通过将你的代码反编译成低级的字节码来查看它底层的工作机制
+
+The dis module can be used to output a disassembly of any Python function.
+dis 模块可以被用来输出任何Python函数的反编译结果
+
+For example:
+例如：
+
+The dis module can be useful if you ever need to study what’s happening in your program at a very low level (e.g., if you’re trying to understand performance characteristics).
+当你想要知道你的程序底层的运行机制的时候，dis 模块是很有用的
+
+If you ever want to interpret this code yourself, you would need to use some of the constants defined in the opcode module.
+如果你想自己解释这段代码，你需要使用一些在 opcode 模块中定义的常量
+
+For example:
+例如：
+
+Ironically, there is no function in the dis module that makes it easy for you to process the byte code in a programmatic way.
+奇怪的是，在 dis 模块中并没有函数让你以编程方式很容易的来处理字节码
+
+However, this generator function will take the raw byte code sequence and turn it into opcodes and arguments.
+ 不过，下面的生成器函数可以将原始字节码序列转换成 opcodes 和参数
+
+To use this function, you would use code like this:
+使用方法如下：
+
+It’s a little-known fact, but you can replace the raw byte code of any function that you want.
+这种方式很少有人知道，你可以利用它替换任何你想要替换的函数的原始字节码
+
+It takes a bit of work to do it, but here’s an example of what’s involved:
+ 下面我们用一个示例来演示整个过程：
+
+Having the interpreter crash is a pretty likely outcome of pulling a crazy stunt like this.
+你可以像这样耍大招让解释器奔溃
+
+However, developers working on advanced optimization and metaprogramming tools might be inclined to rewrite byte code for real.
+但是，对于编写更高级优化和元编程工具的程序员来讲， 他们可能真的需要重写字节码
+
+This last part illustrates how to do it.
+本节最后的部分演示了这个是怎样做到的
+
+See this code on ActiveState for another example of such code in action.
+你还可以参考另外一个类似的例子： this code on ActiveState
+

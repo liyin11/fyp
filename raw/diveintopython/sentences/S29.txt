@@ -1,0 +1,84 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+5.3. Defining Classes
+5.3. 类的定义
+
+Python is fully object-oriented: you can define your own classes, inherit from your own or built-in classes, and instantiate the classes you've defined.
+Python 是完全面向对象的：你可以定义自已的类，从自已的或内置的类继承，然后从你定义的类创建实例
+
+Defining a class in Python is simple.
+在 Python 中定义类很简单
+
+As with functions, there is no separate interface definition.
+就像定义函数，没有单独的接口定义
+
+Just define the class and start coding.
+只要定义类，然后就可以开始编码
+
+A Python class starts with the reserved word class, followed by the class name.
+Python 类以保留字 class 开始，后面跟着类名
+
+Technically, that's all that's required, since a class doesn't need to inherit from any other class.
+从技术上讲，有这些就够了，因为一个类并非必须从其它类继承
+
+Of course, realistically, most classes will be inherited from other classes, and they will define their own class methods and attributes.
+当然，实际上大多数的类都是从其它的类继承来的，并且它们会定义自已的类方法和属性
+
+But as you've just seen, there is nothing that a class absolutely must have, other than a name.
+但是就像你刚才看到的，除了名字以外，类没有什么必须要具有的
+
+In particular, C++ programmers may find it odd that Python classes don't have explicit constructors and destructors.
+特别是，C++ 程序员可能会感到奇怪，Python 的类没有显示的构造函数和析构函数
+
+Python classes do have something similar to a constructor: the __init__ method.
+Python 类的确存在与构造函数相似的东西：__init__ 方法
+
+Python supports multiple inheritance.
+Python 支持多重继承
+
+In the parentheses following the class name, you can list as many ancestor classes as you like, separated by commas.
+在类名后面的小括号中，你可以列出许多你想要的类名，以逗号分隔
+
+This example shows the initialization of the FileInfo class using the __init__ method.
+本例演示了使用 __init__ 方法来进行 FileInfo 类的初始化
+
+When defining your class methods, you must explicitly list self as the first argument for each method, including __init__.
+当定义你自已的类方法时，你必须 明确将 self 作为每个方法的第一个参数列出，包括 __init__
+
+When you call a method of an ancestor class from within your class, you must include the self argument.
+当从你的类中调用一个父类的一个方法时，你必须包括 self 参数
+
+But when you call your class method from outside, you do not specify anything for the self argument;
+但当你从类的外部调用你的类方法时，你不必对 self 参数指定任何值
+
+you skip it entirely, and Python automatically adds the instance reference for you.
+你完全将其忽略，而 Python 会自动地替你增加实例的引用
+
+I am aware that this is confusing at first;
+我知道刚开始这有些混乱
+
+it's not really inconsistent, but it may appear inconsistent because it relies on a distinction (between bound and unbound methods) that you don't know about yet.
+它并不是自相矛盾的，因为它依靠于一个你还不了解的区别 (在绑定与非绑定方法之间)，故看上去是矛盾的
+
+Whew.
+噢
+
+I realize that's a lot to absorb, but you'll get the hang of it.
+我知道有很多知识需要吸收，但是你要掌握它
+
+All Python classes work the same way, so once you learn one, you've learned them all.
+所有的 Python 类以相同的方式工作，所以一旦你学会了一个，就是学会了全部
+
+If you forget everything else, remember this one thing, because I promise it will trip you up:
+如果你忘了别的任何事，也要记住这件事，因为我认定它会让你出错：
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

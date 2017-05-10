@@ -1,0 +1,39 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+6.6. Putting It All Together
+6.6. 全部放在一起
+
+Once again, all the dominoes are in place.
+再一次，所有的多米诺骨牌都放好了
+
+You've seen how each line of code works.
+我们已经看过每行代码是如何工作的了
+
+Now let's step back and see how it all fits together.
+现在往回走一步，看一下放在一起是怎么样的
+
+Note that listDirectory is completely generic.
+请注意 listDirectory 完全是通用的
+
+It doesn't know ahead of time which types of files it will be getting, or which classes are defined that could potentially handle those files.
+它事先不知道将得到哪种类型的文件，也不知道哪些定义好的类能够处理这些文件
+
+It inspects the directory for the files to process, and then introspects its own module to see what special handler classes (like MP3FileInfo) are defined.
+它检查目录中要进行处理的文件，然后反观本身模块，了解定义了什么特别的处理类 (像 MP3FileInfo)
+
+You can extend this program to handle other types of files simply by defining an appropriately-named class: HTMLFileInfo for HTML files, DOCFileInfo for Word .doc files, and so forth.
+你可以对这个程序进行扩充，对其它类型的文件进行处理，只要用适合的名字定义类：HTMLFileInfo 用于 HTML 文件，DOCFileInfo 用于 Word .doc 文件，等等
+
+listDirectory will handle them all, without modification, by handing off the real work to the appropriate classes and collating the results.
+不需要改动函数本身， listDirectory 将会对它们都进行处理，将工作交给适当的类，接着收集结果
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

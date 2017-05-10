@@ -1,0 +1,54 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+2.2. Declaring Functions
+2.2. 函数声明
+
+Python has functions like most other languages, but it does not have separate header files like C++ or interface/implementation sections like Pascal.
+与其它大多数语言一样 Python 有函数，但是它没有像 C++ 一样的独立的头文件
+
+When you need a function, just declare it, like this:
+或者像 Pascal 一样的分离的 interface/implementation 段
+
+Note that the keyword def starts the function declaration, followed by the function name, followed by the arguments in parentheses.
+首先，函数声明以关键字 def 开始，接着为函数名，再往后为参数，参数放在小括号里
+
+Multiple arguments (not shown here) are separated with commas.
+多个参数之间 (这里没有演示)用逗号分隔
+
+Also note that the function doesn't define a return datatype.
+其次，函数没有定义返回的数据类型
+
+Python functions do not specify the datatype of their return value;
+Python 不需要指定返回值的数据类型
+
+they don't even specify whether or not they return a value.
+甚至不需要指定是否有返回值
+
+In fact, every Python function returns a value;
+实际上，每个 Python 函数都返回一个值
+
+if the function ever executes a return statement, it will return that value, otherwise it will return None, the Python null value.
+如果函数执行过 return 语句，它将返回指定的值，否则将返回 None (Python 的空值)
+
+The argument, params, doesn't specify a datatype.
+最后需要指出的是，在 Python 中参数，params 不需要指定数据类型
+
+In Python, variables are never explicitly typed.
+Python 会判定一个变量是什么类型，并在内部将其记录下来
+
+An erudite reader sent me this explanation of how Python compares to other programming languages:
+一位博学的读者发给我 Python 如何与其它编程语言的比较的解释：
+
+So Python is both dynamically typed (because it doesn't use explicit datatype declarations) and strongly typed (because once a variable has a datatype, it actually matters).
+所以说 Python 既是动态类型语言 (因为它不使用显示数据类型声明)，又是强类型语言 (因为只要一个变量获得了一个数据类型，它实际上就一直是这个类型了)
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

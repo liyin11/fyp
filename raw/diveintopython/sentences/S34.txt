@@ -1,0 +1,27 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+5.8. Introducing Class Attributes
+5.8. 类属性介绍
+
+You already know about data attributes, which are variables owned by a specific instance of a class.
+你已经知道了数据属性，它们是被一个特定的类实例所拥有的变量
+
+Python also supports class attributes, which are variables owned by the class itself.
+Python 也支持类属性，它们是由类本身所拥有的
+
+Class attributes can be used as class-level constants (which is how you use them in MP3FileInfo), but they are not really constants.
+类属性可以作为类级别的常量来使用 (这就是为什么我们在 MP3FileInfo 中使用它们)，但是它们不是真正的常量
+
+You can also change them.
+你也可以修改它们
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

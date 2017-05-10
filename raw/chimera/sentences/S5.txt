@@ -1,0 +1,1170 @@
+Chapter 5. Files and I/O
+第五章：文件与IO¶
+
+All programs need to perform input and output.
+所有程序都要处理输入和输出
+
+This chapter covers common idioms for working with different kinds of files, including text and binary files, file encodings, and other related matters.
+ 这一章将涵盖处理不同类型的文件，包括文本和二进制文件，文件编码和其他相关的内容
+
+Techniques for manipulating filenames and directories are also covered.
+ 对文件名和目录的操作也会涉及到
+
+Reading and Writing Text Data
+5.1 读写文本数据¶
+
+You need to read or write text data, possibly in different text encodings such as ASCII, UTF-8, or UTF-16.
+你需要读写各种不同编码的文本数据，比如ASCII，UTF-8或UTF-16编码等
+
+Use the open() function with mode rt to read a text file.
+使用带有 rt 模式的 open() 函数读取文本文件
+
+For example:
+如下所示：
+
+Similarly, to write a text file, use open() with mode wt to write a file, clearing and overwriting the previous contents (if any).
+类似的，为了写入一个文本文件，使用带有 wt 模式的 open() 函数， 如果之前文件内容存在则清除并覆盖掉
+
+For example:
+如下所示：
+
+To append to the end of an existing file, use open() with mode at.
+如果是在已存在文件中添加内容，使用模式为 at 的 open() 函数
+
+By default, files are read/written using the system default text encoding, as can be found in sys.getdefaultencoding().
+文件的读写操作默认使用系统编码，可以通过调用 sys.getdefaultencoding() 来得到
+
+On most machines, this is set to utf-8.
+ 在大多数机器上面都是utf-8编码
+
+If you know that the text you are reading or writing is in a different encoding, supply the optional encoding parameter to open().
+如果你已经知道你要读写的文本是其他编码方式， 那么可以通过传递一个可选的 encoding 参数给open()函数
+
+For example:
+如下所示：
+
+Python understands several hundred possible text encodings.
+Python支持非常多的文本编码
+
+However, some of the more common encodings are ascii, latin-1, utf-8, and utf-16.
+几个常见的编码是ascii, latin-1, utf-8和utf-16
+
+UTF-8 is usually a safe bet if working with web applications.
+ 在web应用程序中通常都使用的是UTF-8
+
+ascii corresponds to the 7-bit characters in the range U+0000 to U+007F.
+ ascii对应从U+0000到U+007F范围内的7位字符
+
+latin-1 is a direct mapping of bytes 0-255 to Unicode characters U+0000 to U+00FF.
+ latin-1是字节0-255到U+0000至U+00FF范围内Unicode字符的直接映射
+
+latin-1 encoding is notable in that it will never produce a decoding error when reading text of a possibly unknown encoding.
+ 当读取一个未知编码的文本时使用latin-1编码永远不会产生解码错误
+
+Reading a file as latin-1 might not produce a completely correct text decoding, but it still might be enough to extract useful data out of it.
+ 使用latin-1编码读取一个文件的时候也许不能产生完全正确的文本解码数据， 但是它也能从中提取出足够多的有用数据
+
+Also, if you later write the data back out, the original input data will be preserved.
+同时，如果你之后将数据回写回去，原先的数据还是会保留的
+
+Reading and writing text files is typically very straightforward.
+读写文本文件一般来讲是比较简单的
+
+However, there are a number of subtle aspects to keep in mind.
+但是也几点是需要注意的
+
+First, the use of the with statement in the examples establishes a context in which the file will be used.
+ 首先，在例子程序中的with语句给被使用到的文件创建了一个上下文环境， 但 with 控制块结束时，文件会自动关闭
+
+When control leaves the with block, the file will be closed automatically.
+你也可以不使用 with 语句，但是这时候你就必须记得手动关闭文件：
+
+Another minor complication concerns the recognition of newlines, which are different on Unix and Windows (i.e., \n versus \r\n).
+另外一个问题是关于换行符的识别问题，在Unix和Windows中是不一样的(分别是n和rn)
+
+By default, Python operates in what’s known as "universal newline" mode.
+ 默认情况下，Python会以统一模式处理换行符
+
+In this mode, all common newline conventions are recognized, and newline characters are converted to a single \n character while reading.
+ 这种模式下，在读取文本的时候，Python可以识别所有的普通换行符并将其转换为单个 \n 字符
+
+Similarly, the newline character \n is converted to the system default newline character on output.
+ 类似的，在输出时会将换行符 \n 转换为系统默认的换行符
+
+If you don’t want this translation, supply the newline='' argument to open(), like this:
+ 如果你不希望这种默认的处理方式，可以给 open() 函数传入参数 newline='' ，就像下面这样：
+
+To illustrate the difference, here’s what you will see on a Unix machine if you read the contents of a Windows-encoded text file containing the raw data hello world!\r\n:
+为了说明两者之间的差异，下面我在Unix机器上面读取一个Windows上面的文本文件，里面的内容是 hello world!\r\n ：
+
+A final issue concerns possible encoding errors in text files.
+最后一个问题就是文本文件中可能出现的编码错误
+
+When reading or writing a text file, you might encounter an encoding or decoding error.
+ 但你读取或者写入一个文本文件时，你可能会遇到一个编码或者解码错误
+
+For instance:
+比如：
+
+If you get this error, it usually means that you’re not reading the file in the correct encoding.
+如果出现这个错误，通常表示你读取文本时指定的编码不正确
+
+You should carefully read the specification of whatever it is that you’re reading and check that you’re doing it right (e.g., reading data as UTF-8 instead of Latin-1 or whatever it needs to be).
+ 你最好仔细阅读说明并确认你的文件编码是正确的(比如使用UTF-8而不是Latin-1编码或其他)
+
+If encoding errors are still a possibility, you can supply an optional errors argument to open() to deal with the errors.
+ 如果编码错误还是存在的话，你可以给 open() 函数传递一个可选的 errors 参数来处理这些错误
+
+Here are a few samples of common error handling schemes:
+ 下面是一些处理常见错误的方法：
+
+If you’re constantly fiddling with the encoding and errors arguments to open() and doing lots of hacks, you’re probably making life more difficult than it needs to be.
+如果你经常使用 errors 参数来处理编码错误，可能会让你的生活变得很糟糕
+
+The number one rule with text is that you simply need to make sure you’re always using the proper text encoding.
+ 对于文本处理的首要原则是确保你总是使用的是正确编码
+
+When in doubt, use the default setting (typically UTF-8).
+当模棱两可的时候，就使用默认的设置(通常都是UTF-8)
+
+Printing to a File
+5.2 打印输出至文件中¶
+
+You want to redirect the output of the print() function to a file.
+你想将 print() 函数的输出重定向到一个文件中去
+
+Use the file keyword argument to print(), like this:
+在 print() 函数中指定 file 关键字参数，像下面这样：
+
+There’s not much more to printing to a file other than this.
+关于输出重定向到文件中就这些了
+
+However, make sure that the file is opened in text mode.
+但是有一点要注意的就是文件必须是以文本模式打开
+
+Printing will fail if the underlying file is in binary mode.
+ 如果文件是二进制模式的话，打印就会出错
+
+Printing with a Different Separator or Line Ending
+5.3 使用其他分隔符或行终止符打印¶
+
+You want to output data using print(), but you also want to change the separator character or line ending.
+你想使用 print() 函数输出数据，但是想改变默认的分隔符或者行尾符
+
+Use the sep and end keyword arguments to print() to change the output as you wish.
+可以使用在 print() 函数中使用 sep 和 end 关键字参数，以你想要的方式输出
+
+For example:
+比如：
+
+Use of the end argument is also how you suppress the output of newlines in output.
+使用 end 参数也可以在输出中禁止换行
+
+For example:
+比如：
+
+Using print() with a different item separator is often the easiest way to output data when you need something other than a space separating the items.
+当你想使用非空格分隔符来输出数据的时候，给 print() 函数传递一个 sep 参数是最简单的方案
+
+Sometimes you’ll see programmers using str.join() to accomplish the same thing.
+ 有时候你会看到一些程序员会使用 str.join() 来完成同样的事情
+
+For example:
+比如：
+
+The problem with str.join() is that it only works with strings.
+str.join() 的问题在于它仅仅适用于字符串
+
+This means that it’s often necessary to perform various acrobatics to get it to work.
+这意味着你通常需要执行另外一些转换才能让它正常工作
+
+For example:
+比如：
+
+Instead of doing that, you could just write the following:
+你当然可以不用那么麻烦，仅仅只需要像下面这样写：
+
+Reading and Writing Binary Data
+5.4 读写字节数据¶
+
+You need to read or write binary data, such as that found in images, sound files, and so on.
+你想读写二进制文件，比如图片，声音文件等等
+
+Use the open() function with mode rb or wb to read or write binary data.
+使用模式为 rb 或 wb 的 open() 函数来读取或写入二进制数据
+
+For example:
+比如：
+
+When reading binary, it is important to stress that all data returned will be in the form of byte strings, not text strings.
+在读取二进制数据时，需要指明的是所有返回的数据都是字节字符串格式的，而不是文本字符串
+
+Similarly, when writing, you must supply data in the form of objects that expose data as bytes (e.g., byte strings, bytearray objects, etc.).
+ 类似的，在写入的时候，必须保证参数是以字节形式对外暴露数据的对象(比如字节字符串，字节数组对象等)
+
+When reading binary data, the subtle semantic differences between byte strings and text strings pose a potential gotcha.
+在读取二进制数据的时候，字节字符串和文本字符串的语义差异可能会导致一个潜在的陷阱
+
+In particular, be aware that indexing and iteration return integer byte values instead of byte strings.
+ 特别需要注意的是，索引和迭代动作返回的是字节的值而不是字节字符串
+
+For example:
+比如：
+
+If you ever need to read or write text from a binary-mode file, make sure you remember to decode or encode it.
+如果你想从二进制模式的文件中读取或写入文本数据，必须确保要进行解码和编码操作
+
+For example:
+比如：
+
+A lesser-known aspect of binary I/O is that objects such as arrays and C structures can be used for writing without any kind of intermediate conversion to a bytes object.
+二进制I/O还有一个鲜为人知的特性就是数组和C结构体类型能直接被写入，而不需要中间转换为自己对象
+
+For example:
+比如：
+
+This applies to any object that implements the so-called "buffer interface," which directly exposes an underlying memory buffer to operations that can work with it.
+这个适用于任何实现了被称之为”缓冲接口”的对象，这种对象会直接暴露其底层的内存缓冲区给能处理它的操作
+
+Writing binary data is one such operation.
+ 二进制数据的写入就是这类操作之一
+
+Many objects also allow binary data to be directly read into their underlying memory using the readinto() method of files.
+很多对象还允许通过使用文件对象的 readinto() 方法直接读取二进制数据到其底层的内存中去
+
+For example:
+比如：
+
+However, great care should be taken when using this technique, as it is often platform specific and may depend on such things as the word size and byte ordering (i.e., big endian versus little endian).
+但是使用这种技术的时候需要格外小心，因为它通常具有平台相关性，并且可能会依赖字长和字节顺序(高位优先和低位优先)
+
+See “Reading Binary Data into a Mutable Buffer” for another example of reading binary data into a mutable buffer.
+ 可以查看5.9小节中另外一个读取二进制数据到可修改缓冲区的例子
+
+Writing to a File That Doesn’t Already Exist
+5.5 文件不存在才能写入¶
+
+You want to write data to a file, but only if it doesn’t already exist on the filesystem.
+你想像一个文件中写入数据，但是前提必须是这个文件在文件系统上不存在
+
+This problem is easily solved by using the little-known x mode to open() instead of the usual w mode.
+可以在 open() 函数中使用 x 模式来代替 w 模式的方法来解决这个问题
+
+For example:
+比如：
+
+If the file is binary mode, use mode xb instead of xt.
+如果文件是二进制的，使用 xb 来代替 xt
+
+This recipe illustrates an extremely elegant solution to a problem that sometimes arises when writing files (i.e., accidentally overwriting an existing file).
+这一小节演示了在写文件时通常会遇到的一个问题的完美解决方案(不小心覆盖一个已存在的文件)
+
+An alternative solution is to first test for the file like this:
+ 一个替代方案是先测试这个文件是否存在，像下面这样：
+
+Clearly, using the x file mode is a lot more straightforward.
+显而易见，使用x文件模式更加简单
+
+It is important to note that the x mode is a Python 3 specific extension to the open() function.
+要注意的是x模式是一个Python3对 open() 函数特有的扩展
+
+In particular, no such mode exists in earlier Python versions or the underlying C libraries used in Python’s implementation.
+ 在Python的旧版本或者是Python实现的底层C函数库中都是没有这个模式的
+
+Performing I/O Operations on a String
+5.6 字符串的I/O操作¶
+
+You want to feed a text or binary string to code that’s been written to operate on file-like objects instead.
+你想使用操作类文件对象的程序来操作文本或二进制字符串
+
+Use the io.StringIO() and io.BytesIO() classes to create file-like objects that operate on string data.
+使用 io.StringIO() 和 io.BytesIO() 类来创建类文件对象操作字符串数据
+
+For example:
+比如：
+
+The io.StringIO class should only be used for text.
+io.StringIO 只能用于文本
+
+If you are operating with binary data, use the io.BytesIO class instead.
+如果你要操作二进制数据，要使用 io.BytesIO 类来代替
+
+For example:
+比如：
+
+The StringIO and BytesIO classes are most useful in scenarios where you need to mimic a normal file for some reason.
+当你想模拟一个普通的文件的时候 StringIO 和 BytesIO 类是很有用的
+
+For example, in unit tests, you might use StringIO to create a file-like object containing test data that’s fed into a function that would otherwise work with a normal file.
+ 比如，在单元测试中，你可以使用 StringIO 来创建一个包含测试数据的类文件对象， 这个对象可以被传给某个参数为普通文件对象的函数
+
+Be aware that StringIO and BytesIO instances don’t have a proper integer file-descriptor.
+需要注意的是， StringIO 和 BytesIO 实例并没有正确的整数类型的文件描述符
+
+Thus, they do not work with code that requires the use of a real system-level file such as a file, pipe, or socket.
+ 因此，它们不能在那些需要使用真实的系统级文件如文件，管道或者是套接字的程序中使用
+
+Reading and Writing Compressed Datafiles
+5.7 读写压缩文件¶
+
+You need to read or write data in a file with gzip or bz2 compression.
+你想读写一个gzip或bz2格式的压缩文件
+
+The gzip and bz2 modules make it easy to work with such files.
+gzip 和 bz2 模块可以很容易的处理这些文件
+
+Both modules provide an alternative implementation of open() that can be used for this purpose.
+ 两个模块都为 open() 函数提供了另外的实现来解决这个问题
+
+For example, to read compressed files as text, do this:
+ 比如，为了以文本形式读取压缩文件，可以这样做：
+
+Similarly, to write compressed data, do this:
+类似的，为了写入压缩数据，可以这样做：
+
+As shown, all I/O will use text and perform Unicode encoding/decoding.
+如上，所有的I/O操作都使用文本模式并执行Unicode的编码/解码
+
+If you want to work with binary data instead, use a file mode of rb or wb.
+ 类似的，如果你想操作二进制数据，使用 rb 或者 wb 文件模式即可
+
+For the most part, reading or writing compressed data is straightforward.
+大部分情况下读写压缩数据都是很简单的
+
+However, be aware that choosing the correct file mode is critically important.
+但是要注意的是选择一个正确的文件模式是非常重要的
+
+If you don’t specify a mode, the default mode is binary, which will break programs that expect to receive text.
+ 如果你不指定模式，那么默认的就是二进制模式，如果这时候程序想要接受的是文本数据，那么就会出错
+
+Both gzip.open() and bz2.open() accept the same parameters as the built-in open() function, including encoding, errors, newline, and so forth.
+ gzip.open() 和 bz2.open() 接受跟内置的 open() 函数一样的参数， 包括 encoding，errors，newline 等等
+
+When writing compressed data, the compression level can be optionally specified using the compresslevel keyword argument.
+当写入压缩数据时，可以使用 compresslevel 这个可选的关键字参数来指定一个压缩级别
+
+For example:
+比如：
+
+The default level is 9, which provides the highest level of compression.
+默认的等级是9，也是最高的压缩等级
+
+Lower levels offer better performance, but not as much compression.
+等级越低性能越好，但是数据压缩程度也越低
+
+Finally, a little-known feature of gzip.open() and bz2.open() is that they can be layered on top of an existing file opened in binary mode.
+最后一点， gzip.open() 和 bz2.open() 还有一个很少被知道的特性， 它们可以作用在一个已存在并以二进制模式打开的文件上
+
+For example, this works:
+比如，下面代码是可行的：
+
+This allows the gzip and bz2 modules to work with various file-like objects such as sockets, pipes, and in-memory files.
+这样就允许 gzip 和 bz2 模块可以工作在许多类文件对象上，比如套接字，管道和内存中文件等
+
+Iterating Over Fixed-Sized Records
+5.8 固定大小记录的文件迭代¶
+
+Instead of iterating over a file by lines, you want to iterate over a collection of fixed-sized records or chunks.
+你想在一个固定长度记录或者数据块的集合上迭代，而不是在一个文件中一行一行的迭代
+
+Use the iter() function and functools.partial() using this neat trick:
+通过下面这个小技巧使用 iter 和 functools.partial() 函数：
+
+The records object in this example is an iterable that will produce fixed-sized chunks until the end of the file is reached.
+这个例子中的 records 对象是一个可迭代对象，它会不断的产生固定大小的数据块，直到文件末尾
+
+However, be aware that the last item may have fewer bytes than expected if the file size is not an exact multiple of the record size.
+ 要注意的是如果总记录大小不是块大小的整数倍的话，最后一个返回元素的字节数会比期望值少
+
+A little-known feature of the iter() function is that it can create an iterator if you pass it a callable and a sentinel value.
+iter() 函数有一个鲜为人知的特性就是，如果你给它传递一个可调用对象和一个标记值，它会创建一个迭代器
+
+The resulting iterator simply calls the supplied callable over and over again until it returns the sentinel, at which point iteration stops.
+ 这个迭代器会一直调用传入的可调用对象直到它返回标记值为止，这时候迭代终止
+
+In the solution, the functools.partial is used to create a callable that reads a fixed number of bytes from a file each time it’s called.
+在例子中， functools.partial 用来创建一个每次被调用时从文件中读取固定数目字节的可调用对象
+
+The sentinel of b'' is what gets returned when a file is read but the end of file has been reached.
+ 标记值 b'' 就是当到达文件结尾时的返回值
+
+Last, but not least, the solution shows the file being opened in binary mode.
+最后再提一点，上面的例子中的文件时以二进制模式打开的
+
+For reading fixed-sized records, this would probably be the most common case.
+ 如果是读取固定大小的记录，这通常是最普遍的情况
+
+For text files, reading line by line (the default iteration behavior) is more common.
+ 而对于文本文件，一行一行的读取(默认的迭代行为)更普遍点
+
+Reading Binary Data into a Mutable Buffer
+5.9 读取二进制数据到可变缓冲区中¶
+
+You want to read binary data directly into a mutable buffer without any intermediate copying.
+你想直接读取二进制数据到一个可变缓冲区中，而不需要做任何的中间复制操作
+
+Perhaps you want to mutate the data in-place and write it back out to a file.
+ 或者你想原地修改数据并将它写回到一个文件中去
+
+To read data into a mutable array, use the readinto() method of files.
+为了读取数据到一个可变数组中，使用文件对象的 readinto() 方法
+
+For example:
+比如：
+
+Here is an example that illustrates the usage:
+下面是一个演示这个函数使用方法的例子：
+
+The readinto() method of files can be used to fill any preallocated array with data.
+文件对象的 readinto() 方法能被用来为预先分配内存的数组填充数据，甚至包括由 array 模块或 numpy 库创建的数组
+
+This even includes arrays created from the array module or libraries such as numpy.
+ 和普通 read() 方法不同的是， readinto() 填充已存在的缓冲区而不是为新对象重新分配内存再返回它们
+
+Unlike the normal read() method, readinto() fills the contents of an existing buffer rather than allocating new objects and returning them.
+ 因此，你可以使用它来避免大量的内存分配操作
+
+Thus, you might be able to use it to avoid making extra memory allocations.
+ 比如，如果你读取一个由相同大小的记录组成的二进制文件时，你可以像下面这样写：
+
+Another interesting feature to use here might be a memoryview, which lets you make zero-copy slices of an existing buffer and even change its contents.
+另外有一个有趣特性就是 memoryview ， 它可以通过零复制的方式对已存在的缓冲区执行切片操作，甚至还能修改它的内容
+
+For example:
+比如：
+
+One caution with using f.readinto() is that you must always make sure to check its return code, which is the number of bytes actually read.
+使用 f.readinto() 时需要注意的是，你必须检查它的返回值，也就是实际读取的字节数
+
+If the number of bytes is smaller than the size of the supplied buffer, it might indicate truncated or corrupted data (e.g., if you were expecting an exact number of bytes to be read).
+如果字节数小于缓冲区大小，表明数据被截断或者被破坏了(比如你期望每次读取指定数量的字节)
+
+Finally, be on the lookout for other "into" related functions in various library modules (e.g., recv_into(), pack_into(), etc.).
+最后，留心观察其他函数库和模块中和 into 相关的函数(比如 recv_into() ， pack_into() 等)
+
+Many other parts of Python have support for direct I/O or data access that can be used to fill or alter the contents of arrays and buffers.
+ Python的很多其他部分已经能支持直接的I/O或数据访问操作，这些操作可被用来填充或修改数组和缓冲区内容
+
+See “Reading Nested and Variable-Sized Binary Structures” for a significantly more advanced example of interpreting binary structures and usage of memoryviews.
+关于解析二进制结构和 memoryviews 使用方法的更高级例子，请参考6.12小节
+
+Memory Mapping Binary Files
+5.10 内存映射的二进制文件¶
+
+You want to memory map a binary file into a mutable byte array, possibly for random access to its contents or to make in-place modifications.
+你想内存映射一个二进制文件到一个可变字节数组中，目的可能是为了随机访问它的内容或者是原地做些修改
+
+Use the mmap module to memory map files.
+使用 mmap 模块来内存映射文件
+
+Here is a utility function that shows how to open a file and memory map it in a portable manner:
+ 下面是一个工具函数，向你演示了如何打开一个文件并以一种便捷方式内存映射这个文件
+
+To use this function, you would need to have a file already created and filled with data.
+为了使用这个函数，你需要有一个已创建并且内容不为空的文件
+
+Here is an example of how you could initially create a file and expand it to a desired size:
+ 下面是一个例子，教你怎样初始创建一个文件并将其内容扩充到指定大小：
+
+Now here is an example of memory mapping the contents using the memory_map() function:
+下面是一个利用 memory_map() 函数类内存映射文件内容的例子：
+
+The mmap object returned by mmap() can also be used as a context manager, in which case the underlying file is closed automatically.
+mmap() 返回的 mmap 对象同样也可以作为一个上下文管理器来使用， 这时候底层的文件会被自动关闭
+
+For example:
+比如：
+
+By default, the memory_map() function shown opens a file for both reading and writing.
+默认情况下， memeory_map() 函数打开的文件同时支持读和写操作
+
+Any modifications made to the data are copied back to the original file.
+ 任何的修改内容都会复制回原来的文件中
+
+If read-only access is needed instead, supply mmap.ACCESS_READ for the access argument.
+ 如果需要只读的访问模式，可以给参数 access 赋值为 mmap.ACCESS_READ 
+
+For example:
+比如：
+
+If you intend to modify the data locally, but don’t want those changes written back to the original file, use mmap.ACCESS_COPY:
+如果你想在本地修改数据，但是又不想将修改写回到原始文件中，可以使用 mmap.ACCESS_COPY ：
+
+Using mmap to map files into memory can be an efficient and elegant means for randomly accessing the contents of a file.
+为了随机访问文件的内容，使用 mmap 将文件映射到内存中是一个高效和优雅的方法
+
+For example, instead of opening a file and performing various combinations of seek(), read(), and write() calls, you can simply map the file and access the data using slicing operations.
+ 例如，你无需打开一个文件并执行大量的 seek() ， read() ， write() 调用， 只需要简单的映射文件并使用切片操作访问数据即可
+
+Normally, the memory exposed by mmap() looks like a bytearray object.
+一般来讲， mmap() 所暴露的内存看上去就是一个二进制数组对象
+
+However, you can interpret the data differently using a memoryview.
+ 但是，你可以使用一个内存视图来解析其中的数据
+
+For example:
+比如：
+
+It should be emphasized that memory mapping a file does not cause the entire file to be read into memory.
+需要强调的一点是，内存映射一个文件并不会导致整个文件被读取到内存中
+
+That is, it’s not copied into some kind of memory buffer or array.
+ 也就是说，文件并没有被复制到内存缓存或数组中
+
+Instead, the operating system merely reserves a section of virtual memory for the file contents.
+相反，操作系统仅仅为文件内容保留了一段虚拟内存
+
+As you access different regions, those portions of the file will be read and mapped into the memory region as needed.
+ 当你访问文件的不同区域时，这些区域的内容才根据需要被读取并映射到内存区域中
+
+However, parts of the file that are never accessed simply stay on disk.
+ 而那些从没被访问到的部分还是留在磁盘上
+
+This all happens transparently, behind the scenes.
+所有这些过程是透明的，在幕后完成
+
+If more than one Python interpreter memory maps the same file, the resulting mmap object can be used to exchange data between interpreters.
+如果多个Python解释器内存映射同一个文件，得到的 mmap 对象能够被用来在解释器直接交换数据
+
+That is, all interpreters can read/write data simultaneously, and changes made to the data in one interpreter will automatically appear in the others.
+ 也就是说，所有解释器都能同时读写数据，并且其中一个解释器所做的修改会自动呈现在其他解释器中
+
+Obviously, some extra care is required to synchronize things, but this kind of approach is sometimes used as an alternative to transmitting data in messages over pipes or sockets.
+ 很明显，这里需要考虑同步的问题
+
+As shown, this recipe has been written to be as general purpose as possible, working on both Unix and Windows.
+这一小节中函数尽量写得很通用，同时适用于Unix和Windows平台
+
+Be aware that there are some platform differences concerning the use of the mmap() call hidden behind the scenes.
+ 要注意的是使用 mmap() 函数时会在底层有一些平台的差异性
+
+In addition, there are options to create anonymously mapped memory regions.
+ 另外，还有一些选项可以用来创建匿名的内存映射区域
+
+If this is of interest to you, make sure you carefully read the Python documentation on the subject.
+ 如果你对这个感兴趣，确保你仔细研读了Python文档中 这方面的内容 
+
+Manipulating Pathnames
+5.11 文件路径名的操作¶
+
+You need to manipulate pathnames in order to find the base filename, directory name, absolute path, and so on.
+你需要使用路径名来获取文件名，目录名，绝对路径等等
+
+To manipulate pathnames, use the functions in the os.path module.
+使用 os.path 模块中的函数来操作路径名
+
+Here is an interactive example that illustrates a few key features:
+ 下面是一个交互式例子来演示一些关键的特性：
+
+For any manipulation of filenames, you should use the os.path module instead of trying to cook up your own code using the standard string operations.
+对于任何的文件名的操作，你都应该使用 os.path 模块，而不是使用标准字符串操作来构造自己的代码
+
+In part, this is for portability.
+ 特别是为了可移植性考虑的时候更应如此， 因为 os.path 模块知道Unix和Windows系统之间的差异并且能够可靠地处理类似 Data/data.csv 和 Data\data.csv 这样的文件名
+
+The os.path module knows about differences between Unix and Windows and can reliably deal with filenames such as Data/data.csv and Data\data.csv.
+ 其次，你真的不应该浪费时间去重复造轮子
+
+Second, you really shouldn’t spend your time reinventing the wheel.
+通常最好是直接使用已经为你准备好的功能
+
+It should be noted that the os.path module has many more features not shown in this recipe.
+要注意的是 os.path 还有更多的功能在这里并没有列举出来
+
+Consult the documentation for more functions related to file testing, symbolic links, and so forth.
+ 可以查阅官方文档来获取更多与文件测试，符号链接等相关的函数说明
+
+Testing for the Existence of a File
+5.12 测试文件是否存在¶
+
+You need to test whether or not a file or directory exists.
+你想测试一个文件或目录是否存在
+
+Use the os.path module to test for the existence of a file or directory.
+使用 os.path 模块来测试一个文件或目录是否存在
+
+For example:
+比如：
+
+You can perform further tests to see what kind of file it might be.
+你还能进一步测试这个文件时什么类型的
+
+These tests return False if the file in question doesn’t exist:
+ 在下面这些测试中，如果测试的文件不存在的时候，结果都会返回False：
+
+If you need to get metadata (e.g., the file size or modification date), that is also available in the os.path module.
+如果你还想获取元数据(比如文件大小或者是修改日期)，也可以使用 os.path 模块来解决：
+
+File testing is a straightforward operation using os.path.
+使用 os.path 来进行文件测试是很简单的
+
+Probably the only thing to be aware of when writing scripts is that you might need to worry about permissions—especially for operations that get metadata.
+ 在写这些脚本时，可能唯一需要注意的就是你需要考虑文件权限的问题，特别是在获取元数据时候
+
+For example:
+比如：
+
+Getting a Directory Listing
+5.13 获取文件夹中的文件列表¶
+
+You want to get a list of the files contained in a directory on the filesystem.
+你想获取文件系统中某个目录下的所有文件列表
+
+Use the os.listdir() function to obtain a list of files in a directory:
+使用 os.listdir() 函数来获取某个目录中的文件列表：
+
+This will give you the raw directory listing, including all files, subdirectories, symbolic links, and so forth.
+结果会返回目录中所有文件列表，包括所有文件，子目录，符号链接等等
+
+If you need to filter the data in some way, consider using a list comprehension combined with various functions in the os.path library.
+ 如果你需要通过某种方式过滤数据，可以考虑结合 os.path 库中的一些函数来使用列表推导
+
+For example:
+比如：
+
+The startswith() and endswith() methods of strings can be useful for filtering the contents of a directory as well.
+字符串的 startswith() 和 endswith() 方法对于过滤一个目录的内容也是很有用的
+
+For example:
+比如：
+
+For filename matching, you may want to use the glob or fnmatch modules instead.
+对于文件名的匹配，你可能会考虑使用 glob 或 fnmatch 模块
+
+For example:
+比如：
+
+Getting a directory listing is easy, but it only gives you the names of entries in the directory.
+获取目录中的列表是很容易的，但是其返回结果只是目录中实体名列表而已
+
+If you want to get additional metadata, such as file sizes, modification dates, and so forth, you either need to use additional functions in the os.path module or use the os.stat() function.
+ 如果你还想获取其他的元信息，比如文件大小，修改时间等等， 你或许还需要使用到 os.path 模块中的函数或着 os.stat() 函数来收集数据
+
+To collect the data.
+比如：
+
+Last, but not least, be aware that there are subtle issues that can arise in filename handling related to encodings.
+最后还有一点要注意的就是，有时候在处理文件名编码问题时候可能会出现一些问题
+
+Normally, the entries returned by a function such as os.listdir() are decoded according to the system default filename encoding.
+ 通常来讲，函数 os.listdir() 返回的实体列表会根据系统默认的文件名编码来解码
+
+However, it’s possible under certain circumstances to encounter un-decodable filenames.
+ 但是有时候也会碰到一些不能正常解码的文件名
+
+Recipes and have more details about handling such names.
+ 关于文件名的处理问题，在5.14和5.15小节有更详细的讲解
+
+Bypassing Filename Encoding
+5.14 忽略文件名编码¶
+
+You want to perform file I/O operations using raw filenames that have not been decoded or encoded according to the default filename encoding.
+你想使用原始文件名执行文件的I/O操作，也就是说文件名并没有经过系统默认编码去解码或编码过
+
+By default, all filenames are encoded and decoded according to the text encoding returned by sys.getfilesystemencoding().
+默认情况下，所有的文件名都会根据 sys.getfilesystemencoding() 返回的文本编码来编码或解码
+
+For example:
+比如：
+
+If you want to bypass this encoding for some reason, specify a filename using a raw byte string instead.
+如果因为某种原因你想忽略这种编码，可以使用一个原始字节字符串来指定一个文件名即可
+
+For example:
+比如：
+
+As you can see in the last two operations, the filename handling changes ever so slightly when byte strings are supplied to file-related functions, such as open() and os.listdir().
+正如你所见，在最后两个操作中，当你给文件相关函数如 open() 和 os.listdir() 传递字节字符串时，文件名的处理方式会稍有不同
+
+Under normal circumstances, you shouldn’t need to worry about filename encoding and decoding—normal filename operations should just work.
+通常来讲，你不需要担心文件名的编码和解码，普通的文件名操作应该就没问题了
+
+However, many operating systems may allow a user through accident or malice to create files with names that don’t conform to the expected encoding rules.
+ 但是，有些操作系统允许用户通过偶然或恶意方式去创建名字不符合默认编码的文件
+
+Such filenames may mysteriously break Python programs that work with a lot of files.
+ 这些文件名可能会神秘地中断那些需要处理大量文件的Python程序
+
+Reading directories and working with filenames as raw undecoded bytes has the potential to avoid such problems, albeit at the cost of programming convenience.
+读取目录并通过原始未解码方式处理文件名可以有效的避免这样的问题， 尽管这样会带来一定的编程难度
+
+See “Printing Bad Filenames” for a recipe on printing undecodable filenames.
+关于打印不可解码的文件名，请参考5.15小节
+
+Printing Bad Filenames
+5.15 打印不合法的文件名¶
+
+Your program received a directory listing, but when it tried to print the filenames, it crashed with a UnicodeEncodeError exception and a cryptic message about "surrogates not allowed."
+你的程序获取了一个目录中的文件名列表，但是当它试着去打印文件名的时候程序崩溃， 出现了 UnicodeEncodeError 异常和一条奇怪的消息—— surrogates not allowed 
+
+When printing filenames of unknown origin, use this convention to avoid errors:
+当打印未知的文件名时，使用下面的方法可以避免这样的错误：
+
+This recipe is about a potentially rare but very annoying problem regarding programs that must manipulate the filesystem.
+这一小节讨论的是在编写必须处理文件系统的程序时一个不太常见但又很棘手的问题
+
+By default, Python assumes that all filenames are encoded according to the setting reported by sys.getfilesystemencoding().
+ 默认情况下，Python假定所有文件名都已经根据 sys.getfilesystemencoding() 的值编码过了
+
+However, certain filesystems don’t necessarily enforce this encoding restriction, thereby allowing files to be created without proper filename encoding.
+ 但是，有一些文件系统并没有强制要求这样做，因此允许创建文件名没有正确编码的文件
+
+It’s not common, but there is always the danger that some user will do something silly and create such a file by accident (e.g., maybe passing a bad filename to open() in some buggy code).
+ 这种情况不太常见，但是总会有些用户冒险这样做或者是无意之中这样做了( 可能是在一个有缺陷的代码中给 open() 函数传递了一个不合规范的文件名)
+
+When executing a command such as os.listdir(), bad filenames leave Python in a bind.
+当执行类似 os.listdir() 这样的函数时，这些不合规范的文件名就会让Python陷入困境
+
+On the one hand, it can’t just discard bad names.
+ 一方面，它不能仅仅只是丢弃这些不合格的名字
+
+On the other hand, it still can’t turn the filename into a proper text string.
+而另一方面，它又不能将这些文件名转换为正确的文本字符串
+
+Python’s solution to this problem is to take an undecodable byte value \xhh in a filename and map it into a so-called "surrogate encoding" represented by the Unicode character \udchh.
+ Python对这个问题的解决方案是从文件名中获取未解码的字节值比如 \xhh 并将它映射成Unicode字符 \udchh 表示的所谓的”代理编码”
+
+Here is an example of how a bad directory listing might look if it contained a filename bäd.txt, encoded as Latin-1 instead of UTF-8:
+ 下面一个例子演示了当一个不合格目录列表中含有一个文件名为bäd.txt(使用Latin-1而不是UTF-8编码)时的样子：
+
+If you have code that manipulates filenames or even passes them to functions such as open(), everything works normally.
+如果你有代码需要操作文件名或者将文件名传递给 open() 这样的函数，一切都能正常工作
+
+It’s only in situations where you want to output the filename that you run into trouble (e.g., printing it to the screen, logging it, etc.).
+ 只有当你想要输出文件名时才会碰到些麻烦(比如打印输出到屏幕或日志文件等)
+
+Specifically, if you tried to print the preceding listing, your program will crash:
+ 特别的，当你想打印上面的文件名列表时，你的程序就会崩溃：
+
+The reason it crashes is that the character \udce4 is technically invalid Unicode.
+程序崩溃的原因就是字符 \udce4 是一个非法的Unicode字符
+
+It’s actually the second half of a two-character combination known as a surrogate pair.
+ 它其实是一个被称为代理字符对的双字符组合的后半部分
+
+However, since the first half is missing, it’s invalid Unicode.
+ 由于缺少了前半部分，因此它是个非法的Unicode
+
+Thus, the only way to produce successful output is to take corrective action when a bad filename is encountered.
+ 所以，唯一能成功输出的方法就是当遇到不合法文件名时采取相应的补救措施
+
+For example, changing the code to the recipe produces the following:
+ 比如可以将上述代码修改如下：
+
+The choice of what to do for the bad_filename() function is largely up to you.
+在 bad_filename() 函数中怎样处置取决于你自己
+
+Another option is to re-encode the value in some way, like this:
+ 另外一个选择就是通过某种方式重新编码，示例如下：
+
+Using this version produces the following output:
+使用这个版本产生的输出如下：
+
+This recipe will likely be ignored by most readers.
+这一小节主题可能会被大部分读者所忽略
+
+However, if you’re writing mission-critical scripts that need to work reliably with filenames and the filesystem, it’s something to think about.
+但是如果你在编写依赖文件名和文件系统的关键任务程序时， 就必须得考虑到这个
+
+Otherwise, you might find yourself called back into the office over the weekend to debug a seemingly inscrutable error.
+否则你可能会在某个周末被叫到办公室去调试一些令人费解的错误
+
+Adding or Changing the Encoding of an Already Open File
+5.16 增加或改变已打开文件的编码¶
+
+You want to add or change the Unicode encoding of an already open file without closing it first.
+你想在不关闭一个已打开的文件前提下增加或改变它的Unicode编码
+
+If you want to add Unicode encoding/decoding to an already existing file object that’s opened in binary mode, wrap it with an io.TextIOWrapper() object.
+如果你想给一个以二进制模式打开的文件添加Unicode编码/解码方式， 可以使用 io.TextIOWrapper() 对象包装它
+
+For example:
+比如：
+
+If you want to change the encoding of an already open text-mode file, use its detach() method to remove the existing text encoding layer before replacing it with a new one.
+如果你想修改一个已经打开的文本模式的文件的编码方式，可以先使用 detach() 方法移除掉已存在的文本编码层， 并使用新的编码方式代替
+
+Here is an example of changing the encoding on sys.stdout:
+下面是一个在 sys.stdout 上修改编码方式的例子：
+
+Doing this might break the output of your terminal.
+这样做可能会中断你的终端，这里仅仅是为了演示而已
+
+The I/O system is built as a series of layers.
+I/O系统由一系列的层次构建而成
+
+You can see the layers yourself by trying this simple example involving a text file:
+你可以试着运行下面这个操作一个文本文件的例子来查看这种层次：
+
+In this example, io.TextIOWrapper is a text-handling layer that encodes and decodes Unicode, io.BufferedWriter is a buffered I/O layer that handles binary data, and io.FileIO is a raw file representing the low-level file descriptor in the operating system.
+在这个例子中，io.TextIOWrapper 是一个编码和解码Unicode的文本处理层， io.BufferedWriter 是一个处理二进制数据的带缓冲的I/O层， io.FileIO 是一个表示操作系统底层文件描述符的原始文件
+
+Adding or changing the text encoding involves adding or changing the topmost io.TextIOWrapper layer.
+ 增加或改变文本编码会涉及增加或改变最上面的 io.TextIOWrapper 层
+
+As a general rule, it’s not safe to directly manipulate the different layers by accessing the attributes shown.
+一般来讲，像上面例子这样通过访问属性值来直接操作不同的层是很不安全的
+
+For example, see what happens if you try to change the encoding using this technique:
+ 例如，如果你试着使用下面这样的技术改变编码看看会发生什么：
+
+It doesn’t work because the original value of f got destroyed and closed the underlying file in the process.
+结果出错了，因为f的原始值已经被破坏了并关闭了底层的文件
+
+The detach() method disconnects the topmost layer of a file and returns the next lower layer.
+detach() 方法会断开文件的最顶层并返回第二层，之后最顶层就没什么用了
+
+Afterward, the top layer will no longer be usable.
+例如：
+
+Once detached, however, you can add a new top layer to the returned result.
+一旦断开最顶层后，你就可以给返回结果添加一个新的最顶层
+
+For example:
+比如：
+
+Although changing the encoding has been shown, it is also possible to use this technique to change the line handling, error policy, and other aspects of file handling.
+尽管已经向你演示了改变编码的方法， 但是你还可以利用这种技术来改变文件行处理、错误机制以及文件处理的其他方面
+
+For example:
+例如：
+
+Notice how the non-ASCII character ñ has been replaced by &#241;
+注意下最后输出中的非ASCII字符 ñ 是如何被 &#241; 取代的
+
+Writing Bytes to a Text File
+5.17 将字节写入文本文件¶
+
+You want to write raw bytes to a file opened in text mode.
+你想在文本模式打开的文件中写入原始的字节数据
+
+Simply write the byte data to the files underlying buffer.
+将字节数据直接写入文件的缓冲区即可，例如：
+
+Similarly, binary data can be read from a text file by reading from its buffer attribute instead.
+类似的，能够通过读取文本文件的 buffer 属性来读取二进制数据
+
+The I/O system is built from layers.
+I/O系统以层级结构的形式构建而成
+
+Text files are constructed by adding a Unicode encoding/decoding layer on top of a buffered binary-mode file.
+ 文本文件是通过在一个拥有缓冲的二进制模式文件上增加一个Unicode编码/解码层来创建
+
+The buffer attribute simply points at this underlying file.
+ buffer 属性指向对应的底层文件
+
+If you access it, you’ll bypass the text encoding/decoding layer.
+如果你直接访问它的话就会绕过文本编码/解码层
+
+The example involving sys.stdout might be viewed as a special case.
+本小节例子展示的 sys.stdout 可能看起来有点特殊
+
+By default, sys.stdout is always opened in text mode.
+ 默认情况下，sys.stdout 总是以文本模式打开的
+
+However, if you are writing a script that actually needs to dump binary data to standard output, you can use the technique shown to bypass the text encoding.)
+ 但是如果你在写一个需要打印二进制数据到标准输出的脚本的话，你可以使用上面演示的技术来绕过文本编码层
+
+Wrapping an Existing File Descriptor As a File Object
+5.18 将文件描述符包装成文件对象¶
+
+You have an integer file descriptor correponding to an already open I/O channel on the operating system (e.g., file, pipe, socket, etc.), and you want to wrap a higher-level Python file object around it.
+你有一个对应于操作系统上一个已打开的I/O通道(比如文件、管道、套接字等)的整型文件描述符， 你想将它包装成一个更高层的Python文件对象
+
+A file descriptor is different than a normal open file in that it is simply an integer handle assigned by the operating system to refer to some kind of system I/O channel.
+一个文件描述符和一个打开的普通文件是不一样的
+
+If you happen to have such a file descriptor, you can wrap a Python file object around it using the open() function.
+ 文件描述符仅仅是一个由操作系统指定的整数，用来指代某个系统的I/O通道
+
+However, you simply supply the integer file descriptor as the first argument instead of the filename.
+ 如果你碰巧有这么一个文件描述符，你可以通过使用 open() 函数来将其包装为一个Python的文件对象
+
+For example:
+ 你仅仅只需要使用这个整数值的文件描述符作为第一个参数来代替文件名即可
+
+When the high-level file object is closed or destroyed, the underlying file descriptor will also be closed.
+当高层的文件对象被关闭或者破坏的时候，底层的文件描述符也会被关闭
+
+If this is not desired, supply the optional closefd=False argument to open().
+ 如果这个并不是你想要的结果，你可以给 open() 函数传递一个可选的 colsefd=False 
+
+For example:
+比如：
+
+On Unix systems, this technique of wrapping a file descriptor can be a convenient means for putting a file-like interface on an existing I/O channel that was opened in a different way (e.g., pipes, sockets, etc.).
+在Unix系统中，这种包装文件描述符的技术可以很方便的将一个类文件接口作用于一个以不同方式打开的I/O通道上， 如管道、套接字等
+
+For instance, here is an example involving sockets:
+举例来讲，下面是一个操作管道的例子：
+
+It’s important to emphasize that the above example is only meant to illustrate a feature of the built-in open() function and that it only works on Unix-based systems.
+需要重点强调的一点是，上面的例子仅仅是为了演示内置的 open() 函数的一个特性，并且也只适用于基于Unix的系统
+
+If you are trying to put a file-like interface on a socket and need your code to be cross platform, use the makefile() method of sockets instead.
+ 如果你想将一个类文件接口作用在一个套接字并希望你的代码可以跨平台，请使用套接字对象的 makefile() 方法
+
+However, if portability is not a concern, you’ll find that the above solution provides much better performance than using makefile().
+ 但是如果不考虑可移植性的话，那上面的解决方案会比使用 makefile() 性能更好一点
+
+You can also use this to make a kind of alias that allows an already open file to be used in a slightly different way than how it was first opened.
+你也可以使用这种技术来构造一个别名，允许以不同于第一次打开文件的方式使用它
+
+For example, here’s how you could create a file object that allows you to emit binary data on stdout (which is normally opened in text mode):
+ 例如，下面演示如何创建一个文件对象，它允许你输出二进制数据到标准输出(通常以文本模式打开)：
+
+Although it’s possible to wrap an existing file descriptor as a proper file, be aware that not all file modes may be supported and that certain kinds of file descriptors may have funny side effects (especially with respect to error handling, end-of-file conditions, etc.).
+尽管可以将一个已存在的文件描述符包装成一个正常的文件对象， 但是要注意的是并不是所有的文件模式都被支持，并且某些类型的文件描述符可能会有副作用 (特别是涉及到错误处理、文件结尾条件等等的时候)
+
+The behavior can also vary according to operating system.
+ 在不同的操作系统上这种行为也是不一样，特别的，上面的例子都不能在非Unix系统上运行
+
+In particular, none of the examples are likely to work on non-Unix systems.
+ 我说了这么多，意思就是让你充分测试自己的实现代码，确保它能按照期望工作
+
+Making Temporary Files and Directories
+5.19 创建临时文件和文件夹¶
+
+You need to create a temporary file or directory for use when your program executes.
+你需要在程序执行时创建一个临时文件或目录，并希望使用完之后可以自动销毁掉
+
+The tempfile module has a variety of functions for performing this task.
+tempfile 模块中有很多的函数可以完成这任务
+
+To make an unnamed temporary file, use tempfile.TemporaryFile:
+ 为了创建一个匿名的临时文件，可以使用 tempfile.TemporaryFile ：
+
+Or, if you prefer, you can also use the file like this:
+或者，如果你喜欢，你还可以像这样使用临时文件：
+
+The first argument to TemporaryFile() is the file mode, which is usually w+t for text and w+b for binary.
+TemporaryFile() 的第一个参数是文件模式，通常来讲文本模式使用 w+t ，二进制模式使用 w+b 
+
+This mode simultaneously supports reading and writing, which is useful here since closing the file to change modes would actually destroy it.
+ 这个模式同时支持读和写操作，在这里是很有用的，因为当你关闭文件去改变模式的时候，文件实际上已经不存在了
+
+TemporaryFile() additionally accepts the same arguments as the built-in open() function.
+ TemporaryFile() 另外还支持跟内置的 open() 函数一样的参数
+
+For example:
+比如：
+
+On most Unix systems, the file created by TemporaryFile() is unnamed and won’t even have a directory entry.
+在大多数Unix系统上，通过 TemporaryFile() 创建的文件都是匿名的，甚至连目录都没有
+
+If you want to relax this constraint, use NamedTemporaryFile() instead.
+ 如果你想打破这个限制，可以使用 NamedTemporaryFile() 来代替
+
+For example:
+比如：
+
+Here, the f.name attribute of the opened file contains the filename of the temporary file.
+这里，被打开文件的 f.name 属性包含了该临时文件的文件名
+
+This can be useful if it needs to be given to some other code that needs to open the file.
+ 当你需要将文件名传递给其他代码来打开这个文件的时候，这个就很有用了
+
+As with TemporaryFile(), the resulting file is automatically deleted when it’s closed.
+ 和 TemporaryFile() 一样，结果文件关闭时会被自动删除掉
+
+If you don’t want this, supply a delete=False keyword argument.
+ 如果你不想这么做，可以传递一个关键字参数 delte=False 即可
+
+For example:
+比如：
+
+To make a temporary directory, use tempfile.TemporaryDirectory().
+为了创建一个临时目录，可以使用 tempfile.TemporaryDirectory() 
+
+For example:
+比如：
+
+The TemporaryFile(), NamedTemporaryFile(), and TemporaryDirectory() functions are probably the most convenient way to work with temporary files and directories, because they automatically handle all of the steps of creation and subsequent cleanup.
+TemporaryFile() 、NamedTemporaryFile() 和 TemporaryDirectory() 函数 应该是处理临时文件目录的最简单的方式了，因为它们会自动处理所有的创建和清理步骤
+
+At a lower level, you can also use the mkstemp() and mkdtemp() to create temporary files and directories.
+ 在一个更低的级别，你可以使用 mkstemp() 和 mkdtemp() 来创建临时文件和目录
+
+For example:
+比如：
+
+However, these functions don’t really take care of further management.
+但是，这些函数并不会做进一步的管理了
+
+For example, the mkstemp() function simply returns a raw OS file descriptor and leaves it up to you to turn it into a proper file.
+ 例如，函数 mkstemp() 仅仅就返回一个原始的OS文件描述符，你需要自己将它转换为一个真正的文件对象
+
+Similarly, it’s up to you to clean up the files if you want.
+ 同样你还需要自己清理这些文件
+
+Normally, temporary files are created in the system’s default location, such as /var/tmp or similar.
+通常来讲，临时文件在系统默认的位置被创建，比如 /var/tmp 或类似的地方
+
+To find out the actual location, use the tempfile.gettempdir() function.
+ 为了获取真实的位置，可以使用 tempfile.gettempdir() 函数
+
+For example:
+比如：
+
+All of the temporary-file-related functions allow you to override this directory as well as the naming conventions using the prefix, suffix, and dir keyword arguments.
+所有和临时文件相关的函数都允许你通过使用关键字参数 prefix 、suffix 和 dir 来自定义目录以及命名规则
+
+For example:
+比如：
+
+Last, but not least, to the extent possible, the tempfile() module creates temporary files in the most secure manner possible.
+最后还有一点，尽可能以最安全的方式使用 tempfile 模块来创建临时文件
+
+This includes only giving access permission to the current user and taking steps to avoid race conditions in file creation.
+ 包括仅给当前用户授权访问以及在文件创建过程中采取措施避免竞态条件
+
+Be aware that there can be differences between platforms.
+ 要注意的是不同的平台可能会不一样
+
+Thus, you should make sure to check the official documentation for the finer points.
+因此你最好阅读 官方文档 来了解更多的细节
+
+Communicating with Serial Ports
+5.20 与串行端口的数据通信¶
+
+You want to read and write data over a serial port, typically to interact with some kind of hardware device (e.g., a robot or sensor).
+你想通过串行端口读写数据，典型场景就是和一些硬件设备打交道(比如一个机器人或传感器)
+
+Although you can probably do this directly using Python’s built-in I/O primitives, your best bet for serial communication is to use the pySerial package.
+尽管你可以通过使用Python内置的I/O模块来完成这个任务，但对于串行通信最好的选择是使用 pySerial包 
+
+Getting started with the package is very easy.
+ 这个包的使用非常简单，先安装pySerial，使用类似下面这样的代码就能很容易的打开一个串行端口：
+
+The device name will vary according to the kind of device and operating system.
+设备名对于不同的设备和操作系统是不一样的
+
+For instance, on Windows, you can use a device of 0, 1, and so on, to open up the communication ports such as "COM0" and "COM1." Once open, you can read and write data using read(), readline(), and write() calls.
+ 比如，在Windows系统上，你可以使用0, 1等表示的一个设备来打开通信端口”COM0”和”COM1”
+
+For example:
+ 一旦端口打开，那就可以使用 read()，readline() 和 write() 函数读写数据了
+
+For the most part, simple serial communication should be pretty simple from this point forward.
+大多数情况下，简单的串口通信从此变得十分简单
+
+Although simple on the surface, serial communication can sometimes get rather messy.
+尽管表面上看起来很简单，其实串口通信有时候也是挺麻烦的
+
+One reason you should use a package such as pySerial is that it provides support for advanced features (e.g., timeouts, control flow, buffer flushing, handshaking, etc.).
+ 推荐你使用第三方包如 pySerial 的一个原因是它提供了对高级特性的支持 (比如超时，控制流，缓冲区刷新，握手协议等等)
+
+For instance, if you want to enable RTS-CTS handshaking, you simply provide a rtscts=True argument to Serial().
+举个例子，如果你想启用 RTS-CTS 握手协议， 你只需要给 Serial() 传递一个 rtscts=True 的参数即可
+
+The provided documentation is excellent, so there’s little benefit to paraphrasing it here.
+ 其官方文档非常完善，因此我在这里极力推荐这个包
+
+Keep in mind that all I/O involving serial ports is binary.
+时刻记住所有涉及到串口的I/O都是二进制模式的
+
+Thus, make sure you write your code to use bytes instead of text (or perform proper text encoding/decoding as needed).
+因此，确保你的代码使用的是字节而不是文本 (或有时候执行文本的编码/解码操作)
+
+The struct module may also be useful should you need to create binary-coded commands or packets.
+ 另外当你需要创建二进制编码的指令或数据包的时候，struct 模块也是非常有用的
+
+Serializing Python Objects
+5.21 序列化Python对象¶
+
+You need to serialize a Python object into a byte stream so that you can do things such as save it to a file, store it in a database, or transmit it over a network connection.
+你需要将一个Python对象序列化为一个字节流，以便将它保存到一个文件、存储到数据库或者通过网络传输它
+
+To dump an object to a string, use pickle.dumps():
+对于序列化最普遍的做法就是使用 pickle 模块
+
+To re-create an object from a byte stream, use either the pickle.load() or pickle.loads() functions.
+为了将一个对象转储为一个字符串，可以使用 pickle.dumps() ：
+
+For most programs, usage of the dump() and load() function is all you need to effectively use pickle.
+为了从字节流中恢复一个对象，使用 picle.load() 或 pickle.loads() 函数
+
+It simply works with most Python data types and instances of user-defined classes.
+比如：
+
+pickle is a Python-specific self-describing data encoding.
+对于大多数应用程序来讲，dump() 和 load() 函数的使用就是你有效使用 pickle 模块所需的全部了
+
+By self-describing, the serialized data contains information related to the start and end of each object as well as information about its type.
+ 它可适用于绝大部分Python数据类型和用户自定义类的对象实例
+
+Thus, you don’t need to worry about defining records—it simply works.
+ 如果你碰到某个库可以让你在数据库中保存/恢复Python对象或者是通过网络传输对象的话， 那么很有可能这个库的底层就使用了 pickle 模块
+
+You can pickle functions, classes, and instances, but the resulting data only encodes name references to the associated code objects.
+pickle 是一种Python特有的自描述的数据编码
+
+For example:
+ 通过自描述，被序列化后的数据包含每个对象开始和结束以及它的类型信息
+
+When the data is unpickled, it is assumed that all of the required source is available.
+你还能序列化函数，类，还有接口，但是结果数据仅仅将它们的名称编码成对应的代码对象
+
+Modules, classes, and functions will automatically be imported as needed.
+例如：
+
+pickle.load() should never be used on untrusted data.
+当数据反序列化回来的时候，会先假定所有的源数据时可用的
+
+As a side effect of loading, pickle will automatically load modules and make instances.
+ 模块、类和函数会自动按需导入进来
+
+However, an evildoer who knows how pickle works can create "malformed" data that causes Python to execute arbitrary system commands.
+对于Python数据被不同机器上的解析器所共享的应用程序而言， 数据的保存可能会有问题，因为所有的机器都必须访问同一个源代码
+
+Certain kinds of objects can’t be pickled.
+有些类型的对象是不能被序列化的
+
+These are typically objects that involve some sort of external system state, such as open files, open network connections, threads, processes, stack frames, and so forth.
+这些通常是那些依赖外部系统状态的对象， 比如打开的文件，网络连接，线程，进程，栈帧等等
+
+User-defined classes can sometimes work around these limitations by providing __getstate__() and __setstate__() methods.
+ 用户自定义类可以通过提供 __getstate__() 和 __setstate__() 方法来绕过这些限制
+
+If defined, pickle.dump() will call __getstate__() to get an object that can be pickled.
+ 如果定义了这两个方法，pickle.dump() 就会调用 __getstate__() 获取序列化的对象
+
+Similarly, __setstate__() will be invoked on unpickling.
+ 类似的，__setstate__() 在反序列化时被调用
+
+To illustrate what’s possible, here is a class that internally defines a thread but can still be pickled/unpickled:
+为了演示这个工作原理， 下面是一个在内部定义了一个线程但仍然可以序列化和反序列化的类：
+
+Try the following experiment involving pickling:
+试着运行下面的序列化试验代码：
+
+Now quit Python and try this after restart:
+然后退出Python解析器并重启后再试验下：
+
+You should see the thread magically spring to life again, picking up where it left off when you first pickled it.
+你可以看到线程又奇迹般的重生了，从你第一次序列化它的地方又恢复过来
+
+pickle is not a particularly efficient encoding for large data structures such as binary arrays created by libraries like the array module or numpy.
+pickle 对于大型的数据结构比如使用 array 或 numpy 模块创建的二进制数组效率并不是一个高效的编码方式
+
+If you’re moving large amounts of array data around, you may be better off simply saving bulk array data in a file or using a more standardized encoding, such as HDF5 (supported by third-party libraries).
+ 如果你需要移动大量的数组数据，你最好是先在一个文件中将其保存为数组数据块或使用更高级的标准编码方式如HDF5 (需要第三方库的支持)
+
+Because of its Python-specific nature and attachment to source code, you probably shouldn’t use pickle as a format for long-term storage.
+由于 pickle 是Python特有的并且附着在源码上，所有如果需要长期存储数据的时候不应该选用它
+
+For example, if the source code changes, all of your stored data might break and become unreadable.
+ 例如，如果源码变动了，你所有的存储数据可能会被破坏并且变得不可读取
+
+Frankly, for storing data in databases and archival storage, you’re probably better off using a more standard data encoding, such as XML, CSV, or JSON.
+ 坦白来讲，对于在数据库和存档文件中存储数据时，你最好使用更加标准的数据编码格式如XML，CSV或JSON
+
+These encodings are more standardized, supported by many different languages, and more likely to be better adapted to changes in your source code.
+ 这些编码格式更标准，可以被不同的语言支持，并且也能很好的适应源码变更
+
+Last, but not least, be aware that pickle has a huge variety of options and tricky corner cases.
+最后一点要注意的是 pickle 有大量的配置选项和一些棘手的问题
+
+For the most common uses, you don’t need to worry about them, but a look at the official documentation should be required if you’re going to build a signficant application that uses pickle for serialization.
+ 对于最常见的使用场景，你不需要去担心这个，但是如果你要在一个重要的程序中使用pickle去做序列化的话， 最好去查阅一下 官方文档 
+

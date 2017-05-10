@@ -1,0 +1,57 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+5.7. Advanced Special Class Methods
+5.7. 高级专用类方法
+
+Python has more special methods than just __getitem__ and __setitem__.
+除了 __getitem__ 和 __setitem__ 之外 Python 还有更多的专用函数
+
+Some of them let you emulate functionality that you may not even know about.
+某些可以让你模拟出你甚至可能不知道的功能
+
+This example shows some of the other special methods in UserDict.
+下面的例子将展示 UserDict 一些其他专用方法
+
+At this point, you may be thinking, “All this work just to do something in a class that I can do with a built-in datatype.” And it's true that life would be easier (and the entire UserDict class would be unnecessary) if you could inherit from built-in datatypes like a dictionary.
+在这个地方，你可能会想，“所有这些工作只是为了在类中做一些我可以对一个内置数据类型所做的操作”
+
+But even if you could, special methods would still be useful, because they can be used in any class, not just wrapper classes like UserDict.
+不错，如果你能够从像字典一样的内置数据类型进行继承的话，事情就容易多了 (那样整个 UserDict 类将完全不需要了)
+
+Special methods mean that any class can store key/value pairs like a dictionary, just by defining the __setitem__ method.
+专用方法意味着任何类 可以像字典一样保存键-值对，只要定义 __setitem__ 方法
+
+Any class can act like a sequence, just by defining the __getitem__ method.
+任何类可以表现得像一个序列，只要定义 __getitem__ 方法
+
+Any class that defines the __cmp__ method can be compared with ==.
+任何定义了 __cmp__ 方法的类可以用 == 进行比较
+
+And if your class represents something that has a length, don't define a GetLength method;
+并且如果你的类表现为拥有类似长度的东西，不要定义 GetLength 方法，而定义 __len__ 方法，并使用 len(instance)
+
+Python has a lot of other special methods.
+Python 存在许多其它的专用方法
+
+There's a whole set of them that let classes act like numbers, allowing you to add, subtract, and do other arithmetic operations on class instances.
+有一整套的专用方法，可以让类表现得象数值一样，允许你在类实例上进行加、减，以及执行其它算数操作
+
+(The canonical example of this is a class that represents complex numbers, numbers with both real and imaginary components.) The __call__ method lets a class act like a function, allowing you to call a class instance directly.
+(关于这一点典型的例子就是表示复数的类，数值带有实数和虚数部分.) __call__ 方法让一个类表现得像一个函数，允许你直接调用一个类实例
+
+And there are other special methods that allow classes to have read-only and write-only data attributes;
+并且存在其它的专用函数，允许类拥有只读或只写数据属性
+
+you'll talk more about those in later chapters.
+在后面的章节中我们会更多地谈到这些
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

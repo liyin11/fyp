@@ -1,0 +1,18 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+1.6. Python on Debian GNU/Linux
+1.6. Debian GNU/Linux 上的 Python
+
+If you are lucky enough to be running Debian GNU/Linux, you install Python through the apt command.
+如果您运行在 Debian GNU/Linux 上，安装 Python 需要使用 apt 命令
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

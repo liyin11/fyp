@@ -1,0 +1,42 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+3.5. Formatting Strings
+3.5. 格式化字符串
+
+Python supports formatting values into strings.
+Python 支持格式化字符串的输出 
+
+Although this can include very complicated expressions, the most basic usage is to insert values into a string with the %s placeholder.
+尽管这样可能会用到非常复杂的表达式，但最基本的用法是将一个值插入到一个有字符串格式符 %s 的字符串中
+
+Note that (k, v) is a tuple.
+注意 (k, v) 是一个 tuple
+
+I told you they were good for something.
+我说过它们对某些东西有用
+
+You might be thinking that this is a lot of work just to do simple string concatentation, and you would be right, except that string formatting isn't just concatenation.
+您可能一直在想，做了这么多工作只不过是为了做简单的字符串连接
+
+It's not even just formatting.
+您想的不错，只不过字符串格式化不只是连接
+
+It's also type coercion.
+它甚至不仅仅是格式化
+
+As with printf in C, string formatting in Python is like a Swiss Army knife.
+如同 printf 在 C 中的作用，Python 中的字符串格式化是一把瑞士军刀
+
+There are options galore, and modifier strings to specially format many different types of values.
+它有丰富的选项，不同的格式化格式符和可选的修正符可用于不同的数据类型
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

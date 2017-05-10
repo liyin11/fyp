@@ -1,0 +1,24 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+9.7. Segue
+9.7. Segue [9]
+
+OK, that's it for the hard-core XML stuff.
+以上就是 XML 的核心内容
+
+The next chapter will continue to use these same example programs, but focus on other aspects that make the program more flexible: using streams for input processing, using getattr for method dispatching, and using command-line flags to allow users to reconfigure the program without changing the code.
+下一章将使用相同的示例程序，但是焦点在于能使程序更加灵活的其它方面：使用输入流处理，使用 getattr 进行方法分发，并使用命令行标识允许用户重新配置程序而无需修改代码
+
+Before moving on to the next chapter, you should be comfortable doing all of these things:
+在进入下一章前，你应该没有困难的完成这些事情：
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

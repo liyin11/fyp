@@ -1,0 +1,1326 @@
+Chapter 2. Strings and Text
+第二章：字符串和文本¶
+
+Almost every useful program involves some kind of text processing, whether it is parsing data or generating output.
+几乎所有有用的程序都会涉及到某些文本处理，不管是解析数据还是产生输出
+
+This chapter focuses on common problems involving text manipulation, such as pulling apart strings, searching, substitution, lexing, and parsing.
+ 这一章将重点关注文本的操作处理，比如提取字符串，搜索，替换以及解析等
+
+Many of these tasks can be easily solved using built-in methods of strings.
+ 大部分的问题都能简单的调用字符串的内建方法完成
+
+However, more complicated operations might require the use of regular expressions or the creation of a full-fledged parser.
+ 但是，一些更为复杂的操作可能需要正则表达式或者强大的解析器，所有这些主题我们都会详细讲解
+
+All of these topics are covered.
+ 并且在操作Unicode时候碰到的一些棘手的问题在这里也会被提及到
+
+Splitting Strings on Any of Multiple Delimiters
+2.1 使用多个界定符分割字符串¶
+
+You need to split a string into fields, but the delimiters (and spacing around them) aren’t consistent throughout the string.
+你需要将一个字符串分割为多个字段，但是分隔符(还有周围的空格)并不是固定的
+
+The split() method of string objects is really meant for very simple cases, and does not allow for multiple delimiters or account for possible whitespace around the delimiters.
+string 对象的 split() 方法只适应于非常简单的字符串分割情形， 它并不允许有多个分隔符或者是分隔符周围不确定的空格
+
+In cases when you need a bit more flexibility, use the re.split() method:
+ 当你需要更加灵活的切割字符串的时候，最好使用 re.split() 方法：
+
+The re.split() function is useful because you can specify multiple patterns for the separator.
+函数 re.split() 是非常实用的，因为它允许你为分隔符指定多个正则模式
+
+For example, as shown in the solution, the separator is either a comma (,), semicolon (;), or whitespace followed by any amount of extra whitespace.
+ 比如，在上面的例子中，分隔符可以是逗号，分号或者是空格，并且后面紧跟着任意个的空格
+
+Whenever that pattern is found, the entire match becomes the delimiter between whatever fields lie on either side of the match.
+ 只要这个模式被找到，那么匹配的分隔符两边的实体都会被当成是结果中的元素返回
+
+The result is a list of fields, just as with str.split().
+ 返回结果为一个字段列表，这个跟 str.split() 返回值类型是一样的
+
+When using re.split(), you need to be a bit careful should the regular expression pattern involve a capture group enclosed in parentheses.
+当你使用 re.split() 函数时候，需要特别注意的是正则表达式中是否包含一个括号捕获分组
+
+If capture groups are used, then the matched text is also included in the result.
+ 如果使用了捕获分组，那么被匹配的文本也将出现在结果列表中
+
+For example, watch what happens here:
+比如，观察一下这段代码运行后的结果：
+
+Getting the split characters might be useful in certain contexts.
+获取分割字符在某些情况下也是有用的
+
+For example, maybe you need the split characters later on to reform an output string:
+ 比如，你可能想保留分割字符串，用来在后面重新构造一个新的输出字符串：
+
+If you don’t want the separator characters in the result, but still need to use parentheses to group parts of the regular expression pattern, make sure you use a noncapture group, specified as (?:...).
+如果你不想保留分割字符串到结果列表中去，但仍然需要使用到括号来分组正则表达式的话， 确保你的分组是非捕获分组，形如 (
+
+For example:
+:...) 
+
+Matching Text at the Start or End of a String
+2.2 字符串开头或结尾匹配¶
+
+You need to check the start or end of a string for specific text patterns, such as filename extensions, URL schemes, and so on.
+你需要通过指定的文本模式去检查字符串的开头或者结尾，比如文件名后缀，URL Scheme等等
+
+A simple way to check the beginning or end of a string is to use the str.startswith() or str.endswith() methods.
+检查字符串开头或结尾的一个简单方法是使用 str.startswith() 或者是 str.endswith() 方法
+
+For example:
+比如：
+
+If you need to check against multiple choices, simply provide a tuple of possibilities to startswith() or endswith():
+如果你想检查多种匹配可能，只需要将所有的匹配项放入到一个元组中去， 然后传给 startswith() 或者 endswith() 方法：
+
+Here is another example:
+下面是另一个例子：
+
+Oddly, this is one part of Python where a tuple is actually required as input.
+奇怪的是，这个方法中必须要输入一个元组作为参数
+
+If you happen to have the choices specified in a list or set, just make sure you convert them using tuple() first.
+ 如果你恰巧有一个 list 或者 set 类型的选择项， 要确保传递参数前先调用 tuple() 将其转换为元组类型
+
+For example:
+比如：
+
+The startswith() and endswith() methods provide a very convenient way to perform basic prefix and suffix checking.
+startswith() 和 endswith() 方法提供了一个非常方便的方式去做字符串开头和结尾的检查
+
+Similar operations can be performed with slices, but are far less elegant.
+ 类似的操作也可以使用切片来实现，但是代码看起来没有那么优雅
+
+For example:
+比如：
+
+You might also be inclined to use regular expressions as an alternative.
+你可以能还想使用正则表达式去实现，比如：
+
+This works, but is often overkill for simple matching.
+这种方式也行得通，但是对于简单的匹配实在是有点小材大用了，本节中的方法更加简单并且运行会更快些
+
+Last, but not least, the startswith() and endswith() methods look nice when combined with other operations, such as common data reductions.
+最后提一下，当和其他操作比如普通数据聚合相结合的时候 startswith() 和 endswith() 方法是很不错的
+
+For example, this statement that checks a directory for the presence of certain kinds of files:
+ 比如，下面这个语句检查某个文件夹中是否存在指定的文件类型：
+
+Matching Strings Using Shell Wildcard Patterns
+2.3 用Shell通配符匹配字符串¶
+
+You want to match text using the same wildcard patterns as are commonly used when working in Unix shells (e.g., *.py, Dat[0-9]*.csv, etc.).
+你想使用 Unix Shell 中常用的通配符(比如 *.py , Dat[0-9]*.csv 等)去匹配文本字符串
+
+The fnmatch module provides two functions—fnmatch() and fnmatchcase()—that can be used to perform such matching.
+fnmatch 模块提供了两个函数—— fnmatch() 和 fnmatchcase() ，可以用来实现这样的匹配
+
+The usage is simple:
+用法如下：
+
+Normally, fnmatch() matches patterns using the same case-sensitivity rules as the system’s underlying filesystem (which varies based on operating system).
+fnmatch() 函数使用底层操作系统的大小写敏感规则(不同的系统是不一样的)来匹配模式
+
+For example:
+比如：
+
+If this distinction matters, use fnmatchcase() instead.
+如果你对这个区别很在意，可以使用 fnmatchcase() 来代替
+
+It matches exactly based on the lower- and uppercase conventions that you supply:
+它完全使用你的模式大小写匹配
+
+An often overlooked feature of these functions is their potential use with data processing of nonfilename strings.
+这两个函数通常会被忽略的一个特性是在处理非文件名的字符串时候它们也是很有用的
+
+For example, suppose you have a list of street addresses like this:
+ 比如，假设你有一个街道地址的列表数据：
+
+You could write list comprehensions like this:
+你可以像这样写列表推导：
+
+The matching performed by fnmatch sits somewhere between the functionality of simple string methods and the full power of regular expressions.
+fnmatch() 函数匹配能力介于简单的字符串方法和强大的正则表达式之间
+
+If you’re just trying to provide a simple mechanism for allowing wildcards in data processing operations, it’s often a reasonable solution.
+ 如果在数据处理操作中只需要简单的通配符就能完成的时候，这通常是一个比较合理的方案
+
+If you’re actually trying to write code that matches filenames, use the glob module instead.
+如果你的代码需要做文件名的匹配，最好使用 glob 模块
+
+See “Getting a Directory Listing”.
+参考5.13小节
+
+Matching and Searching for Text Patterns
+2.4 字符串匹配和搜索¶
+
+You want to match or search text for a specific pattern.
+你想匹配或者搜索特定模式的文本
+
+If the text you’re trying to match is a simple literal, you can often just use the basic string methods, such as str.find(), str.endswith(), str.startswith(), or similar.
+如果你想匹配的是字面字符串，那么你通常只需要调用基本字符串方法就行， 比如 str.find() , str.endswith() , str.startswith() 或者类似的方法：
+
+For more complicated matching, use regular expressions and the re module.
+对于复杂的匹配需要使用正则表达式和 re 模块
+
+To illustrate the basic mechanics of using regular expressions, suppose you want to match dates specified as digits, such as "11/27/2012." Here is a sample of how you would do it:
+ 为了解释正则表达式的基本原理，假设你想匹配数字格式的日期字符串比如 11/27/2012 ，你可以这样做：
+
+If you’re going to perform a lot of matches using the same pattern, it usually pays to precompile the regular expression pattern into a pattern object first.
+如果你想使用同一个模式去做多次匹配，你应该先将模式字符串预编译为模式对象
+
+For example:
+比如：
+
+match() always tries to find the match at the start of a string.
+match() 总是从字符串开始去匹配，如果你想查找字符串任意部分的模式出现位置， 使用 findall() 方法去代替
+
+If you want to search text for all occurrences of a pattern, use the findall() method instead.
+比如：
+
+When defining regular expressions, it is common to introduce capture groups by enclosing parts of the pattern in parentheses.
+在定义正则式的时候，通常会利用括号去捕获分组
+
+For example:
+比如：
+
+Capture groups often simplify subsequent processing of the matched text because the contents of each group can be extracted individually.
+捕获分组可以使得后面的处理更加简单，因为可以分别将每个组的内容提取出来
+
+For example:
+比如：
+
+The findall() method searches the text and finds all matches, returning them as a list.
+findall() 方法会搜索文本并以列表形式返回所有的匹配
+
+If you want to find matches iteratively, use the finditer() method instead.
+ 如果你想以迭代方式返回匹配，可以使用 finditer() 方法来代替，比如：
+
+A basic tutorial on the theory of regular expressions is beyond the scope of this book.
+关于正则表达式理论的教程已经超出了本书的范围
+
+However, this recipe illustrates the absolute basics of using the re module to match and search for text.
+ 不过，这一节阐述了使用re模块进行匹配和搜索文本的最基本方法
+
+The essential functionality is first compiling a pattern using re.compile() and then using methods such as match(), findall(), or finditer().
+ 核心步骤就是先使用 re.compile() 编译正则表达式字符串， 然后使用 match() , findall() 或者 finditer() 等方法
+
+When specifying patterns, it is relatively common to use raw strings such as r'(\d+)/(\d+)/(\d+)'.
+当写正则式字符串的时候，相对普遍的做法是使用原始字符串比如 r'(\d+)/(\d+)/(\d+)' 
+
+Such strings leave the backslash character uninterpreted, which can be useful in the context of regular expressions.
+ 这种字符串将不去解析反斜杠，这在正则表达式中是很有用的
+
+Otherwise, you need to use double backslashes such as '(\\d+)/(\\d+)/(\\d+)'.
+ 如果不这样做的话，你必须使用两个反斜杠，类似 '(\\d+)/(\\d+)/(\\d+)' 
+
+Be aware that the match() method only checks the beginning of a string.
+需要注意的是 match() 方法仅仅检查字符串的开始部分
+
+It’s possible that it will match things you aren’t expecting.
+它的匹配结果有可能并不是你期望的那样
+
+For example:
+比如：
+
+If you want an exact match, make sure the pattern includes the end-marker ($), as in the following:
+如果你想精确匹配，确保你的正则表达式以$结尾，就像这么这样：
+
+Last, if you’re just doing a simple text matching/searching operation, you can often skip the compilation step and use module-level functions in the re module instead.
+最后，如果你仅仅是做一次简单的文本匹配/搜索操作的话，可以略过编译部分，直接使用 re 模块级别的函数
+
+For example:
+比如：
+
+Be aware, though, that if you’re going to perform a lot of matching or searching, it usually pays to compile the pattern first and use it over and over again.
+但是需要注意的是，如果你打算做大量的匹配和搜索操作的话，最好先编译正则表达式，然后再重复使用它
+
+The module-level functions keep a cache of recently compiled patterns, so there isn’t a huge performance hit, but you’ll save a few lookups and extra processing by using your own compiled pattern.
+ 模块级别的函数会将最近编译过的模式缓存起来，因此并不会消耗太多的性能， 但是如果使用预编译模式的话，你将会减少查找和一些额外的处理损耗
+
+Searching and Replacing Text
+2.5 字符串搜索和替换¶
+
+You want to search for and replace a text pattern in a string.
+你想在字符串中搜索和匹配指定的文本模式
+
+For simple literal patterns, use the str.replace() method.
+对于简单的字面模式，直接使用 str.repalce() 方法即可，比如：
+
+For more complicated patterns, use the sub() functions/methods in the re module.
+对于复杂的模式，请使用 re 模块中的 sub() 函数
+
+To illustrate, suppose you want to rewrite dates of the form "11/27/2012" as "2012-11-27." Here is a sample of how to do it:
+ 为了说明这个，假设你想将形式为 11/27/2012 的日期字符串改成 2012-11-27 
+
+The first argument to sub() is the pattern to match and the second argument is the replacement pattern.
+sub() 函数中的第一个参数是被匹配的模式，第二个参数是替换模式
+
+Backslashed digits such as \3 refer to capture group numbers in the pattern.
+反斜杠数字比如 \3 指向前面模式的捕获组号
+
+If you’re going to perform repeated substitutions of the same pattern, consider compiling it first for better performance.
+如果你打算用相同的模式做多次替换，考虑先编译它来提升性能
+
+For example:
+比如：
+
+For more complicated substitutions, it’s possible to specify a substitution callback function instead.
+对于更加复杂的替换，可以传递一个替换回调函数来代替，比如：
+
+As input, the argument to the substitution callback is a match object, as returned by match() or find().
+一个替换回调函数的参数是一个 match 对象，也就是 match() 或者 find() 返回的对象
+
+Use the .group() method to extract specific parts of the match.
+ 使用 group() 方法来提取特定的匹配部分
+
+The function should return the replacement text.
+回调函数最后返回替换字符串
+
+If you want to know how many substitutions were made in addition to getting the replacement text, use re.subn() instead.
+如果除了替换后的结果外，你还想知道有多少替换发生了，可以使用 re.subn() 来代替
+
+For example:
+比如：
+
+There isn’t much more to regular expression search and replace than the sub() method shown.
+关于正则表达式搜索和替换，上面演示的 sub() 方法基本已经涵盖了所有
+
+The trickiest part is specifying the regular expression pattern—something that’s best left as an exercise to the reader.
+ 其实最难的部分就是编写正则表达式模式，这个最好是留给读者自己去练习了
+
+Searching and Replacing Case-Insensitive Text
+2.6 字符串忽略大小写的搜索替换¶
+
+You need to search for and possibly replace text in a case-insensitive manner.
+你需要以忽略大小写的方式搜索与替换文本字符串
+
+To perform case-insensitive text operations, you need to use the re module and supply the re.IGNORECASE flag to various operations.
+为了在文本操作时忽略大小写，你需要在使用 re 模块的时候给这些操作提供 re.IGNORECASE 标志参数
+
+For example:
+比如：
+
+The last example reveals a limitation that replacing text won’t match the case of the matched text.
+最后的那个例子揭示了一个小缺陷，替换字符串并不会自动跟被匹配字符串的大小写保持一致
+
+If you need to fix this, you might have to use a support function, as in the following:
+ 为了修复这个，你可能需要一个辅助函数，就像下面的这样：
+
+Here is an example of using this last function:
+下面是使用上述函数的方法：
+
+For simple cases, simply providing the re.IGNORECASE is enough to perform case-insensitive matching.
+对于一般的忽略大小写的匹配操作，简单的传递一个 re.IGNORECASE 标志参数就已经足够了
+
+However, be aware that this may not be enough for certain kinds of Unicode matching involving case folding.
+ 但是需要注意的是，这个对于某些需要大小写转换的Unicode匹配可能还不够， 参考2.10小节了解更多细节
+
+Specifying a Regular Expression for the Shortest Match
+2.7 最短匹配模式¶
+
+You’re trying to match a text pattern using regular expressions, but it is identifying the longest possible matches of a pattern.
+你正在试着用正则表达式匹配某个文本模式，但是它找到的是模式的最长可能匹配
+
+Instead, you would like to change it to find the shortest possible match.
+ 而你想修改它变成查找最短的可能匹配
+
+This problem often arises in patterns that try to match text enclosed inside a pair of starting and ending delimiters (e.g., a quoted string).
+这个问题一般出现在需要匹配一对分隔符之间的文本的时候(比如引号包含的字符串)
+
+To illustrate, consider this example:
+ 为了说明清楚，考虑如下的例子：
+
+In this example, the pattern r'\"(.*)\"' is attempting to match text enclosed inside quotes.
+在这个例子中，模式 r'\"(.*)\"' 的意图是匹配被双引号包含的文本
+
+However, the * operator in a regular expression is greedy, so matching is based on finding the longest possible match.
+ 但是在正则表达式中*操作符是贪婪的，因此匹配操作会查找最长的可能匹配
+
+Thus, in the second example involving text2, it incorrectly matches the two quoted strings.
+ 于是在第二个例子中搜索 text2 的时候返回结果并不是我们想要的
+
+To fix this, add the ?
+为了修正这个问题，可以在模式中的*操作符后面加上
+
+modifier after the * operator in the pattern, like this:
+修饰符，就像这样：
+
+This makes the matching nongreedy, and produces the shortest match instead.
+这样就使得匹配变成非贪婪模式，从而得到最短的匹配，也就是我们想要的结果
+
+This recipe addresses one of the more common problems encountered when writing regular expressions involving the dot (.) character.
+这一节展示了在写包含点(.)字符的正则表达式的时候遇到的一些常见问题
+
+In a pattern, the dot matches any character except a newline.
+ 在一个模式字符串中，点(.)匹配除了换行外的任何字符
+
+However, if you bracket the dot with starting and ending text (such as a quote), matching will try to find the longest possible match to the pattern.
+ 然而，如果你将点(.)号放在开始与结束符(比如引号)之间的时候，那么匹配操作会查找符合模式的最长可能匹配
+
+This causes multiple occurrences of the starting or ending text to be skipped altogether and included in the results of the longer match.
+ 这样通常会导致很多中间的被开始与结束符包含的文本被忽略掉，并最终被包含在匹配结果字符串中返回
+
+Adding the ?
+ 通过在 * 或者 + 这样的操作符后面添加一个 
+
+right after operators such as * or + forces the matching algorithm to look for the shortest possible match instead.
+ 可以强制匹配算法改成寻找最短的可能匹配
+
+Writing a Regular Expression for Multiline Patterns
+2.8 多行匹配模式¶
+
+You’re trying to match a block of text using a regular expression, but you need the match to span multiple lines.
+你正在试着使用正则表达式去匹配一大块的文本，而你需要跨越多行去匹配
+
+This problem typically arises in patterns that use the dot (.) to match any character but forget to account for the fact that it doesn’t match newlines.
+这个问题很典型的出现在当你用点(.)去匹配任意字符的时候，忘记了点(.)不能匹配换行符的事实
+
+For example, suppose you are trying to match C-style comments:
+ 比如，假设你想试着去匹配C语言分割的注释：
+
+To fix the problem, you can add support for newlines.
+为了修正这个问题，你可以修改模式字符串，增加对换行的支持
+
+For example:
+比如：
+
+In this pattern, (?:.|\n) specifies a noncapture group (i.e., it defines a group for the purposes of matching, but that group is not captured separately or numbered).
+在这个模式中， (
+
+The re.compile() function accepts a flag, re.DOTALL, which is useful here.
+re.compile() 函数接受一个标志参数叫 re.DOTALL ，在这里非常有用
+
+It makes the .
+ 它可以让正则表达式中的点(.)匹配包括换行符在内的任意字符
+
+in a regular expression match all characters, including newlines.
+比如：
+
+Using the re.DOTALL flag works fine for simple cases, but might be problematic if you’re working with extremely complicated patterns or a mix of separate regular expressions that have been combined together for the purpose of tokenizing, as described in “Tokenizing Text”.
+对于简单的情况使用 re.DOTALL 标记参数工作的很好， 但是如果模式非常复杂或者是为了构造字符串令牌而将多个模式合并起来(2.18节有详细描述)， 这时候使用这个标记参数就可能出现一些问题
+
+If given a choice, it’s usually better to define your regular expression pattern so that it works correctly without the need for extra flags.
+ 如果让你选择的话，最好还是定义自己的正则表达式模式，这样它可以在不需要额外的标记参数下也能工作的很好
+
+Normalizing Unicode Text to a Standard Representation
+2.9 将Unicode文本标准化¶
+
+You’re working with Unicode strings, but need to make sure that all of the strings have the same underlying representation.
+你正在处理Unicode字符串，需要确保所有字符串在底层有相同的表示
+
+In Unicode, certain characters can be represented by more than one valid sequence of code points.
+在Unicode中，某些字符能够用多个合法的编码表示
+
+To illustrate, consider the following example:
+为了说明，考虑下面的这个例子：
+
+Here the text "Spicy Jalapeño" has been presented in two forms.
+这里的文本”Spicy Jalapeño”使用了两种形式来表示
+
+The first uses the fully composed "ñ" character (U+00F1).
+ 第一种使用整体字符”ñ”(U+00F1)，第二种使用拉丁字母”n”后面跟一个”~”的组合字符(U+0303)
+
+Having multiple representations is a problem for programs that compare strings.
+在需要比较字符串的程序中使用字符的多种表示会产生问题
+
+In order to fix this, you should first normalize the text into a standard representation using the unicodedata module:
+ 为了修正这个问题，你可以使用unicodedata模块先将文本标准化：
+
+The first argument to normalize() specifies how you want the string normalized.
+normalize() 第一个参数指定字符串标准化的方式
+
+NFC means that characters should be fully composed (i.e., use a single code point if possible).
+ NFC表示字符应该是整体组成(比如可能的话就使用单一编码)，而NFD表示字符应该分解为多个组合字符表示
+
+Python also supports the normalization forms NFKC and NFKD, which add extra compatibility features for dealing with certain kinds of characters.
+Python同样支持扩展的标准化形式NFKC和NFKD，它们在处理某些字符的时候增加了额外的兼容特性
+
+For example:
+比如：
+
+Normalization is an important part of any code that needs to ensure that it processes Unicode text in a sane and consistent way.
+标准化对于任何需要以一致的方式处理Unicode文本的程序都是非常重要的
+
+This is especially true when processing strings received as part of user input where you have little control of the encoding.
+ 当处理来自用户输入的字符串而你很难去控制编码的时候尤其如此
+
+Normalization can also be an important part of sanitizing and filtering text.
+在清理和过滤文本的时候字符的标准化也是很重要的
+
+For example, suppose you want to remove all diacritical marks from some text (possibly for the purposes of searching or matching):
+ 比如，假设你想清除掉一些文本上面的变音符的时候(可能是为了搜索和匹配)：
+
+This last example shows another important aspect of the unicodedata module—namely, utility functions for testing characters against character classes.
+最后一个例子展示了 unicodedata 模块的另一个重要方面，也就是测试字符类的工具函数
+
+The combining() function tests a character to see if it is a combining character.
+ combining() 函数可以测试一个字符是否为和音字符
+
+There are other functions in the module for finding character categories, testing digits, and so forth.
+ 在这个模块中还有其他函数用于查找字符类别，测试是否为数字字符等等
+
+Unicode is obviously a large topic.
+Unicode显然是一个很大的主题
+
+For more detailed reference information about normalization, visit Unicode’s page on the subject.
+如果想更深入的了解关于标准化方面的信息， 请看考 Unicode官网中关于这部分的说明 Ned Batchelder在 他的网站 上对Python的Unicode处理问题也有一个很好的介绍
+
+Working with Unicode Characters in Regular Expressions
+2.10 在正则式中使用Unicode¶
+
+You are using regular expressions to process text, but are concerned about the handling of Unicode characters.
+你正在使用正则表达式处理文本，但是关注的是Unicode字符处理
+
+By default, the re module is already programmed with rudimentary knowledge of certain Unicode character classes.
+默认情况下 re 模块已经对一些Unicode字符类有了基本的支持
+
+For example, \d already matches any unicode digit character:
+ 比如， \\d 已经匹配任意的unicode数字字符了：
+
+If you need to include specific Unicode characters in patterns, you can use the usual escape sequence for Unicode characters (e.g., \uFFFF or \UFFFFFFF).
+如果你想在模式中包含指定的Unicode字符，你可以使用Unicode字符对应的转义序列(比如 \uFFF 或者 \UFFFFFFF )
+
+For example, here is a regex that matches all characters in a few different Arabic code pages:
+ 比如，下面是一个匹配几个不同阿拉伯编码页面中所有字符的正则表达式：
+
+When performing matching and searching operations, it’s a good idea to normalize and possibly sanitize all text to a standard form first (see “Normalizing Unicode Text to a Standard Representation”).
+当执行匹配和搜索操作的时候，最好是先标准化并且清理所有文本为标准化格式(参考2.9小节)
+
+However, it’s also important to be aware of special cases.
+ 但是同样也应该注意一些特殊情况，比如在忽略大小写匹配和大小写转换时的行为
+
+Mixing Unicode and regular expressions is often a good way to make your head explode.
+混合使用Unicode和正则表达式通常会让你抓狂
+
+If you’re going to do it seriously, you should consider installing the third-party regex library, which provides full support for Unicode case folding, as well as a variety of other interesting features, including approximate matching.
+ 如果你真的打算这样做的话，最好考虑下安装第三方正则式库， 它们会为Unicode的大小写转换和其他大量有趣特性提供全面的支持，包括模糊匹配
+
+Stripping Unwanted Characters from Strings
+2.11 删除字符串中不需要的字符¶
+
+You want to strip unwanted characters, such as whitespace, from the beginning, end, or middle of a text string.
+你想去掉文本字符串开头，结尾或者中间不想要的字符，比如空白
+
+The strip() method can be used to strip characters from the beginning or end of a string.
+strip() 方法能用于删除开始或结尾的字符
+
+lstrip() and rstrip() perform stripping from the left or right side, respectively.
+ lstrip() 和 rstrip() 分别从左和从右执行删除操作
+
+By default, these methods strip whitespace, but other characters can be given.
+ 默认情况下，这些方法会去除空白字符，但是你也可以指定其他字符
+
+For example:
+比如：
+
+The various strip() methods are commonly used when reading and cleaning up data for later processing.
+这些 strip() 方法在读取和清理数据以备后续处理的时候是经常会被用到的
+
+For example, you can use them to get rid of whitespace, remove quotations, and other tasks.
+ 比如，你可以用它们来去掉空格，引号和完成其他任务
+
+Be aware that stripping does not apply to any text in the middle of a string.
+但是需要注意的是去除操作不会对字符串的中间的文本产生任何影响
+
+For example:
+比如：
+
+If you needed to do something to the inner space, you would need to use another technique, such as using the replace() method or a regular expression substitution.
+如果你想处理中间的空格，那么你需要求助其他技术
+
+For example:
+比如使用 replace() 方法或者是用正则表达式替换
+
+It is often the case that you want to combine string stripping operations with some other kind of iterative processing, such as reading lines of data from a file.
+通常情况下你想将字符串 strip 操作和其他迭代操作相结合，比如从文件中读取多行数据
+
+If so, this is one area where a generator expression can be useful.
+ 如果是这样的话，那么生成器表达式就可以大显身手了
+
+For example:
+比如：
+
+Here, the expression lines = (line.strip() for line in f) acts as a kind of data transform.
+在这里，表达式 lines = (line.strip() for line in f) 执行数据转换操作
+
+It’s efficient because it doesn’t actually read the data into any kind of temporary list first.
+ 这种方式非常高效，因为它不需要预先读取所有数据放到一个临时的列表中去
+
+It just creates an iterator where all of the lines produced have the stripping operation applied to them.
+ 它仅仅只是创建一个生成器，并且每次返回行之前会先执行 strip 操作
+
+For even more advanced stripping, you might turn to the translate() method.
+对于更高阶的strip，你可能需要使用 translate() 方法
+
+See the next recipe on sanitizing strings for further details.
+请参阅下一节了解更多关于字符串清理的内容
+
+Sanitizing and Cleaning Up Text
+2.12 审查清理文本字符串¶
+
+Some bored script kiddie has entered the text "pýtĥöñ" into a form on your web page and you’d like to clean it up somehow.
+一些无聊的幼稚黑客在你的网站页面表单中输入文本”pýtĥöñ”，然后你想将这些字符清理掉
+
+The problem of sanitizing and cleaning up text applies to a wide variety of problems involving text parsing and data handling.
+文本清理问题会涉及到包括文本解析与数据处理等一系列问题
+
+At a very simple level, you might use basic string functions (e.g., str.upper() and str.lower()) to convert text to a standard case.
+ 在非常简单的情形下，你可能会选择使用字符串函数(比如 str.upper() 和 str.lower() )将文本转为标准格式
+
+Simple replacements using str.replace() or re.sub() can focus on removing or changing very specific character sequences.
+ 使用 str.replace() 或者 re.sub() 的简单替换操作能删除或者改变指定的字符序列
+
+You can also normalize text using unicodedata.normalize(), as shown in “Normalizing Unicode Text to a Standard Representation”.
+ 你同样还可以使用2.9小节的 unicodedata.normalize() 函数将unicode文本标准化
+
+However, you might want to take the sanitation process a step further.
+然后，有时候你可能还想在清理操作上更进一步
+
+Perhaps, for example, you want to eliminate whole ranges of characters or strip diacritical marks.
+比如，你可能想消除整个区间上的字符或者去除变音符
+
+To do so, you can turn to the often overlooked str.translate() method.
+ 为了这样做，你可以使用经常会被忽视的 str.translate() 方法
+
+To illustrate, suppose you’ve got a messy string such as the following:
+ 为了演示，假设你现在有下面这个凌乱的字符串：
+
+The first step is to clean up the whitespace.
+第一步是清理空白字符
+
+To do this, make a small translation table and use translate():
+为了这样做，先创建一个小的转换表格然后使用 translate() 方法：
+
+As you can see here, whitespace characters such as \t and \f have been remapped to a single space.
+正如你看的那样，空白字符 \t 和 \f 已经被重新映射到一个空格
+
+The carriage return \r has been deleted entirely.
+回车字符r直接被删除
+
+You can take this remapping idea a step further and build much bigger tables.
+你可以以这个表格为基础进一步构建更大的表格
+
+For example, let’s remove all combining characters:
+比如，让我们删除所有的和音符：
+
+In this last example, a dictionary mapping every Unicode combining character to None is created using the dict.fromkeys().
+上面例子中，通过使用 dict.fromkeys() 方法构造一个字典，每个Unicode和音符作为键，对应的值全部为 None 
+
+The original input is then normalized into a decomposed form using unicodedata.normalize().
+然后使用 unicodedata.normalize() 将原始输入标准化为分解形式字符
+
+From there, the translate function is used to delete all of the accents.
+ 然后再调用 translate 函数删除所有重音符
+
+Similar techniques can be used to remove other kinds of characters (e.g., control characters, etc.).
+ 同样的技术也可以被用来删除其他类型的字符(比如控制字符等)
+
+As another example, here is a translation table that maps all Unicode decimal digit characters to their equivalent in ASCII:
+作为另一个例子，这里构造一个将所有Unicode数字字符映射到对应的ASCII字符上的表格：
+
+Yet another technique for cleaning up text involves I/O decoding and encoding functions.
+另一种清理文本的技术涉及到I/O解码与编码函数
+
+The idea here is to first do some preliminary cleanup of the text, and then run it through a combination of encode() or decode() operations to strip or alter it.
+这里的思路是先对文本做一些初步的清理， 然后再结合 encode() 或者 decode() 操作来清除或修改它
+
+For example:
+比如：
+
+Here the normalization process decomposed the original text into characters along with separate combining characters.
+这里的标准化操作将原来的文本分解为单独的和音符
+
+The subsequent ASCII encoding/decoding simply discarded all of those characters in one fell swoop.
+接下来的ASCII编码/解码只是简单的一下子丢弃掉那些字符
+
+Naturally, this would only work if getting an ASCII representation was the final goal.
+ 当然，这种方法仅仅只在最后的目标就是获取到文本对应ACSII表示的时候生效
+
+A major issue with sanitizing text can be runtime performance.
+文本字符清理一个最主要的问题应该是运行的性能
+
+As a general rule, the simpler it is, the faster it will run.
+一般来讲，代码越简单运行越快
+
+For simple replacements, the str.replace() method is often the fastest approach—even if you have to call it multiple times.
+ 对于简单的替换操作， str.replace() 方法通常是最快的，甚至在你需要多次调用的时候
+
+For instance, to clean up whitespace, you could use code like this:
+ 比如，为了清理空白字符，你可以这样做：
+
+If you try it, you’ll find that it’s quite a bit faster than using translate() or an approach using a regular expression.
+如果你去测试的话，你就会发现这种方式会比使用 translate() 或者正则表达式要快很多
+
+On the other hand, the translate() method is very fast if you need to perform any kind of nontrivial character-to-character remapping or deletion.
+另一方面，如果你需要执行任何复杂字符对字符的重新映射或者删除操作的话， tanslate() 方法会非常的快
+
+In the big picture, performance is something you will have to study further in your particular application.
+从大的方面来讲，对于你的应用程序来说性能是你不得不去自己研究的东西
+
+Unfortunately, it’s impossible to suggest one specific technique that works best for all cases, so try different approaches and measure it.
+ 不幸的是，我们不可能给你建议一个特定的技术，使它能够适应所有的情况
+
+Although the focus of this recipe has been text, similar techniques can be applied to bytes, including simple replacements, translation, and regular expressions.
+尽管这一节集中讨论的是文本，但是类似的技术也可以适用于字节，包括简单的替换，转换和正则表达式
+
+Aligning Text Strings
+2.13 字符串对齐¶
+
+You need to format text with some sort of alignment applied.
+你想通过某种对齐方式来格式化字符串
+
+For basic alignment of strings, the ljust(), rjust(), and center() methods of strings can be used.
+对于基本的字符串对齐操作，可以使用字符串的 ljust() , rjust() 和 center() 方法
+
+For example:
+比如：
+
+All of these methods accept an optional &&65.180&&fill character as well.
+所有这些方法都能接受一个可选的填充字符
+
+For example:
+比如：
+
+The format() function can also be used to easily align things.
+函数 format() 同样可以用来很容易的对齐字符串
+
+All you need to do is use the <, >, or ^ characters along with a desired width.
+ 你要做的就是使用 <,> 或者 ^ 字符后面紧跟一个指定的宽度
+
+For example:
+比如：
+
+If you want to include a fill character other than a space, specify it before the alignment character:
+如果你想指定一个非空格的填充字符，将它写到对齐字符的前面即可：
+
+These format codes can also be used in the format() method when formatting multiple values.
+当格式化多个值的时候，这些格式代码也可以被用在 format() 方法中
+
+For example:
+比如：
+
+One benefit of format() is that it is not specific to strings.
+format() 函数的一个好处是它不仅适用于字符串
+
+It works with any value, making it more general purpose.
+它可以用来格式化任何值，使得它非常的通用
+
+For instance, you can use it with numbers:
+ 比如，你可以用它来格式化数字：
+
+In older code, you will also see the % operator used to format text.
+在老的代码中，你经常会看到被用来格式化文本的 % 操作符
+
+For example:
+比如：
+
+However, in new code, you should probably prefer the use of the format() function or method.
+但是，在新版本代码中，你应该优先选择 format() 函数或者方法
+
+format() is a lot more powerful than what is provided with the % operator.
+ format() 要比 % 操作符的功能更为强大
+
+Moreover, format() is more general purpose than using the jlust(), rjust(), or center() method of strings in that it works with any kind of object.
+ 并且 format() 也比使用 ljust() , rjust() 或 center() 方法更通用， 因为它可以用来格式化任意对象，而不仅仅是字符串
+
+For a complete list of features available with the format() function, consult the online Python documentation.
+如果想要完全了解 format() 函数的有用特性， 请参考 在线Python文档
+
+Combining and Concatenating Strings
+2.14 合并拼接字符串¶
+
+You want to combine many small strings together into a larger string.
+你想将几个小的字符串合并为一个大的字符串
+
+If the strings you wish to combine are found in a sequence or iterable, the fastest way to combine them is to use the join() method.
+如果你想要合并的字符串是在一个序列或者 iterable 中，那么最快的方式就是使用 join() 方法
+
+For example:
+比如：
+
+At first glance, this syntax might look really odd, but the join() operation is specified as a method on strings.
+初看起来，这种语法看上去会比较怪，但是 join() 被指定为字符串的一个方法
+
+Partly this is because the objects you want to join could come from any number of different data sequences (e.g., lists, tuples, dicts, files, sets, or generators), and it would be redundant to have join() implemented as a method on all of those objects separately.
+ 这样做的部分原因是你想去连接的对象可能来自各种不同的数据序列(比如列表，元组，字典，文件，集合或生成器等)， 如果在所有这些对象上都定义一个 join() 方法明显是冗余的
+
+So you just specify the separator string that you want and use the join() method on it to glue text fragments together.
+ 因此你只需要指定你想要的分割字符串并调用他的 join() 方法去将文本片段组合起来
+
+If you’re only combining a few strings, using + usually works well enough:
+如果你仅仅只是合并少数几个字符串，使用加号(+)通常已经足够了：
+
+The + operator also works fine as a substitute for more complicated string formatting operations.
+加号(+)操作符在作为一些复杂字符串格式化的替代方案的时候通常也工作的很好，比如：
+
+If you’re trying to combine string literals together in source code, you can simply place them adjacent to each other with no + operator.
+如果你想在源码中将两个字面字符串合并起来，你只需要简单的将它们放到一起，不需要用加号(+)
+
+For example:
+比如：
+
+Joining strings together might not seem advanced enough to warrant an entire recipe, but it’s often an area where programmers make programming choices that severely impact the performance of their code.
+字符串合并可能看上去并不需要用一整节来讨论
+
+The most important thing to know is that using the + operator to join a lot of strings together is grossly inefficient due to the memory copies and garbage collection that occurs.
+最重要的需要引起注意的是，当我们使用加号(+)操作符去连接大量的字符串的时候是非常低效率的， 因为加号连接会引起内存复制以及垃圾回收操作
+
+In particular, you never want to write code that joins strings together like this:
+ 特别的，你永远都不应像下面这样写字符串连接代码：
+
+This runs quite a bit slower than using the join() method, mainly because each += operation creates a new string object.
+这种写法会比使用 join() 方法运行的要慢一些，因为每一次执行+=操作的时候会创建一个新的字符串对象
+
+You’re better off just collecting all of the parts first and then joining them together at the end.
+ 你最好是先收集所有的字符串片段然后再将它们连接起来
+
+One related (and pretty neat) trick is the conversion of data to strings and concatenation at the same time using a generator expression, as described in “Transforming and Reducing Data at the Same Time”.
+一个相对比较聪明的技巧是利用生成器表达式(参考1.19小节)转换数据为字符串的同时合并字符串，比如：
+
+Also be on the lookout for unnecessary string concatenations.
+同样还得注意不必要的字符串连接操作
+
+Sometimes programmers get carried away with concatenation when it’s really not technically necessary.
+有时候程序员在没有必要做连接操作的时候仍然多此一举
+
+For example, when printing:
+比如在打印的时候：
+
+Mixing I/O operations and string concatenation is something that might require study in your application.
+当混合使用I/O操作和字符串连接操作的时候，有时候需要仔细研究你的程序
+
+For example, consider the following two code fragments:
+ 比如，考虑下面的两端代码片段：
+
+If the two strings are small, the first version might offer much better performance due to the inherent expense of carrying out an I/O system call.
+如果两个字符串很小，那么第一个版本性能会更好些，因为I/O系统调用天生就慢
+
+On the other hand, if the two strings are large, the second version may be more efficient, since it avoids making a large temporary result and copying large blocks of memory around.
+ 另外一方面，如果两个字符串很大，那么第二个版本可能会更加高效， 因为它避免了创建一个很大的临时结果并且要复制大量的内存块数据
+
+Again, it must be stressed that this is something you would have to study in relation to your own data in order to determine which performs best.
+ 还是那句话，有时候是需要根据你的应用程序特点来决定应该使用哪种方案
+
+Last, but not least, if you’re writing code that is building output from lots of small strings, you might consider writing that code as a generator function, using yield to emit fragments.
+最后谈一下，如果你准备编写构建大量小字符串的输出代码， 你最好考虑下使用生成器函数，利用yield语句产生输出片段
+
+For example:
+比如：
+
+The interesting thing about this approach is that it makes no assumption about how the fragments are to be assembled together.
+这种方法一个有趣的方面是它并没有对输出片段到底要怎样组织做出假设
+
+For example, you could simply join the fragments using join():
+ 例如，你可以简单的使用 join() 方法将这些片段合并起来：
+
+Or you could redirect the fragments to I/O:
+或者你也可以将字符串片段重定向到I/O：
+
+Or you could come up with some kind of hybrid scheme that’s smart about combining I/O operations:
+再或者你还可以写出一些结合I/O操作的混合方案：
+
+The key point is that the original generator function doesn’t have to know the precise details.
+这里的关键点在于原始的生成器函数并不需要知道使用细节，它只负责生成字符串片段就行了
+
+Interpolating Variables in Strings
+2.15 字符串中插入变量¶
+
+You want to create a string in which embedded variable names are substituted with a string representation of a variable’s value.
+你想创建一个内嵌变量的字符串，变量被它的值所表示的字符串替换掉
+
+Python has no direct support for simply substituting variable values in strings.
+Python并没有对在字符串中简单替换变量值提供直接的支持
+
+However, this feature can be approximated using the format() method of strings.
+ 但是通过使用字符串的 format() 方法来解决这个问题
+
+For example:
+比如：
+
+Alternatively, if the values to be substituted are truly found in variables, you can use the combination of format_map() and vars(), as in the following:
+或者，如果要被替换的变量能在变量域中找到， 那么你可以结合使用 format_map() 和 vars() 
+
+One subtle feature of vars() is that it also works with instances.
+vars() 还有一个有意思的特性就是它也适用于对象实例
+
+For example:
+比如：
+
+One downside of format() and format_map() is that they do not deal gracefully with missing values.
+format 和 format_map() 的一个缺陷就是它们并不能很好的处理变量缺失的情况，比如：
+
+One way to avoid this is to define an alternative dictionary class with a __missing__() method, as in the following:
+一种避免这种错误的方法是另外定义一个含有 __missing__() 方法的字典对象，就像下面这样：
+
+Now use this class to wrap the inputs to format_map():
+现在你可以利用这个类包装输入后传递给 format_map() ：
+
+If you find yourself frequently performing these steps in your code, you could hide the variable substitution process behind a small utility function that employs a so-called "frame hack." For example:
+如果你发现自己在代码中频繁的执行这些步骤，你可以将变量替换步骤用一个工具函数封装起来
+
+Now you can type things like this:
+现在你可以像下面这样写了：
+
+The lack of true variable interpolation in Python has led to a variety of solutions over the years.
+多年以来由于Python缺乏对变量替换的内置支持而导致了各种不同的解决方案
+
+As an alternative to the solution presented in this recipe, you will sometimes see string formatting like this:
+ 作为本节中展示的一个可能的解决方案，你可以有时候会看到像下面这样的字符串格式化代码：
+
+You may also see the use of template strings:
+你可能还会看到字符串模板的使用：
+
+However, the format() and format_map() methods are more modern than either of these alternatives, and should be preferred.
+然而， format() 和 format_map() 相比较上面这些方案而已更加先进，因此应该被优先选择
+
+One benefit of using format() is that you also get all of the features related to string formatting (alignment, padding, numerical formatting, etc.), which is simply not possible with alternatives such as Template string objects.
+ 使用 format() 方法还有一个好处就是你可以获得对字符串格式化的所有支持(对齐，填充，数字格式化等待)， 而这些特性是使用像模板字符串之类的方案不可能获得的
+
+Parts of this recipe also illustrate a few interesting advanced features.
+本机还部分介绍了一些高级特性
+
+The little-known __missing__() method of mapping/dict classes is a method that you can define to handle missing values.
+映射或者字典类中鲜为人知的 __missing__() 方法可以让你定义如何处理缺失的值
+
+In the safesub class, this method has been defined to return missing values back as a placeholder.
+ 在 SafeSub 类中，这个方法被定义为对缺失的值返回一个占位符
+
+Instead of getting a KeyError exception, you would see the missing values appearing in the resulting string (potentially useful for debugging).
+ 你可以发现缺失的值会出现在结果字符串中(在调试的时候可能很有用)，而不是产生一个 KeyError 异常
+
+The sub() function uses sys._getframe(1) to return the stack frame of the caller.
+sub() 函数使用 sys._getframe(1) 返回调用者的栈帧
+
+From that, the f_locals attribute is accessed to get the local variables.
+可以从中访问属性 f_locals 来获得局部变量
+
+It goes without saying that messing around with stack frames should probably be avoided in most code.
+ 毫无疑问绝大部分情况下在代码中去直接操作栈帧应该是不推荐的
+
+However, for utility functions such as a string substitution feature, it can be useful.
+ 但是，对于像字符串替换工具函数而言它是非常有用的
+
+As an aside, it’s probably worth noting that f_locals is a dictionary that is a copy of the local variables in the calling function.
+ 另外，值得注意的是 f_locals 是一个复制调用函数的本地变量的字典
+
+Although you can modify the contents of f_locals, the modifications don’t actually have any lasting effect.
+ 尽管你可以改变 f_locals 的内容，但是这个修改对于后面的变量访问没有任何影响
+
+Thus, even though accessing a different stack frame might look evil, it’s not possible to accidentally overwrite variables or change the local environment of the caller.
+ 所以，虽说访问一个栈帧看上去很邪恶，但是对它的任何操作不会覆盖和改变调用者本地变量的值
+
+Reformatting Text to a Fixed Number of Columns
+2.16 以指定列宽格式化字符串¶
+
+You have long strings that you want to reformat so that they fill a user-specified number of columns.
+你有一些长字符串，想以指定的列宽将它们重新格式化
+
+Use the textwrap module to reformat text for output.
+使用 textwrap 模块来格式化字符串的输出
+
+For example, suppose you have the following long string:
+比如，假如你有下列的长字符串：
+
+Here’s how you can use the textwrap module to reformat it in various ways:
+下面演示使用 textwrap 格式化字符串的多种方式：
+
+The textwrap module is a straightforward way to clean up text for printing—especially if you want the output to fit nicely on the terminal.
+textwrap 模块对于字符串打印是非常有用的，特别是当你希望输出自动匹配终端大小的时候
+
+On the subject of the terminal size, you can obtain it using os.get_terminal_size().
+ 你可以使用 os.get_terminal_size() 方法来获取终端的大小尺寸
+
+For example:
+比如：
+
+The fill() method has a few additional options that control how it handles tabs, sentence endings, and so on.
+fill() 方法接受一些其他可选参数来控制tab，语句结尾等
+
+Look at the documentation for the textwrap.TextWrapper class for further details.
+ 参阅 textwrap.TextWrapper文档 获取更多内容
+
+Handling HTML and XML Entities in Text
+2.17 在字符串中处理html和xml¶
+
+You want to replace HTML or XML entities such as &entity;
+你想将HTML或者XML实体如 &entity; 或 &#code; 替换为对应的文本
+
+or &#code;
+ 再者，你需要转换文本中特定的字符(比如<, >, 或 &)
+
+If you are producing text, replacing special characters such as < or > is relatively easy if you use the html.escape() function.
+如果你想替换文本字符串中的 ‘<’ 或者 ‘>’ ，使用 html.escape() 函数可以很容易的完成
+
+For example:
+比如：
+
+If you’re trying to emit text as ASCII and want to embed character code entities for non-ASCII characters, you can use the errors='xmlcharrefreplace' argument to various I/O-related functions to do it.
+如果你正在处理的是ASCII文本，并且想将非ASCII文本对应的编码实体嵌入进去， 可以给某些I/O函数传递参数 errors='xmlcharrefreplace' 来达到这个目
+
+For example:
+比如：
+
+To replace entities in text, a different approach is needed.
+为了替换文本中的编码实体，你需要使用另外一种方法
+
+If you’re actually processing HTML or XML, try using a proper HTML or XML parser first.
+ 如果你正在处理HTML或者XML文本，试着先使用一个合适的HTML或者XML解析器
+
+Normally, these tools will automatically take care of replacing the values for you during parsing and you don’t need to worry about it.
+ 通常情况下，这些工具会自动替换这些编码值，你无需担心
+
+If, for some reason, you’ve received bare text with some entities in it and you want them replaced manually, you can usually do it using various utility functions/methods associated with HTML or XML parsers.
+有时候，如果你接收到了一些含有编码值的原始文本，需要手动去做替换， 通常你只需要使用HTML或者XML解析器的一些相关工具函数/方法即可
+
+For example:
+比如：
+
+Proper escaping of special characters is an easily overlooked detail of generating HTML or XML.
+在生成HTML或者XML文本的时候，如果正确的转换特殊标记字符是一个很容易被忽视的细节
+
+This is especially true if you’re generating such output yourself using print() or other basic string formatting features.
+ 特别是当你使用 print() 函数或者其他字符串格式化来产生输出的时候
+
+Using a utility function such as html.escape() is an easy solution.
+ 使用像 html.escape() 的工具函数可以很容易的解决这类问题
+
+If you need to process text in the other direction, various utility functions, such as xml.sax.saxutils.unescape(), can help.
+如果你想以其他方式处理文本，还有一些其他的工具函数比如 xml.sax.saxutils.unescapge() 可以帮助你
+
+However, you really need to investigate the use of a proper parser.
+ 然而，你应该先调研清楚怎样使用一个合适的解析器
+
+For example, if processing HTML or XML, using a parsing module such as html.parser or xml.etree.ElementTree should already take care of details related to replacing entities in the input text for you.
+ 比如，如果你在处理HTML或XML文本， 使用某个解析模块比如 html.parse 或 xml.etree.ElementTree 已经帮你自动处理了相关的替换细节
+
+Tokenizing Text
+2.18 字符串令牌解析¶
+
+You have a string that you want to parse left to right into a stream of tokens.
+你有一个字符串，想从左至右将其解析为一个令牌流
+
+Suppose you have a string of text such as this:
+假如你有下面这样一个文本字符串：
+
+To tokenize the string, you need to do more than merely match patterns.
+为了令牌化字符串，你不仅需要匹配模式，还得指定模式的类型
+
+You need to have some way to identify the kind of pattern as well.
+ 比如，你可能想将字符串像下面这样转换为序列对：
+
+To do this kind of splitting, the first step is to define all of the possible tokens, including whitespace, by regular expression patterns using named capture groups such as this:
+为了执行这样的切分，第一步就是像下面这样利用命名捕获组的正则表达式来定义所有可能的令牌，包括空格：
+
+In these re patterns, the ?P convention is used to assign a name to the pattern.
+在上面的模式中， 
+
+This will be used later.
+P 用于给一个模式命名，供后面使用
+
+Next, to tokenize, use the little-known scanner() method of pattern objects.
+下一步，为了令牌化，使用模式对象很少被人知道的 scanner() 方法
+
+This method creates a scanner object in which repeated calls to match() step through the supplied text one match at a time.
+ 这个方法会创建一个 scanner 对象， 在这个对象上不断的调用 match() 方法会一步步的扫描目标文本，每步一个匹配
+
+Here is an interactive example of how a scanner object works:
+ 下面是演示一个 scanner 对象如何工作的交互式例子：
+
+To take this technique and put it into code, it can be cleaned up and easily packaged into a generator like this:
+实际使用这种技术的时候，可以很容易的像下面这样将上述代码打包到一个生成器中：
+
+If you want to filter the token stream in some way, you can either define more generator functions or use a generator expression.
+如果你想过滤令牌流，你可以定义更多的生成器函数或者使用一个生成器表达式
+
+For example, here is how you might filter out all whitespace tokens.
+ 比如，下面演示怎样过滤所有的空白令牌：
+
+Tokenizing is often the first step for more advanced kinds of text parsing and handling.
+通常来讲令牌化是很多高级文本解析与处理的第一步
+
+To use the scanning technique shown, there are a few important details to keep in mind.
+ 为了使用上面的扫描方法，你需要记住这里一些重要的几点
+
+First, you must make sure that you identify every possible text sequence that might appear in the input with a correponding re pattern.
+ 第一点就是你必须确认你使用正则表达式指定了所有输入中可能出现的文本序列
+
+If any nonmatching text is found, scanning simply stops.
+ 如果有任何不可匹配的文本出现了，扫描就会直接停止
+
+This is why it was necessary to specify the whitespace (WS) token in the example.
+这也是为什么上面例子中必须指定空白字符令牌的原因
+
+The order of tokens in the master regular expression also matters.
+令牌的顺序也是有影响的
+
+When matching, re tries to match pattens in the order specified.
+ re 模块会按照指定好的顺序去做匹配
+
+Thus, if a pattern happens to be a substring of a longer pattern, you need to make sure the longer pattern goes first.
+ 因此，如果一个模式恰好是另一个更长模式的子字符串，那么你需要确定长模式写在前面
+
+For example:
+比如：
+
+The second pattern is wrong because it would match the text <= as the token LT followed by the token EQ, not the single token LE, as was probably desired.
+第二个模式是错的，因为它会将文本<=匹配为令牌LT紧跟着EQ，而不是单独的令牌LE，这个并不是我们想要的结果
+
+Last, but not least, you need to watch out for patterns that form substrings.
+最后，你需要留意下子字符串形式的模式
+
+For example, suppose you have two pattens like this:
+比如，假设你有如下两个模式：
+
+For more advanced kinds of tokenizing, you may want to check out packages such as PyParsing or PLY.
+关于更高阶的令牌化技术，你可能需要查看 PyParsing 或者 PLY 包
+
+An example involving PLY appears in the next recipe.
+ 一个调用PLY的例子在下一节会有演示
+
+Writing a Simple Recursive Descent Parser
+2.19 实现一个简单的递归下降分析器¶
+
+You need to parse text according to a set of grammar rules and perform actions or build an abstract syntax tree representing the input.
+你想根据一组语法规则解析文本并执行命令，或者构造一个代表输入的抽象语法树
+
+The grammar is small, so you’d prefer to just write the parser yourself as opposed to using some kind of framework.
+ 如果语法非常简单，你可以自己写这个解析器，而不是使用一些框架
+
+In this problem, we’re focused on the problem of parsing text according to a particular grammar.
+在这个问题中，我们集中讨论根据特殊语法去解析文本的问题
+
+In order to do this, you should probably start by having a formal specification of the grammar in the form of a BNF or EBNF.
+ 为了这样做，你首先要以BNF或者EBNF形式指定一个标准语法
+
+For example, a grammar for simple arithmetic expressions might look like this:
+ 比如，一个简单数学表达式语法可能像下面这样：
+
+Or, alternatively, in EBNF form:
+或者，以EBNF形式：
+
+In an EBNF, parts of a rule enclosed in { ...
+在EBNF中，被包含在 {...}* 中的规则是可选的
+
+}* are optional.
+*代表0次或多次重复(跟正则表达式中意义是一样的)
+
+Now, if you’re not familiar with the mechanics of working with a BNF, think of it as a specification of substitution or replacement rules where symbols on the left side can be replaced by the symbols on the right (or vice versa).
+现在，如果你对BNF的工作机制还不是很明白的话，就把它当做是一组左右符号可相互替换的规则
+
+Generally, what happens during parsing is that you try to match the input text to the grammar by making various substitutions and expansions using the BNF.
+ 一般来讲，解析的原理就是你利用BNF完成多个替换和扩展以匹配输入文本和语法规则
+
+To illustrate, suppose you are parsing an expression such as 3 + 4 * 5.
+ 为了演示，假设你正在解析形如 3 + 4 * 5 的表达式
+
+This expression would first need to be broken down into a token stream, using the techniques described in “Tokenizing Text”.
+ 这个表达式先要通过使用2.18节中介绍的技术分解为一组令牌流
+
+The result might be a sequence of tokens like this:
+ 结果可能是像下列这样的令牌序列：
+
+From there, parsing involves trying to match the grammar to input tokens by making substitutions:
+在此基础上， 解析动作会试着去通过替换操作匹配语法到输入令牌：
+
+Following all of the substitution steps takes a bit of coffee, but they’re driven by looking at the input and trying to match it to grammar rules.
+下面所有的解析步骤可能需要花点时间弄明白，但是它们原理都是查找输入并试着去匹配语法规则
+
+The first input token is a NUM, so substitutions first focus on matching that part.
+ 第一个输入令牌是NUM，因此替换首先会匹配那个部分
+
+Once matched, attention moves to the next token of + and so on.
+ 一旦匹配成功，就会进入下一个令牌+，以此类推
+
+Certain parts of the righthand side (e.g., { (*/) factor }*) disappear when it’s determined that they can’t match the next token.
+ 当已经确定不能匹配下一个令牌的时候，右边的部分(比如 { (*/) factor }* )就会被清理掉
+
+In a successful parse, the entire righthand side is expanded completely to match the input token stream.
+ 在一个成功的解析中，整个右边部分会完全展开来匹配输入令牌流
+
+With all of the preceding background in place, here is a simple recipe that shows how to build a recursive descent expression evaluator:
+有了前面的知识背景，下面我们举一个简单示例来展示如何构建一个递归下降表达式求值程序：
+
+Parsing is a huge topic that generally occupies students for the first three weeks of a compilers course.
+文本解析是一个很大的主题， 一般会占用学生学习编译课程时刚开始的三周时间
+
+If you are seeking background knowledge about grammars, parsing algorithms, and other information, a compilers book is where you should turn.
+ 如果你在找寻关于语法，解析算法等相关的背景知识的话，你应该去看一下编译器书籍
+
+Needless to say, all of that can’t be repeated here.
+ 很显然，关于这方面的内容太多，不可能在这里全部展开
+
+Nevertheless, the overall idea of writing a recursive descent parser is generally simple.
+尽管如此，编写一个递归下降解析器的整体思路是比较简单的
+
+To start, you take every grammar rule and you turn it into a function or method.
+ 开始的时候，你先获得所有的语法规则，然后将其转换为一个函数或者方法
+
+Thus, if your grammar looks like this:
+ 因此如果你的语法类似这样：
+
+You start by turning it into a set of methods like this:
+你应该首先将它们转换成一组像下面这样的方法：
+
+The task of each method is simple—it must walk from left to right over each part of the grammar rule, consuming tokens in the process.
+每个方法要完成的任务很简单 - 它必须从左至右遍历语法规则的每一部分，处理每个令牌
+
+In a sense, the goal of the method is to either consume the rule or generate a syntax error if it gets stuck.
+ 从某种意义上讲，方法的目的就是要么处理完语法规则，要么产生一个语法错误
+
+To do this, the following implementation techniques are applied:
+ 为了这样做，需采用下面的这些实现方法：
+
+Although a simple example has been shown, recursive descent parsers can be used to implement rather complicated parsers.
+尽管向你演示的是一个简单的例子，递归下降解析器可以用来实现非常复杂的解析
+
+For example, Python code itself is interpreted by a recursive descent parser.
+ 比如，Python语言本身就是通过一个递归下降解析器去解释的
+
+If you’re so inclined, you can look at the underlying grammar by inspecting the file Grammar/Grammar in the Python source.
+ 如果你对此感兴趣，你可以通过查看Python源码文件Grammar/Grammar来研究下底层语法机制
+
+That said, there are still numerous pitfalls and limitations with making a parser by hand.
+ 看完你会发现，通过手动方式去实现一个解析器其实会有很多的局限和不足之处
+
+One such limitation of recursive descent parsers is that they can’t be written for grammar rules involving any kind of left recursion.
+其中一个局限就是它们不能被用于包含任何左递归的语法规则中
+
+For example, suppose you need to translate a rule like this:
+比如，加入你需要翻译下面这样一个规则：
+
+To do it, you might try to use the items() method like this:
+为了这样做，你可能会像下面这样使用 items() 方法：
+
+The only problem is that it doesn’t work.
+唯一的问题是这个方法根本不能工作，事实上，它会产生一个无限递归错误
+
+You can also run into tricky issues concerning the grammar rules themselves.
+关于语法规则本身你可能也会碰到一些棘手的问题
+
+For example, you might have wondered whether or not expressions could have been described by this more simple grammar:
+ 比如，你可能想知道下面这个简单扼语法是否表述得当：
+
+This grammar technically "works," but it doesn’t observe the standard arithmetic rules concerning order of evaluation.
+这个语法看上去没啥问题，但是它却不能察觉到标准四则运算中的运算符优先级
+
+For example, the expression "3 + 4 * 5" would get evaluated as "35" instead of the expected result of "23." The use of separate "expr" and "term" rules is there to make evaluation work correctly.
+ 比如，表达式 "3 + 4 * 5" 会得到35而不是期望的23. 分开使用”expr”和”term”规则可以让它正确的工作
+
+For really complicated grammars, you are often better off using parsing tools such as PyParsing or PLY.
+对于复杂的语法，你最好是选择某个解析工具比如PyParsing或者是PLY
+
+This is what the expression evaluator code looks like using PLY:
+ 下面是使用PLY来重写表达式求值程序的代码：
+
+In this code, you’ll find that everything is specified at a much higher level.
+这个程序中，所有代码都位于一个比较高的层次
+
+You simply write regular expressions for the tokens and high-level handling functions that execute when various grammar rules are matched.
+你只需要为令牌写正则表达式和规则匹配时的高阶处理函数即可
+
+The actual mechanics of running the parser, accepting tokens, and so forth is implemented entirely by the library.
+ 而实际的运行解析器，接受令牌等等底层动作已经被库函数实现了
+
+Here is an example of how the resulting parser object gets used:
+下面是一个怎样使用得到的解析对象的例子：
+
+If you need a bit more excitement in your programming, writing parsers and compilers can be a fun project.
+如果你想在你的编程过程中来点挑战和刺激，编写解析器和编译器是个不错的选择
+
+Again, a compilers textbook will have a lot of low-level details underlying theory.
+ 再次，一本编译器的书籍会包含很多底层的理论知识
+
+However, many fine resources can also be found online.
+不过很多好的资源也可以在网上找到
+
+Python’s own ast module is also worth a look.
+ Python自己的ast模块也值得去看一下
+
+Performing Text Operations on Byte Strings
+2.20 字节字符串上的字符串操作¶
+
+You want to perform common text operations (e.g., stripping, searching, and replacement) on byte strings.
+你想在字节字符串上执行普通的文本操作(比如移除，搜索和替换)
+
+Byte strings already support most of the same built-in operations as text strings.
+字节字符串同样也支持大部分和文本字符串一样的内置操作
+
+For example:
+比如：
+
+Such operations also work with byte arrays.
+这些操作同样也适用于字节数组
+
+For example:
+比如：
+
+You can apply regular expression pattern matching to byte strings, but the patterns themselves need to be specified as bytes.
+你可以使用正则表达式匹配字节字符串，但是正则表达式本身必须也是字节串
+
+For example:
+比如：
+
+For the most part, almost all of the operations available on text strings will work on byte strings.
+大多数情况下，在文本字符串上的操作均可用于字节字符串
+
+However, there are a few notable differences to be aware of.
+ 然而，这里也有一些需要注意的不同点
+
+First, indexing of byte strings produces integers, not individual characters.
+首先，字节字符串的索引操作返回整数而不是单独字符
+
+For example:
+比如：
+
+This difference in semantics can affect programs that try to process byte-oriented data on a character-by-character basis.
+这种语义上的区别会对于处理面向字节的字符数据有影响
+
+Second, byte strings don’t provide a nice string representation and don’t print cleanly unless first decoded into a text string.
+第二点，字节字符串不会提供一个美观的字符串表示，也不能很好的打印出来，除非它们先被解码为一个文本字符串
+
+For example:
+比如：
+
+Similarly, there are no string formatting operations available to byte strings.
+类似的，也不存在任何适用于字节字符串的格式化操作：
+
+If you want to do any kind of formatting applied to byte strings, it should be done using normal text strings and encoding.
+如果你想格式化字节字符串，你得先使用标准的文本字符串，然后将其编码为字节字符串
+
+For example:
+比如：
+
+Finally, you need to be aware that using a byte string can change the semantics of certain operations—especially those related to the filesystem.
+最后需要注意的是，使用字节字符串可能会改变一些操作的语义，特别是那些跟文件系统有关的操作
+
+For example, if you supply a filename encoded as bytes instead of a text string, it usually disables filename encoding/decoding.
+ 比如，如果你使用一个编码为字节的文件名，而不是一个普通的文本字符串，会禁用文件名的编码/解码
+
+For example:
+比如：
+
+Notice in the last part of this example how giving a byte string as the directory name caused the resulting filenames to be returned as undecoded bytes.
+注意例子中的最后部分给目录名传递一个字节字符串是怎样导致结果中文件名以未解码字节返回的
+
+The filename shown in the directory listing contains raw UTF-8 encoding.
+ 在目录中的文件名包含原始的UTF-8编码
+
+See “Printing Bad Filenames” for some related issues concerning filenames.
+ 参考5.15小节获取更多文件名相关的内容
+
+As a final comment, some programmers might be inclined to use byte strings as an alternative to text strings due to a possible performance improvement.
+最后提一点，一些程序员为了提升程序执行的速度会倾向于使用字节字符串而不是文本字符串
+
+Although it’s true that manipulating bytes tends to be slightly more efficient than text (due to the inherent overhead related to Unicode), doing so usually leads to very messy and nonidiomatic code.
+ 尽管操作字节字符串确实会比文本更加高效(因为处理文本固有的Unicode相关开销)
+
+You’ll often find that byte strings don’t play well with a lot of other parts of Python, and that you end up having to perform all sorts of manual encoding/decoding operations yourself to get things to work right.
+ 这样做通常会导致非常杂乱的代码
+
+Frankly, if you’re working with text, use normal text strings in your program, not byte strings.
+你会经常发现字节字符串并不能和Python的其他部分工作的很好， 并且你还得手动处理所有的编码/解码操作
+

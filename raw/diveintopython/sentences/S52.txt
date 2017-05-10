@@ -1,0 +1,117 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+8.5. locals and globals
+8.5. locals 和 globals
+
+Let's digress from HTML processing for a minute and talk about how Python handles variables.
+我们先偏离一下 HTML 处理的主题，讨论一下 Python 如何处理变量
+
+Python has two built-in functions, locals and globals, which provide dictionary-based access to local and global variables.
+Python 有两个内置的函数，locals 和 globals，它们提供了基于 dictionary 的访问局部和全局变量的方式
+
+Remember locals?
+还记得 locals 吗
+
+You first saw it here:
+您第一次是在这里看到的：
+
+No, wait, you can't learn about locals yet.
+不，等等，此时您还不能理解 locals 
+
+First, you need to learn about namespaces.
+首先，您需要学习关于命名空间的知识
+
+This is dry stuff, but it's important, so pay attention.
+这很枯燥，但是很重要，因此要要耐心些
+
+Python uses what are called namespaces to keep track of variables.
+Python 使用叫做名字空间的东西来记录变量的轨迹
+
+A namespace is just like a dictionary where the keys are names of variables and the dictionary values are the values of those variables.
+名字空间只是一个 dictionary ，它的键字就是变量名，它的值就是那些变量的值
+
+In fact, you can access a namespace as a Python dictionary, as you'll see in a minute.
+实际上，名字空间可以像 Python 的 dictionary 一样进行访问，一会儿我们就会看到
+
+At any particular point in a Python program, there are several namespaces available.
+在一个 Python 程序中的任何一个地方，都存在几个可用的名字空间
+
+Each function has its own namespace, called the local namespace, which keeps track of the function's variables, including function arguments and locally defined variables.
+每个函数都有着自已的名字空间，叫做局部名字空间，它记录了函数的变量，包括函数的参数和局部定义的变量
+
+Each module has its own namespace, called the global namespace, which keeps track of the module's variables, including functions, classes, any other imported modules, and module-level variables and constants.
+每个模块拥有它自已的名字空间，叫做全局名字空间，它记录了模块的变量，包括函数、类、其它导入的模块、模块级的变量和常量
+
+And there is the built-in namespace, accessible from any module, which holds built-in functions and exceptions.
+还有就是内置名字空间，任何模块均可访问它，它存放着内置的函数和异常
+
+When a line of code asks for the value of a variable x, Python will search for that variable in all the available namespaces, in order:
+当一行代码要使用变量 x 的值时，Python 会到所有可用的名字空间去查找变量，按照如下顺序：
+
+If Python doesn't find x in any of these namespaces, it gives up and raises a NameError with the message There is no variable named 'x', which you saw back in Example 3.18, “Referencing an Unbound Variable”, but you didn't appreciate how much work Python was doing before giving you that error.
+如果 Python 在这些名字空间找不到 x，它将放弃查找并引发一个 NameError 异常，同时传递 There is no variable named 'x' 这样一条信息，回到 例 3.18 “引用未赋值的变量”，您会看到一路上都有这样的信息
+
+Are you confused yet?
+您是否为此而感到困惑
+
+Don't despair!
+不要灰心
+
+This is really cool, I promise.
+我敢说这一点非常酷
+
+Like many things in Python, namespaces are directly accessible at run-time.
+像 Python 中的许多事情一样，名字空间在运行时直接可以访问
+
+How?
+怎么样
+
+Well, the local namespace is accessible via the built-in locals function, and the global (module level) namespace is accessible via the built-in globals function.
+不错吧，局部名字空间可以通过内置的 locals 函数来访问
+
+What locals does for the local (function) namespace, globals does for the global (module) namespace.
+locals 对局部 (函数) 名字空间做了些什么，globals 就对全局 (模块) 名字空间做了什么
+
+globals is more exciting, though, because a module's namespace is more exciting.[3] Not only does the module's namespace include module-level variables and constants, it includes all the functions and classes defined in the module.
+然而 globals 更令人兴奋，因为一个模块的名字空间是更令人兴奋的
+
+Plus, it includes anything that was imported into the module.
+[6] 模块的名字空间不仅仅包含了模块级的变量和常量，还包括了所有在模块中定义的函数和类
+
+Remember the difference between from module import and import module?
+回想一下 from module import 和 import module 之间的不同
+
+With import module, the module itself is imported, but it retains its own namespace, which is why you need to use the module name to access any of its functions or attributes: module.function.
+使用 import module，模块自身被导入，但是它保持着自已的名字空间，这就是为什么您需要使用模块名来访问它的函数或属性：module.function 的原因
+
+But with from module import, you're actually importing specific functions and attributes from another module into your own namespace, which is why you access them directly without referencing the original module they came from.
+但是使用 from module import，实际上是从另一个模块中将指定的函数和属性导入到您自己的名字空间，这就是为什么您可以直接访问它们却不需要引用它们所来源的模块
+
+With the globals function, you can actually see this happen.
+使用 globals 函数，您会真切地看到这一切的发生
+
+Look at the following block of code at the bottom of BaseHTMLProcessor.py:
+看看下面列出的在文件 BaseHTMLProcessor.py 尾部的代码块：
+
+Now running the script from the command line gives this output (note that your output may be slightly different, depending on your platform and where you installed Python):
+现在从命令行运行这个脚本，会得到下面的输出 (注意您的输出可能有略微的不同，这依赖于您的系统平台和所安装的 Python 版本)：
+
+There is one other important difference between the locals and globals functions, which you should learn now before it bites you.
+在 locals 与 globals 之间有另外一个重要的区别，您应该在它困扰您之前就了解它
+
+It will bite you anyway, but at least then you'll remember learning it.
+它无论如何都会困扰您的，但至少您还会记得曾经学习过它
+
+[3] I don't get out much.
+[6] 我没有说得太多吧
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

@@ -1,0 +1,90 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+4.5. Filtering Lists
+4.5. 过滤列表
+
+As you know, Python has powerful capabilities for mapping lists into other lists, via list comprehensions (Section 3.6, “Mapping Lists”).
+如你所知，Python 具有通过列表解析 (第 3.6 节 “映射 list”) 将列表映射到其它列表的强大能力
+
+This can be combined with a filtering mechanism, where some elements in the list are mapped while others are skipped entirely.
+这种能力同过滤机制结合使用，使列表中的有些元素被映射的同时跳过另外一些元素
+
+Here is the list filtering syntax:
+过滤列表语法：
+
+This is an extension of the list comprehensions that you know and love.
+这是你所知所爱的列表解析的扩展
+
+The first two thirds are the same;
+前三部分都是相同的
+
+the last part, starting with the if, is the filter expression.
+最后一部分，以 if 开头的是过滤器表达式
+
+A filter expression can be any expression that evaluates true or false (which in Python can be almost anything).
+过滤器表达式可以是返回值为真或者假的任何表达式 (在 Python 中是几乎任何东西)
+
+Any element for which the filter expression evaluates true will be included in the mapping.
+任何经过滤器表达式演算值为真的元素都可以包含在映射中
+
+All other elements are ignored, so they are never put through the mapping expression and are not included in the output list.
+其它的元素都将忽略，它们不会进入映射表达式，更不会包含在输出列表中
+
+Let's get back to this line from apihelper.py:
+回到 apihelper.py 中的这一行：
+
+This looks complicated, and it is complicated, but the basic structure is the same.
+这行看上去挺复杂――确实也很复杂――但是基本结构都还是一样的
+
+The whole filter expression returns a list, which is assigned to the methodList variable.
+整个过滤表达式返回一个列表，并赋值给 methodList 变量
+
+The first half of the expression is the list mapping part.
+表达式的前半部分是列表映射部分
+
+The mapping expression is an identity expression, which it returns the value of each element.
+映射表达式是一个和遍历元素相同的表达式，因此它返回每个元素的值
+
+dir(object) returns a list of object's attributes and methods -- that's the list you're mapping.
+dir(object) 返回 object 对象的属性和方法列表――你正在映射的列表
+
+So the only new part is the filter expression after the if.
+所以唯一新出现的部分就是在 if 后面的过滤表达式
+
+The filter expression looks scary, but it's not.
+过滤表达式看上去很恐怖，其实不是
+
+You already know about callable, getattr, and in.
+你已经知道了 callable、getattr 和 in
+
+As you saw in the previous section, the expression getattr(object, method) returns a function object if object is a module and method is the name of a function in that module.
+正如你在前面的部分中看到的，如果 object 是一个模块，并且 method 是上述模块中某个函数的名称，那么表达式 getattr(object, method) 将返回一个函数对象
+
+So this expression takes an object (named object).
+所以这个表达式接收一个名为 object 的对象
+
+Then it gets a list of the names of the object's attributes, methods, functions, and a few other things.
+然后得到它的属性、方法、函数和其他成员的名称列表
+
+Then it filters that list to weed out all the stuff that you don't care about.
+接着过滤掉我们不关心的成员
+
+You do the weeding out by taking the name of each attribute/method/function and getting a reference to the real thing, via the getattr function.
+执行过滤行为是通过对每个属性/方法/函数的名称调用 getattr 函数取得实际成员的引用
+
+Then you check to see if that object is callable, which will be any methods and functions, both built-in (like the pop method of a list) and user-defined (like the buildConnectionString function of the odbchelper module).
+然后检查这些成员对象是否是可调用的，当然这些可调用的成员对象可能是方法或者函数，同时也可能是内置的 (比如列表的 pop 方法) 或者用户自定义的 (比如 odbchelper 模块的 buildConnectionString 函数)
+
+You don't care about other attributes, like the __name__ attribute that's built in to every module.
+这里你不用关心其它的属性，如内置在每一个模块中的 __name__ 属性
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

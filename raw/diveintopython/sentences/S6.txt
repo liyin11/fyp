@@ -1,0 +1,36 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+1.8. The Interactive Shell
+1.8. 使用 Python 的交互 Shell
+
+Now that you have Python installed, what's this interactive shell thing you're running?
+既然我们已经安装了 Python，那么我们运行的这个交互 shell 是什么东西呢
+
+It's like this: Python leads a double life.
+Python 扮演着两种角色
+
+It's an interpreter for scripts that you can run from the command line or run like applications, by double-clicking the scripts.
+首先它是一个脚本解释器，可以从命令行运行脚本，也可以在脚本上双击，像运行其他应用程序一样
+
+But it's also an interactive shell that can evaluate arbitrary statements and expressions.
+它还是一个交互 shell，可以执行任意的语句和表达式
+
+This is extremely useful for debugging, quick hacking, and testing.
+这一点对调试、快速组建和测试相当有用
+
+I even know some people who use the Python interactive shell in lieu of a calculator!
+我甚至知道一些人把 Python 的交互 shell 当作计算器来使用
+
+Launch the Python interactive shell in whatever way works on your platform, and let's dive in with the steps shown here:
+在您的计算机平台上启动 Python 的交互 shell，接下来让我们尝试着做些操作：
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

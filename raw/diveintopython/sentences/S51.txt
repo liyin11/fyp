@@ -1,0 +1,51 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+8.4. Introducing BaseHTMLProcessor.py
+8.4. BaseHTMLProcessor.py 介绍
+
+SGMLParser doesn't produce anything by itself.
+SGMLParser 自身不会产生任何结果
+
+It parses and parses and parses, and it calls a method for each interesting thing it finds, but the methods don't do anything.
+它只是分析，分析，再分析，对于它找到的有趣的东西会调用相应的一个方法，但是这些方法什么都不做
+
+SGMLParser is an HTML consumer: it takes HTML and breaks it down into small, structured pieces.
+SGMLParser 是一个 HTML 消费者 (consumer)：它接收 HTML，将其分解成小的、结构化的小块
+
+As you saw in the previous section, you can subclass SGMLParser to define classes that catch specific tags and produce useful things, like a list of all the links on a web page.
+正如您所看到的，在前一节中，您可以定义 SGMLParser 的子类，它可以捕捉特别标记和生成有用的东西，如一个网页中所有链接的一个列表
+
+Now you'll take this one step further by defining a class that catches everything SGMLParser throws at it and reconstructs the complete HTML document.
+现在我们将沿着这条路更深一步，我们要定义一个可以捕捉 SGMLParser 所丢出来的所有东西的一个类，接着重建整个 HTML 文档
+
+In technical terms, this class will be an HTML producer.
+用技术术语来说，这个类将是一个 HTML 生产者 (producer)
+
+BaseHTMLProcessor subclasses SGMLParser and provides all 8 essential handler methods: unknown_starttag, unknown_endtag, handle_charref, handle_entityref, handle_comment, handle_pi, handle_decl, and handle_data.
+BaseHTMLProcessor 子类化 SGMLParser，并且提供了全部的 8 个处理方法：unknown_starttag、unknown_endtag、handle_charref、handle_entityref、handle_comment、handle_pi、handle_decl 和 handle_data
+
+[2] The reason Python is better at lists than strings is that lists are mutable but strings are immutable.
+[5] Python 处理 list 比字符串快的原因是：list 是可变的，但字符串是不可变的
+
+This means that appending to a list just adds the element and updates the index.
+这就是说向 list 进行追加只是增加元素和修改索引
+
+Since strings can not be changed after they are created, code like s = s + newpiece will create an entirely new string out of the concatenation of the original and the new piece, then throw away the original string.
+因为字符串在创建之后不能被修改，像 s = s + newpiece 这样的代码将会从原值和新片段的连接结果中创建一个全新的字符串，然后丢弃原来的字符串
+
+This involves a lot of expensive memory management, and the amount of effort involved increases as the string gets longer, so doing s = s + newpiece in a loop is deadly.
+这样就需要大量昂贵的内存管理，并且随着字符串变长，所需要的开销也在增长，所以在一个循环中执行 s = s + newpiece 非常不好
+
+In technical terms, appending n items to a list is O(n), while appending n items to a string is O(n2).
+用技术术语来说，向一个 list 追加 n 个项的代价为 O(n)，而向一个字符串追加 n 个项的代价是 O(n2)
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

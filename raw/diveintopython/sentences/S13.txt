@@ -1,0 +1,21 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+3.2. Introducing Lists
+3.2. List 介绍
+
+Lists are Python's workhorse datatype.
+List 是 Python 中使用最频繁的数据类型
+
+If your only experience with lists is arrays in Visual Basic or (God forbid) the datastore in Powerbuilder, brace yourself for Python lists.
+如果您对 list 仅有的经验就是在 Visual Basic 中的数组或 Powerbuilder 中的数据存储，那么就打起精神学习 Python 的 list 吧
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

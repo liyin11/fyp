@@ -1,0 +1,48 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+11.6. Handling Last-Modified and ETag
+11.6. 处理 Last-Modified 和 ETag
+
+Now that you know how to add custom HTTP headers to your web service requests, let's look at adding support for Last-Modified and ETag headers.
+既然你知道如何在你的 web 服务请求中添加自定义的 HTTP 头信息，接下来看看如何添加 Last-Modified 和 ETag 头信息的支持
+
+These examples show the output with debugging turned off.
+下面的这些例子将以调试标记置为关闭的状态来显示输出结果
+
+If you still have it turned on from the previous section, you can turn it off by setting httplib.HTTPConnection.debuglevel = 0.
+如果你还停留在上一部分的开启状态，可以使用 httplib.HTTPConnection.debuglevel = 0 将其设置为关闭状态
+
+Or you can just leave debugging on, if that helps you.
+或者，如果你认为有帮助也可以保持为开启状态
+
+urllib2 also raises an HTTPError exception for conditions that you would think of as errors, such as 404 (page not found).
+urllib2 也为你认为是错误的其他条件引发 HTTPError 异常，比如 404 (page not found)
+
+In fact, it will raise HTTPError for any status code other than 200 (OK), 301 (permanent redirect), or 302 (temporary redirect).
+实际上，它将为任何 除了状态代码 200 (OK)、301 (permanent redirect)或 302 (temporary redirect) 之外的状态引发 HTTPError
+
+It would be more helpful for your purposes to capture the status code and simply return it, without throwing an exception.
+捕获状态代码并简单返回它，而不是抛出异常，这应该对你很有帮助
+
+To do that, you'll need to define a custom URL handler.
+为了实现它，你将需要自定义一个 URL 处理器
+
+This custom URL handler is part of openanything.py.
+这个自定义的 URL 处理器是 openanything.py 的一部分
+
+Handling ETag works much the same way, but instead of checking for Last-Modified and sending If-Modified-Since, you check for ETag and send If-None-Match.
+处理 ETag 的工作也非常相似，只不过不是检查 Last-Modified 并发送 If-Modified-Since，而是检查 ETag 并发送 If-None-Match
+
+Let's start with a fresh IDE session.
+让我们打开一个新的 IDE 会话
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

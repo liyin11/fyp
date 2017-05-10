@@ -1,0 +1,786 @@
+Chapter 7. Functions
+第七章：函数¶
+
+Defining functions using the def statement is a cornerstone of all programs.
+使用 def 语句定义函数是所有程序的基础
+
+The goal of this chapter is to present some more advanced and unusual function definition and usage patterns.
+ 本章的目标是讲解一些更加高级和不常见的函数定义与使用模式
+
+Topics include default arguments, functions that take any number of arguments, keyword-only arguments, annotations, and closures.
+ 涉及到的内容包括默认参数、任意数量参数、强制关键字参数、注解和闭包
+
+In addition, some tricky control flow and data passing problems involving callback functions are addressed.
+ 另外，一些高级的控制流和利用回调函数传递数据的技术在这里也会讲解到
+
+Writing Functions That Accept Any Number of Arguments
+7.1 可接受任意数量参数的函数¶
+
+You want to write a function that accepts any number of input arguments.
+你想构造一个可接受任意数量参数的函数
+
+To write a function that accepts any number of positional arguments, use a * argument.
+为了能让一个函数接受任意数量的位置参数，可以使用一个*参数
+
+For example:
+例如：
+
+In this example, rest is a tuple of all the extra positional arguments passed.
+在这个例子中，rest是由所有其他位置参数组成的元组
+
+The code treats it as a sequence in performing subsequent calculations.
+然后我们在代码中把它当成了一个序列来进行后续的计算
+
+To accept any number of keyword arguments, use an argument that starts with **.
+为了接受任意数量的关键字参数，使用一个以**开头的参数
+
+For example:
+比如：
+
+Here, attrs is a dictionary that holds the passed keyword arguments (if any).
+在这里，attrs是一个包含所有被传入进来的关键字参数的字典
+
+If you want a function that can accept both any number of positional and keyword-only arguments, use * and ** together.
+如果你还希望某个函数能同时接受任意数量的位置参数和关键字参数，可以同时使用*和**
+
+For example:
+比如：
+
+With this function, all of the positional arguments are placed into a tuple args, and all of the keyword arguments are placed into a dictionary kwargs.
+使用这个函数时，所有位置参数会被放到args元组中，所有关键字参数会被放到字典kwargs中
+
+A * argument can only appear as the last positional argument in a function definition.
+一个*参数只能出现在函数定义中最后一个位置参数后面，而 **参数只能出现在最后一个参数
+
+A ** argument can only appear as the last argument.
+ 有一点要注意的是，在*参数后面仍然可以定义其他参数
+
+Such arguments are known as keyword-only arguments, and are discussed further in “Writing Functions That Only Accept Keyword Arguments”.
+这种参数就是我们所说的强制关键字参数，在后面7.2小节还会详细讲解到
+
+Writing Functions That Only Accept Keyword Arguments
+7.2 只接受关键字参数的函数¶
+
+You want a function to only accept certain arguments by keyword.
+你希望函数的某些参数强制使用关键字参数传递
+
+This feature is easy to implement if you place the keyword arguments after a * argument or a single unnamed *.
+将强制关键字参数放到某个*参数或者单个*后面就能达到这种效果
+
+For example:
+比如：
+
+This technique can also be used to specify keyword arguments for functions that accept a varying number of positional arguments.
+利用这种技术，我们还能在接受任意多个位置参数的函数中指定关键字参数
+
+For example:
+比如：
+
+Keyword-only arguments are often a good way to enforce greater code clarity when specifying optional function arguments.
+很多情况下，使用强制关键字参数会比使用位置参数表意更加清晰，程序也更加具有可读性
+
+For example, consider a call like this:
+ 例如，考虑下如下一个函数调用：
+
+If someone is not intimately familiar with the workings of the recv(), they may have no idea what the False argument means.
+如果调用者对recv函数并不是很熟悉，那他肯定不明白那个False参数到底来干嘛用的
+
+On the other hand, it is much clearer if the call is written like this:
+ 但是，如果代码变成下面这样子的话就清楚多了：
+
+The use of keyword-only arguments is also often preferrable to tricks involving **kwargs, since they show up properly when the user asks for help:
+另外，使用强制关键字参数也会比使用**kwargs参数更好，因为在使用函数help的时候输出也会更容易理解：
+
+Keyword-only arguments also have utility in more advanced contexts.
+强制关键字参数在一些更高级场合同样也很有用
+
+For example, they can be used to inject arguments into functions that make use of the *args and **kwargs convention for accepting all inputs.
+ 例如，它们可以被用来在使用*args和**kwargs参数作为输入的函数中插入参数，9.11小节有一个这样的例子
+
+Attaching Informational Metadata to Function Arguments
+7.3 给函数参数增加元信息¶
+
+You’ve written a function, but would like to attach some additional information to the arguments so that others know more about how a function is supposed to be used.
+你写好了一个函数，然后想为这个函数的参数增加一些额外的信息，这样的话其他使用者就能清楚的知道这个函数应该怎么使用
+
+Function argument annotations can be a useful way to give programmers hints about how a function is supposed to be used.
+使用函数参数注解是一个很好的办法，它能提示程序员应该怎样正确使用这个函数
+
+For example, consider the following annotated function:
+ 例如，下面有一个被注解了的函数：
+
+The Python interpreter does not attach any semantic meaning to the attached annotations.
+python解释器不会对这些注解添加任何的语义
+
+They are not type checks, nor do they make Python behave any differently than it did before.
+它们不会被类型检查，运行时跟没有加注解之前的效果也没有任何差距
+
+However, they might give useful hints to others reading the source code about what you had in mind.
+ 然而，对于那些阅读源码的人来讲就很有帮助啦
+
+Third-party tools and frameworks might also attach semantic meaning to the annotations.
+第三方工具和框架可能会对这些注解添加语义
+
+They also appear in documentation:
+同时它们也会出现在文档中
+
+Although you can attach any kind of object to a function as an annotation (e.g., numbers, strings, instances, etc.), classes or strings often seem to make the most sense.
+尽管你可以使用任意类型的对象给函数添加注解(例如数字，字符串，对象实例等等)，不过通常来讲使用类或者字符串会比较好点
+
+Function annotations are merely stored in a function’s __annotations__ attribute.
+函数注解只存储在函数的 __annotations__ 属性中
+
+For example:
+例如：
+
+Although there are many potential uses of annotations, their primary utility is probably just documentation.
+尽管注解的使用方法可能有很多种，但是它们的主要用途还是文档
+
+Because Python doesn’t have type declarations, it can often be difficult to know what you’re supposed to pass into a function if you’re simply reading its source code in isolation.
+ 因为python并没有类型声明，通常来讲仅仅通过阅读源码很难知道应该传递什么样的参数给这个函数
+
+An annotation gives someone more of a hint.
+ 这时候使用注解就能给程序员更多的提示，让他们可以争取的使用函数
+
+See “Implementing Multiple Dispatch with Function Annotations” for an advanced example showing how to use annotations to implement multiple dispatch (i.e., overloaded functions).
+参考9.20小节的一个更加高级的例子，演示了如何利用注解来实现多分派(比如重载函数)
+
+Returning Multiple Values from a Function
+7.4 返回多个值的函数¶
+
+You want to return multiple values from a function.
+你希望构造一个可以返回多个值的函数
+
+To return multiple values from a function, simply return a tuple.
+为了能返回多个值，函数直接return一个元组就行了
+
+For example:
+例如：
+
+Although it looks like myfun() returns multiple values, a tuple is actually being created.
+尽管myfun()看上去返回了多个值，实际上是先创建了一个元组然后返回的
+
+It looks a bit peculiar, but it’s actually the comma that forms a tuple, not the parentheses.
+ 这个语法看上去比较奇怪，实际上我们使用的是逗号来生成一个元组，而不是用括号
+
+For example:
+比如下面的：
+
+When calling functions that return a tuple, it is common to assign the result to multiple variables, as shown.
+当我们调用返回一个元组的函数的时候 ，通常我们会将结果赋值给多个变量，就像上面的那样
+
+This is simply tuple unpacking, as described in “Unpacking a Sequence into Separate Variables”.
+ 其实这就是1.1小节中我们所说的元组解包
+
+The return value could also have been assigned to a single variable:
+返回结果也可以赋值给单个变量， 这时候这个变量值就是函数返回的那个元组本身了：
+
+Defining Functions with Default Arguments
+7.5 定义有默认参数的函数¶
+
+You want to define a function or method where one or more of the arguments are optional and have a default value.
+你想定义一个函数或者方法，它的一个或多个参数是可选的并且有一个默认值
+
+On the surface, defining a function with optional arguments is easy—simply assign values in the definition and make sure that default arguments appear last.
+定义一个有可选参数的函数是非常简单的，直接在函数定义中给参数指定一个默认值，并放到参数列表最后就行了
+
+For example:
+例如：
+
+If the default value is supposed to be a mutable container, such as a list, set, or dictionary, use None as the default and write code like this:
+如果默认参数是一个可修改的容器比如一个列表、集合或者字典，可以使用None作为默认值，就像下面这样：
+
+If, instead of providing a default value, you want to write code that merely tests whether an optional argument was given an interesting value or not, use this idiom:
+如果你并不想提供一个默认值，而是想仅仅测试下某个默认参数是不是有传递进来，可以像下面这样写：
+
+Here’s how this function behaves:
+我们测试下这个函数：
+
+Carefully observe that there is a distinction between passing no value at all and passing a value of None.
+仔细观察可以发现到传递一个None值和不传值两种情况是有差别的
+
+Defining functions with default arguments is easy, but there is a bit more to it than meets the eye.
+定义带默认值参数的函数是很简单的，但绝不仅仅只是这个，还有一些东西在这里也深入讨论下
+
+First, the values assigned as a default are bound only once at the time of function definition.
+首先，默认参数的值仅仅在函数定义的时候赋值一次
+
+Try this example to see it:
+试着运行下面这个例子：
+
+Notice how changing the variable x (which was used as a default value) has no effect whatsoever.
+注意到当我们改变x的值的时候对默认参数值并没有影响，这是因为在函数定义的时候就已经确定了它的默认值了
+
+Second, the values assigned as defaults should always be immutable objects, such as None, True, False, numbers, or strings.
+其次，默认参数的值应该是不可变的对象，比如None、True、False、数字或字符串
+
+Specifically, never write code like this:
+ 特别的，千万不要像下面这样写代码：
+
+If you do this, you can run into all sorts of trouble if the default value ever escapes the function and gets modified.
+如果你这么做了，当默认值在其他地方被修改后你将会遇到各种麻烦
+
+Such changes will permanently alter the default value across future function calls.
+这些修改会影响到下次调用这个函数时的默认值
+
+For example:
+比如：
+
+That’s probably not what you want.
+这种结果应该不是你想要的
+
+To avoid this, it’s better to assign None as a default and add a check inside the function for it, as shown in the solution.
+为了避免这种情况的发生，最好是将默认值设为None， 然后在函数里面检查它，前面的例子就是这样做的
+
+The use of the is operator when testing for None is a critical part of this recipe.
+在测试None值时使用 is 操作符是很重要的，也是这种方案的关键点
+
+Sometimes people make this mistake:
+ 有时候大家会犯下下面这样的错误：
+
+The problem here is that although None evaluates to False, many other objects (e.g., zero-length strings, lists, tuples, dicts, etc.) do as well.
+这么写的问题在于尽管None值确实是被当成False， 但是还有其他的对象(比如长度为0的字符串、列表、元组、字典等)都会被当做False
+
+Thus, the test just shown would falsely treat certain inputs as missing.
+ 因此，上面的代码会误将一些其他输入也当成是没有输入
+
+For example:
+比如：
+
+The last part of this recipe is something that’s rather subtle—a function that tests to see whether a value (any value) has been supplied to an optional argument or not.
+最后一个问题比较微妙，那就是一个函数需要测试某个可选参数是否被使用者传递进来
+
+The tricky part here is that you can’t use a default value of None, 0, or False to test for the presence of a user-supplied argument (since all of these are perfectly valid values that a user might supply).
+ 这时候需要小心的是你不能用某个默认值比如None、 0或者False值来测试用户提供的值(因为这些值都是合法的值，是可能被用户传递进来的)
+
+Thus, you need something else to test against.
+ 因此，你需要其他的解决方案了
+
+To solve this problem, you can create a unique private instance of object, as shown in the solution (the _no_value variable).
+为了解决这个问题，你可以创建一个独一无二的私有对象实例，就像上面的_no_value变量那样
+
+In the function, you then check the identity of the supplied argument against this special value to see if an argument was supplied or not.
+ 在函数里面，你可以通过检查被传递参数值跟这个实例是否一样来判断
+
+The thinking here is that it would be extremely unlikely for a user to pass the _no_value instance in as an input value.
+ 这里的思路是用户不可能去传递这个_no_value实例作为输入
+
+Therefore, it becomes a safe value to check against if you’re trying to determine whether an argument was supplied or not.
+ 因此，这里通过检查这个值就能确定某个参数是否被传递进来了
+
+The use of object() might look rather unusual here.
+这里对 object() 的使用看上去有点不太常见
+
+object is a class that serves as the common base class for almost all objects in Python.
+object 是python中所有类的基类
+
+You can create instances of object, but they are wholly uninteresting, as they have no notable methods nor any instance data (because there is no underlying instance dictionary, you can’t even set any attributes).
+ 你可以创建 object 类的实例，但是这些实例没什么实际用处，因为它并没有任何有用的方法， 也没有任何实例数据(因为它没有任何的实例字典，你甚至都不能设置任何属性值)
+
+About the only thing you can do is perform tests for identity.
+ 你唯一能做的就是测试同一性
+
+This makes them useful as special values, as shown in the solution.
+这个刚好符合我的要求，因为我在函数中就只是需要一个同一性的测试而已
+
+Defining Anonymous or Inline Functions
+7.6 定义匿名或内联函数¶
+
+You need to supply a short callback function for use with an operation such as sort(), but you don’t want to write a separate one-line function using the def statement.
+你想为 sort() 操作创建一个很短的回调函数，但又不想用 def 去写一个单行函数， 而是希望通过某个快捷方式以内联方式来创建这个函数
+
+Simple functions that do nothing more than evaluate an expression can be replaced by a lambda expression.
+当一些函数很简单，仅仅只是计算一个表达式的值的时候，就可以使用lambda表达式来代替了
+
+For example:
+比如：
+
+The use of lambda here is the same as having typed this:
+这里使用的lambda表达式跟下面的效果是一样的：
+
+Typically, lambda is used in the context of some other operation, such as sorting or a data reduction:
+lambda表达式典型的使用场景是排序或数据reduce等：
+
+Although lambda allows you to define a simple function, its use is highly restricted.
+尽管lambda表达式允许你定义简单函数，但是它的使用是有限制的
+
+In particular, only a single expression can be specified, the result of which is the return value.
+ 你只能指定单个表达式，它的值就是最后的返回值
+
+This means that no other language features, including multiple statements, conditionals, iteration, and exception handling, can be included.
+也就是说不能包含其他的语言特性了， 包括多个语句、条件表达式、迭代以及异常处理等等
+
+You can quite happily write a lot of Python code without ever using lambda.
+你可以不使用lambda表达式就能编写大部分python代码
+
+However, you’ll occasionally encounter it in programs where someone is writing a lot of tiny functions that evaluate various expressions, or in programs that require users to supply callback functions.
+ 但是，当有人编写大量计算表达式值的短小函数或者需要用户提供回调函数的程序的时候， 你就会看到lambda表达式的身影了
+
+Capturing Variables in Anonymous Functions
+7.7 匿名函数捕获变量值¶
+
+You’ve defined an anonymous function using lambda, but you also need to capture the values of certain variables at the time of definition.
+你用lambda定义了一个匿名函数，并想在定义时捕获到某些变量的值
+
+Consider the behavior of the following code:
+先看下下面代码的效果：
+
+Now ask yourself a question.
+现在我问你，a(10)和b(10)返回的结果是什么
+
+What are the values of a(10) and b(10)?
+如果你认为结果是20和30，那么你就错了：
+
+The problem here is that the value of x used in the lambda expression is a free variable that gets bound at runtime, not definition time.
+这其中的奥妙在于lambda表达式中的x是一个自由变量， 在运行时绑定值，而不是定义时就绑定，这跟函数的默认值参数定义是不同的
+
+Thus, the value of x in the lambda expressions is whatever the value of the x variable happens to be at the time of execution.
+ 因此，在调用这个lambda表达式的时候，x的值是执行时的值
+
+For example:
+例如：
+
+If you want an anonymous function to capture a value at the point of definition and keep it, include the value as a default value, like this:
+如果你想让某个匿名函数在定义时就捕获到值，可以将那个参数值定义成默认参数即可，就像下面这样：
+
+The problem addressed in this recipe is something that tends to come up in code that tries to be just a little bit too clever with the use of lambda functions.
+在这里列出来的问题是新手很容易犯的错误，有些新手可能会不恰当的使用lambda表达式
+
+For example, creating a list of lambda expressions using a list comprehension or in a loop of some kind and expecting the lambda functions to remember the iteration variable at the time of definition.
+ 比如，通过在一个循环或列表推导中创建一个lambda表达式列表，并期望函数能在定义时就记住每次的迭代值
+
+For example:
+例如：
+
+Notice how all functions think that n has the last value during iteration.
+但是实际效果是运行是n的值为迭代的最后一个值
+
+Now compare to the following:
+现在我们用另一种方式修改一下：
+
+As you can see, the functions now capture the value of n at the time of definition.
+通过使用函数默认值参数形式，lambda函数在定义时就能绑定到值
+
+Making an N-Argument Callable Work As a Callable with Fewer Arguments
+7.8 减少可调用对象的参数个数¶
+
+You have a callable that you would like to use with some other Python code, possibly as a callback function or handler, but it takes too many arguments and causes an exception when called.
+你有一个被其他python代码使用的callable对象，可能是一个回调函数或者是一个处理器， 但是它的参数太多了，导致调用时出错
+
+If you need to reduce the number of arguments to a function, you should use functools.partial().
+如果需要减少某个函数的参数个数，你可以使用 functools.partial() 
+
+The partial() function allows you to assign fixed values to one or more of the arguments, thus reducing the number of arguments that need to be supplied to subsequent calls.
+ partial() 函数允许你给一个或多个参数设置固定的值，减少接下来被调用时的参数个数
+
+To illustrate, suppose you have this function:
+ 为了演示清楚，假设你有下面这样的函数：
+
+Now consider the use of partial() to fix certain argument values:
+现在我们使用 partial() 函数来固定某些参数值：
+
+Observe that partial() fixes the values for certain arguments and returns a new callable as a result.
+可以看出 partial() 固定某些参数并返回一个新的callable对象
+
+This new callable accepts the still unassigned arguments, combines them with the arguments given to partial(), and passes everything to the original function.
+这个新的callable接受未赋值的参数， 然后跟之前已经赋值过的参数合并起来，最后将所有参数传递给原始函数
+
+This recipe is really related to the problem of making seemingly incompatible bits of code work together.
+本节要解决的问题是让原本不兼容的代码可以一起工作
+
+A series of examples will help illustrate.
+下面我会列举一系列的例子
+
+As a first example, suppose you have a list of points represented as tuples of (x,y) coordinates.
+第一个例子是，假设你有一个点的列表来表示(x,y)坐标元组
+
+You could use the following function to compute the distance between two points:
+ 你可以使用下面的函数来计算两点之间的距离：
+
+Now suppose you want to sort all of the points according to their distance from some other point.
+现在假设你想以某个点为基点，根据点和基点之间的距离来排序所有的这些点
+
+The sort() method of lists accepts a key argument that can be used to customize sorting, but it only works with functions that take a single argument (thus, distance() is not suitable).
+ 列表的 sort() 方法接受一个关键字参数来自定义排序逻辑， 但是它只能接受一个单个参数的函数(distance()很明显是不符合条件的)
+
+Here’s how you might use partial() to fix it:
+ 现在我们可以通过使用 partial() 来解决这个问题：
+
+As an extension of this idea, partial() can often be used to tweak the argument signatures of callback functions used in other libraries.
+更进一步，partial() 通常被用来微调其他库函数所使用的回调函数的参数
+
+For example, here’s a bit of code that uses multiprocessing to asynchronously compute a result which is handed to a callback function that accepts both the result and an optional logging argument:
+ 例如，下面是一段代码，使用 multiprocessing 来异步计算一个结果值， 然后这个值被传递给一个接受一个result值和一个可选logging参数的回调函数：
+
+When supplying the callback function using apply_async(), the extra logging argument is given using partial().
+当给 apply_async() 提供回调函数时，通过使用 partial() 传递额外的 logging 参数
+
+multiprocessing is none the wiser about all of this—it simply invokes the callback function with a single value.
+ 而 multiprocessing 对这些一无所知——它仅仅只是使用单个值来调用回调函数
+
+As a similar example, consider the problem of writing network servers.
+作为一个类似的例子，考虑下编写网络服务器的问题，socketserver 模块让它变得很容易
+
+The socketserver module makes it relatively easy.
+ 下面是个简单的echo服务器：
+
+However, suppose you want to give the EchoHandler class an __init__() method that accepts an additional configuration argument.
+不过，假设你想给EchoHandler增加一个可以接受其他配置选项的 __init__ 方法
+
+For example:
+比如：
+
+If you make this change, you’ll find there is no longer an obvious way to plug it into the TCPServer class.
+这么修改后，我们就不需要显式地在TCPServer类中添加前缀了
+
+In fact, you’ll find that the code now starts generating exceptions like this:
+ 但是你再次运行程序后会报类似下面的错误：
+
+At first glance, it seems impossible to fix this code, short of modifying the source code to socketserver or coming up with some kind of weird workaround.
+初看起来好像很难修正这个错误，除了修改 socketserver 模块源代码或者使用某些奇怪的方法之外
+
+However, it’s easy to resolve using partial()—just use it to supply the value of the ack argument, like this:
+ 但是，如果使用 partial() 就能很轻松的解决——给它传递 ack 参数的值来初始化即可，如下：
+
+In this example, the specification of the ack argument in the __init__() method might look a little funny, but it’s being specified as a keyword-only argument.
+在这个例子中，__init__() 方法中的ack参数声明方式看上去很有趣，其实就是声明ack为一个强制关键字参数
+
+This is discussed further in “Writing Functions That Only Accept Keyword Arguments”.
+ 关于强制关键字参数问题我们在7.2小节我们已经讨论过了，读者可以再去回顾一下
+
+The functionality of partial() is sometimes replaced with a lambda expression.
+很多时候 partial() 能实现的效果，lambda表达式也能实现
+
+For example, the previous examples might use statements such as this:
+比如，之前的几个例子可以使用下面这样的表达式：
+
+This code works, but it’s more verbose and potentially a lot more confusing to someone reading it.
+这样写也能实现同样的效果，不过相比而已会显得比较臃肿，对于阅读代码的人来讲也更加难懂
+
+Using partial() is a bit more explicit about your intentions (supplying values for some of the arguments).)
+ 这时候使用 partial() 可以更加直观的表达你的意图(给某些参数预先赋值)
+
+Replacing Single Method Classes with Functions
+7.9 将单方法的类转换为函数¶
+
+You have a class that only defines a single method besides __init__().
+你有一个除 __init__() 方法外只定义了一个方法的类
+
+However, to simplify your code, you would much rather just have a simple function.
+为了简化代码，你想将它转换成一个函数
+
+In many cases, single-method classes can be turned into functions using closures.
+大多数情况下，可以使用闭包来将单个方法的类转换成函数
+
+Consider, as an example, the following class, which allows a user to fetch URLs using a kind of templating scheme.
+ 举个例子，下面示例中的类允许使用者根据某个模板方案来获取到URL链接地址
+
+The class could be replaced with a much simpler function:
+这个类可以被一个更简单的函数来代替：
+
+In many cases, the only reason you might have a single-method class is to store additional state for use in the method.
+大部分情况下，你拥有一个单方法类的原因是需要存储某些额外的状态来给方法使用
+
+For example, the only purpose of the UrlTemplate class is to hold the template value someplace so that it can be used in the open() method.
+ 比如，定义UrlTemplate类的唯一目的就是先在某个地方存储模板值，以便将来可以在open()方法中使用
+
+Using an inner function or closure, as shown in the solution, is often more elegant.
+使用一个内部函数或者闭包的方案通常会更优雅一些
+
+Simply stated, a closure is just a function, but with an extra environment of the variables that are used inside the function.
+简单来讲，一个闭包就是一个函数， 只不过在函数内部带上了一个额外的变量环境
+
+A key feature of a closure is that it remembers the environment in which it was defined.
+闭包关键特点就是它会记住自己被定义时的环境
+
+Thus, in the solution, the opener() function remembers the value of the template argument, and uses it in subsequent calls.
+ 因此，在我们的解决方案中，opener() 函数记住了 template 参数的值，并在接下来的调用中使用它
+
+Whenever you’re writing code and you encounter the problem of attaching additional state to a function, think closures.
+任何时候只要你碰到需要给某个函数增加额外的状态信息的问题，都可以考虑使用闭包
+
+They are often a more minimal and elegant solution than the alternative of turning your function into a full-fledged class.
+ 相比将你的函数转换成一个类而言，闭包通常是一种更加简洁和优雅的方案
+
+Carrying Extra State with Callback Functions
+7.10 带额外状态信息的回调函数¶
+
+You’re writing code that relies on the use of callback functions (e.g., event handlers, completion callbacks, etc.), but you want to have the callback function carry extra state for use inside the callback function.
+你的代码中需要依赖到回调函数的使用(比如事件处理器、等待后台任务完成后的回调等)， 并且你还需要让回调函数拥有额外的状态值，以便在它的内部使用到
+
+This recipe pertains to the use of callback functions that are found in many libraries and frameworks—especially those related to asynchronous processing.
+这一小节主要讨论的是那些出现在很多函数库和框架中的回调函数的使用——特别是跟异步处理有关的
+
+To illustrate and for the purposes of testing, define the following function, which invokes a callback:
+ 为了演示与测试，我们先定义如下一个需要调用回调函数的函数：
+
+In reality, such code might do all sorts of advanced processing involving threads, processes, and timers, but that’s not the main focus here.
+实际上，这段代码可以做任何更高级的处理，包括线程、进程和定时器，但是这些都不是我们要关心的
+
+Instead, we’re simply focused on the invocation of the callback.
+ 我们仅仅只需要关注回调函数的调用
+
+Here’s an example that shows how the preceding code gets used:
+下面是一个演示怎样使用上述代码的例子：
+
+As you will notice, the print_result() function only accepts a single argument, which is the result.
+注意到 print_result() 函数仅仅只接受一个参数 result 
+
+No other information is passed in.
+不能再传入其他信息
+
+This lack of information can sometimes present problems when you want the callback to interact with other variables or parts of the environment.
+ 而当你想让回调函数访问其他变量或者特定环境的变量值的时候就会遇到麻烦
+
+One way to carry extra information in a callback is to use a bound-method instead of a simple function.
+为了让回调函数访问外部信息，一种方法是使用一个绑定方法来代替一个简单函数
+
+For example, this class keeps an internal sequence number that is incremented every time a result is received:
+ 比如，下面这个类会保存一个内部序列号，每次接收到一个 result 的时候序列号加1：
+
+To use this class, you would create an instance and use the bound method handler as the callback:
+使用这个类的时候，你先创建一个类的实例，然后用它的 handler() 绑定方法来做为回调函数：
+
+As an alternative to a class, you can also use a closure to capture state.
+第二种方式，作为类的替代，可以使用一个闭包捕获状态值，例如：
+
+Here is an example of this variant:
+下面是使用闭包方式的一个例子：
+
+As yet another variation on this theme, you can sometimes use a coroutine to accomplish the same thing:
+还有另外一个更高级的方法，可以使用协程来完成同样的事情：
+
+For a coroutine, you would use its send() method as the callback, like this:
+对于协程，你需要使用它的 send() 方法作为回调函数，如下所示：
+
+Software based on callback functions often runs the risk of turning into a huge tangled mess.
+基于回调函数的软件通常都有可能变得非常复杂
+
+Part of the issue is that the callback function is often disconnected from the code that made the initial request leading to callback execution.
+一部分原因是回调函数通常会跟请求执行代码断开
+
+Thus, the execution environment between making the request and handling the result is effectively lost.
+ 因此，请求执行和处理结果之间的执行环境实际上已经丢失了
+
+If you want the callback function to continue with a procedure involving multiple steps, you have to figure out how to save and restore the associated state.
+如果你想让回调函数连续执行多步操作， 那你就必须去解决如何保存和恢复相关的状态信息了
+
+There are really two main approaches that are useful for capturing and carrying state.
+至少有两种主要方式来捕获和保存状态信息，你可以在一个对象实例(通过一个绑定方法)或者在一个闭包中保存它
+
+You can carry it around on an instance (attached to a bound method perhaps) or you can carry it around in a closure (an inner function).
+ 两种方式相比，闭包或许是更加轻量级和自然一点，因为它们可以很简单的通过函数来构造
+
+Of the two techniques, closures are perhaps a bit more lightweight and natural in that they are simply built from functions.
+ 它们还能自动捕获所有被使用到的变量
+
+They also automatically capture all of the variables being used.
+因此，你无需去担心如何去存储额外的状态信息(代码中自动判定)
+
+If using closures, you need to pay careful attention to mutable variables.
+如果使用闭包，你需要注意对那些可修改变量的操作
+
+In the solution, the nonlocal declaration is used to indicate that the sequence variable is being modified from within the callback.
+在上面的方案中， nonlocal 声明语句用来指示接下来的变量会在回调函数中被修改
+
+Without this declaration, you’ll get an error.
+如果没有这个声明，代码会报错
+
+The use of a coroutine as a callback handler is interesting in that it is closely related to the closure approach.
+而使用一个协程来作为一个回调函数就更有趣了，它跟闭包方法密切相关
+
+In some sense, it’s even cleaner, since there is just a single function.
+ 某种意义上来讲，它显得更加简洁，因为总共就一个函数而已
+
+Moreover, variables can be freely modified without worrying about nonlocal declarations.
+ 并且，你可以很自由的修改变量而无需去使用 nonlocal 声明
+
+The potential downside is that coroutines don’t tend to be as well understood as other parts of Python.
+ 这种方式唯一缺点就是相对于其他Python技术而言或许比较难以理解
+
+There are also a few tricky bits such as the need to call next() on a coroutine prior to using it.
+ 另外还有一些比较难懂的部分，比如使用之前需要调用 next() ，实际使用时这个步骤很容易被忘记
+
+That’s something that could be easy to forget in practice.
+ 尽管如此，协程还有其他用处，比如作为一个内联回调函数的定义(下一节会讲到)
+
+The last technique involving partial() is useful if all you need to do is pass extra values into a callback.
+如果你仅仅只需要给回调函数传递额外的值的话，还有一种使用 partial() 的方式也很有用
+
+Instead of using partial(), you’ll sometimes see the same thing accomplished with the use of a lambda:
+ 在没有使用 partial() 的时候，你可能经常看到下面这种使用lambda表达式的复杂代码：
+
+For more examples, see “Making an N-Argument Callable Work As a Callable with Fewer Arguments”, which shows how to use partial() to change argument signatures.
+可以参考7.8小节的几个示例，教你如何使用 partial() 来更改参数签名来简化上述代码
+
+Inlining Callback Functions
+7.11 内联回调函数¶
+
+You’re writing code that uses callback functions, but you’re concerned about the proliferation of small functions and mind boggling control flow.
+当你编写使用回调函数的代码的时候，担心很多小函数的扩张可能会弄乱程序控制流
+
+You would like some way to make the code look more like a normal sequence of procedural steps.
+ 你希望找到某个方法来让代码看上去更像是一个普通的执行序列
+
+Callback functions can be inlined into a function using generators and coroutines.
+通过使用生成器和协程可以使得回调函数内联在某个函数中
+
+To illustrate, suppose you have a function that performs work and invokes a callback as follows (see “Carrying Extra State with Callback Functions”):
+ 为了演示说明，假设你有如下所示的一个执行某种计算任务然后调用一个回调函数的函数(参考7.10小节)：
+
+Now take a look at the following supporting code, which involves an Async class and an inlined_async decorator:
+接下来让我们看一下下面的代码，它包含了一个 Async 类和一个 inlined_async 装饰器：
+
+These two fragments of code will allow you to inline the callback steps using yield statements.
+这两个代码片段允许你使用 yield 语句内联回调步骤
+
+For example:
+比如：
+
+If you call test(), you’ll get output like this:
+如果你调用 test() ，你会得到类似如下的输出：
+
+Aside from the special decorator and use of yield, you will notice that no callback functions appear anywhere (except behind the scenes).
+你会发现，除了那个特别的装饰器和 yield 语句外，其他地方并没有出现任何的回调函数(其实是在后台定义的)
+
+This recipe will really test your knowledge of callback functions, generators, and control flow.
+本小节会实实在在的测试你关于回调函数、生成器和控制流的知识
+
+First, in code involving callbacks, the whole point is that the current calculation will suspend and resume at some later point in time (e.g., asynchronously).
+首先，在需要使用到回调的代码中，关键点在于当前计算工作会挂起并在将来的某个时候重启(比如异步执行)
+
+When the calculation resumes, the callback will get executed to continue the processing.
+ 当计算重启时，回调函数被调用来继续处理结果
+
+The apply_async() function illustrates the essential parts of executing the callback, although in reality it might be much more complicated (involving threads, processes, event handlers, etc.).
+apply_async() 函数演示了执行回调的实际逻辑， 尽管实际情况中它可能会更加复杂(包括线程、进程、事件处理器等等)
+
+The idea that a calculation will suspend and resume naturally maps to the execution model of a generator function.
+计算的暂停与重启思路跟生成器函数的执行模型不谋而合
+
+Specifically, the yield operation makes a generator function emit a value and suspend.
+ 具体来讲，yield 操作会使一个生成器函数产生一个值并暂停
+
+Subsequent calls to the __next__() or send() method of a generator will make it start again.
+ 接下来调用生成器的 __next__() 或 send() 方法又会让它从暂停处继续执行
+
+With this in mind, the core of this recipe is found in the inline_async() decorator function.
+根据这个思路，这一小节的核心就在 inline_async() 装饰器函数中了
+
+The key idea is that the decorator will step the generator function through all of its yield statements, one at a time.
+ 关键点就是，装饰器会逐步遍历生成器函数的所有 yield 语句，每一次一个
+
+To do this, a result queue is created and initially populated with a value of None.
+ 为了这样做，刚开始的时候创建了一个 result 队列并向里面放入一个 None 值
+
+A loop is then initiated in which a result is popped off the queue and sent into the generator.
+ 然后开始一个循环操作，从队列中取出结果值并发送给生成器，它会持续到下一个 yield 语句， 在这里一个 Async 的实例被接受到
+
+This advances to the next yield, at which point an instance of Async is received.
+然后循环开始检查函数和参数，并开始进行异步计算 apply_async() 
+
+The loop then looks at the function and arguments, and initiates the asynchronous calculation apply_async().
+ 然而，这个计算有个最诡异部分是它并没有使用一个普通的回调函数，而是用队列的 put() 方法来回调
+
+At this point, it is left somewhat open as to precisely what happens.
+这时候，是时候详细解释下到底发生了什么了
+
+The main loop immediately goes back to the top and simply executes a get() operation on the queue.
+主循环立即返回顶部并在队列上执行 get() 操作
+
+If data is present, it must be the result placed there by the put() callback.
+ 如果数据存在，它一定是 put() 回调存放的结果
+
+If nothing is there, the operation blocks, waiting for a result to arrive at some future time.
+如果没有数据，那么先暂停操作并等待结果的到来
+
+How that might happen depends on the precise implementation of the apply_async() function.
+ 这个具体怎样实现是由 apply_async() 函数来决定的
+
+If you’re doubtful that anything this crazy would work, you can try it with the multiprocessing library and have async operations executed in separate processes:
+ 如果你不相信会有这么神奇的事情，你可以使用 multiprocessing 库来试一下， 在单独的进程中执行异步计算操作，如下所示：
+
+Indeed, you’ll find that it works, but unraveling the control flow might require more coffee.
+实际上你会发现这个真的就是这样的，但是要解释清楚具体的控制流得需要点时间了
+
+Hiding tricky control flow behind generator functions is found elsewhere in the standard library and third-party packages.
+将复杂的控制流隐藏到生成器函数背后的例子在标准库和第三方包中都能看到
+
+For example, the @contextmanager decorator in the contextlib performs a similar mind-bending trick that glues the entry and exit from a context manager together across a yield statement.
+ 比如，在 contextlib 中的 @contextmanager 装饰器使用了一个令人费解的技巧， 通过一个 yield 语句将进入和离开上下文管理器粘合在一起
+
+The popular Twisted package has inlined callbacks that are also similar.
+ 另外非常流行的 Twisted 包中也包含了非常类似的内联回调
+
+Accessing Variables Defined Inside a Closure
+7.12 访问闭包中定义的变量¶
+
+You would like to extend a closure with functions that allow the inner variables to be accessed and modified.
+你想要扩展函数中的某个闭包，允许它能访问和修改函数的内部变量
+
+Normally, the inner variables of a closure are completely hidden to the outside world.
+通常来讲，闭包的内部变量对于外界来讲是完全隐藏的
+
+However, you can provide access by writing accessor functions and attaching them to the closure as function attributes.
+ 但是，你可以通过编写访问函数并将其作为函数属性绑定到闭包上来实现这个目的
+
+For example:
+例如：
+
+Here is an example of using this code:
+下面是使用的例子:
+
+There are two main features that make this recipe work.
+为了说明清楚它如何工作的，有两点需要解释一下
+
+First, nonlocal declarations make it possible to write functions that change inner variables.
+首先，nonlocal 声明可以让我们编写函数来修改内部变量的值
+
+Second, function attributes allow the accessor methods to be attached to the closure function in a straightforward manner where they work a lot like instance methods (even though no class is involved).
+ 其次，函数属性允许我们用一种很简单的方式将访问方法绑定到闭包函数上，这个跟实例方法很像(尽管并没有定义任何类)
+
+A slight extension to this recipe can be made to have closures emulate instances of a class.
+还可以进一步的扩展，让闭包模拟类的实例
+
+All you need to do is copy the inner functions over to the dictionary of an instance and return it.
+你要做的仅仅是复制上面的内部函数到一个字典实例中并返回它即可
+
+For example:
+例如：
+
+Here’s an interactive session to show that it actually works:
+下面是一个交互式会话来演示它是如何工作的：
+
+Interestingly, this code runs a bit faster than using a normal class definition.
+有趣的是，这个代码运行起来会比一个普通的类定义要快很多
+
+For example, you might be inclined to test the performance against a class like this:
+你可能会像下面这样测试它跟一个类的性能对比：
+
+If you do, you’ll get results similar to the following:
+如果这样做，你会得到类似如下的结果：
+
+As shown, the closure version runs about 8% faster.
+结果显示，闭包的方案运行起来要快大概8%，大部分原因是因为对实例变量的简化访问， 闭包更快是因为不会涉及到额外的self变量
+
+Raymond Hettinger has devised an even more diabolical variant of this idea.
+Raymond Hettinger对于这个问题设计出了更加难以理解的改进方案
+
+However, should you be inclined to do something like this in your code, be aware that it’s still a rather weird substitute for a real class.
+不过，你得考虑下是否真的需要在你代码中这样做， 而且它只是真实类的一个奇怪的替换而已，例如，类的主要特性如继承、属性、描述器或类方法都是不能用的
+
+For example, major features such as inheritance, properties, descriptors, or class methods don’t work.
+ 并且你要做一些其他的工作才能让一些特殊方法生效(比如上面 ClosureInstance 中重写过的 __len__() 实现
+
+You also have to play some tricks to get special methods to work (e.g., see the implementation of __len__() in ClosureInstance).
+)
+
+Lastly, you’ll run the risk of confusing people who read your code and wonder why it doesn’t look anything like a normal class definition (of course, they’ll also wonder why it’s faster).
+最后，你可能还会让其他阅读你代码的人感到疑惑，为什么它看起来不像一个普通的类定义呢
+
+Nevertheless, it’s an interesting example of what can be done by providing access to the internals of a closure.
+ (当然，他们也想知道为什么它运行起来会更快)
+
+In the big picture, adding methods to closures might have more utility in settings where you want to do things like reset the internal state, flush buffers, clear caches, or have some kind of feedback mechanism.
+总体上讲，在配置的时候给闭包添加方法会有更多的实用功能， 比如你需要重置内部状态、刷新缓冲区、清除缓存或其他的反馈机制的时候
+

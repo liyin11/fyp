@@ -1,0 +1,39 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+2.3. Documenting Functions
+2.3. 文档化函数
+
+You can document a Python function by giving it a doc string.
+可以通过给出一个 doc string (文档字符串) 来文档化一个 Python 函数
+
+Triple quotes signify a multi-line string.
+三重引号表示一个多行字符串
+
+Everything between the start and end quotes is part of a single string, including carriage returns and other quote characters.
+在开始与结束引号间的所有东西都被视为单个字符串的一部分，包括硬回车和其它的引号字符
+
+You can use them anywhere, but you'll see them most often used when defining a doc string.
+您可以在任何地方使用它们，但是您可能会发现，它们经常被用于定义 doc string
+
+Everything between the triple quotes is the function's doc string, which documents what the function does.
+在三重引号中的任何东西都是这个函数的 doc string，它们用来说明函数可以做什么
+
+A doc string, if it exists, must be the first thing defined in a function (that is, the first thing after the colon).
+如果存在 doc string，它必须是一个函数要定义的第一个内容 (也就是说，在冒号后面的第一个内容)
+
+You don't technically need to give your function a doc string, but you always should.
+在技术上不要求给出函数的 doc string，但是您应该这样做
+
+I know you've heard this in every programming class you've ever taken, but Python gives you an added incentive: the doc string is available at runtime as an attribute of the function.
+我相信在您上过的每一种编程课上都听到过这一点，但是 Python 带给您一些额外的动机：doc string 在运行时可作为函数的属性
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

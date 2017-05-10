@@ -1,0 +1,66 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+10.7. Putting it all together
+10.7. 全部放在一起
+
+You've covered a lot of ground.
+你已经了解很多基础的东西
+
+Let's step back and see how all the pieces fit together.
+让我们回来看看所有片段是如何整合到一起的
+
+To start with, this is a script that takes its arguments on the command line, using the getopt module.
+作为开始，这里是一个接收命令行参数的脚本，它使用 getopt 模块
+
+You create a new instance of the KantGenerator class, and pass it the grammar file and source that may or may not have been specified on the command line.
+创建 KantGenerator 类的一个实例，然后将语法文件和源文件传给它，可能在命令行没有指定
+
+The KantGenerator instance automatically loads the grammar, which is an XML file.
+KantGenerator 实例自动加载语法，它是一个 XML 文件
+
+You use your custom openAnything function to open the file (which could be stored in a local file or a remote web server), then use the built-in minidom parsing functions to parse the XML into a tree of Python objects.
+你使用自定义的 openAnything 函数打开这个文件 (可能保存在一个本地文件中或者一个远程服务器上)，然后使用内置的 minidom 解析函数将 XML 解析为一棵 Python 对象树
+
+Oh, and along the way, you take advantage of your knowledge of the structure of the XML document to set up a little cache of references, which are just elements in the XML document.
+哦，根据这种方式，你将使用到 XML 文档结构的知识建立一个引用的小缓冲，这些引用都只是 XML 文档中的元素
+
+If you specified some source material on the command line, you use that;
+如果你在命令行中指定了某些源材料，你可以使用它
+
+otherwise you rip through the grammar looking for the "top-level" reference (that isn't referenced by anything else) and use that as a starting point.
+否则你将打开语法文件查找“顶层”引用 (没有被其它的东西引用) 并把它作为开始点
+
+Now you rip through the source material.
+现在你打开了了源材料
+
+The source material is also XML, and you parse it one node at a time.
+它是一个 XML，你每次解析一个节点
+
+To keep the code separated and more maintainable, you use separate handlers for each node type.
+为了让代码分离并具备更高的可维护性，你可以使用针对每个节点类型的独立处理方法
+
+You bounce through the grammar, parsing all the children of each p element,
+你在语法里面跳来跳去，解析每一个 p 元素的所有孩子，
+
+replacing choice elements with a random child,
+用任意一个孩子替换 choice 元素，
+
+and replacing xref elements with a random child of the corresponding ref element, which you previously cached.
+并用对应 ref 元素的任意孩子替换 xref，前面你已经进行了缓冲
+
+Eventually, you parse your way down to plain text,
+就这样一直解析，最后得到普通文本
+
+which you print out.
+把结果打印出来
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

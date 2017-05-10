@@ -1,0 +1,81 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+3.7. Joining Lists and Splitting Strings
+3.7. 连接 list 与分割字符串
+
+You have a list of key-value pairs in the form key=value, and you want to join them into a single string.
+您有了一个形如 key=value 的 key-value 对 list，并且想将它们合成为单个字符串
+
+To join any list of strings into a single string, use the join method of a string object.
+为了将任意包含字符串的 list 连接成单个字符串，可以使用字符串对象的 join 方法
+
+Here is an example of joining a list from the buildConnectionString function:
+下面是一个在 buildConnectionString 函数中连接 list 的例子：
+
+One interesting note before you continue.
+在我们继续之前有一个有趣的地方
+
+I keep repeating that functions are objects, strings are objects...
+我一直在重复函数是对象，字符串是对象，每个东西都是对象的概念
+
+everything is an object.
+您也许认为我的意思是说字符串值 是对象
+
+You might have thought I meant that string variables are objects.
+但是不对，仔细地看一下这个例子，您将会看到字符串 ";" 本身就是一个对象，您在调用它的 join 方法
+
+The join method joins the elements of the list into a single string, with each element separated by a semi-colon.
+总之，这里的 join 方法将 list 中的元素连接成单个字符串，每个元素用一个分号隔开
+
+The delimiter doesn't need to be a semi-colon;
+分隔符不必是一个分号
+
+it doesn't even need to be a single character.
+它甚至不必是单个字符
+
+It can be any string.
+它可以是任何字符串
+
+This string is then returned from the odbchelper function and printed by the calling block, which gives you the output that you marveled at when you started reading this chapter.
+上面的字符串是从 odbchelper 函数返回的，被调用块打印出来，这样就给出了您开始阅读本章时令人感到吃惊的输出结果
+
+You're probably wondering if there's an analogous method to split a string into a list.
+您可能在想是否存在一个适当的方法来将字符串分割成一个 list
+
+And of course there is, and it's called split.
+当然有，它叫做 split
+
+When I first learned Python, I expected join to be a method of a list, which would take the delimiter as an argument.
+当我开始学 Python 时，我以为 join 是 list 的方法，它会使用分隔符作为一个参数
+
+Many people feel the same way, and there's a story behind the join method.
+很多人都有同样的感觉：在 join 方法的背后有一段故事
+
+Prior to Python 1.6, strings didn't have all these useful methods.
+在 Python 1.6 之前，字符串完全没有这些有用的方法
+
+There was a separate string module that contained all the string functions;
+有一个独立的 string 模块包含所有的字符串函数，每个函数使用一个字符串作为它的第一个参数
+
+each function took a string as its first argument.
+这些函数被认为足够重要，所以它们移到字符串中去了，这就使得诸如 lower、upper 和 split 之类的函数是有意义的
+
+The functions were deemed important enough to put onto the strings themselves, which made sense for functions like lower, upper, and split.
+但许多核心的 Python 程序员反对新的 join 方法，争论说应该换成是 list 的一个方法，或不应该移动而仅仅保留为旧的 string 模块 (现仍然还有许多有用的东西在里面) 的一部分
+
+But many hard-core Python programmers objected to the new join method, arguing that it should be a method of the list instead, or that it shouldn't move at all but simply stay a part of the old string module (which still has a lot of useful stuff in it).
+我只使用新的 join 方法，但是您还是会看到其它写法
+
+I use the new join method exclusively, but you will see code written either way, and if it really bothers you, you can use the old string.join function instead.
+如果它真的使您感到麻烦，您可以使用旧的 string.join 函数来替代
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

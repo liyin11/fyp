@@ -1,0 +1,87 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+2.4. Everything Is an Object
+2.4. 万物皆对象
+
+In case you missed it, I just said that Python functions have attributes, and that those attributes are available at runtime.
+也许您没在意，我刚才的意思是 Python 函数有属性，并且这些属性在运行时是可用的
+
+A function, like everything else in Python, is an object.
+在 Python 中，函数同其它东西一样也是对象
+
+Open your favorite Python IDE and follow along:
+打开您习惯使用的 Python IDE 执行如下的操作：
+
+Before you go any further, I want to briefly mention the library search path.
+在我们继续之前，我想简要地提一下库的搜索路径
+
+Python looks in several places when you try to import a module.
+当导入一个模块时，Python 在几个地方进行搜索
+
+Specifically, it looks in all the directories defined in sys.path.
+明确地，它会对定义在 sys.path 中的目录逐个进行搜索
+
+This is just a list, and you can easily view it or modify it with standard list methods.
+它只是一个list (列表)，您可以容易地查看它或通过标准的list方法来修改它
+
+(You'll learn more about lists later in this chapter.)
+(在本章的后面我们将学习更多关于list的知识
+
+Everything in Python is an object, and almost everything has attributes and methods.
+在 Python 中一切都是对象，并且几乎一切都有属性和方法
+
+All functions have a built-in attribute __doc__, which returns the doc string defined in the function's source code.
+所有的函数都有一个内置的 __doc__ 属性，它会返回在函数源代码中定义的 doc string
+
+The sys module is an object which has (among other things) an attribute called path.
+sys 模块是一个对象，它有一个叫作 path 的属性
+
+And so forth.
+等等
+
+Still, this begs the question.
+我们仍然在回避问题的实质，究竟何谓对象
+
+What is an object?
+不同的编程语言以不同的方式定义 “对象” 
+
+Different programming languages define “object” in different ways.
+ 某些语言中，它意味着所有 对象必须 有属性和方法
+
+In some, it means that all objects must have attributes and methods;
+另一些语言中，它意味着所有的对象都可以子类化
+
+in others, it means that all objects are subclassable.
+在 Python 中，定义是松散的
+
+In Python, the definition is looser;
+某些对象既没有属性也没有方法 (关于这一点的说明在 第 3 章)，而且不是所有的对象都可以子类化 (关于这一点的说明在第 5 章)
+
+some objects have neither attributes nor methods (more on this in Chapter 3), and not all objects are subclassable (more on this in Chapter 5).
+但是万物皆对象从感性上可以解释为：一切都可以赋值给变量或作为参数传递给函数 (关于这一点的说明在第 4 章)
+
+This is so important that I'm going to repeat it in case you missed it the first few times: everything in Python is an object.
+这一点太重要了，所以我会在刚开始就不止一次地反复强调它，以免您没注意到：在 Python 中万物皆对象
+
+Strings are objects.
+字符串是对象
+
+Lists are objects.
+列表是对象
+
+Functions are objects.
+函数是对象
+
+Even modules are objects.
+甚至模块也是对象
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

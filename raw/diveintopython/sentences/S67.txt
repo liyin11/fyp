@@ -1,0 +1,48 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+10.5. Creating separate handlers by node type
+10.5. 根据节点类型创建不同的处理器
+
+The third useful XML processing tip involves separating your code into logical functions, based on node types and element names.
+第三个有用的 XML 处理技巧是将你的代码基于节点类型和元素名称分散到逻辑函数中
+
+Parsed XML documents are made up of various types of nodes, each represented by a Python object.
+解析后的 XML 文档是由各种类型的节点组成的，每一个都是通过 Python 对象表示的
+
+The root level of the document itself is represented by a Document object.
+文档本身的根层次通过一个 Document 对象表示
+
+The Document then contains one or more Element objects (for actual XML tags), each of which may contain other Element objects, Text objects (for bits of text), or Comment objects (for embedded comments).
+Document 还包含了一个或多个 Element 对象 (表示 XML 标记)，其中的每一个可以包含其它的 Element 对象、Text 对象 (表示文本)，或者 Comment 对象 (表示内嵌注释)
+
+Python makes it easy to write a dispatcher to separate the logic for each node type.
+使用 Python 编写分离各个节点类型逻辑的分发器非常容易
+
+Fine, so now you can get the class name of any particular XML node (since each XML node is represented as a Python object).
+好，现在你能够得到任何给定 XML 节点的类名了 (因为每个 XML 节点都是以一个 Python 对象表示的)
+
+How can you use this to your advantage to separate the logic of parsing each node type?
+你怎样才能利用这点来分离解析每个节点类型的逻辑呢
+
+The answer is getattr, which you first saw in Section 4.4, “Getting Object References With getattr”.
+答案就是 getattr，你第一次见它是在第 4.4 节 “通过 getattr 获取对象引用”中
+
+In this example, the dispatch functions parse and parse_Element simply find other methods in the same class.
+在这个例子中，分发函数 parse 和 parse_Element 只是找到相同类中的其它方法
+
+If your processing is very complex (or you have many different tag names), you could break up your code into separate modules, and use dynamic importing to import each module and call whatever functions you needed.
+如果你进行的处理过程很复杂 (或者你有很多不同的标记名称)，你可以将代码分散到独立的模块中，然后使用动态导入的方式导入每个模块并调用你需要的任何函数
+
+Dynamic importing will be discussed in Chapter 16, Functional Programming.
+动态导入将在第 16 章 函数编程中介绍
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

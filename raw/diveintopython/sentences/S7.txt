@@ -1,0 +1,30 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+1.9. Summary
+1.9. 小结
+
+You should now have a version of Python installed that works for you.
+您现在应该已经安装了一个可以工作的 Python 版本了
+
+Depending on your platform, you may have more than one version of Python intsalled.
+根据您的运行平台，您可能安装有不止一个 Python 版本
+
+If so, you need to be aware of your paths.
+那样的话，您需要知道 Python 的路径
+
+If simply typing python on the command line doesn't run the version of Python that you want to use, you may need to enter the full pathname of your preferred version.
+若在命令行简单地键入 python 没有运行您想使用的 Python 版本，则需要输入想要的版本的全路径
+
+Congratulations, and welcome to Python.
+最后祝贺您，欢迎来到 Python 世界
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

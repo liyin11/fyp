@@ -1,0 +1,27 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+10.8. Summary
+10.8. 小结
+
+Python comes with powerful libraries for parsing and manipulating XML documents.
+Python 带有解析和操作 XML 文档非常强大的库
+
+The minidom takes an XML file and parses it into Python objects, providing for random access to arbitrary elements.
+minidom 接收一个 XML 文件并将其解析为 Python 对象，并提供了对任意元素的随机访问
+
+Furthermore, this chapter shows how Python can be used to create a "real" standalone command-line script, complete with command-line flags, command-line arguments, error handling, even the ability to take input from the piped result of a previous program.
+进一步，本章展示了如何利用 Python 创建一个“真实”独立的命令行脚本，连同命令行标志、命令行参数、错误处理，甚至从前一个程序的管道接收输入的能力
+
+Before moving on to the next chapter, you should be comfortable doing all of these things:
+在继续下一章前，你应该无困难地完成所有这些事情：
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

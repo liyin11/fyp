@@ -1,0 +1,21 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+11.5. Setting the User-Agent
+11.5. 设置 User-Agent
+
+The first step to improving your HTTP web services client is to identify yourself properly with a User-Agent.
+改善你的 HTTP web 服务客户端的第一步就是用 User-Agent 适当地鉴别你自己
+
+To do that, you need to move beyond the basic urllib and dive into urllib2.
+为了做到这一点，你需要远离基本的 urllib 而深入到 urllib2
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

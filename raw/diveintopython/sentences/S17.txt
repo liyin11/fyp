@@ -1,0 +1,36 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+3.6. Mapping Lists
+3.6. 映射 list
+
+One of the most powerful features of Python is the list comprehension, which provides a compact way of mapping a list into another list by applying a function to each of the elements of the list.
+Python 的强大特性之一是其对 list 的解析，它提供一种紧凑的方法，可以通过对 list 中的每个元素应用一个函数，从而将一个 list 映射为另一个 list
+
+Here are the list comprehensions in the buildConnectionString function that you declared in Chapter 2:
+让我们回过头来看看位于 第 2 章 的函数 buildConnectionString 对 list 的解析：
+
+First, notice that you're calling the items function of the params dictionary.
+首先，注意到你调用了dictionary params 的 items 函数
+
+This function returns a list of tuples of all the data in the dictionary.
+这个函数返回一个 dictionary 中所有数据的 tuple 的 list
+
+Now let's see what buildConnectionString does.
+现在让我们看一看 buildConnectionString 做了些什么
+
+It takes a list, params.items(), and maps it to a new list by applying string formatting to each element.
+它接收一个 list，params.items()，通过对每个元素应用字符串格式化将其映射为一个新 list
+
+The new list will have the same number of elements as params.items(), but each element in the new list will be a string that contains both a key and its associated value from the params dictionary.
+这个新 list 将与 params.items() 一一对应：新 list 中的每个元素都是 dictionary params 中的一个键-值对构成的的字符串
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

@@ -1,0 +1,24 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+8.10. Summary
+8.10. 小结
+
+Python provides you with a powerful tool, sgmllib.py, to manipulate HTML by turning its structure into an object model.
+Python 向您提供了一个强大工具，sgmllib.py，可以通过将 HTML 结构转变为一种对象模型来进行处理
+
+You can use this tool in many different ways.
+可以以许多不同的方式来使用这个工具
+
+Along with these examples, you should be comfortable doing all of the following things:
+学过了这些例子之后，您应该无障碍地完成下面的事情：
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

@@ -1,0 +1,72 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+7.3. Case Study: Roman Numerals
+7.3. 个案研究：罗马字母
+
+You've most likely seen Roman numerals, even if you didn't recognize them.
+你可能经常看到罗马数字，即使你没有意识到它们
+
+You may have seen them in copyrights of old movies and television shows (“Copyright MCMXLVI” instead of “Copyright 1946”), or on the dedication walls of libraries or universities (“established MDCCCLXXXVIII” instead of “established 1888”).
+你可能曾经在老电影或者电视中看到它们 (“版权所有 MCMXLVI” 而不是 “版权所有1946”)，或者在某图书馆或某大学的贡献墙上看到它们 (“成立于 MDCCCLXXXVIII”而不是“成立于1888”)
+
+You may also have seen them in outlines and bibliographical references.
+你也可能在某些文献的大纲或者目录上看到它们
+
+It's a system of representing numbers that really does date back to the ancient Roman empire (hence the name).
+这是一个表示数字的系统，它实际上能够追溯到远古的罗马帝国 (因此而得名)
+
+In Roman numerals, there are seven characters that are repeated and combined in various ways to represent numbers.
+在罗马数字中，利用7个不同字母进行重复或者组合来表达各式各样的数字
+
+The following are some general rules for constructing Roman numerals:
+下面是关于构造罗马数字的一些通用的规则的介绍：
+
+What would it take to validate that an arbitrary string is a valid Roman numeral?
+怎样校验任意一个字符串是否为一个有效的罗马数字呢
+
+Let's take it one digit at a time.
+我们每次只看一位数字，由于罗马数字一般是从高位到低位书写
+
+Since Roman numerals are always written highest to lowest, let's start with the highest: the thousands place.
+我们从高位开始：千位
+
+For numbers 1000 and higher, the thousands are represented by a series of M characters.
+对于大于或等于 1000 的数字，千位由一系列的字符 M 表示
+
+The hundreds place is more difficult than the thousands, because there are several mutually exclusive ways it could be expressed, depending on its value.
+与千位数相比，百位数识别起来要困难得多，这是因为有多种相互独立的表达方式都可以表达百位数，而具体用那种方式表达和具体的数值有关
+
+So there are four possible patterns:
+因此有四种可能的模式：
+
+The last two patterns can be combined:
+后面两个模式可以结合到一起：
+
+This example shows how to validate the hundreds place of a Roman numeral.
+这个例子显示如何有效地识别罗马数字的百位数
+
+Whew!
+哎呀
+
+See how quickly regular expressions can get nasty?
+看看正则表达式能够多快变得难以理解
+
+And you've only covered the thousands and hundreds places of Roman numerals.
+你仅仅表示了罗马数字的千位和百位上的数字
+
+But if you followed all that, the tens and ones places are easy, because they're exactly the same pattern.
+如果你根据类似的方法，十位数和各位数就非常简单了，因为是完全相同的模式
+
+But let's look at another way to express the pattern.
+让我们来看表达这个模式的另一种方式吧
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

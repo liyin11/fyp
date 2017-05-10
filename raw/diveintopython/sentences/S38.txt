@@ -1,0 +1,42 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+6.3. Iterating with for Loops
+6.3. for 循环
+
+Like most other languages, Python has for loops.
+与其它大多数语言一样，Python 也拥有 for 循环
+
+The only reason you haven't seen them until now is that Python is good at so many other things that you don't need them as often.
+你到现在还未曾看到它们的唯一原因就是，Python 在其它太多的方面表现出色，通常你不需要它们
+
+Most other languages don't have a powerful list datatype like Python, so you end up doing a lot of manual work, specifying a start, end, and step to define a range of integers or characters or other iteratable entities.
+其它大多数语言没有像 Python 一样的强大的 list 数据类型，所以你需要亲自做很多事情，指定开始，结束和步长，来定义一定范围的整数或字符或其它可重复的实体
+
+But in Python, a for loop simply iterates over a list, the same way list comprehensions work.
+但是在 Python 中，for 循环简单地在一个列表上循环，与 list 解析的工作方式相同
+
+Doing a “normal” (by Visual Basic standards) counter for loop is also simple.
+要做一个 “通常的” (Visual Basic 标准的) 计数 for 循环也非常简单
+
+for loops are not just for simple counters.
+for 循环不仅仅用于简单计数
+
+They can iterate through all kinds of things.
+它们可以遍历任何类型的东西
+
+Here is an example of using a for loop to iterate through a dictionary.
+下面的例子是一个用 for 循环遍历 dictionary 的例子
+
+Now we can look at the for loop in MP3FileInfo, from the sample fileinfo.py program introduced in Chapter 5.
+现在我们来看看在 第 5 章 介绍的样例程序 fileinfo.py 中 MP3FileInfo 的 for 循环 
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

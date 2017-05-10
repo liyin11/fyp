@@ -1,0 +1,66 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+4.4. Getting Object References With getattr
+4.4. 通过 getattr 获取对象引用
+
+You already know that Python functions are objects.
+你已经知道 Python 函数是对象
+
+What you don't know is that you can get a reference to a function without knowing its name until run-time, by using the getattr function.
+你不知道的是，使用 getattr 函数，可以得到一个直到运行时才知道名称的函数的引用
+
+getattr isn't just for built-in datatypes.
+getattr 不仅仅适用于内置数据类型，也可作用于模块
+
+A common usage pattern of getattr is as a dispatcher.
+getattr 常见的使用模式是作为一个分发者
+
+For example, if you had a program that could output data in a variety of different formats, you could define separate functions for each output format and use a single dispatch function to call the right one.
+举个例子，如果你有一个程序可以以不同的格式输出数据，你可以为每种输出格式定义各自的格式输出函数，然后使用唯一的分发函数调用所需的格式输出函数
+
+For example, let's imagine a program that prints site statistics in HTML, XML, and plain text formats.
+例如，让我们假设有一个以 HTML、XML 和普通文本格式打印站点统计的程序
+
+The choice of output format could be specified on the command line, or stored in a configuration file.
+输出格式在命令行中指定，或者保存在配置文件中
+
+A statsout module defines three functions, output_html, output_xml, and output_text.
+statsout 模块定义了三个函数：output_html、output_xml 和 output_text
+
+Then the main program defines a single output function, like this:
+然后主程序定义了唯一的输出函数，如下：
+
+Did you see the bug in the previous example?
+你是否发现前面示例的一个 Bug
+
+This is a very loose coupling of strings and functions, and there is no error checking.
+即字符串和函数之间的松耦合，而且没有错误检查
+
+What happens if the user passes in a format that doesn't have a corresponding function defined in statsout?
+如果用户传入一个格式参数，但是在 statsout 中没有定义相应的格式输出函数，会发生什么呢
+
+Well, getattr will return None, which will be assigned to output_function instead of a valid function, and the next line that attempts to call that function will crash and raise an exception.
+还好，getattr 会返回 None，它会取代一个有效函数并被赋值给 output_function，然后下一行调用函数的语句将会失败并抛出一个异常
+
+That's bad.
+这种方式不好
+
+Luckily, getattr takes an optional third argument, a default value.
+值得庆幸的是，getattr 能够使用可选的第三个参数，一个缺省返回值
+
+As you can see, getattr is quite powerful.
+正如你所看到，getattr 是相当强大的
+
+It is the heart of introspection, and you'll see even more powerful examples of it in later chapters.
+它是自省的核心，在后面的章节中你将看到它更强大的示例
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

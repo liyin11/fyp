@@ -1,0 +1,60 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+4.2. Using Optional and Named Arguments
+4.2. 使用可选参数和命名参数
+
+Python allows function arguments to have default values;
+Python 允许函数参数有缺省值
+
+if the function is called without the argument, the argument gets its default value.
+如果调用函数时不使用参数，参数将获得它的缺省值
+
+Futhermore, arguments can be specified in any order by using named arguments.
+此外，通过使用命名参数还可以以任意顺序指定参数
+
+Stored procedures in SQL Server Transact/SQL can do this, so if you're a SQL Server scripting guru, you can skim this part.
+SQL Server Transact/SQL 中的存储过程也可以做到这些
+
+Here is an example of info, a function with two optional arguments:
+info 函数就是这样一个例子，它有两个可选参数
+
+spacing and collapse are optional, because they have default values defined.
+spacing 和 collapse 是可选参数，因为它们已经定义了缺省值
+
+object is required, because it has no default value.
+object 是必备参数，因为它没有指定缺省值
+
+If info is called with only one argument, spacing defaults to 10 and collapse defaults to 1.
+如果调用 info 时只指定一个参数，那么 spacing 缺省为 10 ，collapse 缺省为 1
+
+If info is called with two arguments, collapse still defaults to 1.
+如果调用 info 时指定两个参数，collapse 依然默认为 1
+
+Say you want to specify a value for collapse but want to accept the default value for spacing.
+假如你要指定 collapse 的值，但是又想要接受 spacing 的缺省值
+
+In most languages, you would be out of luck, because you would need to call the function with three arguments.
+在绝大部分语言中，你可能运气就不太好了，因为你需要使用三个参数来调用函数，这势必要重新指定 spacing 的值
+
+But in Python, arguments can be specified by name, in any order.
+但是在 Python 中，参数可以通过名称以任意顺序指定
+
+This looks totally whacked until you realize that arguments are simply a dictionary.
+这些看上去非常累，除非你意识到参数不过是一个字典
+
+The “normal” method of calling functions without argument names is actually just a shorthand where Python matches up the values with the argument names in the order they're specified in the function declaration.
+“通常” 不使用参数名称的函数调用只是一个简写的形式，Python 按照函数声明中定义的的参数顺序将参数值和参数名称匹配起来
+
+And most of the time, you'll call functions the “normal” way, but you always have the additional flexibility if you need it.
+大部分时间，你会使用“通常”方式调用函数，但是如果你需要，总是可以提供附加的灵活性
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

@@ -1,0 +1,57 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+2.5. Indenting Code
+2.5. 代码缩进
+
+Python functions have no explicit begin or end, and no curly braces to mark where the function code starts and stops.
+Python 函数没有明显的 begin 和 end，没有标明函数的开始和结束的花括号
+
+The only delimiter is a colon (:) and the indentation of the code itself.
+唯一的分隔符是一个冒号 (:)，接着代码本身是缩进的
+
+Code blocks are defined by their indentation.
+代码块是通过它们的缩进来定义的
+
+By "code block", I mean functions, if statements, for loops, while loops, and so forth.
+我所说的“代码块”是指：函数、if 语句、for 循环、while 循环，等等
+
+Indenting starts a block and unindenting ends it.
+开始缩进表示块的开始，取消缩进表示块的结束
+
+There are no explicit braces, brackets, or keywords.
+不存在明显的括号，大括号或关键字
+
+This means that whitespace is significant, and must be consistent.
+这就意味着空白是重要的，并且要一致
+
+In this example, the function code (including the doc string) is indented four spaces.
+在这个例子中，函数代码 (包括 doc string) 缩进了 4 个空格
+
+It doesn't need to be four spaces, it just needs to be consistent.
+不一定非要是 4 个，只要一致就可以了
+
+The first line that is not indented is outside the function.
+没有缩进的第一行则被视为在函数体之外
+
+Example 2.6, “if Statements” shows an example of code indentation with if statements.
+例 2.6 “if 语句” 展示了一个 if 语句缩进的例子
+
+After some initial protests and several snide analogies to Fortran, you will make peace with this and start seeing its benefits.
+在经过一些最初的抗议和几个与 Fortran 的嘲讽的类比之后，您会心平气和地对待代码缩进，并且开始看到它的好处
+
+One major benefit is that all Python programs look similar, since indentation is a language requirement and not a matter of style.
+一个主要的好处就是所有的 Python 程序看上去都差不多，因为缩进是一种语言的要求而不是一种风格
+
+This makes it easier to read and understand other people's Python code.
+这样就使得阅读和理解他人的 Python 代码容易得多
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

@@ -1,0 +1,36 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+7.2. Case Study: Street Addresses
+7.2. 个案研究：街道地址
+
+This series of examples was inspired by a real-life problem I had in my day job several years ago, when I needed to scrub and standardize street addresses exported from a legacy system before importing them into a newer system.
+这一系列的例子是由我几年前日常工作中的现实问题启发而来的，当时我需要从一个老化系统中导出街道地址，在将它们导入新的系统之前，进行清理和标准化
+
+(See, I don't just make this stuff up;
+(看，我不是只将这些东西堆到一起
+
+it's actually useful.).
+它有实际的用处
+
+This example shows how I approached the problem.
+)这个例子展示我如何处理这个问题
+
+Continuing with my story of scrubbing addresses, I soon discovered that the previous example, matching 'ROAD' at the end of the address, was not good enough, because not all addresses included a street designation at all;
+继续我的清理地址的故事，很快我发现，在上面的例子中，仅仅匹配地址末尾的 'ROAD' 不是很好，因为不是所有的地址都包括表示街道的单词 ('ROAD')
+
+some just ended with the street name.
+有一些直接以街道名结尾
+
+Most of the time, I got away with it, but if the street name was 'BROAD', then the regular expression would match 'ROAD' at the end of the string as part of the word 'BROAD', which is not what I wanted.
+大部分情况下，不会遇到这种情况，但是，如果街道名称为 'BROAD'，那么正则表达式将会匹配 'BROAD' 的一部分为 'ROAD'，而这并不是我想要的
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

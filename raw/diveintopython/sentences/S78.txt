@@ -1,0 +1,27 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+11.9. Putting it all together
+11.9. 全部放在一起
+
+You've seen all the pieces for building an intelligent HTTP web services client.
+你已经看到了构造一个智能的 HTTP web 客户端的所有片断
+
+Now let's see how they all fit together.
+现在让我们看看如何将它们整合到一起
+
+This function is defined in openanything.py.
+这个函数定义在 openanything.py 中
+
+This function is defined in openanything.py.
+这个函数定义在 openanything.py 中
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

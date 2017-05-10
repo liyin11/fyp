@@ -1,0 +1,198 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+11.3. Features of HTTP
+11.3. HTTP 的特性
+
+There are five important features of HTTP which you should support.
+这里有五个你必须关注的 HTTP 重要特性
+
+The User-Agent is simply a way for a client to tell a server who it is when it requests a web page, a syndicated feed, or any sort of web service over HTTP.
+User-Agent 是一种客户端告知服务器谁在什么时候通过 HTTP 请求了一个 web 页、feed 汇聚或其他类型的 web 服务的简单途径
+
+When the client requests a resource, it should always announce who it is, as specifically as possible.
+当客户端请求一个资源时，应该尽可能明确发起请求的是谁，以便当产生异常错误时，允许服务器端的管理员与客户端的开发者取得联系
+
+By default, Python sends a generic User-Agent: Python-urllib/1.15.
+默认情况下 Python 发送一个通用的 User-Agent：Python-urllib/1.15
+
+In the next section, you'll see how to change this to something more specific.
+下一节，您将看到更加有针对性的 User-Agent
+
+Sometimes resources move around.
+有时资源移来移去
+
+Web sites get reorganized, pages move to new addresses.
+Web 站点重组内容，页面移动到了新的地址
+
+Even web services can reorganize.
+甚至是 web 服务重组
+
+A syndicated feed at http://example.com/index.xml might be moved to http://example.com/xml/atom.xml.
+原来位于 http://example.com/index.xml 的 feed 汇聚可能被移动到 http://example.com/xml/atom.xml
+
+Or an entire domain might move, as an organization expands and reorganizes;
+或者因为一个机构的扩展或重组，整个域被迁移
+
+for instance, http://www.example.com/index.xml might be redirected to http://server-farm-1.example.com/index.xml.
+例如，http://www.example.com/index.xml 可能被重定向到 http://server-farm-1.example.com/index.xml
+
+Every time you request any kind of resource from an HTTP server, the server includes a status code in its response.
+您每次从 HTTP 服务器请求任何类型的资源时，服务器的响应中均包含一个状态代码
+
+Status code 200 means “everything's normal, here's the page you asked for”.
+状态代码 200 的意思是 “一切正常，这就是您请求的页面”
+
+Status code 404 means “page not found”.
+状态代码 404 的意思是 “页面没找到”
+
+(You've probably seen 404 errors while browsing the web.)
+ (当浏览 web 时，你可能看到过 404 errors
+
+HTTP has two different ways of signifying that a resource has moved.
+HTTP 有两种不同的方法表示资源已经被移动
+
+Status code 302 is a temporary redirect;
+状态代码 302 表示临时重定向
+
+it means “oops, that got moved over here temporarily” (and then gives the temporary address in a Location: header).
+这意味着 “哎呀，访问内容被临时移动” (然后在 Location: 头信息中给出临时地址)
+
+Status code 301 is a permanent redirect;
+状态代码 301 表示永久重定向
+
+it means “oops, that got moved permanently” (and then gives the new address in a Location: header).
+这意味着 “哎呀，访问内容被永久移动” (然后在 Location: 头信息中给出新地址)
+
+If you get a 302 status code and a new address, the HTTP specification says you should use the new address to get what you asked for, but the next time you want to access the same resource, you should retry the old address.
+如果您获得了一个 302 状态代码和一个新地址，HTTP 规范说您应该使用新地址获取您的请求，但是下次您要访问同一资源时，应该使用原地址重试
+
+But if you get a 301 status code and a new address, you're supposed to use the new address from then on.
+但是如果您获得了一个 301 状态代码和一个新地址，您应该从此使用新地址
+
+urllib.urlopen will automatically “follow” redirects when it receives the appropriate status code from the HTTP server, but unfortunately, it doesn't tell you when it does so.
+当从 HTTP 服务器接受到一个适当的状态代码时，urllib.urlopen 将自动 “跟踪” 重定向，但不幸的是，当它做了重定向时不会告诉你
+
+You'll end up getting data you asked for, but you'll never know that the underlying library “helpfully” followed a redirect for you.
+ 你将最终获得所请求的数据，却丝毫不会察觉到在这个过程中一个潜在的库 “帮助” 你做了一次重定向操作
+
+So you'll continue pounding away at the old address, and each time you'll get redirected to the new address.
+因此你将继续不断地使用旧地址，并且每次都将获得被重定向的新地址
+
+That's two round trips instead of one: not very efficient!
+这一过程要往返两次而不是一次：太没效率了
+
+Later in this chapter, you'll see how to work around this so you can deal with permanent redirects properly and efficiently.
+本章的后面，您将看到如何改进这一点，从而适当地且有效率地处理永久重定向
+
+Some data changes all the time.
+有些数据随时都在变化
+
+The home page of CNN.com is constantly updating every few minutes.
+CNN.com 的主页经常几分钟就更新
+
+On the other hand, the home page of Google.com only changes once every few weeks (when they put up a special holiday logo, or advertise a new service).
+另一方面，Google.com 的主页几个星期才更新一次 (当他们上传特殊的假日 logo，或为一个新服务作广告时)
+
+Web services are no different;
+ Web 服务是不变的：通常服务器知道你所请求的数据的最后修改时间，并且 HTTP 为服务器提供了一种将最近修改数据连同你请求的数据一同发送的方法
+
+If you ask for the same data a second time (or third, or fourth), you can tell the server the last-modified date that you got last time: you send an If-Modified-Since header with your request, with the date you got back from the server last time.
+如果你第二次 (或第三次，或第四次) 请求相同的数据，你可以告诉服务器你上一次获得的最后修改日期：在你的请求中发送一个 If-Modified-Since 头信息，它包含了上一次从服务器连同数据所获得的日期
+
+If the data hasn't changed since then, the server sends back a special HTTP status code 304, which means “this data hasn't changed since the last time you asked for it”.
+如果数据从那时起没有改变，服务器将返回一个特殊的 HTTP 状态代码 304，这意味着 “从上一次请求后这个数据没有改变”
+
+Why is this an improvement?
+这一点有何进步呢
+
+Because when the server sends a 304, it doesn't re-send the data.
+当服务器发送状态编码 304 时，不再重新发送数据
+
+All you get is the status code.
+您仅仅获得了这个状态代码
+
+So you don't need to download the same data over and over again if it hasn't changed;
+所以当数据没有更新时，你不需要一次又一次地下载相同的数据
+
+the server assumes you have the data cached locally.
+服务器假定你有本地的缓存数据
+
+All modern web browsers support last-modified date checking.
+所有现代的浏览器都支持最近修改 (last-modified) 的数据检查
+
+If you've ever visited a page, re-visited the same page a day later and found that it hadn't changed, and wondered why it loaded so quickly the second time -- this could be why.
+如果你曾经访问过某页，一天后重新访问相同的页时发现它没有变化，并奇怪第二次访问时页面加载得如此之快——这就是原因所在
+
+Your web browser cached the contents of the page locally the first time, and when you visited the second time, your browser automatically sent the last-modified date it got from the server the first time.
+你的浏览器首次访问时会在本地缓存页面内容，当你第二次访问，浏览器自动发送首次访问时从服务器获得的最近修改日期
+
+The server simply says 304: Not Modified, so your browser knows to load the page from its cache.
+服务器简单地返回 304: Not Modified (没有修改)，因此浏览器就会知道从本地缓存加载页面
+
+Web services can be this smart too.
+在这一点上，Web 服务也如此智能
+
+Python's URL library has no built-in support for last-modified date checking, but since you can add arbitrary headers to each request and read arbitrary headers in each response, you can add support for it yourself.
+Python 的 URL 库没有提供内置的最近修改数据检查支持，但是你可以为每一个请求添加任意的头信息并在每一个响应中读取任意头信息，从而自己添加这种支持
+
+ETags are an alternate way to accomplish the same thing as the last-modified date checking: don't re-download data that hasn't changed.
+ETag 是实现与最近修改数据检查同样的功能的另一种方法：没有变化时不重新下载数据
+
+The way it works is, the server sends some sort of hash of the data (in an ETag header) along with the data you requested.
+其工作方式是：服务器发送你所请求的数据的同时，发送某种数据的 hash (在 ETag 头信息中给出)
+
+Exactly how this hash is determined is entirely up to the server.
+hash 的确定完全取决于服务器
+
+The second time you request the same data, you include the ETag hash in an If-None-Match: header, and if the data hasn't changed, the server will send you back a 304 status code.
+当第二次请求相同的数据时，你需要在 If-None-Match: 头信息中包含 ETag hash，如果数据没有改变，服务器将返回 304 状态代码
+
+As with the last-modified date checking, the server just sends the 304;
+与最近修改数据检查相同，服务器仅仅 发送 304 状态代码
+
+it doesn't send you the same data a second time.
+第二次将不为你发送相同的数据
+
+By including the ETag hash in your second request, you're telling the server that there's no need to re-send the same data if it still matches this hash, since you still have the data from the last time.
+在第二次请求时，通过包含 ETag hash，你告诉服务器：如果 hash 仍旧匹配就没有必要重新发送相同的数据，因为你还有上一次访问过的数据
+
+Python's URL library has no built-in support for ETags, but you'll see how to add it later in this chapter.
+Python 的 URL 库没有对 ETag 的内置支持，但是在本章后面你将看到如何添加这种支持
+
+The last important HTTP feature is gzip compression.
+最后一个重要的 HTTP 特性是 gzip 压缩
+
+When you talk about HTTP web services, you're almost always talking about moving XML back and forth over the wire.
+ 关于 HTTP web 服务的主题几乎总是会涉及在网络线路上传输的 XML
+
+XML is text, and quite verbose text at that, and text generally compresses well.
+XML 是文本，而且还是相当冗长的文本，而文本通常可以被很好地压缩
+
+When you request a resource over HTTP, you can ask the server that, if it has any new data to send you, to please send it in compressed format.
+当你通过 HTTP 请求一个资源时，可以告诉服务器，如果它有任何新数据要发送给我时，请以压缩的格式发送
+
+You include the Accept-encoding: gzip header in your request, and if the server supports compression, it will send you back gzip-compressed data and mark it with a Content-encoding: gzip header.
+在你的请求中包含 Accept-encoding: gzip 头信息，如果服务器支持压缩，它将返回由 gzip 压缩的数据并且使用 Content-encoding: gzip 头信息标记
+
+Python's URL library has no built-in support for gzip compression per se, but you can add arbitrary headers to the request.
+Python 的 URL 库本身没有内置对 gzip 压缩的支持，但是你能为请求添加任意的头信息
+
+And Python comes with a separate gzip module, which has functions you can use to decompress the data yourself.
+Python 还提供了一个独立的 gzip 模块，它提供了对数据进行解压缩的功能
+
+Note that our little one-line script to download a syndicated feed did not support any of these HTTP features.
+注意我们用于下载 feed 汇聚的小单行脚本并不支持任何这些 HTTP 特性
+
+Let's see how you can improve it.
+让我们来看看如何改善它
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

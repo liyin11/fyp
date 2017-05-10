@@ -1,0 +1,48 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+8.6. Dictionary-based string formatting
+8.6. 基于 dictionary 的字符串格式化
+
+Why did you learn about locals and globals?
+为什么学习 locals 和 globals
+
+So you can learn about dictionary-based string formatting.
+因为接下来就可以学习关于基于 dictionary 的字符串格式化
+
+As you recall, regular string formatting provides an easy way to insert values into strings.
+或许您还能记起，字符串格式化提供了一种将值插入字符串中的一种便捷的方法
+
+Values are listed in a tuple and inserted in order into the string in place of each formatting marker.
+值被列在一个 tuple 中，按照顺序插入到字符串中每个格式化标记所在的位置上
+
+While this is efficient, it is not always the easiest code to read, especially when multiple values are being inserted.
+尽管这种做法效率高，但还不是最容易阅读的代码，特别是当插入多个值的时候
+
+You can't simply scan through the string in one pass and understand what the result will be;
+仅用眼看一遍字符串，您不能马上就明白结果是什么
+
+you're constantly switching between reading the string and reading the tuple of values.
+您需要经常地在字符串和值的 tuple 之间进行反复查看
+
+There is an alternative form of string formatting that uses dictionaries instead of tuples of values.
+有另外一种字符串格式化的形式，它使用 dictionary 而不是值的 tuple
+
+So why would you use dictionary-based string formatting?
+那么为什么您偏要使用基于 dictionary 的字符串格式化呢
+
+Well, it does seem like overkill to set up a dictionary of keys and values simply to do string formatting in the next line;
+的确，仅为了进行字符串格式化，就事先创建一个有键字和值的 dictionary 看上去的确有些小题大作
+
+it's really most useful when you happen to have a dictionary of meaningful keys and values already.
+它的真正最大用处是当您碰巧已经有了像 locals 一样的有意义的键字和值的 dictionary 的时候
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

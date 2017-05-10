@@ -1,0 +1,48 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+6.2. Working with File Objects
+6.2. 与文件对象共事
+
+Python has a built-in function, open, for opening a file on disk.
+Python 有一个内置函数，open，用来打开在磁盘上的文件
+
+open returns a file object, which has methods and attributes for getting information about and manipulating the opened file.
+open 返回一个文件对象，它拥有一些方法和属性，可以得到被打开文件的信息，以及对被打开文件进行操作
+
+After you open a file, the first thing you'll want to do is read from it, as shown in the next example.
+你打开文件之后，你要做的第一件事是从中读取，正如下一个例子所展示的
+
+Open files consume system resources, and depending on the file mode, other programs may not be able to access them.
+打开文件消耗系统资源，并且其间其它程序可能无法访问它们 (取决于文件模式)
+
+It's important to close files as soon as you're finished with them.
+这就是一旦操作完毕就该关闭文件的重要所在
+
+Now you've seen enough to understand the file handling code in the fileinfo.py sample code from teh previous chapter.
+现在你已经足能理解前一章的例子程序 fileinfo.py 的文件处理代码了
+
+This example shows how to safely open and read from a file and gracefully handle errors.
+下面这个例子展示了如何安全地打开文件和读取文件，以及优美地处理错误
+
+As you would expect, you can also write to files in much the same way that you read from them.
+正如你所期待的，你也能用与读取文件同样的方式写入文件
+
+There are two basic file modes:
+有两种基本的文件模式：
+
+Either mode will create the file automatically if it doesn't already exist, so there's never a need for any sort of fiddly "if the log file doesn't exist yet, create a new empty file just so you can open it for the first time" logic.
+如果文件还不存在，任意一种模式都将自动创建文件，因此从来不需要任何复杂的逻辑：“如果 log 文件还不存在，将创建一个新的空文件，正因为如此，你可以第一次就打开它”
+
+Just open it and start writing.
+打开文件并开始写就可以了
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

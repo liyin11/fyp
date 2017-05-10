@@ -1,0 +1,21 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+11.4. Debugging HTTP web services
+11.4. 调试 HTTP web 服务
+
+First, let's turn on the debugging features of Python's HTTP library and see what's being sent over the wire.
+首先，让我们开启 Python HTTP 库的调试特性并查看网络线路上的传输过程
+
+This will be useful throughout the chapter, as you add more and more features.
+这对本章的全部内容都很有用，因为你将添加越来越多的特性
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

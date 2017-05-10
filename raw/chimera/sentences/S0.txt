@@ -1,0 +1,174 @@
+Preface
+前言¶
+
+Since 2008, the Python world has been watching the slow evolution of Python 3.
+自从2008年以来，Python3横空出世并慢慢进化
+
+It was always known that the adoption of Python 3 would likely take a long time.
+Python3的流行一直被认为需要很长一段时间
+
+In fact, even at the time of this writing (2013), most working Python programmers continue to use Python 2 in production.
+ 事实上，到我写这本书的2013年，绝大部分的Python程序员仍然在生产环境中使用的是版本2系列， 最主要是因为Python3不向后兼容
+
+A lot has been made about the fact that Python 3 is not backward compatible with past versions.
+毫无疑问，对于工作在遗留代码上的每个程序员来讲，向后兼容是不得不考虑的问题
+
+To be sure, backward compatibility is an issue for anyone with an existing code base.
+ 但是放眼未来，你就会发现Python3给你带来不一样的惊喜
+
+Just as Python 3 is about the future, this edition of the Python Cookbook represents a major change over past editions.
+正如Python3代表未来一样，新的《Python Cookbook》版本相比较之前的版本有了一个全新的改变
+
+First and foremost, this is meant to be a very forward looking book.
+ 最重要的是，这个意味着本书是一本非常前沿的参考书
+
+All of the recipes have been written and tested with Python 3.3 without regard to past Python versions or the "old way" of doing things.
+书中所有代码都是在Python3.3版本下面编写和测试的， 并没有考虑之前老版本的兼容性，也没有标注旧版本下的解决方案
+
+In fact, many of the recipes will only work with Python 3.3 and above.
+这样子可能会有争议， 但是我们最终的目的是写一本完全基于最新最先进工具和语言的书籍
+
+Doing so may be a calculated risk, but the ultimate goal is to write a book of recipes based on the most modern tools and idioms possible.
+ 希望这本书能成为在Python3下编码和想升级之前遗留代码的程序员的优秀教程
+
+Needless to say, writing a book of recipes in this style presents a certain editorial challenge.
+毫无疑问，编写一本这样的书会冒一定的编辑风险
+
+An online search for Python recipes returns literally thousands of useful recipes on sites such as ActiveState’s Python recipes or Stack Overflow.
+如果在网上搜索Python教程的话，会搜到很多很多
+
+However, most of these recipes are steeped in history and the past.
+ 比如ActiveState’s Python recipes或者Stack Overflow，但是绝大部分都已经是过时的了
+
+Besides being written almost exclusively for Python 2, they often contain workarounds and hacks related to differences between old versions of Python (e.g., version 2.3 versus 2.4).
+ 这些教程除了是基于Python2编写之外，可能还有很多解决方案在不同的版本之间是不一样的(比如2.3和2.4版本)
+
+Moreover, they often use outdated techniques that have simply become a built-in feature of Python 3.3.
+ 另外，它们还会经常使用一些过时的技术，这些已经内置到Python3.3里面去了
+
+Finding recipes exclusively focused on Python 3 can be a bit more difficult.
+寻找完全基于Python3的教程真的难上加难啊
+
+Rather than attempting to seek out Python 3-specific recipes, the topics of this book are merely inspired by existing code and techniques.
+这本书的所有主题都是基于已经存在的代码和技术，而不是专门去寻找Python3特有的教程
+
+Using these ideas as a springboard, the writing is an original work that has been deliberately written with the most modern Python programming techniques possible.
+ 在原有代码基础上，我们完全使用最新的Python技术去改造
+
+Thus, it can serve as a reference for anyone who wants to write their code in a modern style.
+ 所以，任何想使用最新技术编写代码的程序员，都可以将本书当做一本很好的参考书籍
+
+In choosing which recipes to include, there is a certain realization that it is simply impossible to write a book that covers every possible thing that someone might do with Python.
+在讨论的主题选择方面，我们不可能囊括Python领域所有的东西
+
+Thus, a priority has been given to topics that focus on the core Python language as well as tasks that are common to a wide variety of application domains.
+ 因此，我们优先选择了Python语言核心部分，以及一些在开发中常见的问题和任务
+
+In addition, many of the recipes aim to illustrate features that are new to Python 3 and more likely to be unknown to even experienced programmers using older versions.
+ 另外，这里讨论的很多技术都是Python 3最新才出现的，所以如果工作在Python老版本下， 即便是最有经验的程序员可能之前也没见过这些东西
+
+There is also a certain preference to recipes that illustrate a generally applicable programming technique (i.e., programming patterns) as opposed to those that narrowly try to address a very specific practical problem.
+ 另外，这些示例程序也会偏向于展示一些有用的编程技术(比如设计模式)， 而不是仅仅定位在一些具体的问题上
+
+Although certain third-party packages get coverage, a majority of the recipes focus on the core language and standard library.
+尽管也提及到了有一些第三方包，但是本书主要定位在Python语言核心和标准库
+
+Who This Book Is For
+这本书适合谁¶
+
+This book is aimed at more experienced Python programmers who are looking to deepen their understanding of the language and modern programming idioms.
+这本书的目标读者是那些想深入理解Python语言机制和最新编程技能的资深程序员
+
+Much of the material focuses on some of the more advanced techniques used by libraries, frameworks, and applications.
+ 很多讨论都是标准库，框架和应用程序使用到的高级技术
+
+Throughout the book, the recipes generally assume that the reader already has the necessary background to understand the topic at hand (e.g., general knowledge of computer science, data structures, complexity, systems programming, concurrency, C programming, etc.).
+ 本书所有示例均假设读者已经有了一定的编程背景并且可以很容易的读懂相关主题 (比如基本的计算机科学知识，数据结构知识，算法复杂度，系统编程，并行，C语言编程等)
+
+Moreover, the recipes are often just skeletons that aim to provide essential information for getting started, but which require the reader to do more research to fill in the details.
+ 另外，每个示例都只是一个入门指导，如果读者想深入研究，需要自己去查阅更多资料
+
+As such, it is assumed that the reader knows how to use search engines and Python’s excellent online documentation.
+ 因此，我们假定读者可以很熟练的使用搜索引擎以及知道怎样查询在线的Python文档
+
+This is not a book designed for beginners trying to learn Python for the first time.
+这本书不适合Python的初学者
+
+In fact, it already assumes that you know the basics that might be taught in a Python tutorial or more introductory book.
+事实上，本书已经假定了读者已经有了一定的Python基础，看完过几本入门书籍
+
+This book is also not designed to serve as a quick reference manual (e.g., quickly looking up the functions in a specific module).
+ 本书也不是那种快速参考手册(可以很快的查询某个模块下的某个函数)
+
+Instead, the book aims to focus on specific programming topics, show possible solutions, and serve as a springboard for jumping into more advanced material you might find online or in a reference.
+ 本书旨在聚焦几个最重要的主题，演示几种可能的解决方案，作为一个跳板， 你可以经此进入一些更高级的主题，这些可以在网上或者参考手册中找到
+
+Online Code Examples
+本书示例代码¶
+
+Almost all of the code examples in this book are available online at http://github.com/dabeaz/python-cookbook.
+本书几乎所有源代码均可以在 http://github.com/dabeaz/python-cookbook 上面找到
+
+The authors welcome bug fixes, improvements, and comments.
+ 作者欢迎各位修正bug，改进代码和评论
+
+This book is here to help you get your job done.
+本书就是帮助你完成你的工作
+
+In general, if this book includes code examples, you may use the code in this book in your programs and documentation.
+一般来讲，只要在本书上面的实例代码， 你都可以随时拿过去在你的源码和文档中使用
+
+You do not need to contact us for permission unless you’re reproducing a significant portion of the code.
+你不需要向我们申请许可， 除非你抄袭的太过分了
+
+For example, writing a program that uses several chunks of code from this book does not require permission.
+比如说复制几个代码片段去完成一个程序是不需要许可的， 贩卖或者分发实例代码的光盘也不需要许可，引用本书和实例代码去网上回答一个问题也不需要许可
+
+Selling or distributing a CD-ROM of examples from O’Reilly books does require permission.
+ 但是，合并大量的代码到你的正式产品或文档中去必须得到我们的许可
+
+We appreciate, but do not require, attribution.
+我们不会要求你添加代码的出处，包括标题，作者，出版社，ISBN
+
+An attribution usually includes the title, author, publisher, and ISBN.
+ 比如：Python Cookbook, 3rd edition, by David Beazley and Brian K. Jones (O’Reilly). Copyright 2013 David Beazley and Brian Jones, 978-1-449-34037-7. 但是如果你这么做了，我们会很感激的
+
+How to Contact Us
+联系我们¶
+
+Please address comments and questions concerning this book to the publisher:
+请将关于本书的评论和问题发送给出版社：
+
+We have a web page for this book, where we list errata, examples, and any additional information.
+本书网站: http://oreil.ly/python_cookbook_3e ，上面有勘误表，示例和一些其他信息
+
+To comment or ask technical questions about this book, send email to <bookquestions@oreilly.com>.
+如果想要评论或者是问一下本书技术方面的问题， 请发送邮件至： bookquestions@oreilly.com
+
+For more information about our books, courses, conferences, and news, see our website at http://www.oreilly.com.
+更多关于我们的书籍，讨论会，新闻， 请访问我们的网站： http://www.oreilly.com
+
+Find us on Facebook: http://facebook.com/oreilly
+在Facebook上查找我们: http://facebook.com/oreilly
+
+Follow us on Twitter: http://twitter.com/oreillymedia
+在Twitter上关注我们: http://twitter.com/oreillymedia
+
+Watch us on YouTube: http://www.youtube.com/oreillymedia
+在YouTube上观看我们: http://www.youtube.com/oreillymedia
+
+Acknowledgments
+感谢¶
+
+We would like to acknowledge the technical reviewers, Jake Vanderplas, Robert Kern, and Andrea Crotti, for their very helpful comments, as well as the general Python community for their support and encouragement.
+我们由衷的感谢本书的技术审核者Jake Vanderplas, Robert Kern 和 Andrea Crotti的非常有用的评论和建议， 还有Python社区的帮助和鼓励
+
+We would also like to thank the editors of the prior edition, Alex Martelli, Anna Ravenscroft, and David Ascher.
+我们还想感谢上一个版本的编辑Jake Vanderplas, Robert Kern,and Andrea Crotti
+
+Although this edition is newly written, the previous edition provided an initial framework for selecting the topics and recipes of interest.
+ 尽管这个版本是最新的，但是前一个版本已经提供了一个感兴趣主题和解决方案的框架
+
+Last, but not least, we would like to thank readers of the early release editions for their comments and suggestions for improvement.
+ 最后，最最重要的就是，我们要感谢所有预览版本的读者，他们的评论和改进意见对本书很有帮助
+

@@ -1,0 +1,51 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+1.4. Python on Mac OS 9
+1.4. Mac OS 9 上的 Python
+
+Mac OS 9 does not come with any version of Python, but installation is very simple, and there is only one choice.
+Mac OS 9 上没有预装任何版本的 Python，安装相对简单，只有一种选择
+
+Follow these steps to install Python on Mac OS 9:
+下面介绍在 Mac OS 9 上安装 Python 的过程:
+
+Download the MacPython23full.bin file from http://homepages.cwi.nl/~jack/macpython/download.html.
+从 http://homepages.cwi.nl/~jack/macpython/download.html 下载 MacPython23full.bin
+
+If your browser does not decompress the file automatically, double-click MacPython23full.bin to decompress the file with Stuffit Expander.
+如果浏览器不能自动解压文件，那么双击 MacPython23full.bin 用 Stuffit Expander 解压
+
+Double-click the installer, MacPython23full.
+双击安装程序 MacPython23full
+
+Step through the installer program.
+按照安装程序的提示一步步执行
+
+AFter installation is complete, close the installer and open the /Applications folder.
+安装完毕后，关闭安装程序，打开 /Applications 文件夹
+
+Open the MacPython-OS9 2.3 folder.
+打开 MacPython-OS9 2.3 文件夹
+
+Double-click Python IDE to launch Python.
+双击 PythonIDE 来运行 Python 
+
+The MacPython IDE should display a splash screen, and then take you to the interactive shell.
+MacPython IDE 将显示启动画面将您带进交互 shell
+
+If the interactive shell does not appear, select Window->Python Interactive (Cmd-0).
+如果交互 shell 没有出现，选择 Window->Python Interactive (Cmd-0)
+
+You'll see a screen like this:
+您将看到类似如下的信息:
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

@@ -1,0 +1,33 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+6.4. Using sys.modules
+6.4. 使用 sys.modules
+
+Modules, like everything else in Python, are objects.
+与其它任何 Python 的东西一样，模块也是对象
+
+Once imported, you can always get a reference to a module through the global dictionary sys.modules.
+只要导入了，总可以用全局 dictionary sys.modules 来得到一个模块的引用
+
+This example demonstrates how to use sys.modules.
+下面的例子展示了如何使用 sys.modules
+
+The next example shows how to use the __module__ class attribute with the sys.modules dictionary to get a reference to the module in which a class is defined.
+下面的例子将展示通过结合使用 __module__ 类属性和 sys.modules dictionary 来获取已知类所在的模块
+
+Now you're ready to see how sys.modules is used in fileinfo.py, the sample program introduced in Chapter 5.
+现在准备好了，看看在样例程序 第 5 章 sys.modules 介绍的 fileinfo.py 中是如何使用的
+
+This example shows that portion of the code.
+这个例子显示它的一部分代码
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

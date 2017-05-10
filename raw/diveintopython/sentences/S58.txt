@@ -1,0 +1,87 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+9.2. Packages
+9.2. 包
+
+Actually parsing an XML document is very simple: one line of code.
+实际上解析一个 XML 文档是很简单的：只要一行代码
+
+However, before you get to that line of code, you need to take a short detour to talk about packages.
+但是，在你接触那行代码前，需要暂时岔开一下，讨论一下包
+
+That sounds complicated, but it's really not.
+听起来挺复杂的，其实不是
+
+Looking at the actual implementation may help.
+看一下确切的实现可能会有帮助
+
+Packages are little more than directories of modules;
+包不过是模块的目录
+
+nested packages are subdirectories.
+嵌套包是子目录
+
+The modules within a package (or a nested package) are still just .py files, like always, except that they're in a subdirectory instead of the main lib/ directory of your Python installation.
+一个包 (或一个嵌套包) 中的模块也只是 .py 文件罢了，永远都是，只是它们是在一个子目录中，而不是在你的 Python 安装环境的主 lib/ 目录下
+
+So when you say from xml.dom import minidom, Python figures out that that means “look in the xml directory for a dom directory, and look in that for the minidom module, and import it as minidom”.
+所以你说 from xml.dom import minidom，Python 认为它的意思是“在 xml 目录中查找 dom 目录，然后在这个目录 中查找 minidom 模块，接着导入它并以 minidom 命名 ”
+
+But Python is even smarter than that;
+但是 Python 更聪明
+
+not only can you import entire modules contained within a package, you can selectively import specific classes or functions from a module contained within a package.
+你不仅可以导入包含在一个包中的所有模块，还可以从包的模块中有选择地导入指定的类或者函数
+
+You can also import the package itself as a module.
+语法都是一样的
+
+The syntax is all the same;
+ Python 会根据包的布局理解你的意思，然后自动进行正确的导入
+
+So how can a package (which is just a directory on disk) be imported and treated as a module (which is always a file on disk)?
+那么如何才能导入一个包 (它不过是磁盘上的一个目录) 并使其成为一个模块 (它总是在磁盘上的一个文件) 呢
+
+The answer is the magical __init__.py file.
+答案就是神奇的 __init__.py 文件
+
+You see, packages are not simply directories;
+你明白了吧，包不只是目录，它们是包含一个特殊文件 __init__.py 的目录
+
+they are directories with a specific file, __init__.py, inside.
+这个文件定义了包的属性和方法
+
+This file defines the attributes and methods of the package.
+例如，xml.dom 包含了 Node 类，它在xml/dom/__init__.py中有所定义
+
+For instance, xml.dom contains a Node class, which is defined in xml/dom/__init__.py.
+当你将一个包作为模块导入 (比如从 xml 导入 dom) 的时候，实际上导入了它的 __init__.py 文件
+
+So why bother with packages?
+那为什么非得用包呢
+
+Well, they provide a way to logically group related modules.
+嗯，它们提供了在逻辑上将相关模块归为一组的方法
+
+Instead of having an xml package with sax and dom packages inside, the authors could have chosen to put all the sax functionality in xmlsax.py and all the dom functionality in xmldom.py, or even put all of it in a single module.
+不使用其中带有 sax 和 dom 的 xml 包，作者也可以选择将所有的 sax 功能放入 xmlsax.py中，并将所有的 dom 功能放入 xmldom.py中，或者干脆将所有东西放入单个模块中
+
+But that would have been unwieldy (as of this writing, the XML package has over 3000 lines of code) and difficult to manage (separate source files mean multiple people can work on different areas simultaneously).
+但是这样可能不实用 (写到这儿时，XML 包已经超过了 3000 行代码) 并且很难管理 (独立的源文件意味着多个人可以同时在不同的地方进行开发)
+
+If you ever find yourself writing a large subsystem in Python (or, more likely, when you realize that your small subsystem has grown into a large one), invest some time designing a good package architecture.
+如果你发现自己正在用 Python 编写一个大型的子系统 (或者，很有可能，当你意识到你的小型子系统已经成长为一个大型子系统时)，你应该花费些时间设计一个好的包架构
+
+It's one of the many things Python is good at, so take advantage of it.
+它是 Python 所擅长的事情之一，所以应该好好利用它
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

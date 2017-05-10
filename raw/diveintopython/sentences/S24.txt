@@ -1,0 +1,66 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+4.6. The Peculiar Nature of and and or
+4.6. and 和 or 的特殊性质
+
+In Python, and and or perform boolean logic as you would expect, but they do not return boolean values;
+在Python 中，and 和 or 执行布尔逻辑演算，如你所期待的一样
+
+instead, they return one of the actual values they are comparing.
+但是它们并不返回布尔值，而是返回它们实际进行比较的值之一
+
+If you're a C hacker, you are certainly familiar with the bool ?
+如果你是一名 C 语言黑客，肯定很熟悉 bool ? a : b 表达式，如果 bool 为真，表达式演算值为 a，否则为 b
+
+a : b expression, which evaluates to a if bool is true, and b otherwise.
+基于 Python 中 and 和 or 的工作方式，你可以完成相同的事情
+
+However, since this Python expression is simply boolean logic, and not a special construct of the language, there is one extremely important difference between this and-or trick in Python and the bool ?
+然而，由于这种 Python 表达式单单只是进行布尔逻辑运算，并不是语言的特定构成，这是 and-or 技巧和 C 语言中的 bool ? a : b 语法非常重要的不同
+
+a : b syntax in C.
+如果 a 为假，表达式就不会按你期望的那样工作了
+
+If the value of a is false, the expression will not work as you would expect it to.
+(你能知道我被这个问题折腾过吗
+
+(Can you tell I was bitten by this?
+不止一次
+
+More than once?)
+)
+
+The and-or trick, bool and a or b, will not work like the C expression bool ?
+and-or 技巧，也就是 bool and a or b 表达式，当 a 在布尔环境中的值为假时，不会像 C 语言表达式 bool ? a : b 那样工作
+
+The real trick behind the and-or trick, then, is to make sure that the value of a is never false.
+在 and-or 技巧后面真正的技巧是，确保 a 的值决不会为假
+
+One common way of doing this is to turn a into [a] and b into [b], then taking the first element of the returned list, which will be either a or b.
+最常用的方式是使 a 成为 [a] 、 b 成为 [b]，然后使用返回值列表的第一个元素，应该是 a 或 b中的某一个
+
+By now, this trick may seem like more trouble than it's worth.
+到现在为止，这个技巧可能看上去问题超过了它的价值
+
+You could, after all, accomplish the same thing with an if statement, so why go through all this fuss?
+毕竟，使用 if 语句可以完成相同的事情，那为什么要经历这些麻烦事呢
+
+Well, in many cases, you are choosing between two constant values, so you can use the simpler syntax and not worry, because you know that the a value will always be true.
+哦，在很多情况下，你要在两个常量值中进行选择，由于你知道 a 的值总是为真，所以你可以使用这种较为简单的语法而且不用担心
+
+And even if you need to use the more complicated safe form, there are good reasons to do so.
+对于使用更为复杂的安全形式，依然有很好的理由要求这样做
+
+For example, there are some cases in Python where if statements are not allowed, such as in lambda functions.
+例如，在 Python 语言的某些情况下 if 语句是不允许使用的，比如在 lambda 函数中
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

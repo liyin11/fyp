@@ -1,0 +1,960 @@
+Chapter 14. Testing, Debugging, and Exceptions
+第十四章：测试、调试和异常¶
+
+Testing rocks, but debugging?
+试验还是很棒的，但是调试
+
+Not so much.
+就没那么有趣了
+
+The fact that there’s no compiler to analyze your code before Python executes it makes testing a critical part of development.
+事实是，在Python测试代码之前没有编译器来分析你的代码，因此使的测试成为开发的一个重要部分
+
+The goal of this chapter is to discuss some common problems related to testing, debugging, and exception handling.
+本章的目标是讨论一些关于测试、调试和异常处理的常见问题
+
+It is not meant to be a gentle introduction to test-driven development or the unittest module.
+但是并不是为测试驱动开发或者单元测试模块做一个简要的介绍
+
+Thus, some familiarity with testing concepts is assumed.
+因此，笔者假定读者熟悉测试概念
+
+Testing Output Sent to stdout
+14.1 测试stdout输出¶
+
+You have a program that has a method whose output goes to standard Output (sys.stdout).
+你的程序中有个方法会输出到标准输出中（sys.stdout）
+
+This almost always means that it emits text to the screen.
+也就是说它会将文本打印到屏幕上面
+
+You’d like to write a test for your code to prove that, given the proper input, the proper output is displayed.
+ 你想写个测试来证明它，给定一个输入，相应的输出能正常显示出来
+
+Using the unittest.mock module’s patch() function, it’s pretty simple to mock out sys.stdout for just a single test, and put it back again, without messy temporary variables or leaking mocked-out state between test cases.
+使用 unittest.mock 模块中的 patch() 函数， 使用起来非常简单，可以为单个测试模拟 sys.stdout 然后回滚， 并且不产生大量的临时变量或在测试用例直接暴露状态变量
+
+Consider, as an example, the following function in a module mymodule:
+作为一个例子，我们在 mymodule 模块中定义如下一个函数：
+
+The built-in print function, by default, sends output to sys.stdout.
+默认情况下内置的 print 函数会将输出发送到 sys.stdout 
+
+In order to test that output is actually getting there, you can mock it out using a stand-in object, and then make assertions about what happened.
+ 为了测试输出真的在那里，你可以使用一个替身对象来模拟它，然后使用断言来确认结果
+
+Using the unittest.mock module’s patch() method makes it convenient to replace objects only within the context of a running test, returning things to their original state immediately after the test is complete.
+ 使用 unittest.mock 模块的 patch() 方法可以很方便的在测试运行的上下文中替换对象， 并且当测试完成时候自动返回它们的原有状态
+
+Here’s the test code for mymodule:
+下面是对 mymodule 模块的测试代码：
+
+The urlprint() function takes three arguments, and the test starts by setting up dummy arguments for each one.
+urlprint() 函数接受三个参数，测试方法开始会先设置每一个参数的值
+
+The expected_url variable is set to a string containing the expected output.
+ expected_url 变量被设置成包含期望的输出的字符串
+
+To run the test, the unittest.mock.patch() function is used as a context manager to replace the value of sys.stdout with a StringIO object as a substitute.
+unittest.mock.patch() 函数被用作一个上下文管理器，使用 StringIO 对象来代替 sys.stdout . fake_out 变量是在该进程中被创建的模拟对象
+
+The fake_out variable is the mock object that’s created in this process.
+ 在with语句中使用它可以执行各种检查
+
+This can be used inside the body of the with statement to perform various checks.
+当with语句结束时，patch 会将所有东西恢复到测试开始前的状态
+
+When the with statement completes, patch conveniently puts everything back the way it was before the test ever ran.
+ 
+
+It’s worth noting that certain C extensions to Python may write directly to standard output, bypassing the setting of sys.stdout.
+有一点需要注意的是某些对Python的C扩展可能会忽略掉 sys.stdout 的配置二直接写入到标准输出中
+
+This recipe won’t help with that scenario, but it should work fine with pure Python code (if you need to capture I/O from such C extensions, you can do it by opening a temporary file and performing various tricks involving file descriptors to have standard output temporarily redirected to that file).
+ 限于篇幅，本节不会涉及到这方面的讲解，它适用于纯Python代码
+
+More information about capturing IO in a string and StringIO objects can be found in “Performing I/O Operations on a String”.
+更多关于捕获以字符串形式捕获I/O和 StringIO 对象请参阅5.6小节
+
+Patching Objects in Unit Tests
+14.2 在单元测试中给对象打补丁¶
+
+You’re writing unit tests and need to apply patches to selected objects in order to make assertions about how they were used in the test (e.g., assertions about being called with certain parameters, access to selected attributes, etc.).
+你写的单元测试中需要给指定的对象打补丁， 用来断言它们在测试中的期望行为（比如，断言被调用时的参数个数，访问指定的属性等）
+
+The unittest.mock.patch() function can be used to help with this problem.
+unittest.mock.patch() 函数可被用来解决这个问题
+
+It’s a little unusual, but patch() can be used as a decorator, a context manager, or stand-alone.
+ patch() 还可被用作一个装饰器、上下文管理器或单独使用，尽管并不常见
+
+For example, here’s an example of how it’s used as a decorator:
+ 例如，下面是一个将它当做装饰器使用的例子：
+
+It can also be used as a context manager:
+它还可以被当做一个上下文管理器：
+
+Last, but not least, you can use it to patch things manually:
+最后，你还可以手动的使用它打补丁：
+
+If necessary, you can stack decorators and context managers to patch multiple objects.
+如果可能的话，你能够叠加装饰器和上下文管理器来给多个对象打补丁
+
+For example:
+例如：
+
+patch() works by taking an existing object with the fully qualified name that you provide and replacing it with a new value.
+patch() 接受一个已存在对象的全路径名，将其替换为一个新的值
+
+The original value is then restored after the completion of the decorated function or context manager.
+ 原来的值会在装饰器函数或上下文管理器完成后自动恢复回来
+
+By default, values are replaced with MagicMock instances.
+ 默认情况下，所有值会被 MagicMock 实例替代
+
+For example:
+例如：
+
+However, you can actually replace the value with anything that you wish by supplying it as a second argument to patch():
+不过，你可以通过给 patch() 提供第二个参数来将值替换成任何你想要的：
+
+The MagicMock instances that are normally used as replacement values are meant to mimic callables and instances.
+被用来作为替换值的 MagicMock 实例能够模拟可调用对象和实例
+
+They record information about usage and allow you to make assertions.
+ 他们记录对象的使用信息并允许你执行断言检查，例如：
+
+Typically, these kinds of operations are carried out in a unit test.
+一般来讲，这些操作会在一个单元测试中完成
+
+For example, suppose you have some function like this:
+例如，假设你已经有了像下面这样的函数：
+
+Normally, this function uses urlopen() to go fetch data off the Web and parse it.
+正常来讲，这个函数会使用 urlopen() 从Web上面获取数据并解析它
+
+To unit test it, you might want to give it a more predictable dataset of your own creation, however.
+ 在单元测试中，你可以给它一个预先定义好的数据集
+
+Here’s an example using patching:
+下面是使用补丁操作的例子:
+
+In this example, the urlopen() function in the example module is replaced with a mock object that returns a BytesIO() containing sample data as a substitute.
+本例中，位于 example 模块中的 urlopen() 函数被一个模拟对象替代， 该对象会返回一个包含测试数据的 ByteIO().
+
+An important but subtle facet of this test is the patching of example.urlopen instead of urllib.request.urlopen.
+还有一点，在打补丁时我们使用了 example.urlopen 来代替 urllib.request.urlopen 
+
+When you are making patches, you have to use the names as they are used in the code being tested.
+ 当你创建补丁的时候，你必须使用它们在测试代码中的名称
+
+Since the example code uses from urllib.request import urlopen, the urlopen() function used by the dowprices() function is actually located in example.
+ 由于测试代码使用了 from urllib.request import urlopen ,那么 dowprices() 函数 中使用的 urlopen() 函数实际上就位于 example 模块了
+
+This recipe has really only given a very small taste of what’s possible with the unittest.mock module.
+本节实际上只是对 unittest.mock 模块的一次浅尝辄止
+
+The official documentation is a must-read for more advanced features.
+ 更多更高级的特性，请参考 官方文档
+
+Testing for Exceptional Conditions in Unit Tests
+14.3 在单元测试中测试异常情况¶
+
+You want to write a unit test that cleanly tests if an exception is raised.
+你想写个测试用例来准确的判断某个异常是否被抛出
+
+To test for exceptions, use the assertRaises() method.
+对于异常的测试可使用 assertRaises() 方法
+
+For example, if you want to test that a function raised a ValueError exception, use this code:
+ 例如，如果你想测试某个函数抛出了 ValueError 异常，像下面这样写：
+
+If you need to test the exception’s value in some way, then a different approach is needed.
+如果你想测试异常的具体值，需要用到另外一种方法：
+
+The assertRaises() method provides a convenient way to test for the presence of an exception.
+assertRaises() 方法为测试异常存在性提供了一个简便方法
+
+A common pitfall is to write tests that manually try to do things with exceptions on their own.
+ 一个常见的陷阱是手动去进行异常检测
+
+For instance:
+比如：
+
+The problem with such approaches is that it is easy to forget about corner cases, such as that when no exception is raised at all.
+这种方法的问题在于它很容易遗漏其他情况，比如没有任何异常抛出的时候
+
+To do that, you need to add an extra check for that situation, as shown here:
+ 那么你还得需要增加另外的检测过程，如下面这样：
+
+The assertRaises() method simply takes care of these details, so you should prefer to use it.
+assertRaises() 方法会处理所有细节，因此你应该使用它
+
+The one limitation of assertRaises() is that it doesn’t provide a means for testing the value of the exception object that’s created.
+assertRaises() 的一个缺点是它测不了异常具体的值是多少
+
+To do that, you have to manually test it, as shown.
+ 为了测试异常值，可以使用 assertRaisesRegex() 方法， 它可同时测试异常的存在以及通过正则式匹配异常的字符串表示
+
+Somewhere in between these two extremes, you might consider using the assertRaisesRegex() method, which allows you to test for an exception and perform a regular expression match against the exception’s string representation at the same time.
+例如：
+
+A little-known fact about assertRaises() and assertRaisesRegex() is that they can also be used as context managers:
+assertRaises() 和 assertRaisesRegex() 还有一个容易忽略的地方就是它们还能被当做上下文管理器使用：
+
+This form can be useful if your test involves multiple steps (e.g., setup) besides that of simply executing a callable.
+但你的测试涉及到多个执行步骤的时候这种方法就很有用了
+
+Logging Test Output to a File
+14.4 将测试输出用日志记录到文件中¶
+
+You want the results of running unit tests written to a file instead of printed to standard output.
+你希望将单元测试的输出写到到某个文件中去，而不是打印到标准输出
+
+A very common technique for running unit tests is to include a small code fragment like this at the bottom of your testing file:
+运行单元测试一个常见技术就是在测试文件底部加入下面这段代码片段：
+
+This makes the test file executable, and prints the results of running tests to standard output.
+这样的话测试文件就是可执行的，并且会将运行测试的结果打印到标准输出上
+
+If you would like to redirect this output, you need to unwind the main() call a bit and write your own main() function like this:
+ 如果你想重定向输出，就需要像下面这样修改 main() 函数：
+
+The interesting thing about this recipe is not so much the task of getting test results redirected to a file, but the fact that doing so exposes some notable inner workings of the unittest module.
+本节感兴趣的部分并不是将测试结果重定向到一个文件中， 而是通过这样做向你展示了 unittest 模块中一些值得关注的内部工作原理
+
+At a basic level, the unittest module works by first assembling a test suite.
+unittest 模块首先会组装一个测试套件
+
+This test suite consists of the different testing methods you defined.
+ 这个测试套件包含了你定义的各种方法
+
+Once the suite has been assembled, the tests it contains are executed.
+一旦套件组装完成，它所包含的测试就可以被执行了
+
+These two parts of unit testing are separate from each other.
+这两步是分开的，unittest.TestLoader 实例被用来组装测试套件
+
+The unittest.TestLoader instance created in the solution is used to assemble a test suite.
+ loadTestsFromModule() 是它定义的方法之一，用来收集测试用例
+
+The loadTestsFromModule() is one of several methods it defines to gather tests.
+ 它会为 TestCase 类扫描某个模块并将其中的测试方法提取出来
+
+In this case, it scans a module for TestCase classes and extracts test methods from them.
+ 如果你想进行细粒度的控制， 可以使用 loadTestsFromTestCase() 方法来从某个继承TestCase的类中提取测试方法
+
+If you want something more fine-grained, the loadTestsFromTestCase() method (not shown) can be used to pull test methods from an individual class that inherits from TestCase.
+ 
+
+The TextTestRunner class is an example of a test runner class.
+TextTestRunner 类是一个测试运行类的例子， 这个类的主要用途是执行某个测试套件中包含的测试方法
+
+The main purpose of this class is to execute the tests contained in a test suite.
+ 这个类跟执行 unittest.main() 函数所使用的测试运行器是一样的
+
+This class is the same test runner that sits behind the unittest.main() function.
+ 不过，我们在这里对它进行了一些列底层配置，包括输出文件和提升级别
+
+However, here we’re giving it a bit of low-level configuration, including an output file and an elevated verbosity level.
+ 
+
+Although this recipe only consists of a few lines of code, it gives a hint as to how you might further customize the unittest framework.
+尽管本节例子代码很少，但是能指导你如何对 unittest 框架进行更进一步的自定义
+
+To customize how test suites are assembled, you would perform various operations using the TestLoader class.
+ 要想自定义测试套件的装配方式，你可以对 TestLoader 类执行更多的操作
+
+To customize how tests execute, you could make custom test runner classes that emulate the functionality of TextTestRunner.
+ 为了自定义测试运行，你可以构造一个自己的测试运行类来模拟 TextTestRunner 的功能
+
+Both topics are beyond the scope of what can be covered here.
+ 而这些已经超出了本节的范围
+
+However, documentation for the unittest module has extensive coverage of the underlying protocols.
+unittest 模块的文档对底层实现原理有更深入的讲解，可以去看看
+
+Skipping or Anticipating Test Failures
+14.5 忽略或期望测试失败¶
+
+You want to skip or mark selected tests as an anticipated failure in your unit tests.
+你想在单元测试中忽略或标记某些测试会按照预期运行失败
+
+The unittest module has decorators that can be applied to selected test methods to control their handling.
+unittest 模块有装饰器可用来控制对指定测试方法的处理，例如：
+
+If you run this code on a Mac, you’ll get this output:
+如果你在Mac上运行这段代码，你会得到如下输出：
+
+The skip() decorator can be used to skip over a test that you don’t want to run at all.
+skip() 装饰器能被用来忽略某个你不想运行的测试
+
+skipIf() and skipUnless() can be a useful way to write tests that only apply to certain platforms or Python versions, or which have other dependencies.
+ skipIf() 和 skipUnless() 对于你只想在某个特定平台或Python版本或其他依赖成立时才运行测试的时候非常有用
+
+Use the @expectedFailure decorator to mark tests that are known failures, but for which you don’t want the test framework to report more information.
+ 使用 @expected 的失败装饰器来标记那些确定会失败的测试，并且对这些测试你不想让测试框架打印更多信息
+
+The decorators for skipping methods can also be applied to entire testing classes.
+忽略方法的装饰器还可以被用来装饰整个测试类，比如：
+
+Handling Multiple Exceptions
+14.6 处理多个异常¶
+
+You have a piece of code that can throw any of several different exceptions, and you need to account for all of the potential exceptions that could be raised without creating duplicate code or long, meandering code passages.
+你有一个代码片段可能会抛出多个不同的异常，怎样才能不创建大量重复代码就能处理所有的可能异常呢
+
+If you can handle different exceptions all using a single block of code, they can be grouped together in a tuple like this:
+如果你可以用单个代码块处理不同的异常，可以将它们放入一个元组中，如下所示：
+
+In the preceding example, the remove_url() method will be called if any one of the listed exceptions occurs.
+在这个例子中，元祖中任何一个异常发生时都会执行 remove_url() 方法
+
+If, on the other hand, you need to handle one of the exceptions differently, put it into its own except clause:
+ 如果你想对其中某个异常进行不同的处理，可以将其放入另外一个 except 语句中：
+
+Many exceptions are grouped into an inheritance hierarchy.
+很多的异常会有层级关系，对于这种情况，你可能使用它们的一个基类来捕获所有的异常
+
+For such exceptions, you can catch all of them by simply specifying a base class.
+例如，下面的代码：
+
+you could rewrite the except statement as:
+可以被重写为：
+
+This works because OSError is a base class that’s common to both the FileNotFound Errorand PermissionError exceptions.
+OSError 是 FileNotFoundError 和 PermissionError 异常的基类
+
+Although it’s not specific to handling multiple exceptions per se, it’s worth noting that you can get a handle to the thrown exception using the as keyword:
+尽管处理多个异常本身并没什么特殊的，不过你可以使用 as 关键字来获得被抛出异常的引用：
+
+In this example, the e variable holds an instance of the raised OSError.
+这个例子中， e 变量指向一个被抛出的 OSError 异常实例
+
+This is useful if you need to inspect the exception further, such as processing it based on the value of an additional status code.
+ 这个在你想更进一步分析这个异常的时候会很有用，比如基于某个状态码来处理它
+
+Be aware that except clauses are checked in the order listed and that the first match executes.
+同时还要注意的时候 except 语句是顺序检查的，第一个匹配的会执行
+
+It may be a bit pathological, but you can easily create situations where multiple except clauses might match.
+ 你可以很容易的构造多个 except 同时匹配的情形，比如：
+
+Here the except FileNotFoundError clause doesn’t execute because the OSError is more general, matches the FileNotFoundError exception, and was listed first.
+这里的 FileNotFoundError 语句并没有执行的原因是 OSError 更一般，它可匹配 FileNotFoundError 异常， 于是就是第一个匹配的
+
+As a debugging tip, if you’re not entirely sure about the class hierarchy of a particular exception, you can quickly view it by inspecting the exception’s __mro__ attribute.
+在调试的时候，如果你对某个特定异常的类成层级关系不是很确定， 你可以通过查看该异常的 __mro__ 属性来快速浏览
+
+For example:
+比如：
+
+Any one of the listed classes up to BaseException can be used with the except statement.
+上面列表中任何一个直到 BaseException 的类都能被用于 except 语句
+
+Catching All Exceptions
+14.7 捕获所有异常¶
+
+You want to write code that catches all exceptions.
+怎样捕获代码中的所有异常
+
+To catch all exceptions, write an exception handler for Exception, as shown here:
+想要捕获所有的异常，可以直接捕获 Exception 即可：
+
+This will catch all exceptions save SystemExit, KeyboardInterrupt, and GeneratorExit.
+这个将会捕获除了 SystemExit 、 KeyboardInterrupt 和 GeneratorExit 之外的所有异常
+
+If you also want to catch those exceptions, change Exception to BaseException.
+ 如果你还想捕获这三个异常，将 Exception 改成 BaseException 即可
+
+Catching all exceptions is sometimes used as a crutch by programmers who can’t remember all of the possible exceptions that might occur in complicated operations.
+捕获所有异常通常是由于程序员在某些复杂操作中并不能记住所有可能的异常
+
+As such, it is also a very good way to write undebuggable code if you are not careful.
+ 如果你不是很细心的人，这也是编写不易调试代码的一个简单方法
+
+Because of this, if you choose to catch all exceptions, it is absolutely critical to log or report the actual reason for the exception somewhere (e.g., log file, error message printed to screen, etc.).
+正因如此，如果你选择捕获所有异常，那么在某个地方（比如日志文件、打印异常到屏幕）打印确切原因就比较重要了
+
+If you don’t do this, your head will likely explode at some point.
+ 如果你没有这样做，有时候你看到异常打印时可能摸不着头脑，就像下面这样：
+
+If you try this function, it behaves like this:
+试着运行这个函数，结果如下：
+
+At this point, you might be left scratching your head as to why it doesn’t work.
+这时候你就会挠头想：“这咋回事啊
+
+Now suppose the function had been written like this:
+” 假如你像下面这样重写这个函数：
+
+In this case, you get the following output, which indicates that a programming mistake has been made:
+这时候你能获取如下输出，指明了有个编程错误：
+
+All things being equal, it’s probably better to be as precise as possible in your exception handling.
+很明显，你应该尽可能将异常处理器定义的精准一些
+
+However, if you must catch all exceptions, just make sure you give good diagnostic information or propagate the exception so that cause doesn’t get lost.
+ 不过，要是你必须捕获所有异常，确保打印正确的诊断信息或将异常传播出去，这样不会丢失掉异常
+
+Creating Custom Exceptions
+14.8 创建自定义异常¶
+
+You’re building an application and would like to wrap lower-level exceptions with custom ones that have more meaning in the context of your application.
+在你构建的应用程序中，你想将底层异常包装成自定义的异常
+
+Creating new exceptions is easy—just define them as classes that inherit from Exception (or one of the other existing exception types if it makes more sense).
+创建新的异常很简单——定义新的类，让它继承自 Exception （或者是任何一个已存在的异常类型）
+
+For example, if you are writing code related to network programming, you might define some custom exceptions like this:
+ 例如，如果你编写网络相关的程序，你可能会定义一些类似如下的异常：
+
+Users could then use these exceptions in the normal way.
+然后用户就可以像通常那样使用这些异常了，例如：
+
+Custom exception classes should almost always inherit from the built-in Exception class, or inherit from some locally defined base exception that itself inherits from Exception.
+自定义异常类应该总是继承自内置的 Exception 类， 或者是继承自那些本身就是从 Exception 继承而来的类
+
+Although all exceptions also derive from BaseException, you should not use this as a base class for new exceptions.
+ 尽管所有类同时也继承自 BaseException ，但你不应该使用这个基类来定义新的异常
+
+BaseException is reserved for system-exiting exceptions, such as KeyboardInterrupt or SystemExit, and other exceptions that should signal the application to exit.
+ BaseException 是为系统退出异常而保留的，比如 KeyboardInterrupt 或 SystemExit 以及其他那些会给应用发送信号而退出的异常
+
+Therefore, catching these exceptions is not the intended use case.
+ 因此，捕获这些异常本身没什么意义
+
+Assuming you follow this convention, it follows that inheriting from BaseException causes your custom exceptions to not be caught and to signal an imminent application shutdown!
+ 这样的话，假如你继承 BaseException 可能会导致你的自定义异常不会被捕获而直接发送信号退出程序运行
+
+Having custom exceptions in your application and using them as shown makes your application code tell a more coherent story to whoever may need to read the code.
+在程序中引入自定义异常可以使得你的代码更具可读性，能清晰显示谁应该阅读这个代码
+
+One design consideration involves the grouping of custom exceptions via inheritance.
+ 还有一种设计是将自定义异常通过继承组合起来
+
+In complicated applications, it may make sense to introduce further base classes that group different classes of exceptions together.
+在复杂应用程序中， 使用基类来分组各种异常类也是很有用的
+
+This gives the user a choice of catching a narrowly specified error, such as this:
+它可以让用户捕获一个范围很窄的特定异常，比如下面这样的：
+
+It also gives the ability to catch a broad range of errors, such as the following:
+你还能捕获更大范围的异常，就像下面这样：
+
+If you are going to define a new exception that overrides the __init__() method of Exception, make sure you always call Exception.__init__() with all of the passed arguments.
+如果你想定义的新异常重写了 __init__() 方法， 确保你使用所有参数调用 Exception.__init__() ，例如：
+
+This might look a little weird, but the default behavior of Exception is to accept all arguments passed and to store them in the .args attribute as a tuple.
+看上去有点奇怪，不过Exception的默认行为是接受所有传递的参数并将它们以元组形式存储在 .args 属性中. 很多其他函数库和部分Python库默认所有异常都必须有 .args 属性， 因此如果你忽略了这一步，你会发现有些时候你定义的新异常不会按照期望运行
+
+Various other libraries and parts of Python expect all exceptions to have the .args attribute, so if you skip this step, you might find that your new exception doesn’t behave quite right in certain contexts.
+ 为了演示 .args 的使用，考虑下下面这个使用内置的 RuntimeError` 异常的交互会话， 注意看raise语句中使用的参数个数是怎样的：
+
+For more information on creating your own exceptions, see the Python documentation.
+关于创建自定义异常的更多信息，请参考`Python官方文档 <https://docs.python.org/3/tutorial/errors.html>`_
+
+Raising an Exception in Response to Another Exception
+14.9 捕获异常后抛出另外的异常¶
+
+You want to raise an exception in response to catching a different exception, but want to include information about both exceptions in the traceback.
+你想捕获一个异常后抛出另外一个不同的异常，同时还得在异常回溯中保留两个异常的信息
+
+To chain exceptions, use the raise from statement instead of a simple raise statement.
+为了链接异常，使用 raise from 语句来代替简单的 raise 语句
+
+This will give you information about both errors.
+ 它会让你同时保留两个异常的信息
+
+For example:
+例如：
+
+As you can see in the traceback, both exceptions are captured.
+在回溯中科院看到，两个异常都被捕获
+
+To catch such an exception, you would use a normal except statement.
+当在 except 块中又有另外的异常被抛出时会导致一个隐藏的异常链的出现
+
+However, you can look at the __cause__ attribute of the exception object to follow the exception chain should you wish.
+例如：
+
+An implicit form of chained exceptions occurs when another exception gets raised inside an except block.
+在处理上述异常的时候，另外一个异常发生了：
+
+In this example, you get information about both exceptions, but the interpretation is a bit different.
+这个例子中，你同时获得了两个异常的信息，但是对异常的解释不同
+
+In this case, the NameError exception is raised as the result of a programming error, not in direct response to the parsing error.
+ 这时候，NameError 异常被作为程序最终异常被抛出，而不是位于解析异常的直接回应中
+
+If, for some reason, you want to suppress chaining, use raise from None:
+如果，你想忽略掉异常链，可使用 raise from None :
+
+In designing code, you should give careful attention to use of the raise statement inside of other except blocks.
+在设计代码时，在另外一个 except 代码块中使用 raise 语句的时候你要特别小心了
+
+In most cases, such raise statements should probably be changed to raise from statements.
+ 大多数情况下，这种 raise 语句都应该被改成 raise from 语句
+
+That is, you should prefer this style:
+也就是说你应该使用下面这种形式：
+
+The reason for doing this is that you are explicitly chaining the causes together.
+这样做的原因是你应该显示的将原因链接起来
+
+That is, the DifferentException is being raised in direct response to getting a SomeException.
+ 也就是说，DifferentException 是直接从 SomeException 衍生而来
+
+This relationship will be explicitly stated in the resulting traceback.
+ 这种关系可以从回溯结果中看出来
+
+If you write your code in the following style, you still get a chained exception, but it’s often not clear if the exception chain was intentional or the result of an unforeseen programming error:
+如果你像下面这样写代码，你仍然会得到一个链接异常， 不过这个并没有很清晰的说明这个异常链到底是内部异常还是某个未知的编程错误
+
+When you use raise from, you’re making it clear that you meant to raise the second exception.
+当你使用 raise from 语句的话，就很清楚的表明抛出的是第二个异常
+
+Resist the urge to suppress exception information, as shown in the last example.
+最后一个例子中隐藏异常链信息
+
+Although suppressing exception information can lead to smaller tracebacks, it also discards information that might be useful for debugging.
+ 尽管隐藏异常链信息不利于回溯，同时它也丢失了很多有用的调试信息
+
+All things being equal, it’s often best to keep as much information as possible.
+ 不过万事皆平等，有时候只保留适当的信息也是很有用的
+
+Reraising the Last Exception
+14.10 重新抛出被捕获的异常¶
+
+You caught an exception in an except block, but now you want to reraise it.
+你在一个 except 块中捕获了一个异常，现在想重新抛出它
+
+Simply use the raise statement all by itself.
+简单的使用一个单独的 rasie 语句即可，例如：
+
+This problem typically arises when you need to take some kind of action in response to an exception (e.g., logging, cleanup, etc.), but afterward, you simply want to propagate the exception along.
+这个问题通常是当你需要在捕获异常后执行某个操作（比如记录日志、清理等），但是之后想将异常传播下去
+
+A very common use might be in catch-all exception handlers:
+ 一个很常见的用法是在捕获所有异常的处理器中：
+
+Issuing Warning Messages
+14.11 输出警告信息¶
+
+You want to have your program issue warning messages (e.g., about deprecated features or usage problems).
+你希望自己的程序能生成警告信息（比如废弃特性或使用问题）
+
+To have your program issue a warning message, use the warnings.warn() function.
+要输出一个警告消息，可使用 warning.warn() 函数
+
+For example:
+例如：
+
+The arguments to warn() are a warning message along with a warning class, which is typically one of the following: UserWarning, DeprecationWarning, SyntaxWarning, RuntimeWarning, ResourceWarning, or FutureWarning.
+warn() 的参数是一个警告消息和一个警告类，警告类有如下几种：UserWarning, DeprecationWarning, SyntaxWarning, RuntimeWarning, ResourceWarning, 或 FutureWarning.
+
+The handling of warnings depends on how you have executed the interpreter and other configuration.
+对警告的处理取决于你如何运行解释器以及一些其他配置
+
+For example, if you run Python with the -W all option, you’ll get output such as the following:
+ 例如，如果你使用 -W all 选项去运行Python，你会得到如下的输出：
+
+Normally, warnings just produce output messages on standard error.
+通常来讲，警告会输出到标准错误上
+
+If you want to turn warnings into exceptions, use the -W error option:
+如果你想讲警告转换为异常，可以使用 -W error 选项：
+
+Issuing a warning message is often a useful technique for maintaining software and assisting users with issues that don’t necessarily rise to the level of being a full-fledged exception.
+在你维护软件，提示用户某些信息，但是又不需要将其上升为异常级别，那么输出警告信息就会很有用了
+
+For example, if you’re going to change the behavior of a library or framework, you can start issuing warning messages for the parts that you’re going to change while still providing backward compatibility for a time.
+ 例如，假设你准备修改某个函数库或框架的功能，你可以先为你要更改的部分输出警告信息，同时向后兼容一段时间
+
+You can also warn users about problematic usage issues in their code.
+ 你还可以警告用户一些对代码有问题的使用方式
+
+As another example of a warning in the built-in library, here is an example of a warning message generated by destroying a file without closing it:
+作为另外一个内置函数库的警告使用例子，下面演示了一个没有关闭文件就销毁它时产生的警告消息：
+
+By default, not all warning messages appear.
+默认情况下，并不是所有警告消息都会出现
+
+The -W option to Python can control the output of warning messages.
+-W 选项能控制警告消息的输出
+
+-W all will output all warning messages, -W ignore ignores all warnings, and -W error turns warnings into exceptions.
+ -W all 会输出所有警告消息，-W ignore 忽略掉所有警告，-W error 将警告转换成异常
+
+As an alternative, you can can use the warnings.simplefilter() function to control output, as just shown.
+ 另外一种选择，你还可以使用 warnings.simplefilter() 函数控制输出
+
+An argument of always makes all warning messages appear, ignore ignores all warnings, and error turns warnings into exceptions.
+ always 参数会让所有警告消息出现，`ignore 忽略调所有的警告，error 将警告转换成异常
+
+For simple cases, this is all you really need to issue warning messages.
+对于简单的生成警告消息的情况这些已经足够了
+
+The warnings module provides a variety of more advanced configuration options related to the filtering and handling of warning messages.
+ warnings 模块对过滤和警告消息处理提供了大量的更高级的配置选项
+
+See the Python documentation for more information.
+ 更多信息请参考 Python文档
+
+Debugging Basic Program Crashes
+14.12 调试基本的程序崩溃错误¶
+
+Your program is broken and you’d like some simple strategies for debugging it.
+你的程序奔溃后该怎样去调试它
+
+If your program is crashing with an exception, running your program as python3 -i someprogram.py can be a useful tool for simply looking around.
+如果你的程序因为某个异常而奔溃，运行 python3 -i someprogram.py 可执行简单的调试
+
+The -i option starts an interactive shell as soon as a program terminates.
+ -i 选项可让程序结束后打开一个交互式shell
+
+From there, you can explore the environment.
+ 然后你就能查看环境，例如，假设你有下面的代码：
+
+Running python3 -i produces the following:
+运行 python3 -i sample.py 会有类似如下的输出：
+
+If you don’t see anything obvious, a further step is to launch the Python debugger after a crash.
+如果你看不到上面这样的，可以在程序奔溃后打开Python的调试器
+
+For example:
+例如：
+
+If your code is deeply buried in an environment where it is difficult to obtain an interactive shell (e.g., in a server), you can often catch errors and produce tracebacks yourself.
+如果你的代码所在的环境很难获取交互shell（比如在某个服务器上面）， 通常可以捕获异常后自己打印跟踪信息
+
+For example:
+例如：
+
+If your program isn’t crashing, but it’s producing wrong answers or you’re mystified by how it works, there is often nothing wrong with just injecting a few print() calls in places of interest.
+要是你的程序没有奔溃，而只是产生了一些你看不懂的结果， 你在感兴趣的地方插入一下 print() 语句也是个不错的选择
+
+However, if you’re going to do that, there are a few related techniques of interest.
+ 不过，要是你打算这样做，有一些小技巧可以帮助你
+
+First, the traceback.print_stack() function will create a stack track of your program immediately at that point.
+ 首先，traceback.print_stack() 函数会你程序运行到那个点的时候创建一个跟踪栈
+
+For example:
+例如：
+
+Alternatively, you can also manually launch the debugger at any point in your program using pdb.set_trace() like this:
+另外，你还可以像下面这样使用 pdb.set_trace() 在任何地方手动的启动调试器：
+
+This can be a useful technique for poking around in the internals of a large program and answering questions about the control flow or arguments to functions.
+当程序比较大二你想调试控制流程以及函数参数的时候这个就比较有用了
+
+For instance, once the debugger starts, you can inspect variables using print or type a command such as w to get the stack traceback.
+ 例如，一旦调试器开始运行，你就能够使用 print 来观测变量值或敲击某个命令比如 w 来获取追踪信息
+
+Don’t make debugging more complicated than it needs to be.
+不要将调试弄的过于复杂化
+
+Simple errors can often be resolved by merely knowing how to read program tracebacks (e.g., the actual error is usually the last line of the traceback).
+一些简单的错误只需要观察程序堆栈信息就能知道了， 实际的错误一般是堆栈的最后一行
+
+Inserting a few selected print() functions in your code can also work well if you’re in the process of developing it and you simply want some diagnostics (just remember to remove the statements later).
+ 你在开发的时候，也可以在你需要调试的地方插入一下 print() 函数来诊断信息（只需要最后发布的时候删除这些打印语句即可）
+
+A common use of the debugger is to inspect variables inside a function that has crashed.
+调试器的一个常见用法是观测某个已经奔溃的函数中的变量
+
+Knowing how to enter the debugger after such a crash has occurred is a useful skill to know.
+ 知道怎样在函数奔溃后进入调试器是一个很有用的技能
+
+Inserting statements such as pdb.set_trace() can be useful if you’re trying to unravel an extremely complicated program where the underlying control flow isn’t obvious.
+当你想解剖一个非常复杂的程序，底层的控制逻辑你不是很清楚的时候， 插入 pdb.set_trace() 这样的语句就很有用了
+
+Essentially, the program will run until it hits the set_trace() call, at which point it will immediately enter the debugger.
+实际上，程序会一直运行到碰到 set_trace() 语句位置，然后立马进入调试器
+
+From there, you can try to make more sense of it.
+ 然后你就可以做更多的事了
+
+If you’re using an IDE for Python development, the IDE will typically provide its own debugging interface on top of or in place of pdb.
+如果你使用IDE来做Python开发，通常IDE都会提供自己的调试器来替代pdb
+
+Consult the manual for your IDE for more information.
+ 更多这方面的信息可以参考你使用的IDE手册
+
+Profiling and Timing Your Program
+14.13 给你的程序做性能测试¶
+
+You would like to find out where your program spends its time and make timing measurements.
+你想测试你的程序运行所花费的时间并做性能测试
+
+If you simply want to time your whole program, it’s usually easy enough to use something like the Unix time command.
+如果你只是简单的想测试下你的程序整体花费的时间， 通常使用Unix时间函数就行了，比如：
+
+On the other extreme, if you want a detailed report showing what your program is doing, you can use the cProfile module:
+如果你还需要一个程序各个细节的详细报告，可以使用 cProfile 模块：
+
+More often than not, profiling your code lies somewhere in between these two extremes.
+不过通常情况是介于这两个极端之间
+
+For example, you may already know that your code spends most of its time in a few selected functions.
+比如你已经知道代码运行时在少数几个函数中花费了绝大部分时间
+
+For selected profiling of functions, a short decorator can be useful.
+ 对于这些函数的性能测试，可以使用一个简单的装饰器：
+
+To use this decorator, you simply place it in front of a function definition to get timings from it.
+要使用这个装饰器，只需要将其放置在你要进行性能测试的函数定义前即可，比如：
+
+To time a block of statements, you can define a context manager.
+要测试某个代码块运行时间，你可以定义一个上下文管理器，例如：
+
+Here is an example of how the context manager works:
+下面是使用这个上下文管理器的例子：
+
+For studying the performance of small code fragments, the timeit module can be useful.
+对于测试很小的代码片段运行性能，使用 timeit 模块会很方便，例如：
+
+timeit works by executing the statement specified in the first argument a million times and measuring the time.
+timeit 会执行第一个参数中语句100万次并计算运行时间
+
+The second argument is a setup string that is executed to set up the environment prior to running the test.
+ 第二个参数是运行测试之前配置环境
+
+If you need to change the number of iterations, supply a number argument like this:
+如果你想改变循环执行次数， 可以像下面这样设置 number 参数的值：
+
+When making performance measurements, be aware that any results you get are approximations.
+当执行性能测试的时候，需要注意的是你获取的结果都是近似值
+
+The time.perf_counter() function used in the solution provides the highest-resolution timer possible on a given platform.
+ time.perf_counter() 函数会在给定平台上获取最高精度的计时值
+
+However, it still measures wall-clock time, and can be impacted by many different factors, such as machine load.
+ 不过，它仍然还是基于时钟时间，很多因素会影响到它的精确度，比如机器负载
+
+If you are interested in process time as opposed to wall-clock time, use time.process_time() instead.
+如果你对于执行时间更感兴趣，使用 time.process_time() 来代替它
+
+For example:
+例如：
+
+Last, but not least, if you’re going to perform detailed timing analysis, make sure to read the documentation for the time, timeit, and other associated modules, so that you have an understanding of important platform-related differences and other pitfalls.
+最后，如果你想进行更深入的性能分析，那么你需要详细阅读 time 、timeit 和其他相关模块的文档
+
+See “Making a Stopwatch Timer” for a related recipe on creating a stopwatch timer class.
+还可以参考13.13小节中相关的一个创建计时器类的例子
+
+Making Your Programs Run Faster
+14.14 加速程序运行¶
+
+Your program runs too slow and you’d like to speed it up without the assistance of more extreme solutions, such as C extensions or a just-in-time (JIT) compiler.
+你的程序运行太慢，你想在不使用复杂技术比如C扩展或JIT编译器的情况下加快程序运行速度
+
+While the first rule of optimization might be to "not do it," the second rule is almost certainly "don’t optimize the unimportant." To that end, if your program is running slow, you might start by profiling your code as discussed in “Profiling and Timing Your Program”.
+关于程序优化的第一个准则是“不要优化”，第二个准则是“不要优化那些无关紧要的部分”
+
+More often than not, you’ll find that your program spends its time in a few hotspots, such as inner data processing loops.
+通常来讲你会发现你得程序在少数几个热点地方花费了大量时间， 不然内存的数据处理循环
+
+Once you’ve identified those locations, you can use the no-nonsense techniques presented in the following sections to make your program run faster.
+一旦你定位到这些点，你就可以使用下面这些实用技术来加速程序运行
+
+A lot of programmers start using Python as a language for writing simple scripts.
+很多程序员刚开始会使用Python语言写一些简单脚本
+
+When writing scripts, it is easy to fall into a practice of simply writing code with very little structure.
+ 当编写脚本的时候，通常习惯了写毫无结构的代码，比如：
+
+A little-known fact is that code defined in the global scope like this runs slower than code defined in a function.
+很少有人知道，像这样定义在全局范围的代码运行起来要比定义在函数中运行慢的多
+
+The speed difference has to do with the implementation of local versus global variables (operations involving locals are faster).
+ 这种速度差异是由于局部变量和全局变量的实现方式（使用局部变量要更快些）
+
+So, if you want to make the program run faster, simply put the scripting statements in a function:
+ 因此，如果你想让程序运行更快些，只需要将脚本语句放入函数中即可：
+
+The speed difference depends heavily on the processing being performed, but in our experience, speedups of 15-30% are not uncommon.
+速度的差异取决于实际运行的程序，不过根据经验，使用函数带来15-30%的性能提升是很常见的
+
+Every use of the dot (.) operator to access attributes comes with a cost.
+每一次使用点(.)操作符来访问属性的时候会带来额外的开销
+
+Under the covers, this triggers special methods, such as __getattribute__() and __getattr__(), which often lead to dictionary lookups.
+ 它会触发特定的方法，比如 __getattribute__() 和 __getattr__() ，这些方法会进行字典操作操作
+
+You can often avoid attribute lookups by using the from module import name form of import as well as making selected use of bound methods.
+通常你可以使用 from module import name 这样的导入形式，以及使用绑定的方法
+
+To illustrate, consider the following code fragment:
+ 假设你有如下的代码片段：
+
+When tested on our machine, this program runs in about 40 seconds.
+在我们机器上面测试的时候，这个程序花费了大概40秒
+
+Now change the compute_roots() function as follows:
+现在我们修改 compute_roots() 函数如下：
+
+This version runs in about 29 seconds.
+修改后的版本运行时间大概是29秒
+
+The only difference between the two versions of code is the elimination of attribute access.
+唯一不同之处就是消除了属性访问
+
+Instead of using math.sqrt(), the code uses sqrt().
+ 用 sqrt() 代替了 math.sqrt() 
+
+The result.append() method is additionally placed into a local variable result_append and reused in the inner loop.
+ The result.append() 方法被赋给一个局部变量 result_append ，然后在内部循环中使用它
+
+However, it must be emphasized that these changes only make sense in frequently executed code, such as loops.
+不过，这些改变只有在大量重复代码中才有意义，比如循环
+
+So, this optimization really only makes sense in carefully selected places.
+ 因此，这些优化也只是在某些特定地方才应该被使用
+
+As previously noted, local variables are faster than global variables.
+之前提过，局部变量会比全局变量运行速度快
+
+For frequently accessed names, speedups can be obtained by making those names as local as possible.
+ 对于频繁访问的名称，通过将这些名称变成局部变量可以加速程序运行
+
+For example, consider this modified version of the compute_roots() function just discussed:
+ 例如，看下之前对于 compute_roots() 函数进行修改后的版本：
+
+In this version, sqrt has been lifted from the math module and placed into a local variable.
+在这个版本中，sqrt 从 match 模块被拿出并放入了一个局部变量中
+
+If you run this code, it now runs in about 25 seconds (an improvement over the previous version, which took 29 seconds).
+ 如果你运行这个代码，大概花费25秒（对于之前29秒又是一个改进）
+
+That additional speedup is due to a local lookup of sqrt being a bit faster than a global lookup of sqrt.
+ 这个额外的加速原因是因为对于局部变量 sqrt 的查找要快于全局变量 sqrt
+
+Locality arguments also apply when working in classes.
+对于类中的属性访问也同样适用于这个原理
+
+In general, looking up a value such as self.name will be considerably slower than accessing a local variable.
+ 通常来讲，查找某个值比如 self.name 会比访问一个局部变量要慢一些
+
+In inner loops, it might pay to lift commonly accessed attributes into a local variable.
+ 在内部循环中，可以将某个需要频繁访问的属性放入到一个局部变量中
+
+For example:
+例如：
+
+Any time you wrap up code with extra layers of processing, such as decorators, properties, or descriptors, you’re going to make it slower.
+任何时候当你使用额外的处理层（比如装饰器、属性访问、描述器）去包装你的代码时，都会让程序运行变慢
+
+As an example, consider this class:
+ 比如看下如下的这个类：
+
+Now, try a simple timing test:
+现在进行一个简单测试：
+
+As you can observe, accessing the property y is not just slightly slower than a simple attribute x, it’s about 4.5 times slower.
+可以看到，访问属性y相比属性x而言慢的不止一点点，大概慢了4.5倍
+
+If this difference matters, you should ask yourself if the definition of y as a property was really necessary.
+ 如果你在意性能的话，那么就需要重新审视下对于y的属性访问器的定义是否真的有必要了
+
+If not, simply get rid of it and go back to using a simple attribute instead.
+ 如果没有必要，就使用简单属性吧
+
+Just because it might be common for programs in another programming language to use getter/setter functions, that doesn’t mean you should adopt that programming style for Python.
+ 如果仅仅是因为其他编程语言需要使用getter/setter函数就去修改代码风格，这个真的没有必要
+
+Built-in data types such as strings, tuples, lists, sets, and dicts are all implemented in C, and are rather fast.
+内置的数据类型比如字符串、元组、列表、集合和字典都是使用C来实现的，运行起来非常快
+
+If you’re inclined to make your own data structures as a replacement (e.g., linked lists, balanced trees, etc.), it may be rather difficult if not impossible to match the speed of the built-ins.
+ 如果你想自己实现新的数据结构（比如链接列表、平衡树等）， 那么要想在性能上达到内置的速度几乎不可能，因此，还是乖乖的使用内置的吧
+
+Sometimes programmers get carried away with making unnecessary data structures when they just don’t have to.
+有时候程序员想显摆下，构造一些并没有必要的数据结构
+
+For example, someone might write code like this:
+例如，有人可能会像下面这样写：
+
+Perhaps the thinking here is to first collect a bunch of values into a list and then to start applying operations such as list comprehensions to it.
+也许这里的想法是首先将一些值收集到一个列表中，然后使用列表推导来执行操作
+
+However, the first list is completely unnecessary.
+ 不过，第一个列表完全没有必要，可以简单的像下面这样写：
+
+Related to this, be on the lookout for code written by programmers who are overly paranoid about Python’s sharing of values.
+与此相关，还要注意下那些对Python的共享数据机制过于偏执的程序所写的代码
+
+Overuse of functions such as copy.deepcopy() may be a sign of code that’s been written by someone who doesn’t fully understand or trust Python’s memory model.
+ 有些人并没有很好的理解或信任Python的内存模型，滥用 copy.deepcopy() 之类的函数
+
+In such code, it may be safe to eliminate many of the copies.
+ 通常在这些代码中是可以去掉复制操作的
+
+Before optimizing, it’s usually worthwhile to study the algorithms that you’re using first.
+在优化之前，有必要先研究下使用的算法
+
+You’ll get a much bigger speedup by switching to an O(n log n) algorithm than by trying to tweak the implementation of an an O(n**2) algorithm.
+ 选择一个复杂度为 O(n log n) 的算法要比你去调整一个复杂度为 O(n**2) 的算法所带来的性能提升要大得多
+
+If you’ve decided that you still must optimize, it pays to consider the big picture.
+如果你觉得你还是得进行优化，那么请从整体考虑
+
+As a general rule, you don’t want to apply optimizations to every part of your program, because such changes are going to make the code hard to read and understand.
+ 作为一般准则，不要对程序的每一个部分都去优化,因为这些修改回导致代码难以阅读和理解
+
+Instead, focus only on known performance bottlenecks, such as inner loops.
+ 你应该专注于优化产生性能瓶颈的地方，比如内部循环
+
+You need to be especially wary interpreting the results of micro-optimizations.
+你还要注意微小优化的结果
+
+For example, consider these two techniques for creating a dictionary:
+例如考虑下面创建一个字典的两种方式：
+
+The latter choice has the benefit of less typing (you don’t need to quote the key names).
+后面一种写法更简洁一些（你不需要在关键字上输入引号）
+
+However, if you put the two code fragments in a head-to-head performance battle, you’ll find that using dict() runs three times slower!
+ 不过，如果你将这两个代码片段进行性能测试对比时，会发现使用 dict() 的方式会慢了3倍
+
+With this knowledge, you might be inclined to scan your code and replace every use of dict() with its more verbose alternative.
+ 看到这个，你是不是有冲动把所有使用 dict() 的代码都替换成第一种
+
+However, a smart programmer will only focus on parts of a program where it might actually matter, such as an inner loop.
+ 不够，聪明的程序员只会关注他应该关注的地方，比如内部循环
+
+In other places, the speed difference just isn’t going to matter at all.
+在其他地方，这点性能损失没有什么影响
+
+If, on the other hand, your performance needs go far beyond the simple techniques in this recipe, you might investigate the use of tools based on just-in-time (JIT) compilation techniques.
+如果你的优化要求比较高，本节的这些简单技术满足不了，那么你可以研究下基于即时编译（JIT）技术的一些工具
+
+For example, the PyPy project is an alternate implementation of the Python interpreter that analyzes the execution of your program and generates native machine code for frequently executed parts.
+ 例如，PyPy工程是Python解释器的另外一种实现，它会分析你的程序运行并对那些频繁执行的部分生成本机机器码
+
+It can sometimes make Python programs run an order of magnitude faster, often approaching (or even exceeding) the speed of code written in C.
+ 它有时候能极大的提升性能，通常可以接近C代码的速度
+
+Unfortunately, as of this writing, PyPy does not yet fully support Python 3.
+ 不过可惜的是，到写这本书位置，PyPy还不能完全支持Python3. 因此，这个是你将来需要去研究的
+
+So, that is something to look for in the future.
+你还可以考虑下Numba工程， Numba是一个在你使用装饰器来选择Python函数进行优化时的动态编译器
+
+You might also consider the Numba project.
+ 这些函数会使用LLVM被编译成本地机器码
+
+Numba is a dynamic compiler where you annotate selected Python functions that you want to optimize with a decorator.
+它同样可以极大的提升性能
+
+Those functions are then compiled into native machine code through the use of LLVM.
+ 但是，跟PyPy一样，它对于Python 3的支持现在还停留在实验阶段
+
+Last, but not least, the words of John Ousterhout come to mind: "The best performance improvement is the transition from the nonworking to the working state." Don’t worry about optimization until you need to.
+最后我引用John Ousterhout说过的话作为结尾：“最好的性能优化时从不工作到工作状态的迁移”
+
+Making sure your program works correctly is usually more important than making it run fast (at least initially).
+ 直到你真的需要优化的时候再去考虑它
+

@@ -1,0 +1,1185 @@
+Chapter 6. Data Encoding and Processing
+第六章：数据编码和处理¶
+
+The main focus of this chapter is using Python to process data presented in different kinds of common encodings, such as CSV files, JSON, XML, and binary packed records.
+这一章主要讨论使用Python处理各种不同方式编码的数据，比如CSV文件，JSON，XML和二进制包装记录
+
+Unlike the chapter on data structures, this chapter is not focused on specific algorithms, but instead on the problem of getting data in and out of a program.
+ 和数据结构那一章不同的是，这章不会讨论特殊的算法问题，而是关注于怎样获取和存储这些格式的数据
+
+Reading and Writing CSV Data
+6.1 读写CSV数据¶
+
+You want to read or write data encoded as a CSV file.
+你想读写一个CSV格式的文件
+
+For most kinds of CSV data, use the csv library.
+对于大多数的CSV格式的数据读写问题，都可以使用 csv 库
+
+For example, suppose you have some stock market data in a file named stocks.csv like this:
+ 例如：假设你在一个名叫stocks.csv文件中有一些股票市场数据，就像这样：
+
+Here’s how you would read the data as a sequence of tuples:
+下面向你展示如何将这些数据读取为一个元组的序列：
+
+In the preceding code, row will be a tuple.
+在上面的代码中， row 会是一个列表
+
+Thus, to access certain fields, you will need to use indexing, such as row[0] (Symbol) and row[4] (Change).
+因此，为了访问某个字段，你需要使用下标，如 row[0] 访问Symbol， row[4] 访问Change
+
+Since such indexing can often be confusing, this is one place where you might want to consider the use of named tuples.
+由于这种下标访问通常会引起混淆，你可以考虑使用命名元组
+
+For example:
+例如：
+
+This would allow you to use the column headers such as row.Symbol and row.Change instead of indices.
+它允许你使用列名如 row.Symbol 和 row.Change 代替下标访问
+
+It should be noted that this only works if the column headers are valid Python identifiers.
+ 需要注意的是这个只有在列名是合法的Python标识符的时候才生效
+
+If not, you might have to massage the initial headings (e.g., replacing nonidentifier characters with underscores or similar).
+如果不是的话， 你可能需要修改下原始的列名(如将非标识符字符替换成下划线之类的)
+
+Another alternative is to read the data as a sequence of dictionaries instead.
+另外一个选择就是将数据读取到一个字典序列中去
+
+To do that, use this code:
+可以这样做：
+
+In this version, you would access the elements of each row using the row headers.
+在这个版本中，你可以使用列名去访问每一行的数据了
+
+For example, row['Symbol'] or row['Change'].
+比如，row['Symbol'] 或者 row['Change']
+
+To write CSV data, you also use the csv module but create a writer object.
+为了写入CSV数据，你仍然可以使用csv模块，不过这时候先创建一个 writer 对象
+
+For example:
+例如:
+
+If you have the data as a sequence of dictionaries, do this:
+如果你有一个字典序列的数据，可以像这样做：
+
+You should almost always prefer the use of the csv module over manually trying to split and parse CSV data yourself.
+你应该总是优先选择csv模块分割或解析CSV数据
+
+For instance, you might be inclined to just write some code like this:
+例如，你可能会像编写类似下面这样的代码：
+
+The problem with this approach is that you’ll still need to deal with some nasty details.
+使用这种方式的一个缺点就是你仍然需要去处理一些棘手的细节问题
+
+For example, if any of the fields are surrounded by quotes, you’ll have to strip the quotes.
+ 比如，如果某些字段值被引号包围，你不得不去除这些引号
+
+In addition, if a quoted field happens to contain a comma, the code will break by producing a row with the wrong size.
+ 另外，如果一个被引号包围的字段碰巧含有一个逗号，那么程序就会因为产生一个错误大小的行而出错
+
+By default, the csv library is programmed to understand CSV encoding rules used by Microsoft Excel.
+默认情况下，csv 库可识别Microsoft Excel所使用的CSV编码规则
+
+This is probably the most common variant, and will likely give you the best compatibility.
+ 这或许也是最常见的形式，并且也会给你带来最好的兼容性
+
+However, if you consult the documentation for csv, you’ll see a few ways to tweak the encoding to different formats (e.g., changing the separator character, etc.).
+ 然而，如果你查看csv的文档，就会发现有很多种方法将它应用到其他编码格式上(如修改分割字符等)
+
+For example, if you want to read tab-delimited data instead, use this:
+ 例如，如果你想读取以tab分割的数据，可以这样做：
+
+If you’re reading CSV data and converting it into named tuples, you need to be a little careful with validating column headers.
+如果你正在读取CSV数据并将它们转换为命名元组，需要注意对列名进行合法性认证
+
+For example, a CSV file could have a header line containing nonvalid identifier characters like this:
+ 例如，一个CSV格式文件有一个包含非法标识符的列头行，类似下面这样：
+
+This will actually cause the creation of a namedtuple to fail with a ValueError exception.
+这样最终会导致在创建一个命名元组时产生一个 ValueError 异常而失败
+
+To work around this, you might have to scrub the headers first.
+ 为了解决这问题，你可能不得不先去修正列标题
+
+For instance, carrying a regex substitution on nonvalid identifier characters like this:
+ 例如，可以像下面这样在非法标识符上使用一个正则表达式替换：
+
+It’s also important to emphasize that csv does not try to interpret the data or convert it to a type other than a string.
+还有重要的一点需要强调的是，csv产生的数据都是字符串类型的，它不会做任何其他类型的转换
+
+If such conversions are important, that is something you’ll need to do yourself.
+ 如果你需要做这样的类型转换，你必须自己手动去实现
+
+Here is one example of performing extra type conversions on CSV data:
+ 下面是一个在CSV数据上执行其他类型转换的例子：
+
+Alternatively, here is an example of converting selected fields of dictionaries:
+另外，下面是一个转换字典中特定字段的例子：
+
+In general, you’ll probably want to be a bit careful with such conversions, though.
+通常来讲，你可能并不想过多去考虑这些转换问题
+
+In the real world, it’s common for CSV files to have missing values, corrupted data, and other issues that would break type conversions.
+ 在实际情况中，CSV文件都或多或少有些缺失的数据，被破坏的数据以及其它一些让转换失败的问题
+
+So, unless your data is guaranteed to be error free, that’s something you’ll need to consider (you might need to add suitable exception handling).
+ 因此，除非你的数据确实有保障是准确无误的，否则你必须考虑这些问题(你可能需要增加合适的错误处理机制)
+
+Finally, if your goal in reading CSV data is to perform data analysis and statistics, you might want to look at the Pandas package.
+最后，如果你读取CSV数据的目的是做数据分析和统计的话， 你可能需要看一看 Pandas 包
+
+Pandas includes a convenient pandas.read_csv() function that will load CSV data into a DataFrame object.
+Pandas 包含了一个非常方便的函数叫 pandas.read_csv() ， 它可以加载CSV数据到一个 DataFrame 对象中去
+
+From there, you can generate various summary statistics, filter the data, and perform other kinds of high-level operations.
+ 然后利用这个对象你就可以生成各种形式的统计、过滤数据以及执行其他高级操作了
+
+An example is given in “Summarizing Data and Performing Statistics”.
+ 在6.13小节中会有这样一个例子
+
+Reading and Writing JSON Data
+6.2 读写JSON数据¶
+
+You want to read or write data encoded as JSON (JavaScript Object Notation).
+你想读写JSON(JavaScript Object Notation)编码格式的数据
+
+The json module provides an easy way to encode and decode data in JSON.
+json 模块提供了一种很简单的方式来编码和解码JSON数据
+
+The two main functions are json.dumps() and json.loads(), mirroring the interface used in other serialization libraries, such as pickle.
+ 其中两个主要的函数是 json.dumps() 和 json.loads() ， 要比其他序列化函数库如pickle的接口少得多
+
+Here is how you turn a Python data structure into JSON:
+ 下面演示如何将一个Python数据结构转换为JSON：
+
+Here is how you turn a JSON-encoded string back into a Python data structure:
+下面演示如何将一个JSON编码的字符串转换回一个Python数据结构：
+
+If you are working with files instead of strings, you can alternatively use json.dump() and json.load() to encode and decode JSON data.
+如果你要处理的是文件而不是字符串，你可以使用 json.dump() 和 json.load() 来编码和解码JSON数据
+
+For example:
+例如：
+
+JSON encoding supports the basic types of None, bool, int, float, and str, as well as lists, tuples, and dictionaries containing those types.
+JSON编码支持的基本数据类型为 None ， bool ， int ， float 和 str ， 以及包含这些类型数据的lists，tuples和dictionaries
+
+For dictionaries, keys are assumed to be strings (any nonstring keys in a dictionary are converted to strings when encoding).
+ 对于dictionaries，keys需要是字符串类型(字典中任何非字符串类型的key在编码时会先转换为字符串)
+
+To be compliant with the JSON specification, you should only encode Python lists and dictionaries.
+ 为了遵循JSON规范，你应该只编码Python的lists和dictionaries
+
+Moreover, in web applications, it is standard practice for the top-level object to be a dictionary.
+ 而且，在web应用程序中，顶层对象被编码为一个字典是一个标准做法
+
+The format of JSON encoding is almost identical to Python syntax except for a few minor changes.
+JSON编码的格式对于Python语法而已几乎是完全一样的，除了一些小的差异之外
+
+For instance, True is mapped to true, False is mapped to false, and None is mapped to null.
+ 比如，True会被映射为true，False被映射为false，而None会被映射为null
+
+Here is an example that shows what the encoding looks like:
+ 下面是一个例子，演示了编码后的字符串效果：
+
+If you are trying to examine data you have decoded from JSON, it can often be hard to ascertain its structure simply by printing it out—especially if the data contains a deep level of nested structures or a lot of fields.
+如果你试着去检查JSON解码后的数据，你通常很难通过简单的打印来确定它的结构， 特别是当数据的嵌套结构层次很深或者包含大量的字段时
+
+To assist with this, consider using the pprint() function in the pprint module.
+ 为了解决这个问题，可以考虑使用pprint模块的 pprint() 函数来代替普通的 print() 函数
+
+This will alphabetize the keys and output a dictionary in a more sane way.
+ 它会按照key的字母顺序并以一种更加美观的方式输出
+
+Here is an example that illustrates how you would pretty print the results of a search on Twitter:
+ 下面是一个演示如何漂亮的打印输出Twitter上搜索结果的例子：
+
+Normally, JSON decoding will create dicts or lists from the supplied data.
+一般来讲，JSON解码会根据提供的数据创建dicts或lists
+
+If you want to create different kinds of objects, supply the object_pairs_hook or object_hook to json.loads().
+ 如果你想要创建其他类型的对象，可以给 json.loads() 传递object_pairs_hook或object_hook参数
+
+For example, here is how you would decode JSON data, preserving its order in an OrderedDict:
+ 例如，下面是演示如何解码JSON数据并在一个OrderedDict中保留其顺序的例子：
+
+Here is how you could turn a JSON dictionary into a Python object:
+下面是如何将一个JSON字典转换为一个Python对象例子：
+
+In this last example, the dictionary created by decoding the JSON data is passed as a single argument to __init__().
+最后一个例子中，JSON解码后的字典作为一个单个参数传递给 __init__() 
+
+From there, you are free to use it as you will, such as using it directly as the instance dictionary of the object.
+ 然后，你就可以随心所欲的使用它了，比如作为一个实例字典来直接使用它
+
+There are a few options that can be useful for encoding JSON.
+在编码JSON的时候，还有一些选项很有用
+
+If you would like the output to be nicely formatted, you can use the indent argument to json.dumps().
+ 如果你想获得漂亮的格式化字符串后输出，可以使用 json.dumps() 的indent参数
+
+This causes the output to be pretty printed in a format similar to that with the pprint() function.
+ 它会使得输出和pprint()函数效果类似
+
+For example:
+比如：
+
+Instances are not normally serializable as JSON.
+对象实例通常并不是JSON可序列化的
+
+For example:
+例如：
+
+If you want to serialize instances, you can supply a function that takes an instance as input and returns a dictionary that can be serialized.
+如果你想序列化对象实例，你可以提供一个函数，它的输入是一个实例，返回一个可序列化的字典
+
+For example:
+例如：
+
+If you want to get an instance back, you could write code like this:
+如果你想反过来获取这个实例，可以这样做：
+
+Here is an example of how these functions are used:
+下面是如何使用这些函数的例子：
+
+The json module has a variety of other options for controlling the low-level interpretation of numbers, special values such as NaN, and more.
+json 模块还有很多其他选项来控制更低级别的数字、特殊值如NaN等的解析
+
+Consult the documentation for further details.
+ 可以参考官方文档获取更多细节
+
+Parsing Simple XML Data
+6.3 解析简单的XML数据¶
+
+You would like to extract data from a simple XML document.
+你想从一个简单的XML文档中提取数据
+
+The xml.etree.ElementTree module can be used to extract data from simple XML documents.
+可以使用 xml.etree.ElementTree 模块从简单的XML文档中提取数据
+
+To illustrate, suppose you want to parse and make a summary of the RSS feed on Planet Python.
+ 为了演示，假设你想解析Planet Python上的RSS源
+
+Here is a script that will do it:
+下面是相应的代码：
+
+If you run the preceding script, the output looks similar to the following:
+运行上面的代码，输出结果类似这样：
+
+Obviously, if you want to do more processing, you need to replace the print() statements with something more interesting.
+很显然，如果你想做进一步的处理，你需要替换 print() 语句来完成其他有趣的事
+
+Working with data encoded as XML is commonplace in many applications.
+在很多应用程序中处理XML编码格式的数据是很常见的
+
+Not only is XML widely used as a format for exchanging data on the Internet, it is a common format for storing application data (e.g., word processing, music libraries, etc.).
+ 不仅因为XML在Internet上面已经被广泛应用于数据交换， 同时它也是一种存储应用程序数据的常用格式(比如字处理，音乐库等)
+
+The discussion that follows already assumes the reader is familiar with XML basics.
+ 接下来的讨论会先假定读者已经对XML基础比较熟悉了
+
+In many cases, when XML is simply being used to store data, the document structure is compact and straightforward.
+在很多情况下，当使用XML来仅仅存储数据的时候，对应的文档结构非常紧凑并且直观
+
+For example, the RSS feed from the example looks similar to the following:
+ 例如，上面例子中的RSS订阅源类似于下面的格式：
+
+The xml.etree.ElementTree.parse() function parses the entire XML document into a document object.
+xml.etree.ElementTree.parse() 函数解析整个XML文档并将其转换成一个文档对象
+
+From there, you use methods such as find(), iterfind(), and findtext() to search for specific XML elements.
+ 然后，你就能使用 find() 、iterfind() 和 findtext() 等方法来搜索特定的XML元素了
+
+The arguments to these functions are the names of a specific tag, such as channel/item or title.
+ 这些函数的参数就是某个指定的标签名，例如 channel/item 或 title 
+
+When specifying tags, you need to take the overall document structure into account.
+每次指定某个标签时，你需要遍历整个文档结构
+
+Each find operation takes place relative to a starting element.
+每次搜索操作会从一个起始元素开始进行
+
+Likewise, the tagname that you supply to each operation is also relative to the start.
+ 同样，每次操作所指定的标签名也是起始元素的相对路径
+
+In the example, the call to doc.iterfind('channel/item') looks for all "item" elements under a "channel" element.
+ 例如，执行 doc.iterfind('channel/item') 来搜索所有在 channel 元素下面的 item 元素
+
+doc represents the top of the document (the top-level "rss" element).
+ doc 代表文档的最顶层(也就是第一级的 rss 元素)
+
+The later calls to item.findtext() take place relative to the found "item" elements.
+ 然后接下来的调用 item.findtext() 会从已找到的 item 元素位置开始搜索
+
+Each element represented by the ElementTree module has a few essential attributes and methods that are useful when parsing.
+ElementTree 模块中的每个元素有一些重要的属性和方法，在解析的时候非常有用
+
+The tag attribute contains the name of the tag, the text attribute contains enclosed text, and the get() method can be used to extract attributes (if any).
+ tag 属性包含了标签的名字，text 属性包含了内部的文本，而 get() 方法能获取属性值
+
+For example:
+例如：
+
+It should be noted that xml.etree.ElementTree is not the only option for XML parsing.
+有一点要强调的是 xml.etree.ElementTree 并不是XML解析的唯一方法
+
+For more advanced applications, you might consider lxml.
+ 对于更高级的应用程序，你需要考虑使用 lxml 
+
+It uses the same programming interface as ElementTree, so the example shown in this recipe works in the same manner.
+ 它使用了和ElementTree同样的编程接口，因此上面的例子同样也适用于lxml
+
+You simply need to change the first import to from lxml.etree import parse.
+ 你只需要将刚开始的import语句换成 from lxml.etree import parse 就行了
+
+lxml provides the benefit of being fully compliant with XML standards.
+ lxml 完全遵循XML标准，并且速度也非常快，同时还支持验证，XSLT，和XPath等特性
+
+Parsing Huge XML Files Incrementally
+6.4 增量式解析大型XML文件¶
+
+You need to extract data from a huge XML document using as little memory as possible.
+你想使用尽可能少的内存从一个超大的XML文档中提取数据
+
+Any time you are faced with the problem of incremental data processing, you should think of iterators and generators.
+任何时候只要你遇到增量式的数据处理时，第一时间就应该想到迭代器和生成器
+
+Here is a simple function that can be used to incrementally process huge XML files using a very small memory footprint:
+ 下面是一个很简单的函数，只使用很少的内存就能增量式的处理一个大型XML文件：
+
+To test the function, you now need to find a large XML file to work with.
+为了测试这个函数，你需要先有一个大型的XML文件
+
+You can often find such files on government and open data websites.
+ 通常你可以在政府网站或公共数据网站上找到这样的文件
+
+For example, you can download Chicago’s pothole database as XML.
+ 例如，你可以下载XML格式的芝加哥城市道路坑洼数据库
+
+At the time of this writing, the downloaded file consists of more than 100,000 rows of data, which are encoded like this:
+ 在写这本书的时候，下载文件已经包含超过100,000行数据，编码格式类似于下面这样：
+
+Suppose you want to write a script that ranks ZIP codes by the number of pothole reports.
+假设你想写一个脚本来按照坑洼报告数量排列邮编号码
+
+To do it, you could write code like this:
+你可以像这样做：
+
+The only problem with this script is that it reads and parses the entire XML file into memory.
+这个脚本唯一的问题是它会先将整个XML文件加载到内存中然后解析
+
+On our machine, it takes about 450 MB of memory to run.
+ 在我的机器上，为了运行这个程序需要用到450MB左右的内存空间
+
+Using this recipe’s code, the program changes only slightly:
+ 如果使用如下代码，程序只需要修改一点点：
+
+This version of code runs with a memory footprint of only 7 MB—a huge savings!
+结果是：这个版本的代码运行时只需要7MB的内存–大大节约了内存资源
+
+This recipe relies on two core features of the ElementTree module.
+这一节的技术会依赖 ElementTree 模块中的两个核心功能
+
+First, the iterparse() method allows incremental processing of XML documents.
+ 第一，iterparse() 方法允许对XML文档进行增量操作
+
+To use it, you supply the filename along with an event list consisting of one or more of the following: start, end, start-ns, and end-ns.
+ 使用时，你需要提供文件名和一个包含下面一种或多种类型的事件列表： start , end, start-ns 和 end-ns 
+
+The iterator created by iterparse() produces tuples of the form (event, elem), where event is one of the listed events and elem is the resulting XML element.
+ 由 iterparse() 创建的迭代器会产生形如 (event, elem) 的元组， 其中 event 是上述事件列表中的某一个，而 elem 是相应的XML元素
+
+For example:
+例如：
+
+start events are created when an element is first created but not yet populated with any other data (e.g., child elements).
+start 事件在某个元素第一次被创建并且还没有被插入其他数据(如子元素)时被创建
+
+end events are created when an element is completed.
+ 而 end 事件在某个元素已经完成时被创建
+
+Although not shown in this recipe, start-ns and end-ns events are used to handle XML namespace declarations.
+ 尽管没有在例子中演示， start-ns 和 end-ns 事件被用来处理XML文档命名空间的声明
+
+In this recipe, the start and end events are used to manage stacks of elements and tags.
+这本节例子中， start 和 end 事件被用来管理元素和标签栈
+
+The stacks represent the current hierarchical structure of the document as it’s being parsed, and are also used to determine if an element matches the requested path given to the parse_and_remove() function.
+ 栈代表了文档被解析时的层次结构， 还被用来判断某个元素是否匹配传给函数 parse_and_remove() 的路径
+
+If a match is made, yield is used to emit it back to the caller.
+ 如果匹配，就利用 yield 语句向调用者返回这个元素
+
+The following statement after the yield is the core feature of ElementTree that makes this recipe save memory:
+在 yield 之后的下面这个语句才是使得程序占用极少内存的ElementTree的核心特性：
+
+This statement causes the previously yielded element to be removed from its parent.
+这个语句使得之前由 yield 产生的元素从它的父节点中删除掉
+
+Assuming that no references are left to it anywhere else, the element is destroyed and memory reclaimed.
+ 假设已经没有其它的地方引用这个元素了，那么这个元素就被销毁并回收内存
+
+The end effect of the iterative parse and the removal of nodes is a highly efficient incremental sweep over the document.
+对节点的迭代式解析和删除的最终效果就是一个在文档上高效的增量式清扫过程
+
+At no point is a complete document tree ever constructed.
+ 文档树结构从始自终没被完整的创建过
+
+Yet, it is still possible to write code that processes the XML data in a straightforward manner.
+尽管如此，还是能通过上述简单的方式来处理这个XML数据
+
+The primary downside to this recipe is its runtime performance.
+这种方案的主要缺陷就是它的运行性能了
+
+When tested, the version of code that reads the entire document into memory first runs approximately twice as fast as the version that processes it incrementally.
+ 我自己测试的结果是，读取整个文档到内存中的版本的运行速度差不多是增量式处理版本的两倍快
+
+However, it requires more than 60 times as much memory.
+ 但是它却使用了超过后者60倍的内存
+
+So, if memory use is a greater concern, the incremental version is a big win.
+ 因此，如果你更关心内存使用量的话，那么增量式的版本完胜
+
+Turning a Dictionary into XML
+6.5 将字典转换为XML¶
+
+You want to take the data in a Python dictionary and turn it into XML.
+你想使用一个Python字典存储数据，并将它转换成XML格式
+
+Although the xml.etree.ElementTree library is commonly used for parsing, it can also be used to create XML documents.
+尽管 xml.etree.ElementTree 库通常用来做解析工作，其实它也可以创建XML文档
+
+For example, consider this function:
+ 例如，考虑如下这个函数：
+
+Here is an example:
+下面是一个使用例子：
+
+The result of this conversion is an Element instance.
+转换结果是一个 Element 实例
+
+For I/O, it is easy to convert this to a byte string using the tostring() function in xml.etree.ElementTree.
+对于I/O操作，使用 xml.etree.ElementTree 中的 tostring() 函数很容易就能将它转换成一个字节字符串
+
+For example:
+例如：
+
+If you want to attach attributes to an element, use its set() method:
+如果你想给某个元素添加属性值，可以使用 set() 方法：
+
+If the order of the elements matters, consider making an OrderedDict instead of a normal dictionary.
+如果你还想保持元素的顺序，可以考虑构造一个 OrderedDict 来代替一个普通的字典
+
+See “Keeping Dictionaries in Order”.
+请参考1.7小节
+
+When creating XML, you might be inclined to just make strings instead.
+当创建XML的时候，你被限制只能构造字符串类型的值
+
+For example:
+例如：
+
+The problem is that you’re going to make a real mess for yourself if you try to do things manually.
+问题是如果你手动的去构造的时候可能会碰到一些麻烦
+
+For example, what happens if the dictionary values contain special characters like this?
+例如，当字典的值中包含一些特殊字符的时候会怎样呢
+
+Notice how in the latter example, the characters < and > got replaced with &lt;
+注意到程序的后面那个例子中，字符 ‘<’ 和 ‘>’ 被替换成了 &lt; 和 &gt;
+
+Just for reference, if you ever need to manually escape or unescape such characters, you can use the escape() and unescape() functions in xml.sax.saxutils.
+下面仅供参考，如果你需要手动去转换这些字符， 可以使用 xml.sax.saxutils 中的 escape() 和 unescape() 函数
+
+For example:
+例如：
+
+Aside from creating correct output, the other reason why it’s a good idea to create Element instances instead of strings is that they can be more easily combined together to make a larger document.
+除了能创建正确的输出外，还有另外一个原因推荐你创建 Element 实例而不是字符串， 那就是使用字符串组合构造一个更大的文档并不是那么容易
+
+The resulting Element instances can also be processed in various ways without ever having to worry about parsing the XML text.
+ 而 Element 实例可以不用考虑解析XML文本的情况下通过多种方式被处理
+
+Essentially, you can do all of the processing of the data in a more high-level form and then output it as a string at the very end.
+ 也就是说，你可以在一个高级数据结构上完成你所有的操作，并在最后以字符串的形式将其输出
+
+Parsing, Modifying, and Rewriting XML
+6.6 解析和修改XML¶
+
+You want to read an XML document, make changes to it, and then write it back out as XML.
+你想读取一个XML文档，对它最一些修改，然后将结果写回XML文档
+
+The xml.etree.ElementTree module makes it easy to perform such tasks.
+使用 xml.etree.ElementTree 模块可以很容易的处理这些任务
+
+Essentially, you start out by parsing the document in the usual way.
+ 第一步是以通常的方式来解析这个文档
+
+For example, suppose you have a document named pred.xml that looks like this:
+例如，假设你有一个名为 pred.xml 的文档，类似下面这样：
+
+Here is an example of using ElementTree to read it and make changes to the structure:
+下面是一个利用 ElementTree 来读取这个文档并对它做一些修改的例子：
+
+The result of these operations is a new XML file that looks like this:
+处理结果是一个像下面这样新的XML文件：
+
+Modifying the structure of an XML document is straightforward, but you must remember that all modifications are generally made to the parent element, treating it as if it were a list.
+修改一个XML文档结构是很容易的，但是你必须牢记的是所有的修改都是针对父节点元素， 将它作为一个列表来处理
+
+For example, if you remove an element, it is removed from its immediate parent using the parent’s remove() method.
+例如，如果你删除某个元素，通过调用父节点的 remove() 方法从它的直接父节点中删除
+
+If you insert or append new elements, you also use insert() and append() methods on the parent.
+ 如果你插入或增加新的元素，你同样使用父节点元素的 insert() 和 append() 方法
+
+Elements can also be manipulated using indexing and slicing operations, such as element[i] or element[i:j].
+ 还能对元素使用索引和切片操作，比如 element[i] 或 element[i:j]
+
+If you need to make new elements, use the Element class, as shown in this recipe’s solution.
+如果你需要创建新的元素，可以使用本节方案中演示的 Element 类
+
+This is described further in “Turning a Dictionary into XML”.
+我们在6.5小节已经详细讨论过了
+
+Parsing XML Documents with Namespaces
+6.7 利用命名空间解析XML文档¶
+
+You need to parse an XML document, but it’s using XML namespaces.
+你想解析某个XML文档，文档中使用了XML命名空间
+
+Consider a document that uses namespaces like this:
+考虑下面这个使用了命名空间的文档：
+
+If you parse this document and try to perform the usual queries, you’ll find that it doesn’t work so easily because everything becomes incredibly verbose:
+如果你解析这个文档并执行普通的查询，你会发现这个并不是那么容易，因为所有步骤都变得相当的繁琐
+
+You can often simplify matters for yourself by wrapping namespace handling up into a utility class.
+你可以通过将命名空间处理逻辑包装为一个工具类来简化这个过程：
+
+To use this class, you do the following:
+通过下面的方式使用这个类：
+
+Parsing XML documents that contain namespaces can be messy.
+解析含有命名空间的XML文档会比较繁琐
+
+The XMLNamespaces class is really just meant to clean it up slightly by allowing you to use the shortened namespace names in subsequent operations as opposed to fully qualified URIs.
+ 上面的 XMLNamespaces 仅仅是允许你使用缩略名代替完整的URI将其变得稍微简洁一点
+
+Unfortunately, there is no mechanism in the basic ElementTree parser to get further information about namespaces.
+很不幸的是，在基本的 ElementTree 解析中没有任何途径获取命名空间的信息
+
+However, you can get a bit more information about the scope of namespace processing if you’re willing to use the iterparse() function instead.
+ 但是，如果你使用 iterparse() 函数的话就可以获取更多关于命名空间处理范围的信息
+
+For example:
+例如：
+
+As a final note, if the text you are parsing makes use of namespaces in addition to other advanced XML features, you’re really better off using the lxml library instead of ElementTree.
+最后一点，如果你要处理的XML文本除了要使用到其他高级XML特性外，还要使用到命名空间， 建议你最好是使用 lxml 函数库来代替 ElementTree 
+
+For instance, lxml provides better support for validating documents against a DTD, more complete XPath support, and other advanced XML features.
+ 例如，lxml 对利用DTD验证文档、更好的XPath支持和一些其他高级XML特性等都提供了更好的支持
+
+This recipe is really just a simple fix to make parsing a little easier.
+ 这一小节其实只是教你如何让XML解析稍微简单一点
+
+Interacting with a Relational Database
+6.8 与关系型数据库的交互¶
+
+You need to select, insert, or delete rows in a relational database.
+你想在关系型数据库中查询、增加或删除记录
+
+A standard way to represent rows of data in Python is as a sequence of tuples.
+Python中表示多行数据的标准方式是一个由元组构成的序列
+
+For example:
+例如：
+
+Given data in this form, it is relatively straightforward to interact with a relational database using Python’s standard database API, as described in PEP 249.
+依据PEP249，通过这种形式提供数据， 可以很容易的使用Python标准数据库API和关系型数据库进行交互
+
+The gist of the API is that all operations on the database are carried out by SQL queries.
+ 所有数据库上的操作都通过SQL查询语句来完成
+
+Each row of input or output data is represented by a tuple.
+每一行输入输出数据用一个元组来表示
+
+To illustrate, you can use the sqlite3 module that comes with Python.
+为了演示说明，你可以使用Python标准库中的 sqlite3 模块
+
+If you are using a different database (e.g., MySql, Postgres, or ODBC), you’ll have to install a third-party module to support it.
+ 如果你使用的是一个不同的数据库(比如MySql、Postgresql或者ODBC)， 还得安装相应的第三方模块来提供支持
+
+However, the underlying programming interface will be virtually the same, if not identical.
+ 不过相应的编程接口几乎都是一样的，除了一点点细微差别外
+
+The first step is to connect to the database.
+第一步是连接到数据库
+
+Typically, you execute a connect() function, supplying parameters such as the name of the database, hostname, username, password, and other details as needed.
+通常你要执行 connect() 函数， 给它提供一些数据库名、主机、用户名、密码和其他必要的一些参数
+
+For example:
+例如：
+
+To do anything with the data, you next create a cursor.
+为了处理数据，下一步你需要创建一个游标
+
+Once you have a cursor, you can start executing SQL queries.
+ 一旦你有了游标，那么你就可以执行SQL查询语句了
+
+For example:
+比如：
+
+To insert a sequence of rows into the data, use a statement like this:
+为了向数据库表中插入多条记录，使用类似下面这样的语句：
+
+To perform a query, use a statement such as this:
+为了执行某个查询，使用像下面这样的语句：
+
+If you want to perform queries that accept user-supplied input parameters, make sure you escape the parameters using ?
+如果你想接受用户输入作为参数来执行查询操作，必须确保你使用下面这样的占位符``
+
+like this:
+``来进行引用参数：
+
+At a low level, interacting with a database is an extremely straightforward thing to do.
+在比较低的级别上和数据库交互是非常简单的
+
+You simply form SQL statements and feed them to the underlying module to either update the database or retrieve data.
+ 你只需提供SQL语句并调用相应的模块就可以更新或提取数据了
+
+That said, there are still some tricky details you’ll need to sort out on a case-by-case basis.
+ 虽说如此，还是有一些比较棘手的细节问题需要你逐个列出去解决
+
+One complication is the mapping of data from the database into Python types.
+一个难点是数据库中的数据和Python类型直接的映射
+
+For entries such as dates, it is most common to use datetime instances from the datetime module, or possibly system timestamps, as used in the time module.
+ 对于日期类型，通常可以使用 datetime 模块中的 datetime 实例， 或者可能是 time 模块中的系统时间戳
+
+For numerical data, especially financial data involving decimals, numbers may be represented as Decimal instances from the decimal module.
+ 对于数字类型，特别是使用到小数的金融数据，可以用 decimal 模块中的 Decimal 实例来表示
+
+Unfortunately, the exact mapping varies by database backend so you’ll have to read the associated documentation.
+ 不幸的是，对于不同的数据库而言具体映射规则是不一样的，你必须参考相应的文档
+
+Another extremely critical complication concerns the formation of SQL statement strings.
+另外一个更加复杂的问题就是SQL语句字符串的构造
+
+You should never use Python string formatting operators (e.g., %) or the .format() method to create such strings.
+ 你千万不要使用Python字符串格式化操作符(如%)或者 .format() 方法来创建这样的字符串
+
+If the values provided to such formatting operators are derived from user input, this opens up your program to an SQL-injection attack (see http://xkcd.com/327).
+ 如果传递给这些格式化操作符的值来自于用户的输入，那么你的程序就很有可能遭受SQL注入攻击(参考 http://xkcd.com/327 )
+
+The special ?
+ 查询语句中的通配符 
+
+wildcard in queries instructs the database backend to use its own string substitution mechanism, which (hopefully) will do it safely.
+ 指示后台数据库使用它自己的字符串替换机制，这样更加的安全
+
+Sadly, there is some inconsistency across database backends with respect to the wildcard.
+不幸的是，不同的数据库后台对于通配符的使用是不一样的
+
+Many modules use ?
+大部分模块使用 
+
+or %s, while others may use a different symbol, such as :0 or :1, to refer to parameters.
+ 或 %s ， 还有其他一些使用了不同的符号，比如:0或:1来指示参数
+
+Again, you’ll have to consult the documentation for the database module you’re using.
+ 同样的，你还是得去参考你使用的数据库模块相应的文档
+
+The paramstyle attribute of a database module also contains information about the quoting style.
+ 一个数据库模块的 paramstyle 属性包含了参数引用风格的信息
+
+For simply pulling data in and out of a database table, using the database API is usually simple enough.
+对于简单的数据库数据的读写问题，使用数据库API通常非常简单
+
+If you’re doing something more complicated, it may make sense to use a higher-level interface, such as that provided by an object-relational mapper.
+ 如果你要处理更加复杂的问题，建议你使用更加高级的接口，比如一个对象关系映射ORM所提供的接口
+
+Libraries such as SQLAlchemy allow database tables to be described as Python classes and for database operations to be carried out while hiding most of the underlying SQL.
+ 类似 SQLAlchemy 这样的库允许你使用Python类来表示一个数据库表， 并且能在隐藏底层SQL的情况下实现各种数据库的操作
+
+Decoding and Encoding Hexadecimal Digits
+6.9 编码和解码十六进制数¶
+
+You need to decode a string of hexadecimal digits into a byte string or encode a byte string as hex.
+你想将一个十六进制字符串解码成一个字节字符串或者将一个字节字符串编码成一个十六进制字符串
+
+If you simply need to decode or encode a raw string of hex digits, use the binascii module.
+如果你只是简单的解码或编码一个十六进制的原始字符串，可以使用　binascii 模块
+
+For example:
+例如：
+
+Similar functionality can also be found in the base64 module.
+类似的功能同样可以在 base64 模块中找到
+
+For example:
+例如：
+
+For the most part, converting to and from hex is straightforward using the functions shown.
+大部分情况下，通过使用上述的函数来转换十六进制是很简单的
+
+The main difference between the two techniques is in case folding.
+ 上面两种技术的主要不同在于大小写的处理
+
+The base64.b16decode() and base64.b16encode() functions only operate with uppercase hexadecimal letters, whereas the functions in binascii work with either case.
+ 函数 base64.b16decode() 和 base64.b16encode() 只能操作大写形式的十六进制字母， 而 binascii 模块中的函数大小写都能处理
+
+It’s also important to note that the output produced by the encoding functions is always a byte string.
+还有一点需要注意的是编码函数所产生的输出总是一个字节字符串
+
+To coerce it to Unicode for output, you may need to add an extra decoding step.
+ 如果想强制以Unicode形式输出，你需要增加一个额外的界面步骤
+
+For example:
+例如：
+
+When decoding hex digits, the b16decode() and a2b_hex() functions accept either bytes or unicode strings.
+在解码十六进制数时，函数 b16decode() 和 a2b_hex() 可以接受字节或unicode字符串
+
+However, those strings must only contain ASCII-encoded hexadecimal digits.
+ 但是，unicode字符串必须仅仅只包含ASCII编码的十六进制数
+
+Decoding and Encoding Base64
+6.10 编码解码Base64数据¶
+
+You need to decode or encode binary data using Base64 encoding.
+你需要使用Base64格式解码或编码二进制数据
+
+The base64 module has two functions—b64encode() and b64decode()—that do exactly what you want.
+base64 模块中有两个函数 b64encode() and b64decode() 可以帮你解决这个问题
+
+For example:
+例如;
+
+Base64 encoding is only meant to be used on byte-oriented data such as byte strings and byte arrays.
+Base64编码仅仅用于面向字节的数据比如字节字符串和字节数组
+
+Moreover, the output of the encoding process is always a byte string.
+ 此外，编码处理的输出结果总是一个字节字符串
+
+If you are mixing Base64-encoded data with Unicode text, you may have to perform an extra decoding step.
+ 如果你想混合使用Base64编码的数据和Unicode文本，你必须添加一个额外的解码步骤
+
+For example:
+例如：
+
+When decoding Base64, both byte strings and Unicode text strings can be supplied.
+当解码Base64的时候，字节字符串和Unicode文本都可以作为参数
+
+However, Unicode strings can only contain ASCII characters.
+ 但是，Unicode字符串只能包含ASCII字符
+
+Reading and Writing Binary Arrays of Structures
+6.11 读写二进制数组数据¶
+
+You want to read or write data encoded as a binary array of uniform structures into Python tuples.
+你想读写一个二进制数组的结构化数据到Python元组中
+
+To work with binary data, use the struct module.
+可以使用 struct 模块处理二进制数据
+
+Here is an example of code that writes a list of Python tuples out to a binary file, encoding each tuple as a structure using struct:
+ 下面是一段示例代码将一个Python元组列表写入一个二进制文件，并使用 struct 将每个元组编码为一个结构体
+
+There are several approaches for reading this file back into a list of tuples.
+有很多种方法来读取这个文件并返回一个元组列表
+
+First, if you’re going to read the file incrementally in chunks, you can write code such as this:
+ 首先，如果你打算以块的形式增量读取文件，你可以这样做：
+
+If you want to read the file entirely into a byte string with a single read and convert it piece by piece, you can write the following:
+如果你想将整个文件一次性读取到一个字节字符串中，然后在分片解析
+
+In both cases, the result is an iterable that produces the tuples originally stored when the file was created.
+两种情况下的结果都是一个可返回用来创建该文件的原始元组的可迭代对象
+
+For programs that must encode and decode binary data, it is common to use the struct module.
+对于需要编码和解码二进制数据的程序而言，通常会使用 struct 模块
+
+To declare a new structure, simply create an instance of Struct such as:
+ 为了声明一个新的结构体，只需要像这样创建一个 Struct 实例即可：
+
+Structures are always defined using a set of structure codes such as i, d, f, and so forth [see the Python documentation].
+结构体通常会使用一些结构码值i, d, f等 [参考 Python文档 ]
+
+These codes correspond to specific binary data types such as 32-bit integers, 64-bit floats, 32-bit floats, and so forth.
+ 这些代码分别代表某个特定的二进制数据类型如32位整数，64位浮点数，32位浮点数等
+
+The < in the first character specifies the byte ordering.
+ 第一个字符 < 指定了字节顺序
+
+In this example, it is indicating "little endian." Change the character to > for big endian or !
+在这个例子中，它表示”低位在前”
+
+for network byte order.
+ 更改这个字符为 > 表示高位在前，或者是 ! 表示网络字节顺序
+
+The resulting Struct instance has various attributes and methods for manipulating structures of that type.
+产生的 Struct 实例有很多属性和方法用来操作相应类型的结构
+
+The size attribute contains the size of the structure in bytes, which is useful to have in I/O operations.
+ size 属性包含了结构的字节数，这在I/O操作时非常有用
+
+pack() and unpack() methods are used to pack and unpack data.
+ pack() 和 unpack() 方法被用来打包和解包数据
+
+For example:
+比如：
+
+Sometimes you’ll see the pack() and unpack() operations called as module-level functions, as in the following:
+有时候你还会看到 pack() 和 unpack() 操作以模块级别函数被调用，类似下面这样：
+
+This works, but feels less elegant than creating a single Struct instance—especially if the same structure appears in multiple places in your code.
+这样可以工作，但是感觉没有实例方法那么优雅，特别是在你代码中同样的结构出现在多个地方的时候
+
+By creating a Struct instance, the format code is only specified once and all of the useful operations are grouped together nicely.
+ 通过创建一个 Struct 实例，格式代码只会指定一次并且所有的操作被集中处理
+
+This certainly makes it easier to maintain your code if you need to fiddle with the structure code (as you only have to change it in one place).
+ 这样一来代码维护就变得更加简单了(因为你只需要改变一处代码即可)
+
+The code for reading binary structures involves a number of interesting, yet elegant programming idioms.
+读取二进制结构的代码要用到一些非常有趣而优美的编程技巧
+
+In the read_records() function, iter() is being used to make an iterator that returns fixed-sized chunks.
+ 在函数　read_records 中，iter() 被用来创建一个返回固定大小数据块的迭代器，参考5.8小节
+
+See “Iterating Over Fixed-Sized Records”.
+ 这个迭代器会不断的调用一个用户提供的可调用对象(比如 lambda: f.read(record_struct.size) )， 直到它返回一个特殊的值(如b’‘)，这时候迭代停止
+
+This iterator repeatedly calls a user-supplied callable (e.g., lambda: f.read(record_struct.size)) until it returns a specified value (e.g., b), at which point iteration stops.
+例如：
+
+One reason for creating an iterable is that it nicely allows records to be created using a generator comprehension, as shown in the solution.
+如你所见，创建一个可迭代对象的一个原因是它能允许使用一个生成器推导来创建记录
+
+If you didn’t use this approach, the code might look like this:
+ 如果你不使用这种技术，那么代码可能会像下面这样：
+
+In the unpack_records() function, a different approach using the unpack_from() method is used.
+在函数 unpack_records() 中使用了另外一种方法 unpack_from() 
+
+unpack_from() is a useful method for extracting binary data from a larger binary array, because it does so without making any temporary objects or memory copies.
+ unpack_from() 对于从一个大型二进制数组中提取二进制数据非常有用， 因为它不会产生任何的临时对象或者进行内存复制操作
+
+You just give it a byte string (or any array) along with a byte offset, and it will unpack fields directly from that location.
+ 你只需要给它一个字节字符串(或数组)和一个字节偏移量，它会从那个位置开始直接解包数据
+
+If you used unpack() instead of unpack_from(), you would need to modify the code to make a lot of small slices and offset calculations.
+如果你使用 unpack() 来代替 unpack_from() ， 你需要修改代码来构造大量的小的切片以及进行偏移量的计算
+
+For example:
+比如：
+
+In addition to being more complicated to read, this version also requires a lot more work, as it performs various offset calculations, copies data, and makes small slice objects.
+这种方案除了代码看上去很复杂外，还得做很多额外的工作，因为它执行了大量的偏移量计算， 复制数据以及构造小的切片对象
+
+If you’re going to be unpacking a lot of structures from a large byte string you’ve already read, unpack_from() is a more elegant approach.
+ 如果你准备从读取到的一个大型字节字符串中解包大量的结构体的话，unpack_from() 会表现的更出色
+
+Unpacking records is one place where you might want to use namedtuple objects from the collections module.
+在解包的时候，collections 模块中的命名元组对象或许是你想要用到的
+
+This allows you to set attribute names on the returned tuples.
+ 它可以让你给返回元组设置属性名称
+
+For example:
+例如：
+
+If you’re writing a program that needs to work with a large amount of binary data, you may be better off using a library such as numpy.
+如果你的程序需要处理大量的二进制数据，你最好使用 numpy 模块
+
+For example, instead of reading a binary into a list of tuples, you could read it into a structured array, like this:
+ 例如，你可以将一个二进制数据读取到一个结构化数组中而不是一个元组列表中
+
+Last, but not least, if you’re faced with the task of reading binary data in some known file format (i.e., image formats, shape files, HDF5, etc.), check to see if a Python module already exists for it.
+最后提一点，如果你需要从已知的文件格式(如图片格式，图形文件，HDF5等)中读取二进制数据时， 先检查看看Python是不是已经提供了现存的模块
+
+There’s no reason to reinvent the wheel if you don’t have to.
+因为不到万不得已没有必要去重复造轮子
+
+Reading Nested and Variable-Sized Binary Structures
+6.12 读取嵌套和可变长二进制数据¶
+
+You need to read complicated binary-encoded data that contains a collection of nested and/or variable-sized records.
+你需要读取包含嵌套或者可变长记录集合的复杂二进制格式的数据
+
+Such data might include images, video, shapefiles, and so on.
+这些数据可能包含图片、视频、电子地图文件等
+
+The struct module can be used to decode and encode almost any kind of binary data structure.
+struct 模块可被用来编码/解码几乎所有类型的二进制的数据结构
+
+To illustrate the kind of data in question here, suppose you have this Python data structure representing a collection of points that make up a series of polygons:
+为了解释清楚这种数据，假设你用下面的Python数据结构 来表示一个组成一系列多边形的点的集合：
+
+Now suppose this data was to be encoded into a binary file where the file started with the following header:
+现在假设这个数据被编码到一个以下列头部开始的二进制文件中去了：
+
+Following the header, a series of polygon records follow, each encoded as follows:
+紧跟着头部是一系列的多边形记录，编码格式如下：
+
+To write this file, you can use Python code like this:
+为了写这样的文件，你可以使用如下的Python代码：
+
+To read the resulting data back, you can write very similar looking code using the struct.unpack() function, reversing the operations performed during writing.
+将数据读取回来的时候，可以利用函数 struct.unpack() ，代码很相似，基本就是上面写操作的逆序
+
+For example:
+如下：
+
+Although this code works, it’s also a rather messy mix of small reads, struct unpacking, and other details.
+尽管这个代码可以工作，但是里面混杂了很多读取、解包数据结构和其他细节的代码
+
+If code like this is used to process a real datafile, it can quickly become even messier.
+如果用这样的代码来处理真实的数据文件， 那未免也太繁杂了点
+
+Thus, it’s an obvious candidate for an alternative solution that might simplify some of the steps and free the programmer to focus on more important matters.
+因此很显然应该有另一种解决方法可以简化这些步骤，让程序员只关注自最重要的事情
+
+In the remainder of this recipe, a rather advanced solution for interpreting binary data will be built up in pieces.
+在本小节接下来的部分，我会逐步演示一个更加优秀的解析字节数据的方案
+
+The goal will be to allow a programmer to provide a high-level specification of the file format, and to simply have the details of reading and unpacking all of the data worked out under the covers.
+ 目标是可以给程序员提供一个高级的文件格式化方法，并简化读取和解包数据的细节
+
+As a forewarning, the code that follows may be the most advanced example in this entire book, utilizing various object-oriented programming and metaprogramming techniques.
+但是我要先提醒你， 本小节接下来的部分代码应该是整本书中最复杂最高级的例子，使用了大量的面向对象编程和元编程技术
+
+Be sure to carefully read the discussion section as well as cross-references to other recipes.
+ 一定要仔细的阅读我们的讨论部分，另外也要参考下其他章节内容
+
+First, when reading binary data, it is common for the file to contain headers and other data structures.
+首先，当读取字节数据的时候，通常在文件开始部分会包含文件头和其他的数据结构
+
+Although the struct module can unpack this data into a tuple, another way to represent such information is through the use of a class.
+ 尽管struct模块可以解包这些数据到一个元组中去，另外一种表示这种信息的方式就是使用一个类
+
+Here’s some code that allows just that:
+ 就像下面这样：
+
+This code uses a descriptor to represent each structure field.
+这里我们使用了一个描述器来表示每个结构字段，每个描述器包含一个结构兼容格式的代码以及一个字节偏移量， 存储在内部的内存缓冲中
+
+Each descriptor contains a struct-compatible format code along with a byte offset into an underlying memory buffer.
+在 __get__() 方法中，struct.unpack_from() 函数被用来从缓冲中解包一个值，省去了额外的分片或复制操作步骤
+
+The Structure class just serves as a base class that accepts some byte data and stores it as the underlying memory buffer used by the StructField descriptor.
+Structure 类就是一个基础类，接受字节数据并存储在内部的内存缓冲中，并被 StructField 描述器使用
+
+The use of a memoryview() in this class serves a purpose that will become clear later.
+ 这里使用了 memoryview() ，我们会在后面详细讲解它是用来干嘛的
+
+Using this code, you can now define a structure as a high-level class that mirrors the information found in the tables that described the expected file format.
+使用这个代码，你现在就能定义一个高层次的结构对象来表示上面表格信息所期望的文件格式
+
+For example:
+例如：
+
+Here is an example of using this class to read the header from the polygon data written earlier:
+下面的例子利用这个类来读取之前我们写入的多边形数据的头部数据：
+
+This is interesting, but there are a number of annoyances with this approach.
+这个很有趣，不过这种方式还是有一些烦人的地方
+
+For one, even though you get the convenience of a class-like interface, the code is rather verbose and requires the user to specify a lot of low-level detail (e.g., repeated uses of StructField, specification of offsets, etc.).
+首先，尽管你获得了一个类接口的便利， 但是这个代码还是有点臃肿，还需要使用者指定很多底层的细节(比如重复使用 StructField ，指定偏移量等)
+
+The resulting class is also missing common conveniences such as providing a way to compute the total size of the structure.
+ 另外，返回的结果类同样确实一些便利的方法来计算结构的总数
+
+Any time you are faced with class definitions that are overly verbose like this, you might consider the use of a class decorator or metaclass.
+任何时候只要你遇到了像这样冗余的类定义，你应该考虑下使用类装饰器或元类
+
+One of the features of a metaclass is that it can be used to fill in a lot of low-level implementation details, taking that burden off of the user.
+ 元类有一个特性就是它能够被用来填充许多低层的实现细节，从而释放使用者的负担
+
+As an example, consider this metaclass and slight reformulation of the Structure class:
+ 下面我来举个例子，使用元类稍微改造下我们的 Structure 类：
+
+Using this new Structure class, you can now write a structure definition like this:
+使用新的 Structure 类，你可以像下面这样定义一个结构：
+
+As you can see, the specification is a lot less verbose.
+正如你所见，这样写就简单多了
+
+The added from_file() class method also makes it easier to read the data from a file without knowing any details about the size or structure of the data.
+我们添加的类方法 from_file() 让我们在不需要知道任何数据的大小和结构的情况下就能轻松的从文件中读取数据
+
+For example:
+比如：
+
+Once you introduce a metaclass into the mix, you can build more intelligence into it.
+一旦你开始使用了元类，你就可以让它变得更加智能
+
+For example, suppose you want to support nested binary structures.
+例如，假设你还想支持嵌套的字节结构， 下面是对前面元类的一个小的改进，提供了一个新的辅助描述器来达到想要的效果：
+
+In this code, the NestedStruct descriptor is used to overlay another structure definition over a region of memory.
+在这段代码中，NestedStruct 描述器被用来叠加另外一个定义在某个内存区域上的结构
+
+It does this by taking a slice of the original memory buffer and using it to instantiate the given structure type.
+ 它通过将原始内存缓冲进行切片操作后实例化给定的结构类型
+
+Since the underlying memory buffer was initialized as a memoryview, this slicing does not incur any extra memory copies.
+由于底层的内存缓冲区是通过一个内存视图初始化的， 所以这种切片操作不会引发任何的额外的内存复制
+
+Instead, it’s just an overlay on the original memory.
+相反，它仅仅就是之前的内存的一个叠加而已
+
+Moreover, to avoid repeated instantiations, the descriptor then stores the resulting inner structure object on the instance using the same technique described in “Using Lazily Computed Properties”.
+ 另外，为了防止重复实例化，通过使用和8.10小节同样的技术，描述器保存了该实例中的内部结构对象
+
+Using this new formulation, you can start to write code like this:
+使用这个新的修正版，你就可以像下面这样编写：
+
+Amazingly, it will all still work as you expect.
+令人惊讶的是，它也能按照预期的正常工作，我们实际操作下：
+
+At this point, a framework for dealing with fixed-sized records has been developed, but what about the variable-sized components?
+到目前为止，一个处理定长记录的框架已经写好了
+
+For example, the remainder of the polygon files contain sections of variable size.
+但是如果组件记录是变长的呢
+
+One way to handle this is to write a class that simply represents a chunk of binary data along with a utility function for interpreting the contents in different ways.
+一种方案是写一个类来表示字节数据，同时写一个工具函数来通过多少方式解析内容
+
+This is closely related to the code in “Reading and Writing Binary Arrays of Structures”:
+跟6.11小节的代码很类似：
+
+The SizedRecord.from_file() class method is a utility for reading a size-prefixed chunk of data from a file, which is common in many file formats.
+类方法 SizedRecord.from_file() 是一个工具，用来从一个文件中读取带大小前缀的数据块， 这也是很多文件格式常用的方式
+
+As input, it accepts a structure format code containing the encoding of the size, which is expected to be in bytes.
+作为输入，它接受一个包含大小编码的结构格式编码，并且也是自己形式
+
+The optional includes_size argument specifies whether the number of bytes includes the size header or not.
+ 可选的 includes_size 参数指定了字节数是否包含头部大小
+
+Here’s an example of how you would use this code to read the individual polygons in the polygon file:
+ 下面是一个例子教你怎样使用从多边形文件中读取单独的多边形数据：
+
+As shown, the contents of the SizedRecord instances have not yet been interpreted.
+可以看出，SizedRecord 实例的内容还没有被解析出来
+
+To do that, use the iter_as() method, which accepts a structure format code or Structure class as input.
+ 可以使用 iter_as() 方法来达到目的，这个方法接受一个结构格式化编码或者是 Structure 类作为输入
+
+This gives you a lot of flexibility in how to interpret the data.
+ 这样子可以很灵活的去解析数据，例如：
+
+Putting all of this together, here’s an alternative formulation of the read_polys() function:
+将所有这些结合起来，下面是一个 read_polys() 函数的另外一个修正版：
+
+This recipe provides a practical application of various advanced programming techniques, including descriptors, lazy evaluation, metaclasses, class variables, and memoryviews.
+这一节向你展示了许多高级的编程技术，包括描述器，延迟计算，元类，类变量和内存视图
+
+However, they all serve a very specific purpose.
+ 然而，它们都为了同一个特定的目标服务
+
+A major feature of the implementation is that it is strongly based on the idea of lazy-unpacking.
+上面的实现的一个主要特征是它是基于懒解包的思想
+
+When an instance of Structure is created, the __init__() merely creates a memoryview of the supplied byte data and does nothing else.
+当一个 Structure 实例被创建时， __init__() 仅仅只是创建一个字节数据的内存视图，没有做其他任何事
+
+Specifically, no unpacking or other structure-related operations take place at this time.
+ 特别的，这时候并没有任何的解包或者其他与结构相关的操作发生
+
+One motivation for taking this approach is that you might only be interested in a few specific parts of a binary record.
+ 这样做的一个动机是你可能仅仅只对一个字节记录的某一小部分感兴趣
+
+Rather than unpacking the whole file, only the parts that are actually accessed will be unpacked.
+我们只需要解包你需要访问的部分，而不是整个文件
+
+To implement the lazy unpacking and packing of values, the StructField descriptor class is used.
+为了实现懒解包和打包，需要使用 StructField 描述器类
+
+Each attribute the user lists in _fields_ gets converted to a StructField descriptor that stores the associated structure format code and byte offset into the stored buffer.
+ 用户在 _fields_ 中列出来的每个属性都会被转化成一个 StructField 描述器， 它将相关结构格式码和偏移值保存到存储缓存中
+
+The StructureMeta metaclass is what creates these descriptors automatically when various structure classes are defined.
+元类 StructureMeta 在多个结构类被定义时自动创建了这些描述器
+
+The main reason for using a metaclass is to make it extremely easy for a user to specify a structure format with a high-level description without worrying about low-level details.
+ 我们使用元类的一个主要原因是它使得用户非常方便的通过一个高层描述就能指定结构格式，而无需考虑低层的细节问题
+
+One subtle aspect of the StructureMeta metaclass is that it makes byte order sticky.
+StructureMeta 的一个很微妙的地方就是它会固定字节数据顺序
+
+That is, if any attribute specifies a byte order (< for little endian or > for big endian), that ordering is applied to all fields that follow.
+ 也就是说，如果任意的属性指定了一个字节顺序(<表示低位优先 或者 >表示高位优先)， 那后面所有字段的顺序都以这个顺序为准
+
+This helps avoid extra typing, but also makes it possible to switch in the middle of a definition.
+这么做可以帮助避免额外输入，但是在定义的中间我们仍然可能切换顺序的
+
+For example, you might have something more complicated, such as this:
+ 比如，你可能有一些比较复杂的结构，就像下面这样：
+
+As noted, the use of a memoryview() in the solution serves a useful role in avoiding memory copies.
+之前我们提到过，memoryview() 的使用可以帮助我们避免内存的复制
+
+When structures start to nest, memoryviews can be used to overlay different parts of the structure definition on the same region of memory.
+ 当结构存在嵌套的时候，memoryviews 可以叠加同一内存区域上定义的机构的不同部分
+
+This aspect of the solution is subtle, but it concerns the slicing behavior of a memoryview versus a normal byte array.
+ 这个特性比较微妙，但是它关注的是内存视图与普通字节数组的切片操作行为
+
+If you slice a byte string or byte array, you usually get a copy of the data.
+ 如果你在一个字节字符串或字节数组上执行切片操作，你通常会得到一个数据的拷贝
+
+Not so with a memoryview—slices simply overlay the existing memory.
+ 而内存视图切片不是这样的，它仅仅是在已存在的内存上面叠加而已
+
+Thus, this approach is more efficient.
+因此，这种方式更加高效
+
+A number of related recipes will help expand upon the topics used in the solution.
+还有很多相关的章节可以帮助我们扩展这里讨论的方案
+
+See “Implementing a Data Model or Type System” for a closely related recipe that uses descriptors to build a type system.
+ 参考8.13小节使用描述器构建一个类型系统
+
+“Using Lazily Computed Properties” has information about lazily computed properties and is related to the implementation of the NestedStruct descriptor.
+ 8.10小节有更多关于延迟计算属性值的讨论，并且跟NestedStruct描述器的实现也有关
+
+“Initializing Class Members at Definition Time” has an example of using a metaclass to initialize class members, much in the same manner as the StructureMeta class.
+ 9.19小节有一个使用元类来初始化类成员的例子，和 StructureMeta 类非常相似
+
+The source code for Python’s ctypes library may also be of interest, due to its similar support for defining data structures, nesting of data structures, and similar functionality.
+ Python的 ctypes 源码同样也很有趣，它提供了对定义数据结构、数据结构嵌套这些相似功能的支持
+
+Summarizing Data and Performing Statistics
+6.13 数据的累加与统计操作¶
+
+You need to crunch through large datasets and generate summaries or other kinds of statistics.
+你需要处理一个很大的数据集并需要计算数据总和或其他统计量
+
+For any kind of data analysis involving statistics, time series, and other related techniques, you should look at the Pandas library.
+对于任何涉及到统计、时间序列以及其他相关技术的数据分析问题，都可以考虑使用 Pandas库 
+
+To give you a taste, here’s an example of using Pandas to analyze the City of Chicago rat and rodent database.
+为了让你先体验下，下面是一个使用Pandas来分析芝加哥城市的 老鼠和啮齿类动物数据库 的例子
+
+At the time of this writing, it’s a CSV file with about 74,000 entries:
+ 在我写这篇文章的时候，这个数据库是一个拥有大概74,000行数据的CSV文件
+
+Yes, October 7, 2011, was indeed a very busy day for rats.
+嗯，看样子2011年10月7日对老鼠们来说是个很忙碌的日子啊
+
+Pandas is a large library that has more features than can be described here.
+Pandas是一个拥有很多特性的大型函数库，我在这里不可能介绍完
+
+However, if you need to analyze large datasets, group data, perform statistics, or other similar tasks, it’s definitely worth a look.
+ 但是只要你需要去分析大型数据集合、对数据分组、计算各种统计量或其他类似任务的话，这个函数库真的值得你去看一看
+

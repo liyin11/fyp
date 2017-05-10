@@ -1,0 +1,1965 @@
+Chapter 15. C Extensions
+第十五章：C语言扩展¶
+
+This chapter looks at the problem of accessing C code from Python.
+本章着眼于从Python访问C代码的问题
+
+Many of Python’s built-in libraries are written in C, and accessing C is an important part of making Python talk to existing libraries.
+许多Python内置库是用C写的， 访问C是让Python的对现有库进行交互一个重要的组成部分
+
+It’s also an area that might require the most study if you’re faced with the problem of porting extension code from Python 2 to 3.
+ 这也是一个当你面临从Python 2 到 Python 3扩展代码的问题
+
+Although Python provides an extensive C programming API, there are actually many different approaches for dealing with C.
+虽然Python提供了一个广泛的编程API，实际上有很多方法来处理C的代码
+
+Rather than trying to give an exhaustive reference for every possible tool or technique, the approach is to focus on a small fragment of C code along with some representative examples of how to work with the code.
+ 相比试图给出对于每一个可能的工具或技术的详细参考， 我么采用的是是集中在一个小片段的C++代码，以及一些有代表性的例子来展示如何与代码交互
+
+The goal is to provide a series of programming templates that experienced programmers can expand upon for their own use.
+ 这个目标是提供一系列的编程模板，有经验的程序员可以扩展自己的使用
+
+Here is the C code we will work with in most of the recipes:
+这里是我们将在大部分秘籍中工作的代码：
+
+This code contains a number of different C programming features.
+这段代码包含了多种不同的C语言编程特性
+
+First, there are a few simple functions such as gcd() and is_mandel().
+ 首先，这里有很多函数比如 gcd() 和 is_mandel() 
+
+The divide() function is an example of a C function returning multiple values, one through a pointer argument.
+ divide() 函数是一个返回多个值的C函数例子，其中有一个是通过指针参数的方式
+
+The avg() function performs a data reduction across a C array.
+ avg() 函数通过一个C数组执行数据聚集操作
+
+The Point and distance() function involve C structures.
+Point 和 distance() 函数涉及到了C结构体
+
+For all of the recipes that follow, assume that the preceding code is found in a file named sample.c, that definitions are found in a file named sample.h and that it has been compiled into a library libsample that can be linked to other C code.
+对于接下来的所有小节，先假定上面的代码已经被写入了一个名叫“sample.c”的文件中， 然后它们的定义被写入一个名叫“sample.h”的头文件中， 并且被编译为一个库叫“libsample”，能被链接到其他C语言代码中
+
+The exact details of compilation and linking vary from system to system, but that is not the primary focus.
+ 编译和链接的细节依据系统的不同而不同，但是这个不是我们关注的
+
+It is assumed that if you’re working with C code, you’ve already figured that out.
+ 如果你要处理C代码，我们假定这些基础的东西你都掌握了
+
+Accessing C Code Using ctypes
+15.1 使用ctypes访问C代码¶
+
+You have a small number of C functions that have been compiled into a shared library or DLL.
+你有一些C函数已经被编译到共享库或DLL中
+
+You would like to call these functions purely from Python without having to write additional C code or using a third-party extension tool.
+你希望可以使用纯Python代码调用这些函数， 而不用编写额外的C代码或使用第三方扩展工具
+
+For small problems involving C code, it is often easy enough to use the ctypes module that is part of Python’s standard library.
+对于需要调用C代码的一些小的问题，通常使用Python标准库中的 ctypes 模块就足够了
+
+In order to use ctypes, you must first make sure the C code you want to access has been compiled into a shared library that is compatible with the Python interpreter (e.g., same architecture, word size, compiler, etc.).
+ 要使用 ctypes ，你首先要确保你要访问的C代码已经被编译到和Python解释器兼容 （同样的架构、字大小、编译器等）的某个共享库中了
+
+For the purposes of this recipe, assume that a shared library, libsample.so, has been created and that it contains nothing more than the code shown in the chapter introduction.
+ 为了进行本节的演示，假设你有一个共享库名字叫 libsample.so ，里面的内容就是15章介绍部分那样
+
+Further assume that the libsample.so file has been placed in the same directory as the sample.py file shown next.
+ 另外还假设这个 libsample.so 文件被放置到位于 sample.py 文件相同的目录中了
+
+To access the resulting library, you make a Python module that wraps around it, such as the following:
+要访问这个函数库，你要先构建一个包装它的Python模块，如下这样：
+
+If all goes well, you should be able to load the module and use the resulting C functions.
+如果一切正常，你就可以加载并使用里面定义的C函数了
+
+For example:
+例如：
+
+There are several aspects of this recipe that warrant some discussion.
+本小节有很多值得我们详细讨论的地方
+
+The first issue concerns the overall packaging of C and Python code together.
+ 首先是对于C和Python代码一起打包的问题，如果你在使用 ctypes 来访问编译后的C代码， 那么需要确保这个共享库放在 sample.py 模块同一个地方
+
+If you are using ctypes to access C code that you have compiled yourself, you will need to make sure that the shared library gets placed in a location where the sample.py module can find it.
+ 一种可能是将生成的 .so 文件放置在要使用它的Python代码同一个目录下
+
+One possibility is to put the resulting .so file in the same directory as the supporting Python code.
+ 我们在 recipe—sample.py 中使用 __file__ 变量来查看它被安装的位置， 然后构造一个指向同一个目录中的 libsample.so 文件的路径
+
+If the C library is going to be installed elsewhere, then you’ll have to adjust the path accordingly.
+如果C函数库被安装到其他地方，那么你就要修改相应的路径
+
+If the C library is installed as a standard library on your machine, you might be able to use the ctypes.util.find_library() function.
+ 如果C函数库在你机器上被安装为一个标准库了， 那么可以使用 ctypes.util.find_library() 函数来查找：
+
+Once you know where the C library is located, you use ctypes.cdll.LoadLibrary() to load it.
+一旦你知道了C函数库的位置，那么就可以像下面这样使用 ctypes.cdll.LoadLibrary() 来加载它， 其中 _path 是标准库的全路径：
+
+Once a library has been loaded, you need to write statements that extract specific symbols and put type signatures on them.
+函数库被加载后，你需要编写几个语句来提取特定的符号并指定它们的类型
+
+This is what’s happening in code fragments such as this:
+ 就像下面这个代码片段一样：
+
+In this code, the .argtypes attribute is a tuple containing the input arguments to a function, and .restype is the return type.
+在这段代码中，.argtypes 属性是一个元组，包含了某个函数的输入按时， 而 .restype 就是相应的返回类型
+
+ctypes defines a variety of type objects (e.g., c_double, c_int, c_short, c_float, etc.) that represent common C data types.
+ ctypes 定义了大量的类型对象（比如c_double, c_int, c_short, c_float等）， 代表了对应的C数据类型
+
+Attaching the type signatures is critical if you want to make Python pass the right kinds of arguments and convert data correctly (if you don’t do this, not only will the code not work, but you might cause the entire interpreter process to crash).
+如果你想让Python能够传递正确的参数类型并且正确的转换数据的话， 那么这些类型签名的绑定是很重要的一步
+
+A somewhat tricky part of using ctypes is that the original C code may use idioms that don’t map cleanly to Python.
+使用ctypes有一个麻烦点的地方是原生的C代码使用的术语可能跟Python不能明确的对应上来
+
+The divide() function is a good example because it returns a value through one of its arguments.
+ divide() 函数是一个很好的例子，它通过一个参数除以另一个参数返回一个结果值
+
+Although that’s a common C technique, it’s often not clear how it’s supposed to work in Python.
+ 尽管这是一个很常见的C技术，但是在Python中却不知道怎样清晰的表达出来
+
+For example, you can’t do anything straightforward like this:
+ 例如，你不能像下面这样简单的做：
+
+Even if this did work, it would violate Python’s immutability of integers and probably cause the entire interpreter to be sucked into a black hole.
+就算这个能正确的工作，它会违反Python对于整数的不可更改原则，并且可能会导致整个解释器陷入一个黑洞中
+
+For arguments involving pointers, you usually have to construct a compatible ctypes object and pass it in like this:
+ 对于涉及到指针的参数，你通常需要先构建一个相应的ctypes对象并像下面这样传进去：
+
+Here an instance of a ctypes.c_int is created and passed in as the pointer object.
+在这里，一个 ctypes.c_int 实例被创建并作为一个指针被传进去
+
+Unlike a normal Python integer, a c_int object can be mutated.
+ 跟普通Python整形不同的是，一个 c_int 对象是可以被修改的
+
+The .value attribute can be used to either retrieve or change the value as desired.
+ .value 属性可被用来获取或更改这个值
+
+For cases where the C calling convention is "un-Pythonic," it is common to write a small wrapper function.
+对于那些不像Python的C调用，通常可以写一个小的包装函数
+
+In the solution, this code makes the divide() function return the two results using a tuple instead:
+ 这里，我们让 divide() 函数通过元组来返回两个结果：
+
+The avg() function presents a new kind of challenge.
+avg() 函数又是一个新的挑战
+
+The underlying C code expects to receive a pointer and a length representing an array.
+C代码期望接受到一个指针和一个数组的长度值
+
+However, from the Python side, we must consider the following questions: What is an array?
+ 但是，在Python中，我们必须考虑这个问题：数组是啥
+
+Is it a list?
+它是一个列表
+
+A tuple?
+一个元组
+
+An array from the array module?
+ 还是 array 模块中的一个数组
+
+A numpy array?
+还是一个 numpy 数组
+
+Is it all of these?
+还是说所有都是
+
+In practice, a Python "array" could take many different forms, and maybe you would like to support multiple possibilities.
+ 实际上，一个Python“数组”有多种形式，你可能想要支持多种可能性
+
+The DoubleArrayType class shows how to handle this situation.
+DoubleArrayType 演示了怎样处理这种情况
+
+In this class, a single method from_param() is defined.
+ 在这个类中定义了一个单个方法 from_param() 
+
+The role of this method is to take a single parameter and narrow it down to a compatible ctypes object (a pointer to a ctypes.c_double, in the example).
+ 这个方法的角色是接受一个单个参数然后将其向下转换为一个合适的ctypes对象 （本例中是一个 ctypes.c_double 的指针）
+
+Within from_param(), you are free to do anything that you wish.
+ 在 from_param() 中，你可以做任何你想做的事
+
+In the solution, the typename of the parameter is extracted and used to dispatch to a more specialized method.
+ 参数的类型名被提取出来并被用于分发到一个更具体的方法中去
+
+For example, if a list is passed, the typename is list and a method from_list() is invoked.
+ 例如，如果一个列表被传递过来，那么 typename 就是 list ， 然后 from_list 方法被调用
+
+For lists and tuples, the from_list() method performs a conversion to a ctypes array object.
+对于列表和元组，from_list 方法将其转换为一个 ctypes 的数组对象
+
+This looks a little weird, but here is an interactive example of converting a list to a ctypes array:
+ 这个看上去有点奇怪，下面我们使用一个交互式例子来将一个列表转换为一个 ctypes 数组：
+
+For array objects, the from_array() method extracts the underlying memory pointer and casts it to a ctypes pointer object.
+对于数组对象，from_array() 提取底层的内存指针并将其转换为一个 ctypes 指针对象
+
+For example:
+例如：
+
+The from_ndarray() shows comparable conversion code for numpy arrays.
+from_ndarray() 演示了对于 numpy 数组的转换操作
+
+By defining the DoubleArrayType class and using it in the type signature of avg(), as shown, the function can accept a variety of different array-like inputs:
+通过定义 DoubleArrayType 类并在 avg() 类型签名中使用它， 那么这个函数就能接受多个不同的类数组输入了：
+
+The last part of this recipe shows how to work with a simple C structure.
+本节最后一部分向你演示了怎样处理一个简单的C结构
+
+For structures, you simply define a class that contains the appropriate fields and types like this:
+ 对于结构体，你只需要像下面这样简单的定义一个类，包含相应的字段和类型即可：
+
+Once defined, you can use the class in type signatures as well as in code that needs to instantiate and work with the structures.
+一旦类被定义后，你就可以在类型签名中或者是需要实例化结构体的代码中使用它
+
+For example:
+例如：
+
+A few final comments: ctypes is a useful library to know about if all you’re doing is accessing a few C functions from Python.
+最后一些小的提示：如果你想在Python中访问一些小的C函数，那么 ctypes 是一个很有用的函数库
+
+However, if you’re trying to access a large library, you might want to look at alternative approaches, such as Swig (described in “Wrapping C Code with Swig”) or Cython (described in “Wrapping Existing C Code with Cython”).
+ 尽管如此，如果你想要去访问一个很大的库，那么可能就需要其他的方法了，比如 Swig (15.9节会讲到) 或 Cython（15.10节）
+
+The main problem with a large library is that since ctypes isn’t entirely automatic, you’ll have to spend a fair bit of time writing out all of the type signatures, as shown in the example.
+对于大型库的访问有个主要问题，由于ctypes并不是完全自动化， 那么你就必须花费大量时间来编写所有的类型签名，就像例子中那样
+
+Depending on the complexity of the library, you might also have to write a large number of small wrapper functions and supporting classes.
+ 如果函数库够复杂，你还得去编写很多小的包装函数和支持类
+
+Also, unless you fully understand all of the low-level details of the C interface, including memory management and error handling, it is often quite easy to make Python catastrophically crash with a segmentation fault, access violation, or some similar error.
+ 另外，除非你已经完全精通了所有底层的C接口细节，包括内存分配和错误处理机制， 通常一个很小的代码缺陷、访问越界或其他类似错误就能让Python程序奔溃
+
+As an alternative to ctypes, you might also look at CFFI.
+作为 ctypes 的一个替代，你还可以考虑下CFFI
+
+CFFI provides much of the same functionality, but uses C syntax and supports more advanced kinds of C code.
+CFFI提供了很多类似的功能， 但是使用C语法并支持更多高级的C代码类型
+
+As of this writing, CFFI is still a relatively new project, but its use has been growing rapidly.
+ 到写这本书为止，CFFI还是一个相对较新的工程， 但是它的流行度正在快速上升
+
+There has even been some discussion of including it in the Python standard library in some future release.
+ 甚至还有在讨论在Python将来的版本中将它包含进去
+
+Thus, it’s definitely something to keep an eye on.
+因此，这个真的值得一看
+
+Writing a Simple C Extension Module
+15.2 简单的C扩展模块¶
+
+You want to write a simple C extension module directly using Python’s extension API and no other tools.
+你想不依靠其他工具，直接使用Python的扩展API来编写一些简单的C扩展模块
+
+For simple C code, it is straightforward to make a handcrafted extension module.
+对于简单的C代码，构建一个自定义扩展模块是很容易的
+
+As a preliminary step, you probably want to make sure your C code has a proper header file.
+ 作为第一步，你需要确保你的C代码有一个正确的头文件
+
+For example,
+例如：
+
+Typically, this header would correspond to a library that has been compiled separately.
+通常来讲，这个头文件要对应一个已经被单独编译过的库
+
+With that assumption, here is a sample extension module that illustrates the basics of writing extension functions:
+ 有了这些，下面我们演示下编写扩展函数的一个简单例子：
+
+For building the extension module, create a setup.py file that looks like this:
+要绑定这个扩展模块，像下面这样创建一个 setup.py 文件：
+
+Now, to build the resulting library, simply use python3 buildlib.py build_ext --inplace.
+为了构建最终的函数库，只需简单的使用 python3 buildlib.py build_ext --inplace 命令即可：
+
+As shown, this creates a shared library called sample.so.
+如上所示，它会创建一个名字叫 sample.so 的共享库
+
+When compiled, you should be able to start importing it as a module:
+当被编译后，你就能将它作为一个模块导入进来了：
+
+If you are attempting these steps on Windows, you may need to spend some time fiddling with your environment and the build environment to get extension modules to build correctly.
+如果你是在Windows机器上面尝试这些步骤，可能会遇到各种环境和编译问题，你需要花更多点时间去配置
+
+Binary distributions of Python are typically built using Microsoft Visual Studio.
+ Python的二进制分发通常使用了Microsoft Visual Studio来构建
+
+To get extensions to work, you may have to compile them using the same or compatible tools.
+ 为了让这些扩展能正常工作，你需要使用同样或兼容的工具来编译它
+
+See the Python documentation.
+ 参考相应的 Python文档
+
+Before attempting any kind of handwritten extension, it is absolutely critical that you consult Python’s documentation on "Extending and Embedding the Python Interpreter".
+在尝试任何手写扩展之前，最好能先参考下Python文档中的 扩展和嵌入Python解释器 . Python的C扩展API很大，在这里整个去讲述它没什么实际意义
+
+Python’s C extension API is large, and repeating all of it here is simply not practical.
+ 不过对于最核心的部分还是可以讨论下的
+
+First, in extension modules, functions that you write are all typically written with a common prototype such as this:
+首先，在扩展模块中，你写的函数都是像下面这样的一个普通原型：
+
+PyObject is the C data type that represents any Python object.
+PyObject 是一个能表示任何Python对象的C数据类型
+
+At a very high level, an extension function is a C function that receives a tuple of Python objects (in PyObject *args) and returns a new Python object as a result.
+ 在一个高级层面，一个扩展函数就是一个接受一个Python对象 （在 PyObject *args中）元组并返回一个新Python对象的C函数
+
+The self argument to the function is unused for simple extension functions, but comes into play should you want to define new classes or object types in C (e.g., if the extension function were a method of a class, then self would hold the instance).
+ 函数的 self 参数对于简单的扩展函数没有被使用到， 不过如果你想定义新的类或者是C中的对象类型的话就能派上用场了
+
+The PyArg_ParseTuple() function is used to convert values from Python to a C representation.
+PyArg_ParseTuple() 函数被用来将Python中的值转换成C中对应表示
+
+As input, it takes a format string that indicates the required values, such as "i" for integer and "d" for double, as well as the addresses of C variables in which to place the converted results.
+ 它接受一个指定输入格式的格式化字符串作为输入，比如“i”代表整数，“d”代表双精度浮点数， 同样还有存放转换后结果的C变量的地址
+
+PyArg_ParseTuple() performs a variety of checks on the number and type of arguments.
+ 如果输入的值不匹配这个格式化字符串，就会抛出一个异常并返回一个NULL值
+
+If there is any mismatch with the format string, an exception is raised and NULL is returned.
+ 通过检查并返回NULL，一个合适的异常会在调用代码中被抛出
+
+The Py_BuildValue() function is used to create Python objects from C data types.
+Py_BuildValue() 函数被用来根据C数据类型创建Python对象
+
+It also accepts a format code to indicate the desired type.
+ 它同样接受一个格式化字符串来指定期望类型
+
+In the extension functions, it is used to return results back to Python.
+ 在扩展函数中，它被用来返回结果给Python
+
+One feature of Py_BuildValue() is that it can build more complicated kinds of objects, such as tuples and dictionaries.
+ Py_BuildValue() 的一个特性是它能构建更加复杂的对象类型，比如元组和字典
+
+In the code for py_divide(), an example showing the return of a tuple is shown.
+ 在 py_divide() 代码中，一个例子演示了怎样返回一个元组
+
+However, here are a few more examples:
+不过，下面还有一些实例：
+
+Near the bottom of any extension module, you will find a function table such as the SampleMethods table shown in this recipe.
+在扩展模块底部，你会发现一个函数表，比如本节中的 SampleMethods 表
+
+This table lists C functions, the names to use in Python, as well as doc strings.
+ 这个表可以列出C函数、Python中使用的名字、文档字符串
+
+All modules are required to specify such a table, as it gets used in the initialization of the module.
+ 所有模块都需要指定这个表，因为它在模块初始化时要被使用到
+
+The final function PyInit_sample() is the module initialization function that executes when the module is first imported.
+最后的函数 PyInit_sample() 是模块初始化函数，但该模块第一次被导入时执行
+
+The primary job of this function is to register the module object with the interpreter.
+ 这个函数的主要工作是在解释器中注册模块对象
+
+As a final note, it must be stressed that there is considerably more to extending Python with C functions than what is shown here (in fact, the C API contains well over 500 functions in it).
+最后一个要点需要提出来，使用C函数来扩展Python要考虑的事情还有很多，本节只是一小部分
+
+You should view this recipe simply as a stepping stone for getting started.
+ （实际上，C API包含了超过500个函数）
+
+To do more, start with the documentation on the PyArg_ParseTuple() and Py_BuildValue() functions, and expand from there.
+你应该将本节当做是一个入门篇
+
+Writing an Extension Function That Operates on Arrays
+15.3 编写扩展函数操作数组¶
+
+You want to write a C extension function that operates on contiguous arrays of data, as might be created by the array module or libraries like NumPy.
+你想编写一个C扩展函数来操作数组，可能是被array模块或类似Numpy库所创建
+
+However, you would like your function to be general purpose and not specific to any one array library.
+ 不过，你想让你的函数更加通用，而不是针对某个特定的库所生成的数组
+
+To receive and process arrays in a portable manner, you should write code that uses the Buffer Protocol.
+为了能让接受和处理数组具有可移植性，你需要使用到 Buffer Protocol . 下面是一个手写的C扩展函数例子， 用来接受数组数据并调用本章开篇部分的 avg(double *buf, int len) 函数：
+
+Here is an example that shows how this extension function works:
+下面我们演示下这个扩展函数是如何工作的：
+
+Passing array objects to C functions might be one of the most common things you would want to do with a extension function.
+将一个数组对象传给C函数可能是一个扩展函数做的最常见的事
+
+A large number of Python applications, ranging from image processing to scientific computing, are based on high-performance array processing.
+ 很多Python应用程序，从图像处理到科学计算，都是基于高性能的数组处理
+
+By writing code that can accept and operate on arrays, you can write customized code that plays nicely with those applications as opposed to having some sort of custom solution that only works with your own code.
+ 通过编写能接受并操作数组的代码，你可以编写很好的兼容这些应用程序的自定义代码， 而不是只能兼容你自己的代码
+
+The key to this code is the PyBuffer_GetBuffer() function.
+代码的关键点在于 PyBuffer_GetBuffer() 函数
+
+Given an arbitrary Python object, it tries to obtain information about the underlying memory representation.
+ 给定一个任意的Python对象，它会试着去获取底层内存信息，它简单的抛出一个异常并返回-1. 传给 PyBuffer_GetBuffer() 的特殊标志给出了所需的内存缓冲类型
+
+If it’s not possible, as is the case with most normal Python objects, it simply raises an exception and returns -1.
+ 例如，PyBUF_ANY_CONTIGUOUS 表示是一个联系的内存区域
+
+For arrays, byte strings, and other similar objects, a Py_buffer structure is filled with information about the underlying memory.
+对于数组、字节字符串和其他类似对象而言，一个 Py_buffer 结构体包含了所有底层内存的信息
+
+This includes a pointer to the memory, size, itemsize, format, and other details.
+ 它包含一个指向内存地址、大小、元素大小、格式和其他细节的指针
+
+Here is the definition of this structure:
+下面是这个结构体的定义：
+
+In this recipe, we are simply concerned with receiving a contiguous array of doubles.
+本节中，我们只关注接受一个双精度浮点数数组作为参数
+
+To check if items are a double, the format attribute is checked to see if the string is "d".
+ 要检查元素是否是一个双精度浮点数，只需验证 format 属性是不是字符串”d”. 这个也是 struct 模块用来编码二进制数据的
+
+This is the same code that the struct module uses when encoding binary values.
+ 通常来讲，format 可以是任何兼容 struct 模块的格式化字符串， 并且如果数组包含了C结构的话它可以包含多个值
+
+As a general rule, format could be any format string that’s compatible with the struct module and might include multiple items in the case of arrays containing C structures.
+ 
+
+Once we have verified the underlying buffer information, we simply pass it to the C function, which treats it as a normal C array.
+一旦我们已经确定了底层的缓存区信息，那只需要简单的将它传给C函数，然后会被当做是一个普通的C数组了
+
+For all practical purposes, it is not concerned with what kind of array it is or what library created it.
+ 实际上，我们不必担心是怎样的数组类型或者它是被什么库创建出来的
+
+This is how the function is able to work with arrays created by the array module or by numpy.
+ 这也是为什么这个函数能兼容 array 模块也能兼容 numpy 模块中的数组了
+
+Before returning a final result, the underlying buffer view must be released using PyBuffer_Release().
+在返回最终结果之前，底层的缓冲区视图必须使用 PyBuffer_Release() 释放掉
+
+This step is required to properly manage reference counts of objects.
+ 之所以要这一步是为了能正确的管理对象的引用计数
+
+Again, this recipe only shows a tiny fragment of code that receives an array.
+同样，本节也仅仅只是演示了接受数组的一个小的代码片段
+
+If working with arrays, you might run into issues with multidimensional data, strided data, different data types, and more that will require study.
+ 如果你真的要处理数组，你可能会碰到多维数据、大数据、不同的数据类型等等问题， 那么就得去学更高级的东西了
+
+Make sure you consult the official documentation to get more details.
+你需要参考官方文档来获取更多详细的细节
+
+If you need to write many extensions involving array handling, you may find it easier to implement the code in Cython.
+如果你需要编写涉及到数组处理的多个扩展，那么通过Cython来实现会更容易下
+
+See “Using Cython to Write High-Performance Array Operations”.
+参考15.11节
+
+Managing Opaque Pointers in C Extension Modules
+15.4 在C扩展模块中操作隐形指针¶
+
+You have an extension module that needs to handle a pointer to a C data structure, but you don’t want to expose any internal details of the structure to Python.
+你有一个扩展模块需要处理C结构体中的指针， 但是你又不想暴露结构体中任何内部细节给Python
+
+Opaque data structures are easily handled by wrapping them inside capsule objects.
+隐形结构体可以很容易的通过将它们包装在胶囊对象中来处理
+
+Consider this fragment of C code from our sample code:
+ 考虑我们例子代码中的下列C代码片段：
+
+Here is an example of extension code that wraps the Point structure and distance() function using capsules:
+下面是一个使用胶囊包装Point结构体和 distance() 函数的扩展代码实例：
+
+Using these functions from Python looks like this:
+在Python中可以像下面这样来使用这些函数：
+
+Capsules are similar to a typed C pointer.
+胶囊和C指针类似
+
+Internally, they hold a generic pointer along with an identifying name and can be easily created using the PyCapsule_New() function.
+在内部，它们获取一个通用指针和一个名称，可以使用 PyCapsule_New() 函数很容易的被创建
+
+In addition, an optional destructor function can be attached to a capsule to release the underlying memory when the capsule object is garbage collected.
+ 另外，一个可选的析构函数能被绑定到胶囊上，用来在胶囊对象被垃圾回收时释放底层的内存
+
+To extract the pointer contained inside a capsule, use the PyCapsule_GetPointer() function and specify the name.
+要提取胶囊中的指针，可使用 PyCapsule_GetPointer() 函数并指定名称
+
+If the supplied name doesn’t match that of the capsule or some other error occurs, an exception is raised and NULL is returned.
+ 如果提供的名称和胶囊不匹配或其他错误出现，那么就会抛出异常并返回NULL
+
+In this recipe, a pair of utility functions—PyPoint_FromPoint() and PyPoint_AsPoint()—have been written to deal with the mechanics of creating and unwinding Point instances from capsule objects.
+本节中，一对工具函数—— PyPoint_FromPoint() 和 PyPoint_AsPoint() 被用来创建和从胶囊对象中提取Point实例
+
+In any extension functions, we’ll use these functions instead of working with capsules directly.
+ 在任何扩展函数中，我们会使用这些函数而不是直接使用胶囊对象
+
+This design choice makes it easier to deal with possible changes to the wrapping of Point objects in the future.
+ 这种设计使得我们可以很容易的应对将来对Point底下的包装的更改
+
+For example, if you decided to use something other than a capsule later, you would only have to change these two functions.
+ 例如，如果你决定使用另外一个胶囊了，那么只需要更改这两个函数即可
+
+One tricky part about capsules concerns garbage collection and memory management.
+对于胶囊对象一个难点在于垃圾回收和内存管理
+
+The PyPoint_FromPoint() function accepts a must_free argument that indicates whether the underlying Point * structure is to be collected when the capsule is destroyed.
+ PyPoint_FromPoint() 函数接受一个 must_free 参数， 用来指定当胶囊被销毁时底层Point * 结构体是否应该被回收
+
+When working with certain kinds of C code, ownership issues can be difficult to handle (e.g., perhaps a Point structure is embedded within a larger data structure that is managed separately).
+ 在某些C代码中，归属问题通常很难被处理（比如一个Point结构体被嵌入到一个被单独管理的大结构体中）
+
+Rather than making a unilateral decision to garbage collect, this extra argument gives control back to the programmer.
+ 程序员可以使用 extra 参数来控制，而不是单方面的决定垃圾回收
+
+It should be noted that the destructor associated with an existing capsule can also be changed using the PyCapsule_SetDestructor() function.
+ 要注意的是和现有胶囊有关的析构器能使用 PyCapsule_SetDestructor() 函数来更改
+
+Capsules are a sensible solution to interfacing with certain kinds of C code involving structures.
+对于涉及到结构体的C代码而言，使用胶囊是一个比较合理的解决方案
+
+For instance, sometimes you just don’t care about exposing the internals of a structure or turning it into a full-fledged extension type.
+ 例如，有时候你并不关心暴露结构体的内部信息或者将其转换成一个完整的扩展类型
+
+With a capsule, you can put a lightweight wrapper around it and easily pass it around to other extension functions.
+ 通过使用胶囊，你可以在它上面放一个轻量级的包装器，然后将它传给其他的扩展函数
+
+Defining and Exporting C APIs from Extension Modules
+15.5 从扩张模块中定义和导出C的API¶
+
+You have a C extension module that internally defines a variety of useful functions that you would like to export as a public C API for use elsewhere.
+你有一个C扩展模块，在内部定义了很多有用的函数，你想将它们导出为一个公共的C API供其他地方使用
+
+You would like to use these functions inside other extension modules, but don’t know how to link them together, and doing it with the C compiler/linker seems excessively complicated (or impossible).
+ 你想在其他扩展模块中使用这些函数，但是不知道怎样将它们链接起来， 并且通过C编译器/链接器来做看上去特别复杂（或者不可能做到）
+
+This recipe focuses on the code written to handle Point objects, which were presented in “Managing Opaque Pointers in C Extension Modules”.
+本节主要问题是如何处理15.4小节中提到的Point对象
+
+If you recall, that C code included some utility functions like this:
+仔细回一下，在C代码中包含了如下这些工具函数：
+
+The problem now addressed is how to export the PyPoint_AsPoint() and PyPoint_FromPoint() functions as an API that other extension modules could use and link to (e.g., if you have other extensions that also want to use the wrapped Point objects).
+现在的问题是怎样将 PyPoint_AsPoint() 和 Point_FromPoint() 函数作为API导出， 这样其他扩展模块能使用并链接它们，比如如果你有其他扩展也想使用包装的Point对象
+
+To solve this problem, start by introducing a new header file for the "sample" extension called pysample.h.
+要解决这个问题，首先要为 sample 扩展写个新的头文件名叫 pysample.h ，如下：
+
+The most important feature here is the _PointAPIMethods table of function pointers.
+这里最重要的部分是函数指针表 _PointAPIMethods . 它会在导出模块时被初始化，然后导入模块时被查找到
+
+It will be initialized in the exporting module and found by importing modules.
+ 
+
+Change the original extension module to populate the table and export it as follows:
+修改原始的扩展模块来填充表格并将它像下面这样导出：
+
+Finally, here is an example of a new extension module that loads and uses these API functions:
+最后，下面是一个新的扩展模块例子，用来加载并使用这些API函数：
+
+When compiling this new module, you don’t even need to bother to link against any of the libraries or code from the other module.
+编译这个新模块时，你甚至不需要去考虑怎样将函数库或代码跟其他模块链接起来
+
+For example, you can just make a simple setup.py file like this:
+ 例如，你可以像下面这样创建一个简单的 setup.py 文件：
+
+If it all works, you’ll find that your new extension function works perfectly with the C API functions defined in the other module:
+如果一切正常，你会发现你的新扩展函数能和定义在其他模块中的C API函数一起运行的很好
+
+This recipe relies on the fact that capsule objects can hold a pointer to anything you wish.
+本节基于一个前提就是，胶囊对象能获取任何你想要的对象的指针
+
+In this case, the defining module populates a structure of function pointers, creates a capsule that points to it, and saves the capsule in a module-level attribute (e.g., sample._point_api).
+ 这样的话，定义模块会填充一个函数指针的结构体，创建一个指向它的胶囊，并在一个模块级属性中保存这个胶囊， 例如 sample._point_api .
+
+Other modules can be programmed to pick up this attribute when imported and extract the underlying pointer.
+其他模块能够在导入时获取到这个属性并提取底层的指针
+
+In fact, Python provides the PyCapsule_Import() utility function, which takes care of all the steps for you.
+ 事实上，Python提供了 PyCapsule_Import() 工具函数，为了完成所有的步骤
+
+You simply give it the name of the attribute (e.g., sample._point_api), and it will find the capsule and extract the pointer all in one step.
+ 你只需提供属性的名字即可（比如sample._point_api），然后他就会一次性找到胶囊对象并提取出指针来
+
+There are some C programming tricks involved in making exported functions look normal in other modules.
+在将被导出函数变为其他模块中普通函数时，有一些C编程陷阱需要指出来
+
+In the pysample.h file, a pointer _point_api is used to point to the method table that was initialized in the exporting module.
+ 在 pysample.h 文件中，一个 _point_api 指针被用来指向在导出模块中被初始化的方法表
+
+A related function import_sample() is used to perform the required capsule import and initialize this pointer.
+ 一个相关的函数 import_sample() 被用来指向胶囊导入并初始化这个指针
+
+This function must be called before any functions are used.
+ 这个函数必须在任何函数被使用之前被调用
+
+Normally, it would be called in during module initialization.
+通常来讲，它会在模块初始化时被调用到
+
+Finally, a set of C preprocessor macros have been defined to transparently dispatch the API functions through the method table.
+ 最后，C的预处理宏被定义，被用来通过方法表去分发这些API函数
+
+The user just uses the original function names, but doesn’t know about the extra indirection through these macros.
+ 用户只需要使用这些原始函数名称即可，不需要通过宏去了解其他信息
+
+Finally, there is another important reason why you might use this technique to link modules together—it’s actually easier and it keeps modules more cleanly decoupled.
+最后，还有一个重要的原因让你去使用这个技术来链接模块——它非常简单并且可以使得各个模块很清晰的解耦
+
+If you didn’t want to use this recipe as shown, you might be able to cross-link modules using advanced features of shared libraries and the dynamic loader.
+ 如果你不想使用本机的技术，那你就必须使用共享库的高级特性和动态加载器来链接模块
+
+For example, putting common API functions into a shared library and making sure that all extension modules link against that shared library.
+ 例如，将一个普通的API函数放入一个共享库并确保所有扩展模块链接到那个共享库
+
+Yes, this works, but it can be tremendously messy in large systems.
+ 这种方法确实可行，但是它相对繁琐，特别是在大型系统中
+
+Essentially, this recipe cuts out all of that magic and allows modules to link to one another through Python’s normal import mechanism and just a tiny number of capsule calls.
+ 本节演示了如何通过Python的普通导入机制和仅仅几个胶囊调用来将多个模块链接起来的魔法
+
+For compilation of modules, you only need to worry about header files, not the hairy details of shared libraries.
+ 对于模块的编译，你只需要定义头文件，而不需要考虑函数库的内部细节
+
+Further information about providing C APIs for extension modules can be found in the Python documentation.
+更多关于利用C API来构造扩展模块的信息可以参考 Python的文档
+
+Calling Python from C
+15.6 从C语言中调用Python代码¶
+
+You want to safely execute a Python callable from C and return a result back to C.
+你想在C中安全的执行某个Python调用并返回结果给C
+
+For example, perhaps you are writing C code that wants to use a Python function as a callback.
+ 例如，你想在C语言中使用某个Python函数作为一个回调
+
+Calling Python from C is mostly straightforward, but involves a number of tricky parts.
+在C语言中调用Python非常简单，不过设计到一些小窍门
+
+The following C code shows an example of how to do it safely:
+ 下面的C代码告诉你怎样安全的调用：
+
+To use this function, you need to have obtained a reference to an existing Python callable to pass in.
+要使用这个函数，你需要获取传递过来的某个已存在Python调用的引用
+
+There are many ways that you can go about doing that, such as having a callable object passed into an extension module or simply writing C code to extract a symbol from an existing module.
+ 有很多种方法可以让你这样做， 比如将一个可调用对象传给一个扩展模块或直接写C代码从已存在模块中提取出来
+
+Here is a simple example that shows calling a function from an embedded Python interpreter:
+下面是一个简单例子用来掩饰从一个嵌入的Python解释器中调用一个函数：
+
+To build this last example, you’ll need to compile the C and link against the Python interpreter.
+要构建例子代码，你需要编译C并将它链接到Python解释器
+
+Here is a Makefile that shows how you might do it (this is something that might require some amount of fiddling with on your machine):
+ 下面的Makefile可以教你怎样做（不过在你机器上面需要一些配置）
+
+Compiling and running the resulting executable should produce output similar to this:
+编译并运行会产生类似下面的输出：
+
+Here is a slightly different example that shows an extension function that receives a callable and some arguments and passes them to call_func() for the purposes of testing:
+下面是一个稍微不同的例子，展示了一个扩展函数， 它接受一个可调用对象和其他参数，并将它们传递给 call_func() 来做测试：
+
+Using this extension function, you could test it as follows:
+使用这个扩展函数，你要像下面这样测试它：
+
+If you are calling Python from C, the most important thing to keep in mind is that C is generally going to be in charge.
+如果你在C语言中调用Python，要记住最重要的是C语言会是主体
+
+That is, C has the responsibility of creating the arguments, calling the Python function, checking for exceptions, checking types, extracting return values, and more.
+ 也就是说，C语言负责构造参数、调用Python函数、检查异常、检查类型、提取返回值等
+
+As a first step, it is critical that you have a Python object representing the callable that you’re going to invoke.
+作为第一步，你必须先有一个表示你将要调用的Python可调用对象
+
+This could be a function, class, method, built-in method, or anything that implements the __call__() operation.
+ 这可以是一个函数、类、方法、内置方法或其他任意实现了 __call__() 操作的东西
+
+To verify that it’s callable, use PyCallable_Check() as shown in this code fragment:
+ 为了确保是可调用的，可以像下面的代码这样利用 PyCallable_Check() 做检查：
+
+As an aside, handling errors in the C code is something that you will need to carefully study.
+在C代码里处理错误你需要格外的小心
+
+As a general rule, you can’t just raise a Python exception.
+一般来讲，你不能仅仅抛出一个Python异常
+
+Instead, errors will have to be handled in some other manner that makes sense to your C code.
+ 错误应该使用C代码方式来被处理
+
+In the solution, we’re using goto to transfer control to an error handling block that calls abort().
+在这里，我们打算将对错误的控制传给一个叫 abort() 的错误处理器
+
+This causes the whole program to die, but in real code you would probably want to do something more graceful (e.g., return a status code).
+ 它会结束掉整个程序，在真实环境下面你应该要处理的更加优雅些（返回一个状态码）
+
+Keep in mind that C is in charge here, so there isn’t anything comparable to just raising an exception.
+ 你要记住的是在这里C是主角，因此并没有跟抛出异常相对应的操作
+
+Error handling is something you’ll have to engineer into the program somehow.
+ 错误处理是你在编程时必须要考虑的事情
+
+Calling a function is relatively straightforward—simply use PyObject_Call(), supplying it with the callable object, a tuple of arguments, and an optional dictionary of keyword arguments.
+调用一个函数相对来讲很简单——只需要使用 PyObject_Call() ， 传一个可调用对象给它、一个参数元组和一个可选的关键字字典
+
+To build the argument tuple or dictionary, you can use Py_BuildValue(), as shown.
+ 要构建参数元组或字典，你可以使用 Py_BuildValue() ,如下：
+
+If there are no keyword arguments, you can pass NULL, as shown.
+如果没有关键字参数，你可以传递NULL
+
+After making the function call, you need to make sure that you clean up the arguments using Py_DECREF() or Py_XDECREF().
+当你要调用函数时， 需要确保使用了 Py_DECREF() 或者 Py_XDECREF() 清理参数
+
+The latter function safely allows the NULL pointer to be passed (which is ignored), which is why we’re using it for cleaning up the optional keyword arguments.
+ 第二个函数相对安全点，因为它允许传递NULL指针（直接忽略它）， 这也是为什么我们使用它来清理可选的关键字参数
+
+After calling the Python function, you must check for the presence of exceptions.
+调用万Python函数之后，你必须检查是否有异常发生
+
+The PyErr_Occurred() function can be used to do this.
+ PyErr_Occurred() 函数可被用来做这件事
+
+Knowing what to do in response to an exception is tricky.
+ 对对于异常的处理就有点麻烦了，由于是用C语言写的，你没有像Python那么的异常机制
+
+Since you’re working from C, you really don’t have the exception machinery that Python has.
+ 因此，你必须要设置一个异常状态码，打印异常信息或其他相应处理
+
+Thus, you would have to set an error status code, log the error, or do some kind of sensible processing.
+ 在这里，我们选择了简单的 abort() 来处理
+
+In the solution, abort() is called for lack of a simpler alternative (besides, hardened C programmers will appreciate the abrupt crash):
+另外，传统C程序员可能会直接让程序奔溃
+
+Extracting information from the return value of calling a Python function is typically going to involve some kind of type checking and value extraction.
+从调用Python函数的返回值中提取信息通常要进行类型检查和提取值
+
+To do this, you may have to use functions in the Python concrete objects layer.
+ 要这样做的话，你必须使用Python对象层中的函数
+
+In the solution, the code checks for and extracts the value of a Python float using PyFloat_Check() and PyFloat_AsDouble().
+ 在这里我们使用了 PyFloat_Check() 和 PyFloat_AsDouble() 来检查和提取Python浮点数
+
+A final tricky part of calling into Python from C concerns the management of Python’s global interpreter lock (GIL).
+最后一个问题是对于Python全局锁的管理
+
+Whenever Python is accessed from C, you need to make sure that the GIL is properly acquired and released.
+ 在C语言中访问Python的时候，你需要确保GIL被正确的获取和释放了
+
+Otherwise, you run the risk of having the interpreter corrupt data or crash.
+ 不然的话，可能会导致解释器返回错误数据或者直接奔溃
+
+The calls to PyGILState_Ensure() and PyGILState_Release() make sure that it’s done correctly:
+ 调用 PyGILState_Ensure() 和 PyGILState_Release() 可以确保一切都能正常
+
+Upon return, PyGILState_Ensure() always guarantees that the calling thread has exclusive access to the Python interpreter.
+一旦返回，PyGILState_Ensure() 可以确保调用线程独占Python解释器
+
+This is true even if the calling C code is running a different thread that is unknown to the interpreter.
+ 就算C代码运行于另外一个解释器不知道的线程也没事
+
+At this point, the C code is free to use any Python C-API functions that it wants.
+ 这时候，C代码可以自由的使用任何它想要的Python C-API 函数
+
+Upon successful completion, PyGILState_Release() is used to restore the interpreter back to its original state.
+ 调用成功后，PyGILState_Release()被用来讲解释器恢复到原始状态
+
+It is critical to note that every PyGILState_Ensure() call must be followed by a matching PyGILState_Release() call—even in cases where errors have occurred.
+要注意的是每一个 PyGILState_Ensure() 调用必须跟着一个匹配的 PyGILState_Release() 调用——即便有错误发生
+
+In the solution, the use of a goto statement might look like a horrible design, but we’re actually using it to transfer control to a common exit block that performs this required step.
+ 在这里，我们使用一个 goto 语句看上去是个可怕的设计， 但是实际上我们使用它来讲控制权转移给一个普通的exit块来执行相应的操作
+
+Think of the code after the fail: lable as serving the same purpose as code in a Python finally: block.
+ 在 fail: 标签后面的代码和Python的 fianl: 块的用途是一样的
+
+If you write your C code using all of these conventions including management of the GIL, checking for exceptions, and thorough error checking, you’ll find that you can reliably call into the Python interpreter from C—even in very complicated programs that utilize advanced programming techniques such as multithreading.
+如果你使用所有这些约定来编写C代码，包括对GIL的管理、异常检查和错误检查， 你会发现从C语言中调用Python解释器是可靠的——就算再复杂的程序，用到了高级编程技巧比如多线程都没问题
+
+Releasing the GIL in C Extensions
+15.7 从C扩展中释放全局锁¶
+
+You have C extension code in that you want to execute concurrently with other threads in the Python interpreter.
+你想让C扩展代码和Python解释器中的其他进程一起正确的执行， 那么你就需要去释放并重新获取全局解释器锁（GIL）
+
+In C extension code, the GIL can be released and reacquired by inserting the following macros in the code:
+在C扩展代码中，GIL可以通过在代码中插入下面这样的宏来释放和重新获取：
+
+The GIL can only safely be released if you can guarantee that no Python C API functions will be executed in the C code.
+只有当你确保没有Python C API函数在C中执行的时候你才能安全的释放GIL
+
+Typical examples where the GIL might be released are in computationally intensive code that performs calculations on C arrays (e.g., in extensions such as numpy) or in code where blocking I/O operations are going to be performed (e.g., reading or writing on a file descriptor).
+ GIL需要被释放的常见的场景是在计算密集型代码中需要在C数组上执行计算（比如在numpy中） 或者是要执行阻塞的I/O操作时（比如在一个文件描述符上读取或写入时）
+
+While the GIL is released, other Python threads are allowed to execute in the interpreter.
+当GIL被释放后，其他Python线程才被允许在解释器中执行
+
+The Py_END_ALLOW_THREADS macro blocks execution until the calling threads reacquires the GIL in the interpreter.
+ Py_END_ALLOW_THREADS 宏会阻塞执行直到调用线程重新获取了GIL
+
+Mixing Threads from C and Python
+15.8 C和Python中的线程混用¶
+
+You have a program that involves a mix of C, Python, and threads, but some of the threads are created from C outside the control of the Python interpreter.
+你有一个程序需要混合使用C、Python和线程， 有些线程是在C中创建的，超出了Python解释器的控制范围
+
+Moreover, certain threads utilize functions in the Python C API.
+ 并且一些线程还使用了Python C API中的函数
+
+If you’re going to mix C, Python, and threads together, you need to make sure you properly initialize and manage Python’s global interpreter lock (GIL).
+如果你想将C、Python和线程混合在一起，你需要确保正确的初始化和管理Python的全局解释器锁（GIL）
+
+To do this, include the following code somewhere in your C code and make sure it’s called prior to creation of any threads:
+ 要想这样做，可以将下列代码放到你的C代码中并确保它在任何线程被创建之前被调用
+
+For any C code that involves Python objects or the Python C API, make sure you properly acquire and release the GIL first.
+对于任何调用Python对象或Python C API的C代码，确保你首先已经正确地获取和释放了GIL
+
+This is done using PyGILState_Ensure() and PyGILState_Release(), as shown in the following:
+ 这可以用 PyGILState_Ensure() 和 PyGILState_Release() 来做到，如下所示：
+
+Every call to PyGILState_Ensure() must have a matching call to PyGILState_Release().
+每次调用 PyGILState_Ensure() 都要相应的调用 PyGILState_Release() .
+
+In advanced applications involving C and Python, it is not uncommon to have many things going on at once—possibly involving a mix of a C code, Python code, C threads, and Python threads.
+在涉及到C和Python的高级程序中，很多事情一起做是很常见的—— 可能是对C、Python、C线程、Python线程的混合使用
+
+As long as you diligently make sure the interpreter is properly initialized and that C code involving the interpreter has the proper GIL management calls, it all should work.
+ 只要你确保解释器被正确的初始化，并且涉及到解释器的C代码执行了正确的GIL管理，应该没什么问题
+
+Be aware that the PyGILState_Ensure() call does not immediately preempt or interrupt the interpreter.
+要注意的是调用 PyGILState_Ensure() 并不会立刻抢占或中断解释器
+
+If other code is currently executing, this function will block until that code decides to release the GIL.
+ 如果有其他代码正在执行，这个函数被中断知道那个执行代码释放掉GIL
+
+Internally, the interpreter performs periodic thread switching, so even if another thread is executing, the caller will eventually get to run (although it may have to wait for a while first).
+ 在内部，解释器会执行周期性的线程切换，因此如果其他线程在执行， 调用者最终还是可以运行的（尽管可能要先等一会）
+
+Wrapping C Code with Swig
+15.9 用WSIG包装C代码¶
+
+You have existing C code that you would like to access as a C extension module.
+你想让你写的C代码作为一个C扩展模块来访问，想通过使用 Swig包装生成器 来完成
+
+Swig operates by parsing C header files and automatically creating extension code.
+Swig通过解析C头文件并自动创建扩展代码来操作
+
+To use it, you first need to have a C header file.
+ 要使用它，你先要有一个C头文件
+
+For example, this header file for our sample code:
+例如，我们示例的头文件如下：
+
+Once you have the header files, the next step is to write a Swig "interface" file.
+一旦你有了这个头文件，下一步就是编写一个Swig”接口”文件
+
+By convention, these files have a .i suffix and might look similar to the following:
+ 按照约定，这些文件以”.i”后缀并且类似下面这样：
+
+Once you have written the interface file, Swig is invoked as a command-line tool:
+一旦你写好了接口文件，就可以在命令行工具中调用Swig了：
+
+The output of swig is two files, sample_wrap.c and sample.py.
+swig的输出就是两个文件，sample_wrap.c和sample.py
+
+The latter file is what users import.
+ 后面的文件就是用户需要导入的
+
+The sample_wrap.c file is C code that needs to be compiled into a supporting module called _sample.
+ 而sample_wrap.c文件是需要被编译到名叫 _sample 的支持模块的C代码
+
+This is done using the same techniques as for normal extension modules.
+ 这个可以通过跟普通扩展模块一样的技术来完成
+
+For example, you create a setup.py file like this:
+ 例如，你创建了一个如下所示的 setup.py 文件：
+
+To compile and test, run python3 on the setup.py file like this:
+要编译和测试，在setup.py上执行python3，如下：
+
+If all of this works, you’ll find that you can use the resulting C extension module in a straightforward way.
+如果一切正常的话，你会发现你就可以很方便的使用生成的C扩展模块了
+
+For example:
+例如：
+
+Swig is one of the oldest tools for building extension modules, dating back to Python 1.4.
+Swig是Python历史中构建扩展模块的最古老的工具之一
+
+However, recent versions currently support Python 3.
+ Swig能自动化很多包装生成器的处理
+
+All Swig interfaces tend to start with a short preamble like this:
+所有Swig接口都以类似下面这样的为开头：
+
+This merely declares the name of the extension module and specifies C header files that must be included to make everything compile (the code enclosed in %{ and %} is pasted directly into the output code so this is where you put all included files and other definitions needed for compilation).
+这个仅仅只是声明了扩展模块的名称并指定了C头文件， 为了能让编译通过必须要包含这些头文件（位于 %{ 和 %} 的代码）， 将它们之间复制粘贴到输出代码中，这也是你要放置所有包含文件和其他编译需要的定义的地方
+
+The bottom part of a Swig interface is a listing of C declarations that you want to be included in the extension.
+Swig接口的底下部分是一个C声明列表，你需要在扩展中包含它
+
+This is often just copied from the header files.
+ 这通常从头文件中被复制
+
+In our example, we just pasted in the header file directly like this:
+在我们的例子中，我们仅仅像下面这样直接粘贴在头文件中：
+
+It is important to stress that these declarations are telling Swig what you want to include in the Python module.
+有一点需要强调的是这些声明会告诉Swig你想要在Python模块中包含哪些东西
+
+It is quite common to edit the list of declarations or to make modifications as appropriate.
+ 通常你需要编辑这个声明列表或相应的修改下它
+
+For example, if you didn’t want certain declarations to be included, you would remove them from the declaration list.
+ 例如，如果你不想某些声明被包含进来，你要将它从声明列表中移除掉
+
+The most complicated part of using Swig is the various customizations that it can apply to the C code.
+使用Swig最复杂的地方是它能给C代码提供大量的自定义操作
+
+This is a huge topic that can’t be covered in great detail here, but a number of such customizations are shown in this recipe.
+ 这个主题太大，这里无法展开，但是我们在本节还剩展示了一些自定义的东西
+
+The first customization involving the %extend directive allows methods to be attached to existing structure and class definitions.
+第一个自定义是 %extend 指令允许方法被附加到已存在的结构体和类定义上
+
+In the example, this is used to add a constructor method to the Point structure.
+ 我例子中，这个被用来添加一个Point结构体的构造器方法
+
+This customization makes it possible to use the structure like this:
+ 它可以让你像下面这样使用这个结构体：
+
+If omitted, then Point objects would have to be created in a much more clumsy manner like this:
+如果略过的话，Point对象就必须以更加复杂的方式来被创建：
+
+The second customization involving the inclusion of the typemaps.i library and the %apply directive is instructing Swig that the argument signature int *remainder is to be treated as an output value.
+第二个自定义涉及到对 typemaps.i 库的引入和 %apply 指令， 它会指示Swig参数签名 int *remainder 要被当做是输出值
+
+This is actually a pattern matching rule.
+ 这个实际上是一个模式匹配规则
+
+In all declarations that follow, any time int *remainder is encountered, it is handled as output.
+ 在接下来的所有声明中，任何时候只要碰上 int  *remainder ，他就会被作为输出
+
+This customization is what makes the divide() function return two values:
+ 这个自定义方法可以让 divide() 函数返回两个值
+
+The last customization involving the %typemap directive is probably the most advanced feature shown here.
+最后一个涉及到 %typemap 指令的自定义可能是这里展示的最高级的特性了
+
+A typemap is a rule that gets applied to specific argument patterns in the input.
+ 一个typemap就是一个在输入中特定参数模式的规则
+
+In this recipe, a typemap has been written to match the argument pattern (double *a, int n).
+ 在本节中，一个typemap被定义为匹配参数模式 (double *a, int n) . 在typemap内部是一个C代码片段，它告诉Swig怎样将一个Python对象转换为相应的C参数
+
+Inside the typemap is a fragment of C code that tells Swig how to convert a Python object into the associated C arguments.
+ 本节代码使用了Python的缓存协议去匹配任何看上去类似双精度数组的输入参数 （比如NumPy数组、array模块创建的数组等），更多请参考15.3小节
+
+Within the typemap code, substitutions such as $1 and $2 refer to variables that hold the converted values of the C arguments in the typemap pattern (e.g., $1 maps to double *a and $2 maps to int n).
+在typemap代码内部，$1和$2这样的变量替换会获取typemap模式的C参数值 （比如$1映射为 double *a ）
+
+$input refers to a PyObject * argument that was supplied as an input argument.
+$input指向一个作为输入的 PyObject * 参数， 而 $argnum 就代表参数的个数
+
+Writing and understanding typemaps is often the bane of programmers using Swig.
+编写和理解typemaps是使用Swig最基本的前提
+
+Not only is the code rather cryptic, but you need to understand the intricate details of both the Python C API and the way in which Swig interacts with it.
+ 不仅是说代码更神秘，而且你需要理解Python C API和Swig和它交互的方式
+
+The Swig documentation has many more examples and detailed information.
+ Swig文档有更多这方面的细节，可以参考下
+
+Nevertheless, if you have a lot of a C code to expose as an extension module, Swig can be a very powerful tool for doing it.
+不过，如果你有大量的C代码需要被暴露为扩展模块
+
+The key thing to keep in mind is that Swig is basically a compiler that processes C declarations, but with a powerful pattern matching and customization component that lets you change the way in which specific declarations and types get processed.
+ Swig是一个非常强大的工具
+
+More information can be found at Swig’s website, including Python-specific documentation.
+关键点在于Swig是一个处理C声明的编译器， 通过强大的模式匹配和自定义组件，可以让你更改声明指定和类型处理方式
+
+Wrapping Existing C Code with Cython
+15.10 用Cython包装C代码¶
+
+You want to use Cython to make a Python extension module that wraps around an existing C library.
+你想使用Cython来创建一个Python扩展模块，用来包装某个已存在的C函数库
+
+Making an extension module with Cython looks somewhat similar to writing a handwritten extension, in that you will be creating a collection of wrapper functions.
+使用Cython构建一个扩展模块看上去很手写扩展有些类似， 因为你需要创建很多包装函数
+
+However, unlike previous recipes, you won’t be doing this in C—the code will look a lot more like Python.
+不过，跟前面不同的是，你不需要在C语言中做这些——代码看上去更像是Python
+
+As preliminaries, assume that the sample code shown in the introduction to this chapter has been compiled into a C library called libsample.
+作为准备，假设本章介绍部分的示例代码已经被编译到某个叫 libsample 的C函数库中了
+
+Start by creating a file named csample.pxd that looks like this:
+ 首先创建一个名叫 csample.pxd 的文件，如下所示：
+
+This file serves the same purpose in Cython as a C header file.
+这个文件在Cython中的作用就跟C的头文件一样
+
+The initial declaration cdef extern from "sample.h" declares the required C header file.
+ 初始声明 cdef  extern  from  "sample.h" 指定了所学的C头文件
+
+Declarations that follow are taken from that header.
+ 接下来的声明都是来自于那个头文件
+
+The name of this file is csample.pxd, not sample.pxd—this is important.
+文件名是 csample.pxd ，而不是 sample.pxd ——这点很重要
+
+Next, create a file named sample.pyx.
+下一步，创建一个名为 sample.pyx 的问题
+
+This file will define wrappers that bridge the Python interpreter to the underlying C code declared in the csample.pxd file:
+ 该文件会定义包装器，用来桥接Python解释器到 csample.pxd 中声明的C代码
+
+Various details of this file will be covered further in the discussion section.
+该文件更多的细节部分会在讨论部分详细展开
+
+Finally, to build the extension module, create a setup.py file that looks like this:
+ 最后，为了构建扩展模块，像下面这样创建一个 setup.py 文件：
+
+To build the resulting module for experimentation, type this:
+要构建我们测试的目标模块，像下面这样做：
+
+If it works, you should have an extension module sample.so that can be used as shown in the following example:
+如果一切顺利的话，你应该有了一个扩展模块 sample.so ，可在下面例子中使用：
+
+This recipe incorporates a number of advanced features discussed in prior recipes, including manipulation of arrays, wrapping opaque pointers, and releasing the GIL.
+本节包含了很多前面所讲的高级特性，包括数组操作、包装隐形指针和释放GIL
+
+Each of these parts will be discussed in turn, but it may help to review earlier recipes first.
+ 每一部分都会逐个被讲述到，但是我们最好能复习一下前面几小节
+
+At a high level, using Cython is modeled after C.
+在顶层，使用Cython是基于C之上
+
+The .pxd files merely contain C definitions (similar to .h files) and the .pyx files contain implementation (similar to a .c file).
+.pxd文件仅仅只包含C定义（类似.h文件）， .pyx文件包含了实现（类似.c文件）
+
+The cimport statement is used by Cython to import definitions from a .pxd file.
+cimport 语句被Cython用来导入.pxd文件中的定义
+
+This is different than using a normal Python import statement, which would load a regular Python module.
+ 它跟使用普通的加载Python模块的导入语句是不同的
+
+Although .pxd files contain definitions, they are not used for the purpose of automatically creating extension code.
+尽管 .pxd 文件包含了定义，但它们并不是用来自动创建扩展代码的
+
+Thus, you still have to write simple wrapper functions.
+ 因此，你还是要写包装函数
+
+For example, even though the csample.pxd file declares int gcd(int, int) as a function, you still have to write a small wrapper for it in sample.pyx.
+例如，就算 csample.pxd 文件声明了 int gcd(int, int) 函数， 你仍然需要在 sample.pyx 中为它写一个包装函数
+
+For instance:
+例如：
+
+For simple functions, you don’t have to do too much.
+对于简单的函数，你并不需要去做太多的时
+
+Cython will generate wrapper code that properly converts the arguments and return value.
+ Cython会生成包装代码来正确的转换参数和返回值
+
+The C data types attached to the arguments are optional.
+ 绑定到属性上的C数据类型是可选的
+
+However, if you include them, you get additional error checking for free.
+不过，如果你包含了它们，你可以另外做一些错误检查
+
+For example, if someone calls this function with negative values, an exception is generated:
+ 例如，如果有人使用负数来调用这个函数，会抛出一个异常：
+
+If you want to add additional checking to the wrapper, just use additional wrapper code.
+如果你想对包装函数做另外的检查，只需要使用另外的包装代码
+
+For example:
+例如：
+
+The declaration of in_mandel() in the csample.pxd file has an interesting, but subtle definition.
+在csample.pxd文件中的``in_mandel()`` 声明有个很有趣但是比较难理解的定义
+
+In that file, the function is declared as returning a bint instead of an int.
+ 在这个文件中，函数被声明为然后一个bint而不是一个int
+
+This causes the function to create a proper Boolean value from the result instead of a simple integer.
+ 它会让函数创建一个正确的Boolean值而不是简单的整数
+
+So, a return value of 0 gets mapped to False and 1 to True.
+ 因此，返回值0表示False而1表示True
+
+Within the Cython wrappers, you have the option of declaring C data types in addition to using all of the usual Python objects.
+在Cython包装器中，你可以选择声明C数据类型，也可以使用所有的常见Python对象
+
+The wrapper for divide() shows an example of this as well as how to handle a pointer argument.
+ 对于 divide() 的包装器展示了这样一个例子，同时还有如何去处理一个指针参数
+
+Here, the rem variable is explicitly declared as a C int variable.
+在这里，rem 变量被显示的声明为一个C整型变量
+
+When passed to the underlying divide() function, &rem makes a pointer to it just as in C.
+ 当它被传入 divide() 函数的时候，&rem 创建一个跟C一样的指向它的指针
+
+The code for the avg() function illustrates some more advanced features of Cython.
+avg() 函数的代码演示了Cython更高级的特性
+
+First the declaration def avg(double[:] a) declares avg() as taking a one-dimensional memoryview of double values.
+ 首先 def avg(double[:] a) 声明了 avg() 接受一个一维的双精度内存视图
+
+The amazing part about this is that the resulting function will accept any compatible array object, including those created by libraries such as numpy.
+ 最惊奇的部分是返回的结果函数可以接受任何兼容的数组对象，包括被numpy创建的
+
+For example:
+例如：
+
+In the wrapper, a.size and &a[0] refer to the number of array items and underlying pointer, respectively.
+在此包装器中，a.size0 和 &a[0] 分别引用数组元素个数和底层指针
+
+The syntax <double *> &a[0] is how you type cast pointers to a different type if necessary.
+ 语法 <double *> &a[0] 教你怎样将指针转换为不同的类型
+
+This is needed to make sure the C avg() receives a pointer of the correct type.
+ 前提是C中的 avg() 接受一个正确类型的指针
+
+Refer to the next recipe for some more advanced usage of Cython memoryviews.
+ 参考下一节关于Cython内存视图的更高级讲述
+
+In addition to working with general arrays, the avg() example also shows how to work with the global interpreter lock.
+除了处理通常的数组外，avg() 的这个例子还展示了如何处理全局解释器锁
+
+The statement with nogil: declares a block of code as executing without the GIL.
+ 语句 with nogil: 声明了一个不需要GIL就能执行的代码块
+
+Inside this block, it is illegal to work with any kind of normal Python object—only objects and functions declared as cdef can be used.
+ 在这个块中，不能有任何的普通Python对象——只能使用被声明为 cdef 的对象和函数
+
+In addition to that, external functions must explicitly declare that they can execute without the GIL.
+ 另外，外部函数必须现实的声明它们能不依赖GIL就能执行
+
+Thus, in the csample.pxd file, the avg() is declared as double avg(double *, int) nogil.
+ 因此，在csample.pxd文件中，avg() 被声明为 double avg(double *, int) nogil .
+
+The handling of the Point structure presents a special challenge.
+对Point结构体的处理是一个挑战
+
+As shown, this recipe treats Point objects as opaque pointers using capsule objects, as described in “Managing Opaque Pointers in C Extension Modules”.
+本节使用胶囊对象将Point对象当做隐形指针来处理，这个在15.4小节介绍过
+
+However, to do this, the underlying Cython code is a bit more complicated.
+ 要这样做的话，底层Cython代码稍微有点复杂
+
+First, the following imports are being used to bring in definitions of functions from the C library and Python C API:
+ 首先，下面的导入被用来引入C函数库和Python C API中定义的函数：
+
+The function del_Point() and Point() use this functionality to create a capsule object that wraps around a Point * pointer.
+函数 del_Point() 和 Point() 使用这个功能来创建一个胶囊对象， 它会包装一个 Point  * 指针
+
+The declaration cdef del_Point() declares del_Point() as a function that is only accessible from Cython and not Python.
+cdef  del_Point() 将 del_Point() 声明为一个函数， 只能通过Cython访问，而不能从Python中访问
+
+Thus, this function will not be visible to the outside—instead, it’s used as a callback function to clean up memory allocated by the capsule.
+ 因此，这个函数对外部是不可见的——它被用来当做一个回调函数来清理胶囊分配的内存
+
+Calls to functions such as PyCapsule_New(), PyCapsule_GetPointer() are directly from the Python C API and are used in the same way.
+ 函数调用比如 PyCapsule_New() 、PyCapsule_GetPointer() 直接来自Python C API并且以同样的方式被使用
+
+The distance() function has been written to extract pointers from the capsule objects created by Point().
+distance 函数从 Point() 创建的胶囊对象中提取指针
+
+One notable thing here is that you simply don’t have to worry about exception handling.
+ 这里要注意的是你不需要担心异常处理
+
+If a bad object is passed, PyCapsule_GetPointer() raises an exception, but Cython already knows to look for it and propagate it out of the distance() function if it occurs.
+ 如果一个错误的对象被传进来，PyCapsule_GetPointer() 会抛出一个异常， 但是Cython已经知道怎么查找到它，并将它从 distance() 传递出去
+
+A downside to the handling of Point structures is that they will be completely opaque in this implementation.
+处理Point结构体一个缺点是它的实现是不可见的
+
+You won’t be able to peek inside or access any of their attributes.
+ 你不能访问任何属性来查看它的内部
+
+There is an alternative approach to wrapping, which is to define an extension type, as shown in this code:
+ 这里有另外一种方法去包装它，就是定义一个扩展类型，如下所示：
+
+Here, the cdef class Point is declaring Point as an extension type.
+在这里，cdif类 Point 将Point声明为一个扩展类型
+
+The class variable cdef csample.Point *_c_point is declaring an instance variable that holds a pointer to an underlying Point structure in C.
+ 类属性 cdef csample.Point *_c_point 声明了一个实例变量， 拥有一个指向底层Point结构体的指针
+
+The __cinit__() and __dealloc__() methods create and destroy the underlying C structure using malloc() and free() calls.
+ __cinit__() 和 __dealloc__() 方法通过 malloc() 和 free() 创建并销毁底层C结构体
+
+The property x and property y declarations give code that gets and sets the underlying structure attributes.
+ x和y属性的声明让你获取和设置底层结构体的属性值
+
+The wrapper for distance() has also been suitably modified to accept instances of the Point extension type as arguments, but pass the underlying pointer to the C function.
+ distance() 的包装器还可以被修改，使得它能接受 Point 扩展类型实例作为参数， 而传递底层指针给C函数
+
+Making this change, you will find that the code for manipulating Point objects is more natural:
+做了这个改变后，你会发现操作Point对象就显得更加自然了：
+
+This recipe has illustrated many of Cython’s core features that you might be able to extrapolate to more complicated kinds of wrapping.
+本节已经演示了很多Cython的核心特性，你可以以此为基准来构建更多更高级的包装
+
+However, you will definitely want to read more of the official documentation to do more.
+ 不过，你最好先去阅读下官方文档来了解更多信息
+
+The next few recipes also illustrate a few additional Cython features.
+接下来几节还会继续演示一些Cython的其他特性
+
+Using Cython to Write High-Performance Array Operations
+15.11 用Cython写高性能的数组操作¶
+
+You would like to write some high-performance array processing functions to operate on arrays from libraries such as NumPy.
+你要写高性能的操作来自NumPy之类的数组计算函数
+
+You’ve heard that tools such as Cython can make this easier, but aren’t sure how to do it.
+ 你已经知道了Cython这样的工具会让它变得简单，但是并不确定该怎样去做
+
+As an example, consider the following code which shows a Cython function for clipping the values in a simple one-dimensional array of doubles:
+作为一个例子，下面的代码演示了一个Cython函数，用来修整一个简单的一维双精度浮点数数组中元素的值
+
+To compile and build the extension, you’ll need a setup.py file such as the following (use python3 setup.py build_ext --inplace to build it):
+要编译和构建这个扩展，你需要一个像下面这样的 setup.py 文件 （使用 python3 setup.py build_ext --inplace 来构建它）：
+
+You will find that the resulting function clips arrays, and that it works with many different kinds of array objects.
+你会发现结果函数确实对数组进行的修正，并且可以适用于多种类型的数组对象
+
+For example:
+例如：
+
+You will also find that the resulting code is fast.
+你还会发现运行生成结果非常的快
+
+The following session puts our implementation in a head-to-head battle with the clip() function already present in numpy:
+ 下面我们将本例和numpy中的已存在的 clip() 函数做一个性能对比：
+
+As you can see, it’s quite a bit faster—an interesting result considering the core of the NumPy version is written in C.
+正如你看到的，它要快很多——这是一个很有趣的结果，因为NumPy版本的核心代码还是用C语言写的
+
+This recipe utilizes Cython typed memoryviews, which greatly simplify code that operates on arrays.
+本节利用了Cython类型的内存视图，极大的简化了数组的操作
+
+The declaration cpdef clip() declares clip() as both a C-level and Python-level function.
+ cpdef clip() 声明了 clip() 同时为C级别函数以及Python级别函数
+
+In Cython, this is useful, because it means that the function call is more efficently called by other Cython functions (e.g., if you want to invoke clip() from a different Cython function).
+ 在Cython中，这个是很重要的，因为它表示此函数调用要比其他Cython函数更加高效 （比如你想在另外一个不同的Cython函数中调用clip()）
+
+The typed parameters double[:] a and double[:] out declare those parameters as one-dimensional arrays of doubles.
+类型参数 double[:] a 和 double[:] out 声明这些参数为一维的双精度数组
+
+As input, they will access any array object that properly implements the memoryview interface, as described in PEP 3118.
+ 作为输入，它们会访问任何实现了内存视图接口的数组对象，这个在PEP 3118有详细定义
+
+This includes arrays from NumPy and from the built-in array library.
+ 包括了NumPy中的数组和内置的array库
+
+When writing code that produces a result that is also an array, you should follow the convention shown of having an output parameter as shown.
+当你编写生成结果为数组的代码时，你应该遵循上面示例那样设置一个输出参数
+
+This places the responsibility of creating the output array on the caller and frees the code from having to know too much about the specific details of what kinds of arrays are being manipulated (it just assumes the arrays are already in-place and only needs to perform a few basic sanity checks such as making sure their sizes are compatible).
+ 它会将创建输出数组的责任给调用者，不需要知道你操作的数组的具体细节 （它仅仅假设数组已经准备好了，只需要做一些小的检查比如确保数组大小是正确的）
+
+In libraries such as NumPy, it is relatively easy to create output arrays using functions such as numpy.zeros() or numpy.zeros_like().
+ 在像NumPy之类的库中，使用 numpy.zeros() 或 numpy.zeros_like() 创建输出数组相对而言比较容易
+
+Alternatively, to create uninitialized arrays, you can use numpy.empty() or numpy.empty_like().
+另外，要创建未初始化数组， 你可以使用 numpy.empty() 或 numpy.empty_like() . 如果你想覆盖数组内容作为结果的话选择这两个会比较快点
+
+In the implementation of your function, you simply write straightforward looking array processing code using indexing and array lookups (e.g., a[i], out[i], and so forth).
+你你的函数实现中，你只需要简单的通过下标运算和数组查找（比如a[i],out[i]等）来编写代码操作数组
+
+Cython will take steps to make sure these produce efficient code.
+ Cython会负责为你生成高效的代码
+
+The two decorators that precede the definition of clip() are a few optional performance optimizations.
+clip() 定义之前的两个装饰器可以优化下性能
+
+@cython.boundscheck(False) eliminates all array bounds checking and can be used if you know the indexing won’t go out of range.
+ @cython.boundscheck(False) 省去了所有的数组越界检查， 当你知道下标访问不会越界的时候可以使用它
+
+@cython.wraparound(False) eliminates the handling of negative array indices as wrapping around to the end of the array (like with Python lists).
+ @cython.wraparound(False) 消除了相对数组尾部的负数下标的处理（类似Python列表）
+
+The inclusion of these decorators can make the code run substantially faster (almost 2.5 times faster on this example when tested).
+ 引入这两个装饰器可以极大的提升性能（测试这个例子的时候大概快了2.5倍）
+
+Whenever working with arrays, careful study and experimentation with the underlying algorithm can also yield large speedups.
+任何时候处理数组时，研究并改善底层算法同样可以极大的提示性能
+
+For example, consider this variant of the clip() function that uses conditional expressions:
+ 例如，考虑对 clip() 函数的如下修正，使用条件表达式：
+
+When tested, this version of the code runs over 50% faster (2.44s versus 3.76s on the timeit() test shown earlier).
+实际测试结果是，这个版本的代码运行速度要快50%以上（2.44秒对比之前使用 timeit() 测试的3.76秒）
+
+At this point, you might be wondering how this code would stack up against a handwritten C version.
+到这里为止，你可能想知道这种代码怎么能跟手写C语言PK呢
+
+For example, perhaps you write the following C function and craft a handwritten extension to using techniques shown in earlier recipes:
+ 例如，你可能写了如下的C函数并使用前面几节的技术来手写扩展：
+
+The extension code for this isn’t shown, but after experimenting, we found that a handcrafted C extension ran more than 10% slower than the version created by Cython.
+我们没有展示这个的扩展代码，但是试验之后，我们发现一个手写C扩展要比使用Cython版本的慢了大概10%
+
+The bottom line is that the code runs a lot faster than you might think.
+ 最底下的一行比你想象的运行的快很多
+
+There are several extensions that can be made to the solution code.
+你可以对实例代码构建多个扩展
+
+For certain kinds of array operations, it might make sense to release the GIL so that multiple threads can run in parallel.
+ 对于某些数组操作，最好要释放GIL，这样多个线程能并行运行
+
+To do that, modify the code to include the with nogil: statement:
+ 要这样做的话，需要修改代码，使用 with nogil: 语句：
+
+If you want to write a version of the code that operates on two-dimensional arrays, here is what it might look like:
+如果你想写一个操作二维数组的版本，下面是可以参考下：
+
+Hopefully it’s not lost on the reader that all of the code in this recipe is not tied to any specific array library (e.g., NumPy).
+希望读者不要忘了本节所有代码都不会绑定到某个特定数组库（比如NumPy）上面
+
+That gives the code a great deal of flexibility.
+ 这样代码就更有灵活性
+
+However, it’s also worth noting that dealing with arrays can be significantly more complicated once multiple dimensions, strides, offsets, and other factors are introduced.
+ 不过，要注意的是如果处理数组要涉及到多维数组、切片、偏移和其他因素的时候情况会变得复杂起来
+
+Those topics are beyond the scope of this recipe, but more information can be found in PEP 3118.
+ 这些内容已经超出本节范围，更多信息请参考 PEP 3118 ， 同时 Cython文档中关于“类型内存视图” 篇也值得一读
+
+Turning a Function Pointer into a Callable
+15.12 将函数指针转换为可调用对象¶
+
+You have (somehow) obtained the memory address of a compiled function, but want to turn it into a Python callable that you can use as an extension function.
+你已经获得了一个被编译函数的内存地址，想将它转换成一个Python可调用对象， 这样的话你就可以将它作为一个扩展函数使用了
+
+The ctypes module can be used to create Python callables that wrap around arbitrary memory addresses.
+ctypes 模块可被用来创建包装任意内存地址的Python可调用对象
+
+The following example shows how to obtain the raw, low-level address of a C function and how to turn it back into a callable object:
+ 下面的例子演示了怎样获取C函数的原始、底层地址，以及如何将其转换为一个可调用对象：
+
+To make a callable, you must first create a CFUNCTYPE instance.
+要构建一个可调用对象，你首先需要创建一个 CFUNCTYPE 实例
+
+The first argument to CFUNCTYPE() is the return type.
+ CFUNCTYPE() 的第一个参数是返回类型
+
+Subsequent arguments are the types of the arguments.
+ 接下来的参数是参数类型
+
+Once you have defined the function type, you wrap it around an integer memory address to create a callable object.
+一旦你定义了函数类型，你就能将它包装在一个整型内存地址上来创建一个可调用对象了
+
+The resulting object is used like any normal function accessed through ctypes.
+ 生成的对象被当做普通的可通过 ctypes 访问的函数来使用
+
+This recipe might look rather cryptic and low level.
+本节看上去可能有点神秘，偏底层一点
+
+However, it is becoming increasingly common for programs and libraries to utilize advanced code generation techniques like just in-time compilation, as found in libraries such as LLVM.
+ 但是，但是它被广泛使用于各种高级代码生成技术比如即时编译，在LLVM函数库中可以看到
+
+For example, here is a simple example that uses the llvmpy extension to make a small assembly function, obtain a function pointer to it, and turn it into a Python callable:
+例如，下面是一个使用 llvmpy 扩展的简单例子，用来构建一个小的聚集函数，获取它的函数指针， 并将其转换为一个Python可调用对象
+
+It goes without saying that doing anything wrong at this level will probably cause the Python interpreter to die a horrible death.
+并不是说在这个层面犯了任何错误就会导致Python解释器挂掉
+
+Keep in mind that you’re directly working with machine-level memory addresses and native machine code—not Python functions.
+ 要记得的是你是在直接跟机器级别的内存地址和本地机器码打交道，而不是Python函数
+
+Passing NULL-Terminated Strings to C Libraries
+15.13 传递NULL结尾的字符串给C函数库¶
+
+You are writing an extension module that needs to pass a NULL-terminated string to a C library.
+你要写一个扩展模块，需要传递一个NULL结尾的字符串给C函数库
+
+However, you’re not entirely sure how to do it with Python’s Unicode string implementation.
+ 不过，你不是很确定怎样使用Python的Unicode字符串去实现它
+
+Many C libraries include functions that operate on NULL-terminated strings declared as type char *.
+许多C函数库包含一些操作NULL结尾的字符串，被声明类型为 char * . 考虑如下的C函数，我们用来做演示和测试用的：
+
+This function simply prints out the hex representation of individual characters so that the passed strings can be easily debugged.
+此函数会打印被传进来字符串的每个字符的十六进制表示，这样的话可以很容易的进行调试了
+
+For example:
+例如：
+
+For calling such a C function from Python, you have a few choices.
+对于在Python中调用这样的C函数，你有几种选择
+
+First, you could restrict it to only operate on bytes using "y" conversion code to PyArg_ParseTuple() like this:
+ 首先，你可以通过调用 PyArg_ParseTuple() 并指定”y“转换码来限制它只能操作字节，如下：
+
+The resulting function operates as follows.
+结果函数的使用方法如下
+
+Carefully observe how bytes with embedded NULL bytes and Unicode strings are rejected:
+仔细观察嵌入了NULL字节的字符串以及Unicode支持是怎样被拒绝的：
+
+If you want to pass Unicode strings instead, use the "s" format code to PyArg_ParseTuple() such as this:
+如果你想传递Unicode字符串，在 PyArg_ParseTuple() 中使用”s“格式码，如下：
+
+When used, this will automatically convert all strings to a NULL-terminated UTF-8 encoding.
+当被使用的时候，它会自动将所有字符串转换为以NULL结尾的UTF-8编码
+
+For example:
+例如：
+
+If for some reason, you are working directly with a PyObject * and can’t use PyArg_ParseTuple(), the following code samples show how you can check and extract a suitable char * reference, from both a bytes and string object:
+如果因为某些原因，你要直接使用 PyObject * 而不能使用 PyArg_ParseTuple() ， 下面的例子向你展示了怎样从字节和字符串对象中检查和提取一个合适的 char * 引用：
+
+Both of the preceding conversions guarantee NULL-terminated data, but they do not check for embedded NULL bytes elsewhere inside the string.
+前面两种转换都可以确保是NULL结尾的数据， 但是它们并不检查字符串中间是否嵌入了NULL字节
+
+Thus, that’s something that you would need to check yourself if it’s important.
+ 因此，如果这个很重要的话，那你需要自己去做检查了
+
+If it all possible, you should try to avoid writing code that relies on NULL-terminated strings since Python has no such requirement.
+如果可能的话，你应该避免去写一些依赖于NULL结尾的字符串，因为Python并没有这个需要
+
+It is almost always better to handle strings using the combination of a pointer and a size if possible.
+ 最好结合使用一个指针和长度值来处理字符串
+
+Nevertheless, sometimes you have to work with legacy C code that presents no other option.
+ 不过，有时候你必须去处理C语言遗留代码时就没得选择了
+
+Although it is easy to use, there is a hidden memory overhead associated with using the "s" format code to PyArg_ParseTuple() that is easy to overlook.
+尽管很容易使用，但是很容易忽视的一个问题是在 PyArg_ParseTuple() 中使用“s”格式化码会有内存损耗
+
+When you write code that uses this conversion, a UTF-8 string is created and permanently attached to the original string object.
+ 但你需要使用这种转换的时候，一个UTF-8字符串被创建并永久附加在原始字符串对象上面
+
+If the original string contains non-ASCII characters, this makes the size of the string increase until it is garbage collected.
+ 如果原始字符串包含非ASCII字符的话，就会导致字符串的尺寸增到一直到被垃圾回收
+
+For example:
+例如：
+
+If this growth in memory use is a concern, you should rewrite your C extension code to use the PyUnicode_AsUTF8String() function like this:
+如果你在乎这个内存的损耗，你最好重写你的C扩展代码，让它使用 PyUnicode_AsUTF8String() 函数
+
+With this modification, a UTF-8 encoded string is created if needed, but then discarded after use.
+通过这个修改，一个UTF-8编码的字符串根据需要被创建，然后在使用过后被丢弃
+
+Here is the modified behavior:
+下面是修订后的效果：
+
+If you are trying to pass NULL-terminated strings to functions wrapped via ctypes, be aware that ctypes only allows bytes to be passed and that it does not check for embedded NULL bytes.
+如果你试着传递NULL结尾字符串给ctypes包装过的函数， 要注意的是ctypes只能允许传递字节，并且它不会检查中间嵌入的NULL字节
+
+For example:
+例如：
+
+If you want to pass a string instead of bytes, you need to perform a manual UTF-8 encoding first.
+如果你想传递字符串而不是字节，你需要先执行手动的UTF-8编码
+
+For example:
+例如：
+
+For other extension tools (e.g., Swig, Cython), careful study is probably in order should you decide to use them to pass strings to C code.
+对于其他扩展工具（比如Swig、Cython）， 在你使用它们传递字符串给C代码时要先好好学习相应的东西了
+
+Passing Unicode Strings to C Libraries
+15.14 传递Unicode字符串给C函数库¶
+
+You are writing an extension module that needs to pass a Python string to a C library function that may or may not know how to properly handle Unicode.
+你要写一个扩展模块，需要将一个Python字符串传递给C的某个库函数，但是这个函数不知道该怎么处理Unicode
+
+There are many issues to be concerned with here, but the main one is that existing C libraries won’t understand Python’s native representation of Unicode.
+这里我们需要考虑很多的问题，但是最主要的问题是现存的C函数库并不理解Python的原生Unicode表示
+
+Therefore, your challenge is to convert the Python string into a form that can be more easily understood by C libraries.
+ 因此，你的挑战是将Python字符串转换为一个能被C理解的形式
+
+For the purposes of illustration, here are two C functions that operate on string data and output it for the purposes of debugging and experimentation.
+为了演示的目的，下面有两个C函数，用来操作字符串数据并输出它来调试和测试
+
+One uses bytes provided in the form char *, int, whereas the other uses wide characters in the form wchar_t *, int:
+ 一个使用形式为 char *, int 形式的字节， 而另一个使用形式为 wchar_t *, int 的宽字符形式：
+
+For the byte-oriented function print_chars(), you need to convert Python strings into a suitable byte encoding such as UTF-8.
+对于面向字节的函数 print_chars() ，你需要将Python字符串转换为一个合适的编码比如UTF-8. 下面是一个这样的扩展函数例子：
+
+For library functions that work with the machine native wchar_t type, you can write extension code such as this:
+对于那些需要处理机器本地 wchar_t 类型的库函数，你可以像下面这样编写扩展代码：
+
+Here is an interactive session that illustrates how these functions work:
+下面是一个交互会话来演示这个函数是如何工作的：
+
+Carefully observe how the byte-oriented function print_chars() is receiving UTF-8 encoded data, whereas print_wchars() is receiving the Unicode code point values.
+仔细观察这个面向字节的函数 print_chars() 是怎样接受UTF-8编码数据的， 以及 print_wchars() 是怎样接受Unicode编码值的
+
+Before considering this recipe, you should first study the nature of the C library that you’re accessing.
+在继续本节之前，你应该首先学习你访问的C函数库的特征
+
+For many C libraries, it might make more sense to pass bytes instead of a string.
+ 对于很多C函数库，通常传递字节而不是字符串会比较好些
+
+To do that, use this conversion code instead:
+要这样做，请使用如下的转换代码：
+
+If you decide that you still want to pass strings, you need to know that Python 3 uses an adaptable string representation that is not entirely straightforward to map directly to C libraries using the standard types char * or wchar_t * See PEP 393 for details.
+如果你仍然还是想要传递字符串， 你需要知道Python 3可使用一个合适的字符串表示， 它并不直接映射到使用标准类型 char * 或 wchar_t * （更多细节参考PEP 393）的C函数库
+
+Thus, to present string data to C, some kind of conversion is almost always necessary.
+ 因此，要在C中表示这个字符串数据，一些转换还是必须要的
+
+The s# and u# format codes to PyArg_ParseTuple() safely perform such conversions.
+ 在 PyArg_ParseTuple() 中使用”s#” 和”u#”格式化码可以安全的执行这样的转换
+
+One potential downside is that such conversions cause the size of the original string object to permanently increase.
+不过这种转换有个缺点就是它可能会导致原始字符串对象的尺寸增大
+
+Whenever a conversion is made, a copy of the converted data is kept and attached to the original string object so that it can be reused later.
+ 一旦转换过后，会有一个转换数据的复制附加到原始字符串对象上面，之后可以被重用
+
+You can observe this effect:
+ 你可以观察下这种效果：
+
+For small amounts of string data, this might not matter, but if you’re doing large amounts of text processing in extensions, you may want to avoid the overhead.
+对于少量的字符串对象，可能没什么影响， 但是如果你需要在扩展中处理大量的文本，你可能想避免这个损耗了
+
+Here is an alternative implementation of the first extension function that avoids these memory inefficiencies:
+ 下面是一个修订版本可以避免这种内存损耗：
+
+Avoiding memory overhead for wchar_t handling is much more tricky.
+而对 wchar_t 的处理时想要避免内存损耗就更加难办了
+
+Internally, Python stores strings using the most efficient representation possible.
+ 在内部，Python使用最高效的表示来存储字符串
+
+For example, strings containing nothing but ASCII are stored as arrays of bytes, whereas strings containing characters in the range U+0000 to U+FFFF use a two-byte representation.
+ 例如，只包含ASCII的字符串被存储为字节数组， 而包含范围从U+0000到U+FFFF的字符的字符串使用双字节表示
+
+Since there isn’t a single representation of the data, you can’t just cast the internal array to wchar_t * and hope that it works.
+ 由于对于数据的表示形式不是单一的，你不能将内部数组转换为 wchar_t * 然后期望它能正确的工作
+
+Instead, a wchar_t array has to be created and text copied into it.
+ 你应该创建一个 wchar_t 数组并向其中复制文本
+
+The "u#" format code to PyArg_ParseTuple() does this for you at the cost of efficiency (it attaches the resulting copy to the string object).
+ PyArg_ParseTuple() 的”u#”格式码可以帮助你高效的完成它（它将复制结果附加到字符串对象上）
+
+If you want to avoid this long-term memory overhead, your only real choice is to copy the Unicode data into a temporary array, pass it to the C library function, and then deallocate the array.
+如果你想避免长时间内存损耗，你唯一的选择就是复制Unicode数据懂啊一个临时的数组， 将它传递给C函数，然后回收这个数组的内存
+
+Here is one possible implementation:
+下面是一个可能的实现：
+
+In this implementation, PyUnicode_AsWideCharString() creates a temporary buffer of wchar_t characters and copies data into it.
+在这个实现中，PyUnicode_AsWideCharString() 创建一个临时的wchar_t缓冲并复制数据进去
+
+That buffer is passed to C and then released afterward.
+ 这个缓冲被传递给C然后被释放掉
+
+As of this writing, there seems to be a possible bug related to this behavior, as described at the Python issues page.
+ 但是我写这本书的时候，这里可能有个bug，后面的Python问题页有介绍
+
+If, for some reason you know that the C library takes the data in a different byte encoding than UTF-8, you can force Python to perform an appropriate conversion using extension code such as the following:
+如果你知道C函数库需要的字节编码并不是UTF-8， 你可以强制Python使用扩展码来执行正确的转换，就像下面这样：
+
+Last, but not least, if you want to work directly with the characters in a Unicode string, here is an example that illustrates low-level access:
+最后，如果你想直接处理Unicode字符串，下面的是例子，演示了底层操作访问：
+
+In this code, the PyUnicode_KIND() and PyUnicode_DATA() macros are related to the variable-width storage of Unicode, as described in PEP 393.
+在这个代码中，PyUnicode_KIND() 和 PyUnicode_DATA() 这两个宏和Unicode的可变宽度存储有关，这个在PEP 393中有描述
+
+The kind variable encodes information about the underlying storage (8-bit, 16-bit, or 32-bit) and data points the buffer.
+ kind 变量编码底层存储（8位、16位或32位）以及指向缓存的数据指针相关的信息
+
+In reality, you don’t need to do anything with these values as long as you pass them to the PyUnicode_READ() macro when extracting characters.
+ 在实际情况中，你并不需要知道任何跟这些值有关的东西， 只需要在提取字符的时候将它们传给 PyUnicode_READ() 宏
+
+A few final words: when passing Unicode strings from Python to C, you should probably try to make it as simple as possible.
+还有最后几句：当从Python传递Unicode字符串给C的时候，你应该尽量简单点
+
+If given the choice between an encoding such as UTF-8 or wide characters, choose UTF-8.
+ 如果有UTF-8和宽字符两种选择，请选择UTF-8. 对UTF-8的支持更加普遍一些，也不容易犯错，解释器也能支持的更好些
+
+Support for UTF-8 seems to be much more common, less trouble-prone, and better supported by the interpreter.
+ 最后，确保你仔细阅读了 关于处理Unicode的相关文档
+
+Converting C Strings to Python
+15.15 C字符串转换为Python字符串¶
+
+You want to convert strings from C to Python bytes or a string object.
+怎样将C中的字符串转换为Python字节或一个字符串对象
+
+For C strings represented as a pair char *, int, you must decide whether or not you want the string presented as a raw byte string or as a Unicode string.
+C字符串使用一对 char * 和 int 来表示， 你需要决定字符串到底是用一个原始字节字符串还是一个Unicode字符串来表示
+
+Byte objects can be built using Py_BuildValue() as follows:
+ 字节对象可以像下面这样使用 Py_BuildValue() 来构建：
+
+If you want to create a Unicode string and you know that s points to data encoded as UTF-8, you can use the following:
+如果你要创建一个Unicode字符串，并且你知道 s 指向了UTF-8编码的数据，可以使用下面的方式：
+
+If s is encoded in some other known encoding, you can make a string using PyUnicode_Decode() as follows:
+如果 s 使用其他编码方式，那么可以像下面使用 PyUnicode_Decode() 来构建一个字符串：
+
+If you happen to have a wide string represented as a wchar_t *, len pair, there are a few options.
+如果你恰好有一个用 wchar_t *, len 对表示的宽字符串， 有几种选择性
+
+First, you could use Py_BuildValue() as follows:
+首先你可以使用 Py_BuildValue() ：
+
+Alternatively, you can use PyUnicode_FromWideChar():
+另外，你还可以使用 PyUnicode_FromWideChar() :
+
+For wide character strings, no interpretation is made of the character data—it is assumed to be raw Unicode code points which are directly converted to Python.
+对于宽字符串，并没有对字符数据进行解析——它被假定是原始Unicode编码指针，可以被直接转换成Python
+
+Conversion of strings from C to Python follow the same principles as I/O.
+将C中的字符串转换为Python字符串遵循和I/O同样的原则
+
+Namely, the data from C must be explicitly decoded into a string according to some codec.
+ 也就是说，来自C中的数据必须根据一些解码器被显式的解码为一个字符串
+
+Common encodings include ASCII, Latin-1, and UTF-8.
+ 通常编码格式包括ASCII、Latin-1和UTF-8. 如果你并不确定编码方式或者数据是二进制的，你最好将字符串编码成字节
+
+If you’re not entirely sure of the encoding or the data is binary, you’re probably best off encoding the string as bytes instead.
+ 
+
+When making an object, Python always copies the string data you provide.
+当构造一个对象的时候，Python通常会复制你提供的字符串数据
+
+If necessary, it’s up to you to release the C string afterward (if required).
+ 如果有必要的话，你需要在后面去释放C字符串
+
+Also, for better reliability, you should try to create strings using both a pointer and a size rather than relying on NULL-terminated data.
+ 同时，为了让程序更加健壮，你应该同时使用一个指针和一个大小值， 而不是依赖NULL结尾数据来创建字符串
+
+Working with C Strings of Dubious Encoding
+15.16 不确定编码格式的C字符串¶
+
+You are converting strings back and forth between C and Python, but the C encoding is of a dubious or unknown nature.
+你要在C和Python直接来回转换字符串，但是C中的编码格式并不确定
+
+For example, perhaps the C data is supposed to be UTF-8, but it’s not being strictly enforced.
+ 例如，可能C中的数据期望是UTF-8，但是并没有强制它必须是
+
+You would like to write code that can handle malformed data in a graceful way that doesn’t crash Python or destroy the string data in the process.
+ 你想编写代码来以一种优雅的方式处理这些不合格数据，这样就不会让Python奔溃或者破坏进程中的字符串数据
+
+Here is some C data and a function that illustrates the nature of this problem:
+下面是一些C的数据和一个函数来演示这个问题：
+
+In this code, the string sdata contains a mix of UTF-8 and malformed data.
+在这个代码中，字符串 sdata 包含了UTF-8和不合格数据
+
+Nevertheless, if a user calls print_chars(sdata, slen) in C, it works fine.
+ 不过，如果用户在C中调用 print_chars(sdata, slen) ，它缺能正常工作
+
+Now suppose you want to convert the contents of sdata into a Python string.
+现在假设你想将 sdata 的内容转换为一个Python字符串
+
+Further suppose you want to later pass that string to the print_chars() function through an extension.
+ 进一步假设你在后面还想通过一个扩展将那个字符串传个 print_chars() 函数
+
+Here’s how to do it in a way that exactly preserves the original data even though there are encoding problems:
+ 下面是一种用来保护原始数据的方法，就算它编码有问题
+
+If you try these functions from Python, here’s what happens:
+如果你在Python中尝试这些函数，下面是运行效果：
+
+Careful observation will reveal that the malformed string got encoded into a Python string without errors, and that when passed back into C, it turned back into a byte string that exactly encoded the same bytes as the original C string.
+仔细观察结果你会发现，不合格字符串被编码到一个Python字符串中，并且并没有产生错误， 并且当它被回传给C的时候，被转换为和之前原始C字符串一样的字节
+
+This recipe addresses a subtle, but potentially annoying problem with string handling in extension modules.
+本节展示了在扩展模块中处理字符串时会配到的一个棘手又很恼火的问题
+
+Namely, the fact that C strings in extensions might not follow the strict Unicode encoding/decoding rules that Python normally expects.
+ 也就是说，在扩展中的C字符串可能不会严格遵循Python所期望的Unicode编码/解码规则
+
+Thus, it’s possible that some malformed C data would pass to Python.
+ 因此，很可能一些不合格C数据传递到Python中去
+
+A good example might be C strings associated with low-level system calls such as filenames.
+ 一个很好的例子就是涉及到底层系统调用比如文件名这样的字符串
+
+For instance, what happens if a system call returns a broken string back to the interpreter that can’t be properly decoded.
+ 例如，如果一个系统调用返回给解释器一个损坏的字符串，不能被正确解码的时候会怎样呢
+
+Normally, Unicode errors are often handled by specifying some sort of error policy, such as strict, ignore, replace, or something similar.
+一般来讲，可以通过制定一些错误策略比如严格、忽略、替代或其他类似的来处理Unicode错误
+
+However, a downside of these policies is that they irreparably destroy the original string content.
+ 不过，这些策略的一个缺点是它们永久性破坏了原始字符串的内容
+
+For example, if the malformed data in the example was decoded using one of these polices, you would get results such as this:
+ 例如，如果例子中的不合格数据使用这些策略之一解码，你会得到下面这样的结果：
+
+The surrogateescape error handling policies takes all nondecodable bytes and turns them into the low-half of a surrogate pair (\udcXX where XX is the raw byte value).
+surrogateescape 错误处理策略会将所有不可解码字节转化为一个代理对的低位字节（udcXX中XX是原始字节值）
+
+For example:
+ 例如：
+
+Isolated low surrogate characters such as \udcae never appear in valid Unicode.
+单独的低位代理字符比如 \udcae 在Unicode中是非法的
+
+Thus, this string is technically an illegal representation.
+ 因此，这个字符串就是一个非法表示
+
+In fact, if you ever try to pass it to functions that perform output, you’ll get encoding errors:
+ 实际上，如果你将它传个一个执行输出的函数，你会得到一个错误：
+
+However, the main point of allowing the surrogate escapes is to allow malformed strings to pass from C to Python and back into C without any data loss.
+然而，允许代理转换的关键点在于从C传给Python又回传给C的不合格字符串不会有任何数据丢失
+
+When the string is encoded using surrogateescape again, the surrogate characters are turned back into their original bytes.
+ 当这个字符串再次使用 surrogateescape 编码时，代理字符会转换回原始字节
+
+For example:
+例如：
+
+As a general rule, it’s probably best to avoid surrogate encoding whenever possible—your code will be much more reliable if it uses proper encodings.
+作为一般准则，最好避免代理编码——如果你正确的使用了编码，那么你的代码就值得信赖
+
+However, sometimes there are situations where you simply don’t have control over the data encoding and you aren’t free to ignore or replace the bad data because other functions may need to use it.
+ 不过，有时候确实会出现你并不能控制数据编码并且你又不能忽略或替换坏数据，因为其他函数可能会用到它
+
+This recipe shows how to do it.
+ 那么就可以使用本节的技术了
+
+As a final note, many of Python’s system-oriented functions, especially those related to filenames, environment variables, and command-line options, use surrogate encoding.
+最后一点要注意的是，Python中许多面向系统的函数，特别是和文件名、环境变量和命令行参数相关的 都会使用代理编码
+
+For example, if you use a function such as os.listdir() on a directory containing a undecodable filename, it will be returned as a string with surrogate escapes.
+例如，如果你使用像 os.listdir() 这样的函数， 传入一个包含了不可解码文件名的目录的话，它会返回一个代理转换后的字符串
+
+See “Printing Bad Filenames” for a related recipe.
+ 参考5.15的相关章节
+
+PEP 383 has more information about the problem addressed by this recipe and surrogateescape error handling.
+PEP 383 中有更多关于本机提到的以及和surrogateescape错误处理相关的信息
+
+Passing Filenames to C Extensions
+15.17 传递文件名给C扩展¶
+
+You need to pass filenames to C library functions, but need to make sure the filename has been encoded according to the system’s expected filename encoding.
+你需要向C库函数传递文件名，但是需要确保文件名根据系统期望的文件名编码方式编码过
+
+To write an extension function that receives a filename, use code such as this:
+写一个接受一个文件名为参数的扩展函数，如下这样：
+
+If you already have a PyObject * that you want to convert as a filename, use code such as the following:
+如果你已经有了一个 PyObject * ，希望将其转换成一个文件名，可以像下面这样做：
+
+Dealing with filenames in a portable way is a tricky problem that is best left to Python.
+以可移植方式来处理文件名是一个很棘手的问题，最后交由Python来处理
+
+If you use this recipe in your extension code, filenames will be handled in a manner that is consistent with filename handling in the rest of Python.
+ 如果你在扩展代码中使用本节的技术，文件名的处理方式和和Python中是一致的
+
+This includes encoding/decoding of bytes, dealing with bad characters, surrogate escapes, and other complications.
+ 包括编码/界面字节，处理坏字符，代理转换和其他复杂情况
+
+Passing Open Files to C Extensions
+15.18 传递已打开的文件给C扩展¶
+
+You have an open file object in Python, but need to pass it to C extension code that will use the file.
+你在Python中有一个打开的文件对象，但是需要将它传给要使用这个文件的C扩展
+
+To convert a file to an integer file descriptor, use PyFile_FromFd(), as shown:
+要将一个文件转换为一个整型的文件描述符，使用 PyFile_FromFd() ，如下：
+
+The resulting file descriptor is obtained by calling the fileno() method on fobj.
+结果文件描述符是通过调用 fobj 中的 fileno() 方法获得的
+
+Thus, any object that exposes a descriptor in this manner should work (e.g., file, socket, etc.).
+ 因此，任何以这种方式暴露给一个描述器的对象都适用（比如文件、套接字等）
+
+Once you have the descriptor, it can be passed to various low-level C functions that expect to work with files.
+一旦你有了这个描述器，它就能被传递给多个低级的可处理文件的C函数
+
+If you need to convert an integer file descriptor back into a Python object, use PyFile_FromFd() as follows:
+如果你需要转换一个整型文件描述符为一个Python对象，适用下面的 PyFile_FromFd() :
+
+The arguments to PyFile_FromFd() mirror those of the built-in open() function.
+PyFile_FromFd() 的参数对应内置的 open() 函数
+
+NULL values simply indicate that the default settings for the encoding, errors, and newline arguments are being used.
+ NULL表示编码、错误和换行参数使用默认值
+
+If you are passing file objects from Python to C, there are a few tricky issues to be concerned about.
+如果将Python中的文件对象传给C，有一些注意事项
+
+First, Python performs its own I/O buffering through the io module.
+ 首先，Python通过 io 模块执行自己的I/O缓冲
+
+Prior to passing any kind of file descriptor to C, you should first flush the I/O buffers on the associated file objects.
+ 在传递任何类型的文件描述符给C之前，你都要首先在相应文件对象上刷新I/O缓冲
+
+Otherwise, you could get data appearing out of order on the file stream.
+ 不然的话，你会打乱文件系统上面的数据
+
+Second, you need to pay careful attention to file ownership and the responsibility of closing the file in particular.
+其次，你需要特别注意文件的归属者以及关闭文件的职责
+
+If a file descriptor is passed to C, but still used in Python, you need to make sure C doesn’t accidentally close the file.
+ 如果一个文件描述符被传给C，但是在Python中还在被使用着，你需要确保C没有意外的关闭它
+
+Likewise, if a file descriptor is being turned into a Python file object, you need to be clear about who is responsible for closing it.
+ 类似的，如果一个文件描述符被转换为一个Python文件对象，你需要清楚谁应该去关闭它
+
+The last argument to PyFile_FromFd() is set to 1 to indicate that Python should close the file.
+ PyFile_FromFd() 的最后一个参数被设置成1，用来指出Python应该关闭这个文件
+
+If you need to make a different kind of file object such as a FILE * object from the C standard I/O library using a function such as fdopen(), you’ll need to be especially careful.
+如果你需要从C标准I/O库中使用如　fdopen() 函数来创建不同类型的文件对象比如 FILE * 对象， 你需要特别小心了
+
+Doing so would introduce two completely different I/O buffering layers into the I/O stack (one from Python’s io module and one from C stdio).
+这样做会在I/O堆栈中产生两个完全不同的I/O缓冲层 （一个是来自Python的 io 模块，另一个来自C的 stdio ）
+
+Operations such as fclose() in C could also inadvertently close the file for further use in Python.
+ 像C中的 fclose() 会关闭Python要使用的文件
+
+If given a choice, you should probably make extension code work with the low-level integer file descriptors as opposed to using a higher-level abstraction such as that provided by <stdio.h>.
+ 如果让你选的话，你应该会选择去构建一个扩展代码来处理底层的整型文件描述符， 而不是使用来自<stdio.h>的高层抽象功能
+
+Reading File-Like Objects from C
+15.19 从C语言中读取类文件对象¶
+
+You want to write C extension code that consumes data from any Python file-like object (e.g., normal files, StringIO objects, etc.).
+你要写C扩展来读取来自任何Python类文件对象中的数据（比如普通文件、StringIO对象等）
+
+To consume data on a file-like object, you need to repeatedly invoke its read() method and take steps to properly decode the resulting data.
+要读取一个类文件对象的数据，你需要重复调用 read() 方法，然后正确的解码获得的数据
+
+Here is a sample C extension function that merely consumes all of the data on a file-like object and dumps it to standard output so you can see it:
+下面是一个C扩展函数例子，仅仅只是读取一个类文件对象中的所有数据并将其输出到标准输出：
+
+To test the code, try making a file-like object such as a StringIO instance and pass it in:
+要测试这个代码，先构造一个类文件对象比如一个StringIO实例，然后传递进来：
+
+Unlike a normal system file, a file-like object is not necessarily built around a low-level file descriptor.
+和普通系统文件不同的是，一个类文件对象并不需要使用低级文件描述符来构建
+
+Thus, you can’t use normal C library functions to access it.
+ 因此，你不能使用普通的C库函数来访问它
+
+Instead, you need to use Python’s C API to manipulate the file-like object much like you would in Python.
+ 你需要使用Python的C API来像普通文件类似的那样操作类文件对象
+
+In the solution, the read() method is extracted from the passed object.
+在我们的解决方案中，read() 方法从被传递的对象中提取出来
+
+An argument list is built and then repeatedly passed to PyObject_Call() to invoke the method.
+ 一个参数列表被构建然后不断的被传给 PyObject_Call() 来调用这个方法
+
+To detect end-of-file (EOF), PySequence_Length() is used to see if the returned result has zero length.
+ 要检查文件末尾（EOF），使用了 PySequence_Length() 来查看是否返回对象长度为0.
+
+For all I/O operations, you’ll need to concern yourself with the underlying encoding and distinction between bytes and Unicode.
+对于所有的I/O操作，你需要关注底层的编码格式，还有字节和Unicode之前的区别
+
+This recipe shows how to read a file in text mode and decode the resulting text into a bytes encoding that can be used by C.
+ 本节演示了如何以文本模式读取一个文件并将结果文本解码为一个字节编码，这样在C中就可以使用它了
+
+If you want to read the file in binary mode, only minor changes will be made.
+ 如果你想以二进制模式读取文件，只需要修改一点点即可，例如：
+
+The trickiest part of this recipe concerns proper memory management.
+本节最难的地方在于如何进行正确的内存管理
+
+When working with PyObject * variables, careful attention needs to be given to managing reference counts and cleaning up values when no longer needed.
+ 当处理 PyObject * `` 变量的时候，需要注意管理引用计数以及在不需要的变量的时候清理它们的值
+
+The various Py_DECREF() calls are doing this.
+ 对 ``Py_DECREF() 的调用就是来做这个的
+
+The recipe is written in a general-purpose manner so that it can be adapted to other file operations, such as writing.
+本节代码以一种通用方式编写，因此他也能适用于其他的文件操作，比如写文件
+
+For example, to write data, merely obtain the write() method of the file-like object, convert data into an appropriate Python object (bytes or Unicode), and invoke the method to have it written to the file.
+ 例如，要写数据，只需要获取类文件对象的 write() 方法，将数据转换为合适的Python对象 （字节或Unicode），然后调用该方法将输入写入到文件
+
+Finally, although file-like objects often provide other methods (e.g., readline(), read_into()), it is probably best to just stick with the basic read() and write() methods for maximal portability.
+最后，尽管类文件对象通常还提供其他方法（比如readline(), read_info()）， 我们最好只使用基本的 read() 和 write() 方法
+
+Keeping things as simple as possible is often a good policy for C extensions.
+ 在写C扩展的时候，能简单就尽量简单
+
+Consuming an Iterable from C
+15.20 处理C语言中的可迭代对象¶
+
+You want to write C extension code that consumes items from any iterable object such as a list, tuple, file, or generator.
+你想写C扩展代码处理来自任何可迭代对象如列表、元组、文件或生成器中的元素
+
+Here is a sample C extension function that shows how to consume the items on an iterable:
+下面是一个C扩展函数例子，演示了怎样处理可迭代对象中的元素：
+
+The code in this recipe mirrors similar code in Python.
+本节中的代码和Python中对应代码类似
+
+The PyObject_GetIter() call is the same as calling iter() to get an iterator.
+ PyObject_GetIter() 的调用和调用 iter() 一样可获得一个迭代器
+
+The PyIter_Next() function invokes the next method on the iterator returning the next item or NULL if there are no more items.
+ PyIter_Next() 函数调用 next 方法返回下一个元素或NULL(如果没有元素了)
+
+Make sure you’re careful with memory management—Py_DECREF() needs to be called on both the produced items and the iterator object itself to avoid leaking memory.
+ 要注意正确的内存管理—— Py_DECREF() 需要同时在产生的元素和迭代器对象本身上同时被调用， 以避免出现内存泄露
+
+Diagnosing Segmentation Faults
+15.21 诊断分段错误¶
+
+The interpreter violently crashes with a segmentation fault, bus error, access violation, or other fatal error.
+解释器因为某个分段错误、总线错误、访问越界或其他致命错误而突然间奔溃
+
+You would like to get a Python traceback that shows you where your program was running at the point of failure.
+ 你想获得Python堆栈信息，从而找出在发生错误的时候你的程序运行点
+
+The faulthandler module can be used to help you solve this problem.
+faulthandler 模块能被用来帮你解决这个问题
+
+Include the following code in your program:
+ 在你的程序中引入下列代码：
+
+Alternatively, run Python with the -Xfaulthandler option such as this:
+另外还可以像下面这样使用 -Xfaulthandler 来运行Python：
+
+Last, but not least, you can set the PYTHONFAULTHANDLER environment variable.
+最后，你可以设置 PYTHONFAULTHANDLER 环境变量
+
+With faulthandler enabled, fatal errors in C extensions will result in a Python traceback being printed on failures.
+开启faulthandler后，在C扩展中的致命错误会导致一个Python错误堆栈被打印出来
+
+For example:
+例如：
+
+Although this won’t tell you where in the C code things went awry, at least it can tell you how it got there from Python.
+尽管这个并不能告诉你C代码中哪里出错了，但是至少能告诉你Python里面哪里有错
+
+The faulthandler will show you the stack traceback of the Python code executing at the time of failure.
+faulthandler会在Python代码执行出错的时候向你展示跟踪信息
+
+At the very least, this will show you the top-level extension function that was invoked.
+ 至少，它会告诉你出错时被调用的最顶级扩展函数是哪个
+
+With the aid of pdb or other Python debugger, you can investigate the flow of the Python code leading to the error.
+ 在pdb和其他Python调试器的帮助下，你就能追根溯源找到错误所在的位置了
+
+faulthandler will not tell you anything about the failure from C.
+faulthandler不会告诉你任何C语言中的错误信息
+
+For that, you will need to use a traditional C debugger, such as gdb.
+ 因此，你需要使用传统的C调试器，比如gdb
+
+However, the information from the faulthandler traceback may give you a better idea of where to direct your attention.
+ 不过，在faulthandler追踪信息可以让你去判断从哪里着手
+
+It should be noted that certain kinds of errors in C may not be easily recoverable.
+还要注意的是在C中某些类型的错误可能不太容易恢复
+
+For example, if a C extension trashes the stack or program heap, it may render faulthandler inoperable and you’ll simply get no output at all (other than a crash).
+ 例如，如果一个C扩展丢弃了程序堆栈信息，它会让faulthandler不可用， 那么你也得不到任何输出（除了程序奔溃外）
+

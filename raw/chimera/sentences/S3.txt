@@ -1,0 +1,852 @@
+Chapter 3. Numbers, Dates, and Times
+第三章：数字日期和时间¶
+
+Performing mathematical calculations with integers and floating-point numbers is easy in Python.
+在Python中执行整数和浮点数的数学运算时很简单的
+
+However, if you need to perform calculations with fractions, arrays, or dates and times, a bit more work is required.
+ 尽管如此，如果你需要执行分数、数组或者是日期和时间的运算的话，就得做更多的工作了
+
+The focus of this chapter is on such topics.
+ 本章集中讨论的就是这些主题
+
+Rounding Numerical Values
+3.1 数字的四舍五入¶
+
+You want to round a floating-point number to a fixed number of decimal places.
+你想对浮点数执行指定精度的舍入运算
+
+For simple rounding, use the built-in round(value, ndigits) function.
+对于简单的舍入运算，使用内置的 round(value, ndigits) 函数即可
+
+For example:
+比如：
+
+When a value is exactly halfway between two choices, the behavior of round is to round to the nearest even digit.
+当一个值刚好在两个边界的中间的时候， round 函数返回离它最近的偶数
+
+That is, values such as 1.5 or 2.5 both get rounded to 2.
+ 也就是说，对1.5或者2.5的舍入运算都会得到2
+
+The number of digits given to round() can be negative, in which case rounding takes place for tens, hundreds, thousands, and so on.
+传给 round() 函数的 ndigits 参数可以是负数，这种情况下， 舍入运算会作用在十位、百位、千位等上面
+
+For example:
+比如：
+
+Don’t confuse rounding with formatting a value for output.
+不要将舍入和格式化输出搞混淆了
+
+If your goal is simply to output a numerical value with a certain number of decimal places, you don’t typically need to use round().
+ 如果你的目的只是简单的输出一定宽度的数，你不需要使用 round() 函数
+
+Instead, just specify the desired precision when formatting.
+ 而仅仅只需要在格式化的时候指定精度即可
+
+For example:
+比如：
+
+Also, resist the urge to round floating-point numbers to "fix" perceived accuracy problems.
+同样，不要试着去舍入浮点值来”修正”表面上看起来正确的问题
+
+For example, you might be inclined to do this:
+比如，你可能倾向于这样做：
+
+For most applications involving floating point, it’s simply not necessary (or recommended) to do this.
+对于大多数使用到浮点的程序，没有必要也不推荐这样做
+
+Although there are small errors introduced into calculations, the behavior of those errors are understood and tolerated.
+ 尽管在计算的时候会有一点点小的误差，但是这些小的误差是能被理解与容忍的
+
+If avoiding such errors is important (e.g., in financial applications, perhaps), consider the use of the decimal module, which is discussed in the next recipe.
+ 如果不能允许这样的小误差(比如涉及到金融领域)，那么就得考虑使用 decimal 模块了，下一节我们会详细讨论
+
+Performing Accurate Decimal Calculations
+3.2 执行精确的浮点数运算¶
+
+You need to perform accurate calculations with decimal numbers, and don’t want the small errors that naturally occur with floats.
+你需要对浮点数执行精确的计算操作，并且不希望有任何小误差的出现
+
+A well-known issue with floating-point numbers is that they can’t accurately represent all base-10 decimals.
+浮点数的一个普遍问题是它们并不能精确的表示十进制数
+
+Moreover, even simple mathematical calculations introduce small errors.
+ 并且，即使是最简单的数学运算也会产生小的误差，比如：
+
+These errors are a "feature" of the underlying CPU and the IEEE 754 arithmetic performed by its floating-point unit.
+这些错误是由底层CPU和IEEE 754标准通过自己的浮点单位去执行算术时的特征
+
+Since Python’s float data type stores data using the native representation, there’s nothing you can do to avoid such errors if you write your code using float instances.
+ 由于Python的浮点数据类型使用底层表示存储数据，因此你没办法去避免这样的误差
+
+If you want more accuracy (and are willing to give up some performance), you can use the decimal module:
+如果你想更加精确(并能容忍一定的性能损耗)，你可以使用 decimal 模块：
+
+At first glance, it might look a little weird (i.e., specifying numbers as strings).
+初看起来，上面的代码好像有点奇怪，比如我们用字符串来表示数字
+
+However, Decimal objects work in every way that you would expect them to (supporting all of the usual math operations, etc.).
+ 然而， Decimal 对象会像普通浮点数一样的工作(支持所有的常用数学运算)
+
+If you print them or use them in string formatting functions, they look like normal numbers.
+ 如果你打印它们或者在字符串格式化函数中使用它们，看起来跟普通数字没什么两样
+
+A major feature of decimal is that it allows you to control different aspects of calculations, including number of digits and rounding.
+decimal 模块的一个主要特征是允许你控制计算的每一方面，包括数字位数和四舍五入运算
+
+To do this, you create a local context and change its settings.
+ 为了这样做，你先得创建一个本地上下文并更改它的设置，比如：
+
+The decimal module implements IBM’s "General Decimal Arithmetic Specification." Needless to say, there are a huge number of configuration options that are beyond the scope of this book.
+decimal 模块实现了IBM的”通用小数运算规范”
+
+Newcomers to Python might be inclined to use the decimal module to work around perceived accuracy problems with the float data type.
+Python新手会倾向于使用 decimal 模块来处理浮点数的精确运算
+
+However, it’s really important to understand your application domain.
+ 然而，先理解你的应用程序目的是非常重要的
+
+If you’re working with science or engineering problems, computer graphics, or most things of a scientific nature, it’s simply more common to use the normal floating-point type.
+ 如果你是在做科学计算或工程领域的计算、电脑绘图，或者是科学领域的大多数运算， 那么使用普通的浮点类型是比较普遍的做法
+
+For one, very few things in the real world are measured to the 17 digits of accuracy that floats provide.
+ 其中一个原因是，在真实世界中很少会要求精确到普通浮点数能提供的17位精度
+
+Thus, tiny errors introduced in calculations just don’t matter.
+ 因此，计算过程中的那么一点点的误差是被允许的
+
+Second, the performance of native floats is significantly faster—something that’s important if you’re performing a large number of calculations.
+ 第二点就是，原生的浮点数计算要快的多-有时候你在执行大量运算的时候速度也是非常重要的
+
+That said, you can’t ignore the errors completely.
+即便如此，你却不能完全忽略误差
+
+Mathematicians have spent a lot of time studying various algorithms, and some handle errors better than others.
+数学家花了大量时间去研究各类算法，有些处理误差会比其他方法更好
+
+You also have to be a little careful with effects due to things such as subtractive cancellation and adding large and small numbers together.
+ 你也得注意下减法删除以及大数和小数的加分运算所带来的影响
+
+For example:
+比如：
+
+This latter example can be addressed by using a more accurate implementation in math.fsum():
+上面的错误可以利用 math.fsum() 所提供的更精确计算能力来解决：
+
+However, for other algorithms, you really need to study the algorithm and understand its error propagation properties.
+然而，对于其他的算法，你应该仔细研究它并理解它的误差产生来源
+
+All of this said, the main use of the decimal module is in programs involving things such as finance.
+总的来说， decimal 模块主要用在涉及到金融的领域
+
+In such programs, it is extremely annoying to have small errors creep into the calculation.
+ 在这类程序中，哪怕是一点小小的误差在计算过程中蔓延都是不允许的
+
+Thus, decimal provides a way to avoid that.
+ 因此， decimal 模块为解决这类问题提供了方法
+
+It is also common to encounter Decimal objects when Python interfaces with databases—again, especially when accessing financial data.
+ 当Python和数据库打交道的时候也通常会遇到 Decimal 对象，并且，通常也是在处理金融数据的时候
+
+Formatting Numbers for Output
+3.3 数字的格式化输出¶
+
+You need to format a number for output, controlling the number of digits, alignment, inclusion of a thousands separator, and other details.
+你需要将数字格式化后输出，并控制数字的位数、对齐、千位分隔符和其他的细节
+
+To format a single number for output, use the built-in format() function.
+格式化输出单个数字的时候，可以使用内置的 format() 函数，比如：
+
+If you want to use exponential notation, change the f to an e or E, depending on the case you want used for the exponential specifier.
+如果你想使用指数记法，将f改成e或者E(取决于指数输出的大小写形式)
+
+For example:
+比如：
+
+The general form of the width and precision in both cases is '[<>^]?width[,]?(.digits)?' where width and digits are integers and ?
+同时指定宽度和精度的一般形式是 '[<>^]
+
+signifies optional parts.
+width[,]
+
+The same format codes are also used in the .format() method of strings.
+(.digits)
+
+For example:
+' ， 其中 width 和 digits 为整数，
+
+Formatting numbers for output is usually straightforward.
+数字格式化输出通常是比较简单的
+
+The technique shown works for both floating-point numbers and Decimal numbers in the decimal module.
+上面演示的技术同时适用于浮点数和 decimal 模块中的 Decimal 数字对象
+
+When the number of digits is restricted, values are rounded away according to the same rules of the round() function.
+当指定数字的位数后，结果值会根据 round() 函数同样的规则进行四舍五入后返回
+
+For example:
+比如：
+
+Formatting of values with a thousands separator is not locale aware.
+包含千位符的格式化跟本地化没有关系
+
+If you need to take that into account, you might investigate functions in the locale module.
+ 如果你需要根据地区来显示千位符，你需要自己去调查下 locale 模块中的函数了
+
+You can also swap separator characters using the translate() method of strings.
+ 你同样也可以使用字符串的 translate() 方法来交换千位符
+
+For example:
+比如：
+
+In a lot of Python code, numbers are formatted using the % operator.
+在很多Python代码中会看到使用%来格式化数字的，比如：
+
+This formatting is still acceptable, but less powerful than the more modern format() method.
+这种格式化方法也是可行的，不过比更加先进的 format() 要差一点
+
+For example, some features (e.g., adding thousands separators) aren’t supported when using the % operator to format numbers.
+ 比如，在使用%操作符格式化数字的时候，一些特性(添加千位符)并不能被支持
+
+Working with Binary, Octal, and Hexadecimal Integers
+3.4 二八十六进制整数¶
+
+You need to convert or output integers represented by binary, octal, or hexadecimal digits.
+你需要转换或者输出使用二进制，八进制或十六进制表示的整数
+
+To convert an integer into a binary, octal, or hexadecimal text string, use the bin(), oct(), or hex() functions, respectively:
+为了将整数转换为二进制、八进制或十六进制的文本串， 可以分别使用 bin() , oct() 或 hex() 函数：
+
+Alternatively, you can use the format() function if you don’t want the 0b, 0o, or 0x prefixes to appear.
+另外，如果你不想输出 0b , 0o 或者 0x 的前缀的话，可以使用 format() 函数
+
+For example:
+比如：
+
+Integers are signed, so if you are working with negative numbers, the output will also include a sign.
+整数是有符号的，所以如果你在处理负数的话，输出结果会包含一个负号
+
+For example:
+比如：
+
+If you need to produce an unsigned value instead, you’ll need to add in the maximum value to set the bit length.
+如果你想产生一个无符号值，你需要增加一个指示最大位长度的值
+
+For example, to show a 32-bit value, use the following:
+比如为了显示32位的值，可以像下面这样写：
+
+To convert integer strings in different bases, simply use the int() function with an appropriate base.
+为了以不同的进制转换整数字符串，简单的使用带有进制的 int() 函数即可：
+
+For the most part, working with binary, octal, and hexadecimal integers is straightforward.
+大多数情况下处理二进制、八进制和十六进制整数是很简单的
+
+Just remember that these conversions only pertain to the conversion of integers to and from a textual representation.
+ 只要记住这些转换属于整数和其对应的文本表示之间的转换即可
+
+Under the covers, there’s just one integer type.
+永远只有一种整数类型
+
+Finally, there is one caution for programmers who use octal.
+最后，使用八进制的程序员有一点需要注意下
+
+The Python syntax for specifying octal values is slightly different than many other languages.
+ Python指定八进制数的语法跟其他语言稍有不同
+
+For example, if you try something like this, you’ll get a syntax error:
+比如，如果你像下面这样指定八进制，会出现语法错误：
+
+Make sure you prefix the octal value with 0o, as shown here:
+需确保八进制数的前缀是 0o ，就像下面这样：
+
+Packing and Unpacking Large Integers from Bytes
+3.5 字节到大整数的打包与解包¶
+
+You have a byte string and you need to unpack it into an integer value.
+你有一个字节字符串并想将它解压成一个整数
+
+Alternatively, you need to convert a large integer back into a byte string.
+或者，你需要将一个大整数转换为一个字节字符串
+
+Suppose your program needs to work with a 16-element byte string that holds a 128-bit integer value.
+假设你的程序需要处理一个拥有128位长的16个元素的字节字符串
+
+For example:
+比如：
+
+To interpret the bytes as an integer, use int.from_bytes(), and specify the byte ordering like this:
+为了将bytes解析为整数，使用 int.from_bytes() 方法，并像下面这样指定字节顺序：
+
+To convert a large integer value back into a byte string, use the int.to_bytes() method, specifying the number of bytes and the byte order.
+为了将一个大整数转换为一个字节字符串，使用 int.to_bytes() 方法，并像下面这样指定字节数和字节顺序：
+
+Converting large integer values to and from byte strings is not a common operation.
+大整数和字节字符串之间的转换操作并不常见
+
+However, it sometimes arises in certain application domains, such as cryptography or networking.
+ 然而，在一些应用领域有时候也会出现，比如密码学或者网络
+
+For instance, IPv6 network addresses are represented as 128-bit integers.
+ 例如，IPv6网络地址使用一个128位的整数表示
+
+If you are writing code that needs to pull such values out of a data record, you might face this problem.
+ 如果你要从一个数据记录中提取这样的值的时候，你就会面对这样的问题
+
+As an alternative to this recipe, you might be inclined to unpack values using the struct module, as described in “Reading and Writing Binary Arrays of Structures”.
+作为一种替代方案，你可能想使用6.11小节中所介绍的 struct 模块来解压字节
+
+This works, but the size of integers that can be unpacked with struct is limited.
+ 这样也行得通，不过利用 struct 模块来解压对于整数的大小是有限制的
+
+Thus, you would need to unpack multiple values and combine them to create the final value.
+ 因此，你可能想解压多个字节串并将结果合并为最终的结果，就像下面这样：
+
+The specification of the byte order (little or big) just indicates whether the bytes that make up the integer value are listed from the least to most significant or the other way around.
+字节顺序规则(little或big)仅仅指定了构建整数时的字节的低位高位排列方式
+
+This is easy to view using a carefully crafted hexadecimal value:
+ 我们从下面精心构造的16进制数的表示中可以很容易的看出来：
+
+If you try to pack an integer into a byte string, but it won’t fit, you’ll get an error.
+如果你试着将一个整数打包为字节字符串，那么它就不合适了，你会得到一个错误
+
+You can use the int.bit_length() method to determine how many bits are required to store a value if needed:
+ 如果需要的话，你可以使用 int.bit_length() 方法来决定需要多少字节位来存储这个值
+
+Performing Complex-Valued Math
+3.6 复数的数学运算¶
+
+Your code for interacting with the latest web authentication scheme has encountered a singularity and your only solution is to go around it in the complex plane.
+你写的最新的网络认证方案代码遇到了一个难题，并且你唯一的解决办法就是使用复数空间
+
+Or maybe you just need to perform some calculations using complex numbers.
+ 再或者是你仅仅需要使用复数来执行一些计算操作
+
+Complex numbers can be specified using the complex(real, imag) function or by floating-point numbers with a j suffix.
+复数可以用使用函数 complex(real, imag) 或者是带有后缀j的浮点数来指定
+
+For example:
+比如：
+
+The real, imaginary, and conjugate values are easy to obtain, as shown here:
+对应的实部、虚部和共轭复数可以很容易的获取
+
+In addition, all of the usual mathematical operators work:
+另外，所有常见的数学运算都可以工作：
+
+To perform additional complex-valued functions such as sines, cosines, or square roots, use the cmath module:
+如果要执行其他的复数函数比如正弦、余弦或平方根，使用 cmath 模块：
+
+Most of Python’s math-related modules are aware of complex values.
+Python中大部分与数学相关的模块都能处理复数
+
+For example, if you use numpy, it is straightforward to make arrays of complex values and perform operations on them:
+ 比如如果你使用 numpy ，可以很容易的构造一个复数数组并在这个数组上执行各种操作：
+
+Python’s standard mathematical functions do not produce complex values by default, so it is unlikely that such a value would accidentally show up in your code.
+Python的标准数学函数确实情况下并不能产生复数值，因此你的代码中不可能会出现复数返回值
+
+For example:
+比如：
+
+If you want complex numbers to be produced as a result, you have to explicitly use cmath or declare the use of a complex type in libraries that know about them.
+如果你想生成一个复数返回结果，你必须显示的使用 cmath 模块，或者在某个支持复数的库中声明复数类型的使用
+
+For example:
+比如：
+
+Working with Infinity and NaNs
+3.7 无穷大与NaN¶
+
+You need to create or test for the floating-point values of infinity, negative infinity, or NaN (not a number).
+你想创建或测试正无穷、负无穷或NaN(非数字)的浮点数
+
+Python has no special syntax to represent these special floating-point values, but they can be created using float().
+Python并没有特殊的语法来表示这些特殊的浮点值，但是可以使用 float() 来创建它们
+
+For example:
+比如：
+
+To test for the presence of these values, use the math.isinf() and math.isnan() functions.
+为了测试这些值的存在，使用 math.isinf() 和 math.isnan() 函数
+
+For example:
+比如：
+
+For more detailed information about these special floating-point values, you should refer to the IEEE 754 specification.
+想了解更多这些特殊浮点值的信息，可以参考IEEE 754规范
+
+However, there are a few tricky details to be aware of, especially related to comparisons and operators.
+ 然而，也有一些地方需要你特别注意，特别是跟比较和操作符相关的时候
+
+Infinite values will propagate in calculations in a mathematical manner.
+无穷大数在执行数学计算的时候会传播，比如：
+
+However, certain operations are undefined and will result in a NaN result.
+但是有些操作时未定义的并会返回一个NaN结果
+
+For example:
+比如：
+
+NaN values propagate through all operations without raising an exception.
+NaN值会在所有操作中传播，而不会产生异常
+
+For example:
+比如：
+
+A subtle feature of NaN values is that they never compare as equal.
+NaN值的一个特别的地方时它们之间的比较操作总是返回False
+
+For example:
+比如：
+
+Because of this, the only safe way to test for a NaN value is to use math.isnan(), as shown in this recipe.
+由于这个原因，测试一个NaN值得唯一安全的方法就是使用 math.isnan() ，也就是上面演示的那样
+
+Sometimes programmers want to change Python’s behavior to raise exceptions when operations result in an infinite or NaN result.
+有时候程序员想改变Python默认行为，在返回无穷大或NaN结果的操作中抛出异常
+
+The fpectl module can be used to adjust this behavior, but it is not enabled in a standard Python build, it’s platform-dependent, and really only intended for expert-level programmers.
+ fpectl 模块可以用来改变这种行为，但是它在标准的Python构建中并没有被启用，它是平台相关的， 并且针对的是专家级程序员
+
+See the online Python documentation for further details.
+可以参考在线的Python文档获取更多的细节
+
+Calculating with Fractions
+3.8 分数运算¶
+
+You have entered a time machine and suddenly find yourself working on elementary-level homework problems involving fractions.
+你进入时间机器，突然发现你正在做小学家庭作业，并涉及到分数计算问题
+
+Or perhaps you’re writing code to make calculations involving measurements made in your wood shop.
+ 或者你可能需要写代码去计算在你的木工工厂中的测量值
+
+The fractions module can be used to perform mathematical calculations involving fractions.
+fractions 模块可以被用来执行包含分数的数学运算
+
+For example:
+比如：
+
+Calculating with fractions doesn’t arise often in most programs, but there are situations where it might make sense to use them.
+在大多数程序中一般不会出现分数的计算问题，但是有时候还是需要用到的
+
+For example, allowing a program to accept units of measurement in fractions and performing calculations with them in that form might alleviate the need for a user to manually make conversions to decimals or floats.
+ 比如，在一个允许接受分数形式的测试单位并以分数形式执行运算的程序中， 直接使用分数可以减少手动转换为小数或浮点数的工作
+
+Calculating with Large Numerical Arrays
+3.9 大型数组运算¶
+
+You need to perform calculations on large numerical datasets, such as arrays or grids.
+你需要在大数据集(比如数组或网格)上面执行计算
+
+For any heavy computation involving arrays, use the NumPy library.
+涉及到数组的重量级运算操作，可以使用 NumPy 库
+
+The major feature of NumPy is that it gives Python an array object that is much more efficient and better suited for mathematical calculation than a standard Python list.
+ NumPy 的一个主要特征是它会给Python提供一个数组对象，相比标准的Python列表而已更适合用来做数学运算
+
+Here is a short example illustrating important behavioral differences between lists and NumPy arrays:
+ 下面是一个简单的小例子，向你展示标准列表对象和 NumPy 数组对象之间的差别：
+
+As you can see, basic mathematical operations involving arrays behave differently.
+正如所见，两种方案中数组的基本数学运算结果并不相同
+
+Specifically, scalar operations (e.g., ax * 2 or ax + 10) apply the operation on an element-by-element basis.
+ 特别的， NumPy 中的标量运算(比如 ax * 2 或 ax + 10 )会作用在每一个元素上
+
+In addition, performing math operations when both operands are arrays applies the operation to all elements and produces a new array.
+ 另外，当两个操作数都是数组的时候执行元素对等位置计算，并最终生成一个新的数组
+
+The fact that math operations apply to all of the elements simultaneously makes it very easy and fast to compute functions across an entire array.
+对整个数组中所有元素同时执行数学运算可以使得作用在整个数组上的函数运算简单而又快速
+
+For example, if you want to compute the value of a polynomial:
+ 比如，如果你想计算多项式的值，可以这样做：
+
+NumPy provides a collection of "universal functions" that also allow for array operations.
+NumPy 还为数组操作提供了大量的通用函数，这些函数可以作为 math 模块中类似函数的替代
+
+These are replacements for similar functions normally found in the math module.
+比如：
+
+Using universal functions can be hundreds of times faster than looping over the array elements one at a time and performing calculations using functions in the math module.
+使用这些通用函数要比循环数组并使用 math 模块中的函数执行计算要快的多
+
+Thus, you should prefer their use whenever possible.
+ 因此，只要有可能的话尽量选择 NumPy 的数组方案
+
+Under the covers, NumPy arrays are allocated in the same manner as in C or Fortran.
+底层实现中， NumPy 数组使用了C或者Fortran语言的机制分配内存
+
+Namely, they are large, contiguous memory regions consisting of a homogenous data type.
+ 也就是说，它们是一个非常大的连续的并由同类型数据组成的内存区域
+
+Because of this, it’s possible to make arrays much larger than anything you would normally put into a Python list.
+ 所以，你可以构造一个比普通Python列表大的多的数组
+
+For example, if you want to make a two-dimensional grid of 10,000 by 10,000 floats, it’s not an issue:
+ 比如，如果你想构造一个10,000*10,000的浮点数二维网格，很轻松：
+
+All of the usual operations still apply to all of the elements simultaneously:
+所有的普通操作还是会同时作用在所有元素上：
+
+One extremely notable aspect of NumPy is the manner in which it extends Python’s list indexing functionality—especially with multidimensional arrays.
+关于 NumPy 有一点需要特别的主意，那就是它扩展Python列表的索引功能 - 特别是对于多维数组
+
+To illustrate, make a simple two-dimensional array and try some experiments:
+ 为了说明清楚，先构造一个简单的二维数组并试着做些试验：
+
+NumPy is the foundation for a huge number of science and engineering libraries in Python.
+NumPy 是Python领域中很多科学与工程库的基础，同时也是被广泛使用的最大最复杂的模块
+
+It is also one of the largest and most complicated modules in widespread use.
+ 即便如此，在刚开始的时候通过一些简单的例子和玩具程序也能帮我们完成一些有趣的事情
+
+One note about usage is that it is relatively common to use the statement import numpy as np, as shown in the solution.
+通常我们导入 NumPy 模块的时候会使用语句 import numpy as np 
+
+This simply shortens the name to something that’s more convenient to type over and over again in your program.
+ 这样的话你就不用再你的程序里面一遍遍的敲入 numpy ，只需要输入 np 就行了，节省了不少时间
+
+For more information, you definitely need to visit http://www.numpy.org.
+如果想获取更多的信息，你当然得去 NumPy 官网逛逛了，网址是： http://www.numpy.org
+
+Performing Matrix and Linear Algebra Calculations
+3.10 矩阵与线性代数运算¶
+
+You need to perform matrix and linear algebra operations, such as matrix multiplication, finding determinants, solving linear equations, and so on.
+你需要执行矩阵和线性代数运算，比如矩阵乘法、寻找行列式、求解线性方程组等等
+
+The NumPy library has a matrix object that can be used for this purpose.
+矩阵类似于3.9小节中数组对象，但是遵循线性代数的计算规则
+
+Matrices are somewhat similar to the array objects described in “Calculating with Large Numerical Arrays”, but follow linear algebra rules for computation.
+下面的一个例子展示了矩阵的一些基本特性：
+
+More operations can be found in the numpy.linalg subpackage.
+可以在 numpy.linalg 子包中找到更多的操作函数，比如：
+
+Linear algebra is obviously a huge topic that’s far beyond the scope of this cookbook.
+很显然线性代数是个非常大的主题，已经超出了本书能讨论的范围
+
+However, if you need to manipulate matrices and vectors, NumPy is a good starting point.
+ 但是，如果你需要操作数组和向量的话， NumPy 是一个不错的入口点
+
+Visit http://www.numpy.org for more detailed information.
+ 可以访问 NumPy 官网 http://www.numpy.org 获取更多信息
+
+Picking Things at Random
+3.11 随机选择¶
+
+You want to pick random items out of a sequence or generate random numbers.
+你想从一个序列中随机抽取若干元素，或者想生成几个随机数
+
+The random module has various functions for random numbers and picking random items.
+random 模块有大量的函数用来产生随机数和随机选择元素
+
+For example, to pick a random item out of a sequence, use random.choice():
+ 比如，要想从一个序列中随机的抽取一个元素，可以使用 random.choice() ：
+
+To take a sampling of N items where selected items are removed from further consideration, use random.sample() instead:
+为了提取出N个不同元素的样本用来做进一步的操作，可以使用 random.sample() ：
+
+If you simply want to shuffle items in a sequence in place, use random.shuffle():
+如果你仅仅只是想打乱序列中元素的顺序，可以使用 random.shuffle() ：
+
+To produce random integers, use random.randint():
+生成随机整数，请使用 random.randint() ：
+
+To produce uniform floating-point values in the range 0 to 1, use random.random():
+为了生成0到1范围内均匀分布的浮点数，使用 random.random() ：
+
+To get N random-bits expressed as an integer, use random.getrandbits():
+如果要获取N位随机位(二进制)的整数，使用 random.getrandbits() ：
+
+The random module computes random numbers using the Mersenne Twister algorithm.
+random 模块使用 Mersenne Twister 算法来计算生成随机数
+
+This is a deterministic algorithm, but you can alter the initial seed by using the random.seed() function.
+这是一个确定性算法， 但是你可以通过 random.seed() 函数修改初始化种子
+
+For example:
+比如：
+
+In addition to the functionality shown, random() includes functions for uniform, Gaussian, and other probabality distributions.
+除了上述介绍的功能，random模块还包含基于均匀分布、高斯分布和其他分布的随机数生成函数
+
+For example, random.uniform() computes uniformly distributed numbers, and random.gauss() computes normally distributed numbers.
+ 比如， random.uniform() 计算均匀分布随机数， random.gauss() 计算正态分布随机数
+
+Consult the documentation for information on other supported distributions.
+ 对于其他的分布情况请参考在线文档
+
+Functions in random() should not be used in programs related to cryptography.
+在 random 模块中的函数不应该用在和密码学相关的程序中
+
+If you need such functionality, consider using functions in the ssl module instead.
+ 如果你确实需要类似的功能，可以使用ssl模块中相应的函数
+
+For example, ssl.RAND_bytes() can be used to generate a cryptographically secure sequence of random bytes.
+ 比如， ssl.RAND_bytes() 可以用来生成一个安全的随机字节序列
+
+Converting Days to Seconds, and Other Basic Time Conversions
+3.12 基本的日期与时间转换¶
+
+You have code that needs to perform simple time conversions, like days to seconds, hours to minutes, and so on.
+你需要执行简单的时间转换，比如天到秒，小时到分钟等的转换
+
+To perform conversions and arithmetic involving different units of time, use the datetime module.
+为了执行不同时间单位的转换和计算，请使用 datetime 模块
+
+For example, to represent an interval of time, create a timedelta instance, like this:
+ 比如，为了表示一个时间段，可以创建一个 timedelta 实例，就像下面这样：
+
+If you need to represent specific dates and times, create datetime instances and use the standard mathematical operations to manipulate them.
+如果你想表示指定的日期和时间，先创建一个 datetime 实例然后使用标准的数学运算来操作它们
+
+For example:
+比如：
+
+When making calculations, it should be noted that datetime is aware of leap years.
+在计算的时候，需要注意的是 datetime 会自动处理闰年
+
+For example:
+比如：
+
+For most basic date and time manipulation problems, the datetime module will suffice.
+对大多数基本的日期和时间处理问题， datetime 模块以及足够了
+
+If you need to perform more complex date manipulations, such as dealing with time zones, fuzzy time ranges, calculating the dates of holidays, and so forth, look at the dateutil module.
+ 如果你需要执行更加复杂的日期操作，比如处理时区，模糊时间范围，节假日计算等等， 可以考虑使用 dateutil模块
+
+To illustrate, many similar time calculations can be performed with the dateutil.relativedelta() function.
+许多类似的时间计算可以使用 dateutil.relativedelta() 函数代替
+
+However, one notable feature is that it fills in some gaps pertaining to the handling of months (and their differing number of days).
+ 但是，有一点需要注意的就是，它会在处理月份(还有它们的天数差距)的时候填充间隙
+
+For instance:
+看例子最清楚：
+
+Determining Last Friday’s Date
+3.13 计算最后一个周五的日期¶
+
+You want a general solution for finding a date for the last occurrence of a day of the week.
+你需要查找星期中某一天最后出现的日期，比如星期五
+
+Python’s datetime module has utility functions and classes to help perform calculations like this.
+Python的 datetime 模块中有工具函数和类可以帮助你执行这样的计算
+
+A decent, generic solution to this problem looks like this:
+ 下面是对类似这样的问题的一个通用解决方案：
+
+Using this in an interpreter session would look like this:
+在交互式解释器中使用如下：
+
+The optional start_date can be supplied using another datetime instance.
+可选的 start_date 参数可以由另外一个 datetime 实例来提供
+
+For example:
+比如：
+
+This recipe works by mapping the start date and the target date to their numeric position in the week (with Monday as day 0).
+上面的算法原理是这样的：先将开始日期和目标日期映射到星期数组的位置上(星期一索引为0)， 然后通过模运算计算出目标日期要经过多少天才能到达开始日期
+
+Modular arithmetic is then used to figure out how many days ago the target date last occurred.
+然后用开始日期减去那个时间差即得到结果日期
+
+If you’re performing a lot of date calculations like this, you may be better off installing the python-dateutil package instead.
+如果你要像这样执行大量的日期计算的话，你最好安装第三方包 python-dateutil 来代替
+
+For example, here is an example of performing the same calculation using the relativedelta() function from dateutil:
+ 比如，下面是是使用 dateutil 模块中的 relativedelta() 函数执行同样的计算：
+
+Finding the Date Range for the Current Month
+3.14 计算当前月份的日期范围¶
+
+You have some code that needs to loop over each date in the current month, and want an efficient way to calculate that date range.
+你的代码需要在当前月份中循环每一天，想找到一个计算这个日期范围的高效方法
+
+Looping over the dates doesn’t require building a list of all the dates ahead of time.
+在这样的日期上循环并需要事先构造一个包含所有日期的列表
+
+You can just calculate the starting and stopping date in the range, then use datetime.timedelta objects to increment the date as you go.
+ 你可以先计算出开始日期和结束日期， 然后在你步进的时候使用 datetime.timedelta 对象递增这个日期变量即可
+
+Here’s a function that takes any datetime object, and returns a tuple containing the first date of the month and the starting date of the next month:
+下面是一个接受任意 datetime 对象并返回一个由当前月份开始日和下个月开始日组成的元组对象
+
+With this in place, it’s pretty simple to loop over the date range:
+有了这个就可以很容易的在返回的日期范围上面做循环操作了：
+
+This recipe works by first calculating a date correponding to the first day of the month.
+上面的代码先计算出一个对应月份第一天的日期
+
+A quick way to do this is to use the replace() method of a date or datetime object to simply set the days attribute to 1.
+ 一个快速的方法就是使用 date 或 datetime 对象的 replace() 方法简单的将 days 属性设置成1即可
+
+One nice thing about the replace() method is that it creates the same kind of object that you started with.
+ replace() 方法一个好处就是它会创建和你开始传入对象类型相同的对象
+
+Thus, if the input was a date instance, the result is a date.
+ 所以，如果输入参数是一个 date 实例，那么结果也是一个 date 实例
+
+Likewise, if the input was a datetime instance, you get a datetime instance.
+ 同样的，如果输入是一个 datetime 实例，那么你得到的就是一个 datetime 实例
+
+After that, the calendar.monthrange() function is used to find out how many days are in the month in question.
+然后，使用 calendar.monthrange() 函数来找出该月的总天数
+
+Any time you need to get basic information about calendars, the calendar module can be useful.
+ 任何时候只要你想获得日历信息，那么 calendar 模块就非常有用了
+
+monthrange() is only one such function that returns a tuple containing the day of the week along with the number of days in the month.
+ monthrange() 函数会返回包含星期和该月天数的元组
+
+Once the number of days in the month is known, the ending date is calculated by adding an appropriate timedelta to the starting date.
+一旦该月的天数已知了，那么结束日期就可以通过在开始日期上面加上这个天数获得
+
+It’s subtle, but an important aspect of this recipe is that the ending date is not to be included in the range (it is actually the first day of the next month).
+ 有个需要注意的是结束日期并不包含在这个日期范围内(事实上它是下个月的开始日期)
+
+This mirrors the behavior of Python’s slices and range operations, which also never include the end point.
+ 这个和Python的 slice 与 range 操作行为保持一致，同样也不包含结尾
+
+To loop over the date range, standard math and comparison operators are used.
+为了在日期范围上循环，要使用到标准的数学和比较操作
+
+For example, timedelta instances can be used to increment the date.
+ 比如，可以利用 timedelta 实例来递增日期，小于号<用来检查一个日期是否在结束日期之前
+
+Ideally, it would be nice to create a function that works like the built-in range() function, but for dates.
+理想情况下，如果能为日期迭代创建一个同内置的 range() 函数一样的函数就好了
+
+Fortunately, this is extremely easy to implement using a generator:
+ 幸运的是，可以使用一个生成器来很容易的实现这个目标：
+
+Here is an example of it in use:
+下面是使用这个生成器的例子：
+
+Again, a major part of the ease of implementation is that dates and times can be manipulated using standard math and comparison operators.
+这种实现之所以这么简单，还得归功于Python中的日期和时间能够使用标准的数学和比较操作符来进行运算
+
+Converting Strings into Datetimes
+3.15 字符串转换为日期¶
+
+Your application receives temporal data in string format, but you want to convert those strings into datetime objects in order to perform nonstring operations on them.
+你的应用程序接受字符串格式的输入，但是你想将它们转换为 datetime 对象以便在上面执行非字符串操作
+
+Python’s standard datetime module is typically the easy solution for this.
+使用Python的标准模块 datetime 可以很容易的解决这个问题
+
+For example:
+比如：
+
+The datetime.strptime() method supports a host of formatting codes, like %Y for the four-digit year and %m for the two-digit month.
+datetime.strptime() 方法支持很多的格式化代码， 比如 %Y 代表4位数年份， %m 代表两位数月份
+
+It’s also worth noting that these formatting placeholders also work in reverse, in case you need to represent a datetime object in string output and make it look nice.
+ 还有一点值得注意的是这些格式化占位符也可以反过来使用，将日期输出为指定的格式字符串形式
+
+For example, let’s say you have some code that generates a datetime object, but you need to format a nice, human-readable date to put in the header of an auto-generated letter or report:
+比如，假设你的代码中生成了一个 datetime 对象， 你想将它格式化为漂亮易读形式后放在自动生成的信件或者报告的顶部：
+
+It’s worth noting that the performance of strptime() is often much worse than you might expect, due to the fact that it’s written in pure Python and it has to deal with all sorts of system locale settings.
+还有一点需要注意的是， strptime() 的性能要比你想象中的差很多， 因为它是使用纯Python实现，并且必须处理所有的系统本地设置
+
+If you are parsing a lot of dates in your code and you know the precise format, you will probably get much better performance by cooking up a custom solution instead.
+ 如果你要在代码中需要解析大量的日期并且已经知道了日期字符串的确切格式，可以自己实现一套解析方案来获取更好的性能
+
+For example, if you knew that the dates were of the form "YYYY-MM-DD," you could write a function like this:
+ 比如，如果你已经知道所以日期格式是 YYYY-MM-DD ，你可以像下面这样实现一个解析函数：
+
+When tested, this function runs over seven times faster than datetime.strptime().
+实际测试中，这个函数比 datetime.strptime() 快7倍多
+
+This is probably something to consider if you’re processing large amounts of data involving dates.
+ 如果你要处理大量的涉及到日期的数据的话，那么最好考虑下这个方案
+
+Manipulating Dates Involving Time Zones
+3.16 结合时区的日期操作¶
+
+You had a conference call scheduled for December 21, 2012, at 9:30 a.m.
+你有一个安排在2012年12月21日早上9:30的电话会议，地点在芝加哥
+
+in Chicago.
+ 而你的朋友在印度的班加罗尔，那么他应该在当地时间几点参加这个会议呢
+
+For almost any problem involving time zones, you should use the pytz module.
+对几乎所有涉及到时区的问题，你都应该使用 pytz 模块
+
+This package provides the Olson time zone database, which is the de facto standard for time zone information found in many languages and operating systems.
+这个包提供了Olson时区数据库， 它是时区信息的事实上的标准，在很多语言和操作系统里面都可以找到
+
+A major use of pytz is in localizing simple dates created with the datetime library.
+pytz 模块一个主要用途是将 datetime 库创建的简单日期对象本地化
+
+For example, here is how you would represent a date in Chicago time:
+ 比如，下面如何表示一个芝加哥时间的示例：
+
+Once the date has been localized, it can be converted to other time zones.
+一旦日期被本地化了， 它就可以转换为其他时区的时间了
+
+To find the same time in Bangalore, you would do this:
+ 为了得到班加罗尔对应的时间，你可以这样做：
+
+If you are going to perform arithmetic with localized dates, you need to be particularly aware of daylight saving transitions and other details.
+如果你打算在本地化日期上执行计算，你需要特别注意夏令时转换和其他细节
+
+For example, in 2013, U.S.
+ 比如，在2013年，美国标准夏令时时间开始于本地时间3月13日凌晨2:00(在那时，时间向前跳过一小时)
+
+standard daylight saving time started on March 13, 2:00 a.m.
+ 如果你正在执行本地计算，你会得到一个错误
+
+local time (at which point, time skipped ahead one hour).
+比如：
+
+The answer is wrong because it doesn’t account for the one-hour skip in the local time.
+结果错误是因为它并没有考虑在本地时间中有一小时的跳跃
+
+To fix this, use the normalize() method of the time zone.
+ 为了修正这个错误，可以使用时区对象 normalize() 方法
+
+For example:
+比如：
+
+To keep your head from completely exploding, a common strategy for localized date handling is to convert all dates to UTC time and to use that for all internal storage and manipulation.
+为了不让你被这些东东弄的晕头转向，处理本地化日期的通常的策略先将所有日期转换为UTC时间， 并用它来执行所有的中间存储和操作
+
+For example:
+比如：
+
+Once in UTC, you don’t have to worry about issues related to daylight saving time and other matters.
+一旦转换为UTC，你就不用去担心跟夏令时相关的问题了
+
+Thus, you can simply perform normal date arithmetic as before.
+ 因此，你可以跟之前一样放心的执行常见的日期计算
+
+Should you want to output the date in localized time, just convert it to the appropriate time zone afterward.
+ 当你想将输出变为本地时间的时候，使用合适的时区去转换下就行了
+
+For example:
+比如：
+
+One issue in working with time zones is simply figuring out what time zone names to use.
+当涉及到时区操作的时候，有个问题就是我们如何得到时区的名称
+
+For example, in this recipe, how was it known that "Asia/Kolkata" was the correct time zone name for India?
+ 比如，在这个例子中，我们如何知道“Asia/Kolkata”就是印度对应的时区名呢
+
+To find out, you can consult the pytz.country_timezones dictionary using the ISO 3166 country code as a key.
+ 为了查找，可以使用ISO 3166国家代码作为关键字去查阅字典 pytz.country_timezones 
+
+For example:
+比如：
+
+By the time you read this, it’s possible that the pytz module will be deprecated in favor of improved time zone support, as described in PEP 431.
+注：当你阅读到这里的时候，有可能 pytz 模块以及不再建议使用了，因为PEP431提出了更先进的时区支持
+
+Many of the same issues will still apply, however (e.g., advice using UTC dates, etc.).
+ 但是这里谈到的很多问题还是有参考价值的(比如使用UTC日期的建议等)
+

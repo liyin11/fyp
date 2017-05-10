@@ -1,0 +1,81 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+10.2. Standard input, output, and error
+10.2. 标准输入、输出和错误
+
+UNIX users are already familiar with the concept of standard input, standard output, and standard error.
+UNIX 用户已经对标准输入、标准输出和标准错误的概念非常熟悉了
+
+This section is for the rest of you.
+这一节是为其他不熟悉的人准备的
+
+Standard output and standard error (commonly abbreviated stdout and stderr) are pipes that are built into every UNIX system.
+标准输入和标准错误 (通常缩写为 stdout 和 stderr) 是内建在每一个 UNIX 系统中的管道
+
+When you print something, it goes to the stdout pipe;
+当你 print 某些东西时，结果前往 stdout 管道
+
+when your program crashes and prints out debugging information (like a traceback in Python), it goes to the stderr pipe.
+当你的程序崩溃并打印出调试信息 (例如 Python 中的 traceback (错误跟踪)) 的时候，信息前往 stderr 管道
+
+Both of these pipes are ordinarily just connected to the terminal window where you are working, so when a program prints, you see the output, and when a program crashes, you see the debugging information.
+通常这两个管道只与你正在工作的终端窗口相联，所以当一个程序打印时，你可以看到输出，而当一个程序崩溃时，你可以看到调试信息
+
+(If you're working on a system with a window-based Python IDE, stdout and stderr default to your “Interactive Window”.)
+(如果你正在一个基于窗口的 Python IDE 上工作，stdout 和 stderr 缺省为你的“交互窗口”
+
+stdout and stderr are both file-like objects, like the ones you discussed in Section 10.1, “Abstracting input sources”, but they are both write-only.
+stdout 和 stderr 都是类文件对象，就像在第 10.1 节 “抽象输入源”中讨论的一样，但是它们都是只写的
+
+They have no read method, only write.
+它们都没有 read 方法，只有 write 方法
+
+Still, they are file-like objects, and you can assign any other file- or file-like object to them to redirect their output.
+然而，它们仍然是类文件对象，因此你可以将其它任何 (类) 文件对象赋值给它们来重定向其输出
+
+(On Windows, you can use type instead of cat to display the contents of a file.)
+(在 Windows 上，你要使用 type 来代替 cat 显示文件的内容
+
+If you have not already done so, you can download this and other examples used in this book.
+如果您还没有下载本书附带的样例程序, 可以 下载本程序和其他样例程序
+
+Redirecting stderr works exactly the same way, using sys.stderr instead of sys.stdout.
+重定向 stderr 以完全相同的方式进行，只要把 sys.stdout 改为 sys.stderr
+
+If you have not already done so, you can download this and other examples used in this book.
+如果您还没有下载本书附带的样例程序, 可以 下载本程序和其他样例程序
+
+Since it is so common to write error messages to standard error, there is a shorthand syntax that can be used instead of going through the hassle of redirecting it outright.
+向标准错误写入错误信息是很常见的，所以有一种较快的语法可以立刻导出信息
+
+Standard input, on the other hand, is a read-only file object, and it represents the data flowing into the program from some previous program.
+另一方面，标准输入是一个只读文件对象，它表示从前一个程序到这个程序的数据流
+
+This will likely not make much sense to classic Mac OS users, or even Windows users unless you were ever fluent on the MS-DOS command line.
+这个对于老的 Mac OS 用户和 Windows 用户可能不太容易理解，除非你受到过 MS-DOS 命令行的影响
+
+The way it works is that you can construct a chain of commands in a single line, so that one program's output becomes the input for the next program in the chain.
+在 MS-DOS 命令行中，你可以使用一行指令构造一个命令的链，使得一个程序的输出就可以成为下一个程序的输入
+
+The first program simply outputs to standard output (without doing any special redirecting itself, just doing normal print statements or whatever), and the next program reads from standard input, and the operating system takes care of connecting one program's output to the next program's input.
+第一个程序只是简单地输出到标准输出上 (程序本身没有做任何特别的重定向，只是执行了普通的 print 语句等)，然后，下一个程序从标准输入中读取，操作系统就把一个程序的输出连接到一个程序的输入
+
+So how does the script “know” to read from standard input when the grammar file is “-”?
+那么脚本是如何“知道”在语法文件是“-”时从标准输入读取
+
+It's not magic;
+ 其实不神奇
+
+it's just code.
+它只是代码
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

@@ -1,0 +1,24 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+9.3. Parsing XML
+9.3. XML 解析
+
+As I was saying, actually parsing an XML document is very simple: one line of code.
+正如我说的，实际解析一个 XML 文档是非常简单的：只要一行代码
+
+Where you go from there is up to you.
+从这里出发到哪儿去就是你自己的事了
+
+Now that you have an XML document in memory, you can start traversing through it.
+现在内存中已经有了一个 XML 文档了，你可以开始遍历它了
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

@@ -1,0 +1,42 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+5.2. Importing Modules Using from module import
+5.2. 使用 from module import 导入模块
+
+Python has two ways of importing modules.
+Python 有两种导入模块的方法
+
+Both are useful, and you should know when to use each.
+两种都有用，你应该知道什么时候使用哪一种方法
+
+One way, import module, you've already seen in Section 2.4, “Everything Is an Object”.
+一种方法，import module，你已经在第 2.4 节 “万物皆对象”看过了
+
+The other way accomplishes the same thing, but it has subtle and important differences.
+另一种方法完成同样的事情，但是它与第一种有着细微但重要的区别
+
+Here is the basic from module import syntax:
+下面是 from module import 的基本语法：
+
+This is similar to the import module syntax that you know and love, but with an important difference: the attributes and methods of the imported module types are imported directly into the local namespace, so they are available directly, without qualification by module name.
+它与你所熟知的 import module 语法很相似，但是有一个重要的区别：UserDict 被直接导入到局部名字空间去了，所以它可以直接使用，而不需要加上模块名的限定
+
+You can import individual items or use from module import * to import everything.
+你可以导入独立的项或使用 from module import * 来导入所有东西
+
+When should you use from module import?
+什么时候你应该使用 from module import
+
+Other than that, it's just a matter of style, and you will see Python code written both ways.
+除了这些情况，剩下的只是风格问题了，你会看到用两种方式编写的 Python 代码
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

@@ -1,0 +1,810 @@
+Chapter 13. Utility Scripting and System Administration
+第十三章：脚本编程与系统管理¶
+
+A lot of people use Python as a replacement for shell scripts, using it to automate common system tasks, such as manipulating files, configuring systems, and so forth.
+许多人使用Python作为一个shell脚本的替代，用来实现常用系统任务的自动化，如文件的操作，系统的配置等
+
+The main goal of this chapter is to describe features related to common tasks encountered when writing scripts.
+本章的主要目标是描述光宇编写脚本时候经常遇到的一些功能
+
+For example, parsing command-line options, manipulating files on the filesystem, getting useful system configuration data, and so forth.
+例如，解析命令行选项、获取有用的系统配置数据等等
+
+Chapter 5 also contains general information related to files and directories.
+第5章也包含了与文件和目录相关的一般信息
+
+Accepting Script Input via Redirection, Pipes, or Input Files
+13.1 通过重定向/管道/文件接受输入¶
+
+You want a script you’ve written to be able to accept input using whatever mechanism is easiest for the user.
+你希望你的脚本接受任何用户认为最简单的输入方式
+
+This should include piping output from a command to the script, redirecting a file into the script, or just passing a filename, or list of filenames, to the script on the command line.
+包括将命令行的输出通过管道传递给该脚本、 重定向文件到该脚本，或在命令行中传递一个文件名或文件名列表给该脚本
+
+Python’s built-in fileinput module makes this very simple and concise.
+Python内置的 fileinput 模块让这个变得简单
+
+If you have a script that looks like this:
+如果你有一个下面这样的脚本：
+
+Then you can already accept input to the script in all of the previously mentioned ways.
+那么你就能以前面提到的所有方式来为此脚本提供输入
+
+If you save this script as filein.py and make it executable, you can do all of the following and get the expected output:
+假设你将此脚本保存为 filein.py 并将其变为可执行文件， 那么你可以像下面这样调用它，得到期望的输出：
+
+The fileinput.input() function creates and returns an instance of the FileInput class.
+fileinput.input() 创建并返回一个 FileInput 类的实例
+
+In addition to containing a few handy helper methods, the instance can also be used as a context manager.
+ 该实例除了拥有一些有用的帮助方法外，它还可被当做一个上下文管理器使用
+
+So, to put all of this together, if we wrote a script that expected to be printing output from several files at once, we might have it include the filename and line number in the output, like this:
+ 因此，整合起来，如果我们要写一个打印多个文件输出的脚本，那么我们需要在输出中包含文件名和行号，如下所示：
+
+Using it as a context manager ensures that the file is closed when it’s no longer being used, and we leveraged a few handy FileInput helper methods here to get some extra information in the output.
+通过将它作为一个上下文管理器使用，可以确保它不再使用时文件能自动关闭， 而且我们在之类还演示了 FileInput 的一些有用的帮助方法来获取输出中的一些其他信息
+
+Terminating a Program with an Error Message
+13.2 终止程序并给出错误信息¶
+
+You want your program to terminate by printing a message to standard error and returning a nonzero status code.
+你想向标准错误打印一条消息并返回某个非零状态码来终止程序运行
+
+To have a program terminate in this manner, raise a SystemExit exception, but supply the error message as an argument.
+你有一个程序像下面这样终止，抛出一个 SystemExit 异常，使用错误消息作为参数
+
+For example:
+例如：
+
+This will cause the supplied message to be printed to sys.stderr and the program to exit with a status code of 1.
+它会将消息在 sys.stderr 中打印，然后程序以状态码1退出
+
+This is a small recipe, but it solves a common problem that arises when writing scripts.
+本节虽然很短小，但是它能解决在写脚本时的一个常见问题
+
+Namely, to terminate a program, you might be inclined to write code like this:
+ 也就是说，当你想要终止某个程序时，你可能会像下面这样写：
+
+None of the extra steps involving import or writing to sys.stderr are neccessary if you simply supply the message to SystemExit() instead.
+如果你直接将消息作为参数传给 SystemExit() ，那么你可以省略其他步骤， 比如import语句或将错误消息写入 sys.stderr
+
+Parsing Command-Line Options
+13.3 解析命令行选项¶
+
+You want to write a program that parses options supplied on the command line (found in sys.argv).
+你的程序如何能够解析命令行选项（位于sys.argv中）
+
+The argparse module can be used to parse command-line options.
+argparse 模块可被用来解析命令行选项
+
+A simple example will help to illustrate the essential features:
+下面一个简单例子演示了最基本的用法：
+
+This program defines a command-line parser with the following usage:
+该程序定义了一个如下使用的命令行解析器：
+
+The following session shows how data shows up in the program.
+下面的部分演示了程序中的数据部分
+
+Carefully observe the output of the print() statements.
+仔细观察print()语句的打印输出
+
+Further processing of the options is up to the program.
+对于选项值的进一步处理由程序来决定，用你自己的逻辑来替代 print() 函数
+
+The argparse module is one of the largest modules in the standard library, and has a huge number of configuration options.
+argparse 模块是标准库中最大的模块之一，拥有大量的配置选项
+
+This recipe shows an essential subset that can be used and extended to get started.
+ 本节只是演示了其中最基础的一些特性，帮助你入门
+
+To parse options, you first create an ArgumentParser instance and add declarations for the options you want to support it using the add_argument() method.
+为了解析命令行选项，你首先要创建一个 ArgumentParser 实例， 并使用 add_argument() 方法声明你想要支持的选项
+
+In each add_argument() call, the dest argument specifies the name of an attribute where the result of parsing will be placed.
+ 在每个 add-argument() 调用中，dest 参数指定解析结果被指派给属性的名字
+
+The metavar argument is used when generating help messages.
+ metavar 参数被用来生成帮助信息
+
+The action argument specifies the processing associated with the argument and is often store for storing a value or append for collecting multiple argument values into a list.
+action 参数指定跟属性对应的处理逻辑， 通常的值为 store ,被用来存储某个值或讲多个参数值收集到一个列表中
+
+The following argument collects all of the extra command-line arguments into a list.
+下面的参数收集所有剩余的命令行参数到一个列表中
+
+It’s being used to make a list of filenames in the example:
+在本例中它被用来构造一个文件名列表：
+
+The following argument sets a Boolean flag depending on whether or not the argument was provided:
+下面的参数根据参数是否存在来设置一个 Boolean 标志：
+
+The following argument takes a single value and stores it as a string:
+下面的参数接受一个单独值并将其存储为一个字符串：
+
+The following argument specification allows an argument to be repeated multiple times and all of the values append into a list.
+下面的参数说明允许某个参数重复出现多次，并将它们追加到一个列表中去
+
+The required flag means that the argument must be supplied at least once.
+ required 标志表示该参数至少要有一个
+
+The use of -p and --pat mean that either argument name is acceptable.
+-p 和 --pat 表示两个参数名形式都可使用
+
+Finally, the following argument specification takes a value, but checks it against a set of possible choices.
+最后，下面的参数说明接受一个值，但是会将其和可能的选择值做比较，以检测其合法性：
+
+Once the options have been given, you simply execute the parser.parse() method.
+一旦参数选项被指定，你就可以执行 parser.parse() 方法了
+
+This will process the sys.argv value and return an instance with the results.
+ 它会处理 sys.argv 的值并返回一个结果实例
+
+The results for each argument are placed into an attribute with the name given in the dest parameter to add_argument().
+ 每个参数值会被设置成该实例中``add_argument()`` 方法的``dest`` 参数指定的属性值
+
+There are several other approaches for parsing command-line options.
+还很多种其他方法解析命令行选项
+
+For example, you might be inclined to manually process sys.argv yourself or use the getopt module (which is modeled after a similarly named C library).
+ 例如，你可能会手动的处理 sys.argv 或者使用 getopt 模块
+
+However, if you take this approach, you’ll simply end up replicating much of the code that argparse already provides.
+ 但是，如果你采用本节的方式，将会减少很多冗余代码，底层细节 argparse 模块已经帮你处理了
+
+You may also encounter code that uses the optparse library to parse options.
+ 你可能还会碰到使用 optparse 库解析选项的代码
+
+Although optparse is very similar to argparse, the latter is more modern and should be preferred in new projects.
+ 尽管 optparse 和 argparse 很像，但是后者更先进，因此在新的程序中你应该使用它
+
+Prompting for a Password at Runtime
+13.4 运行时弹出密码输入提示¶
+
+You’ve written a script that requires a password, but since the script is meant for interactive use, you’d like to prompt the user for a password rather than hardcode it into the script.
+你写了个脚本，运行时需要一个密码
+
+Python’s getpass module is precisely what you need in this situation.
+这时候Python的 getpass 模块正是你所需要的
+
+It will allow you to very easily prompt for a password without having the keyed-in password displayed on the user’s terminal.
+你可以让你很轻松的弹出密码输入提示， 并且不会在用户终端回显密码
+
+Here’s how it’s done:
+下面是具体代码：
+
+In this code, the svc_login() function is code that you must write to further process the password entry.
+在此代码中，svc_login() 是你要实现的处理密码的函数，具体的处理过程你自己决定
+
+Note in the preceding code that getpass.getuser() doesn’t prompt the user for their username.
+注意在前面代码中 getpass.getuser() 不会弹出用户名的输入提示
+
+Instead, it uses the current user’s login name, according to the user’s shell environment, or as a last resort, according to the local system’s password database (on platforms that support the pwd module).
+ 它会根据该用户的shell环境或者会依据本地系统的密码库（支持 pwd 模块的平台）来使用当前用户的登录名，
+
+If you want to explicitly prompt the user for their username, which can be more reliable, use the built-in input function:
+如果你想显示的弹出用户名输入提示，使用内置的 input 函数：
+
+It’s also important to remember that some systems may not support the hiding of the typed password input to the getpass() method.
+还有一点很重要，有些系统可能不支持 getpass() 方法隐藏输入密码
+
+In this case, Python does all it can to forewarn you of problems (i.e., it alerts you that passwords will be shown in cleartext) before moving on.
+ 这种情况下，Python会提前警告你这些问题（例如它会警告你说密码会以明文形式显示）
+
+Getting the Terminal Size
+13.5 获取终端的大小¶
+
+You need to get the terminal size in order to properly format the output of your program.
+你需要知道当前终端的大小以便正确的格式化输出
+
+Use the os.get_terminal_size() function to do this:
+使用 os.get_terminal_size() 函数来做到这一点
+
+There are many other possible approaches for obtaining the terminal size, ranging from reading environment variables to executing low-level system calls involving ioctl() and TTYs.
+有太多方式来得知终端大小了，从读取环境变量到执行底层的 ioctl() 函数等等
+
+Frankly, why would you bother with that when this one simple call will suffice?
+ 不过，为什么要去研究这些复杂的办法而不是仅仅调用一个简单的函数呢
+
+Executing an External Command and Getting Its Output
+13.6 执行外部命令并获取它的输出¶
+
+You want to execute an external command and collect its output as a Python string.
+你想执行一个外部命令并以Python字符串的形式获取执行结果
+
+Use the subprocess.check_output() function.
+使用 subprocess.check_output() 函数
+
+For example:
+例如：
+
+This runs the specified command and returns its output as a byte string.
+这段代码执行一个指定的命令并将执行结果以一个字节字符串的形式返回
+
+If you need to interpret the resulting bytes as text, add a further decoding step.
+ 如果你需要文本形式返回，加一个解码步骤即可
+
+For example:
+例如：
+
+If the executed command returns a nonzero exit code, an exception is raised.
+如果被执行的命令以非零码返回，就会抛出异常
+
+Here is an example of catching errors and getting the output created along with the exit code:
+ 下面的例子捕获到错误并获取返回码：
+
+By default, check_output() only returns output written to standard output.
+默认情况下，check_output() 仅仅返回输入到标准输出的值
+
+If you want both standard output and error collected, use the stderr argument:
+ 如果你需要同时收集标准输出和错误输出，使用 stderr 参数：
+
+If you need to execute a command with a timeout, use the timeout argument:
+如果你需要用一个超时机制来执行命令，使用 timeout 参数：
+
+Normally, commands are executed without the assistance of an underlying shell (e.g., sh, bash, etc.).
+通常来讲，命令的执行不需要使用到底层shell环境（比如sh、bash）
+
+Instead, the list of strings supplied are given to a low-level system command, such as os.execve().
+ 一个字符串列表会被传递给一个低级系统命令，比如 os.execve() 
+
+If you want the command to be interpreted by a shell, supply it using a simple string and give the shell=True argument.
+ 如果你想让命令被一个shell执行，传递一个字符串参数，并设置参数 shell=True . 有时候你想要Python去执行一个复杂的shell命令的时候这个就很有用了，比如管道流、I/O重定向和其他特性
+
+This is sometimes useful if you’re trying to get Python to execute a complicated shell command involving pipes, I/O redirection, and other features.
+例如：
+
+Be aware that executing commands under the shell is a potential security risk if arguments are derived from user input.
+需要注意的是在shell中执行命令会存在一定的安全风险，特别是当参数来自于用户输入时
+
+The shlex.quote() function can be used to properly quote arguments for inclusion in shell commands in this case.
+ 这时候可以使用 shlex.quote() 函数来讲参数正确的用双引用引起来
+
+The check_output() function is the easiest way to execute an external command and get its output.
+使用 check_output() 函数是执行外部命令并获取其返回值的最简单方式
+
+However, if you need to perform more advanced communication with a subprocess, such as sending it input, you’ll need to take a difference approach.
+ 但是，如果你需要对子进程做更复杂的交互，比如给它发送输入，你得采用另外一种方法
+
+For that, use the subprocess.Popen class directly.
+ 这时候可直接使用 subprocess.Popen 类
+
+For example:
+例如：
+
+The subprocess module is not suitable for communicating with external commands that expect to interact with a proper TTY.
+subprocess 模块对于依赖TTY的外部命令不合适用
+
+For example, you can’t use it to automate tasks that ask the user to enter a password (e.g., a ssh session).
+ 例如，你不能使用它来自动化一个用户输入密码的任务（比如一个ssh会话）
+
+For that, you would need to turn to a third-party module, such as those based on the popular "expect" family of tools (e.g., pexpect or similar).
+ 这时候，你需要使用到第三方模块了，比如基于著名的 expect 家族的工具（pexpect或类似的）
+
+Copying or Moving Files and Directories
+13.7 复制或者移动文件和目录¶
+
+You need to copy or move files and directories around, but you don’t want to do it by calling out to shell commands.
+你想要复制或移动文件和目录，但是又不想调用shell命令
+
+The shutil module has portable implementations of functions for copying files and directories.
+shutil 模块有很多便捷的函数可以复制文件和目录
+
+The usage is extremely straightforward.
+使用起来非常简单，比如：
+
+The arguments to these functions are all strings supplying file or directory names.
+这些函数的参数都是字符串形式的文件或目录名
+
+The underlying semantics try to emulate that of similar Unix commands, as shown in the comments.
+ 底层语义模拟了类似的Unix命令，如上面的注释部分
+
+By default, symbolic links are followed by these commands.
+默认情况下，对于符号链接而已这些命令处理的是它指向的东西
+
+For example, if the source file is a symbolic link, then the destination file will be a copy of the file the link points to.
+ 例如，如果源文件是一个符号链接，那么目标文件将会是符号链接指向的文件
+
+If you want to copy the symbolic link instead, supply the follow_symlinks keyword argument like this:
+ 如果你只想复制符号链接本身，那么需要指定关键字参数 follow_symlinks ,如下：
+
+If you want to preserve symbolic links in copied directories, do this:
+如果你想保留被复制目录中的符号链接，像这样做：
+
+The copytree() optionally allows you to ignore certain files and directories during the copy process.
+copytree() 可以让你在复制过程中选择性的忽略某些文件或目录
+
+To do this, you supply an ignore function that takes a directory name and filename listing as input, and returns a list of names to ignore as a result.
+ 你可以提供一个忽略函数，接受一个目录名和文件名列表作为输入，返回一个忽略的名称列表
+
+For example:
+例如：
+
+Since ignoring filename patterns is common, a utility function ignore_patterns() has already been provided to do it.
+Since ignoring filename patterns is common, a utility function ignore_patterns() has already been provided to do it. For example:
+
+Using shutil to copy files and directories is mostly straightforward.
+shutil.copytree(src, dst, ignore=shutil.ignore_patterns(‘~’,’.pyc’))
+
+When working with filenames, make sure you use the functions in os.path for the greatest portability (especially if working with both Unix and Windows).
+使用 shutil 复制文件和目录也忒简单了点吧
+
+For example:
+ 不过，对于文件元数据信息，copy2() 这样的函数只能尽自己最大能力来保留它
+
+One tricky bit about copying directories with copytree() is the handling of errors.
+使用 copytree() 复制文件夹的一个棘手的问题是对于错误的处理
+
+For example, in the process of copying, the function might encounter broken symbolic links, files that can’t be accessed due to permission problems, and so on.
+ 例如，在复制过程中，函数可能会碰到损坏的符号链接，因为权限无法访问文件的问题等等
+
+To deal with this, all exceptions encountered are collected into a list and grouped into a single exception that gets raised at the end of the operation.
+ 为了解决这个问题，所有碰到的问题会被收集到一个列表中并打包为一个单独的异常，到了最后再抛出
+
+Here is how you would handle it:
+ 下面是一个例子：
+
+If you supply the ignore_dangling_symlinks=True keyword argument, then copytree() will ignore dangling symlinks.
+如果你提供关键字参数 ignore_dangling_symlinks=True ， 这时候 copytree() 会忽略掉无效符号链接
+
+The functions shown in this recipe are probably the most commonly used.
+本节演示的这些函数都是最常见的
+
+However, shutil has many more operations related to copying data.
+不过，shutil 还有更多的和复制数据相关的操作
+
+The documentation is definitely worth a further look.
+ 它的文档很值得一看，参考 Python documentation
+
+Creating and Unpacking Archives
+13.8 创建和解压归档文件¶
+
+You need to create or unpack archives in common formats (e.g., .tar, .tgz, or .zip).
+你需要创建或解压常见格式的归档文件（比如.tar, .tgz或.zip）
+
+The shutil module has two functions—make_archive() and unpack_archive()—that do exactly what you want.
+shutil 模块拥有两个函数—— make_archive() 和 unpack_archive() 可派上用场
+
+For example:
+ 例如：
+
+The second argument to make_archive() is the desired output format.
+make_archive() 的第二个参数是期望的输出格式
+
+To get a list of supported archive formats, use get_archive_formats().
+ 可以使用 get_archive_formats() 获取所有支持的归档格式列表
+
+For example:
+例如：
+
+Python has other library modules for dealing with the low-level details of various archive formats (e.g., tarfile, zipfile, gzip, bz2, etc.).
+Python还有其他的模块可用来处理多种归档格式（比如tarfile, zipfile, gzip, bz2）的底层细节
+
+However, if all you’re trying to do is make or extract an archive, there’s really no need to go so low level.
+ 不过，如果你仅仅只是要创建或提取某个归档，就没有必要使用底层库了
+
+You can just use these high-level functions in shutil instead.
+ 可以直接使用 shutil 中的这些高层函数
+
+The functions have a variety of additional options for logging, dryruns, file permissions, and so forth.
+这些函数还有很多其他选项，用于日志打印、预检、文件权限等等
+
+Consult the shutil library documentation for further details.
+ 参考 shutil文档
+
+Finding Files by Name
+13.9 通过文件名查找文件¶
+
+You need to write a script that involves finding files, like a file renaming script or a log archiver utility, but you’d rather not have to call shell utilities from within your Python script, or you want to provide specialized behavior not easily available by "shelling out."
+你需要写一个涉及到文件查找操作的脚本，比如对日志归档文件的重命名工具， 你不想在Python脚本中调用shell，或者你要实现一些shell不能做的功能
+
+To search for files, use the os.walk() function, supplying it with the top-level directory.
+查找文件，可使用 os.walk() 函数，传一个顶级目录名给它
+
+Here is an example of a function that finds a specific filename and prints out the full path of all matches:
+ 下面是一个例子，查找特定的文件名并答应所有符合条件的文件全路径：
+
+Save this script as findfile.py and run it from the command line, feeding in the starting point and the name as positional arguments, like this:
+保存脚本为文件findfile.py，然后在命令行中执行它
+
+The os.walk() method traverses the directory hierarchy for us, and for each directory it enters, it returns a 3-tuple, containing the relative path to the directory it’s inspecting, a list containing all of the directory names in that directory, and a list of filenames in that directory.
+os.walk() 方法为我们遍历目录树， 每次进入一个目录，它会返回一个三元组，包含相对于查找目录的相对路径，一个该目录下的目录名列表， 以及那个目录下面的文件名列表
+
+For each tuple, you simply check if the target filename is in the files list.
+对于每个元组，只需检测一下目标文件名是否在文件列表中
+
+If it is, os.path.join() is used to put together a path.
+如果是就使用 os.path.join() 合并路径
+
+To avoid the possibility of weird looking paths like ././foo//bar, two additional functions are used to fix the result.
+ 为了避免奇怪的路径名比如 ././foo//bar ，使用了另外两个函数来修正结果
+
+The first is os.path.abspath(), which takes a path that might be relative and forms the absolute path, and the second is os.path.normpath(), which will normalize the path, thereby resolving issues with double slashes, multiple references to the current directory, and so on.
+ 第一个是 os.path.abspath() ,它接受一个路径，可能是相对路径，最后返回绝对路径
+
+Although this script is pretty simple compared to the features of the find utility found on UNIX platforms, it has the benefit of being cross-platform.
+尽管这个脚本相对于UNIX平台上面的很多查找公交来讲要简单很多，它还有跨平台的优势
+
+Furthermore, a lot of additional functionality can be added in a portable manner without much more work.
+ 并且，还能很轻松的加入其他的功能
+
+To illustrate, here is a function that prints out all of the files that have a recent modification time:
+ 我们再演示一个例子，下面的函数打印所有最近被修改过的文件：
+
+It wouldn’t take long for you to build far more complex operations on top of this little function using various features of the os, os.path, glob, and similar modules.
+在此函数的基础之上，使用os,os.path,glob等类似模块，你就能实现更加复杂的操作了
+
+See Recipes and for related recipes.
+ 可参考5.11小节和5.13小节等相关章节
+
+Reading Configuration Files
+13.10 读取配置文件¶
+
+You want to read configuration files written in the common .ini configuration file format.
+怎样读取普通.ini格式的配置文件
+
+The configparser module can be used to read configuration files.
+configparser 模块能被用来读取配置文件
+
+For example, suppose you have this configuration file:
+例如，假设你有如下的配置文件：
+
+Here is an example of how to read it and extract values:
+下面是一个读取和提取其中值的例子：
+
+If desired, you can also modify the configuration and write it back to a file using the cfg.write() method.
+如果有需要，你还能修改配置并使用 cfg.write() 方法将其写回到文件中
+
+For example:
+例如：
+
+Configuration files are well suited as a human-readable format for specifying configuration data to your program.
+配置文件作为一种可读性很好的格式，非常适用于存储程序中的配置数据
+
+Within each config file, values are grouped into different sections (e.g., "installation," "debug," and "server," in the example).
+ 在每个配置文件中，配置数据会被分组（比如例子中的“installation”、 “debug” 和 “server”）
+
+Each section then specifies values for various variables in that section.
+ 每个分组在其中指定对应的各个变量值
+
+There are several notable differences between a config file and using a Python source file for the same purpose.
+对于可实现同样功能的配置文件和Python源文件是有很大的不同的
+
+First, the syntax is much more permissive and "sloppy." For example, both of these assignments are equivalent:
+ 首先，配置文件的语法要更自由些，下面的赋值语句是等效的：
+
+The names used in a config file are also assumed to be case-insensitive.
+配置文件中的名字是不区分大小写的
+
+For example:
+例如：
+
+When parsing values, methods such as getboolean() look for any reasonable value.
+在解析值的时候，getboolean() 方法查找任何可行的值
+
+For example, these are all equivalent:
+例如下面都是等价的：
+
+Perhaps the most significant difference between a config file and Python code is that, unlike scripts, configuration files are not executed in a top-down manner.
+或许配置文件和Python代码最大的不同在于，它并不是从上而下的顺序执行
+
+Instead, the file is read in its entirety.
+ 文件是安装一个整体被读取的
+
+If variable substitutions are made, they are done after the fact.
+如果碰到了变量替换，它实际上已经被替换完成了
+
+For example, in this part of the config file, it doesn’t matter that the prefix variable is assigned after other variables that happen to use it:
+ 例如，在下面这个配置中，prefix 变量在使用它的变量之前后之后定义都是可以的：
+
+An easily overlooked feature of ConfigParser is that it can read multiple configuration files together and merge their results into a single configuration.
+ConfigParser 有个容易被忽视的特性是它能一次读取多个配置文件然后合并成一个配置
+
+For example, suppose a user made their own configuration file that looked like this:
+ 例如，假设一个用户像下面这样构造了他们的配置文件：
+
+This file can be merged with the previous configuration by reading it separately.
+读取这个文件，它就能跟之前的配置合并起来
+
+For example:
+如：
+
+Observe how the override of the prefix variable affects other related variables, such as the setting of library.
+仔细观察下 prefix 变量是怎样覆盖其他相关变量的，比如 library 的设定值
+
+This works because variable interpolation is performed as late as possible.
+ 产生这种结果的原因是变量的改写采取的是后发制人策略，以最后一个为准
+
+You can see this by trying the following experiment:
+ 你可以像下面这样做试验：
+
+Finally, it’s important to note that Python does not support the full range of features you might find in an .ini file used by other programs (e.g., applications on Windows).
+最后还有很重要一点要注意的是Python并不能支持.ini文件在其他程序（比如windows应用程序）中的所有特性
+
+Make sure you consult the configparser documentation for the finer details of the syntax and supported features.
+ 确保你已经参阅了configparser文档中的语法详情以及支持特性
+
+Adding Logging to Simple Scripts
+13.11 给简单脚本增加日志功能¶
+
+You want scripts and simple programs to write diagnostic information to log files.
+你希望在脚本和程序中将诊断信息写入日志文件
+
+The easiest way to add logging to simple programs is to use the logging module.
+The easiest way to add logging to simple programs is to use the logging module. For example: 打印日志最简单方式是使用 logging 模块
+
+For example:
+例如：
+
+The five logging calls (critical(), error(), warning(), info(), debug()) represent different severity levels in decreasing order.
+上面五个日志调用（critical(), error(), warning(), info(), debug()）以降序方式表示不同的严重级别
+
+The level argument to basicConfig() is a filter.
+ basicConfig() 的 level 参数是一个过滤器
+
+All messages issued at a level lower than this setting will be ignored.
+ 所有级别低于此级别的日志消息都会被忽略掉
+
+The argument to each logging operation is a message string followed by zero or more arguments.
+每个logging操作的参数是一个消息字符串，后面再跟一个或多个参数
+
+When making the final log message, the % operator is used to format the message string using the supplied arguments.
+ 构造最终的日志消息的时候我们使用了%操作符来格式化消息字符串
+
+If you run this program, the contents of the file app.log will be as follows:
+运行这个程序后，在文件 app.log 中的内容应该是下面这样：
+
+If you want to change the output or level of output, you can change the parameters to the basicConfig() call.
+If you want to change the output or level of output, you can change the parameters to the basicConfig() call. For example: 如果你想改变输出等级，你可以修改 basicConfig() 调用中的参数
+
+For example:
+例如：
+
+As a result, the output changes to the following:
+最后输出变成如下：
+
+As shown, the logging configuration is hardcoded directly into the program.
+上面的日志配置都是硬编码到程序中的
+
+If you want to configure it from a configuration file, change the basicConfig() call to the following:
+如果你想使用配置文件， 可以像下面这样修改 basicConfig() 调用：
+
+Now make a configuration file logconfig.ini that looks like this:
+创建一个下面这样的文件，名字叫 logconfig.ini ：
+
+If you want to make changes to the configuration, you can simply edit the logconfig.ini file as appropriate.
+如果你想修改配置，可以直接编辑文件logconfig.ini即可
+
+Ignoring for the moment that there are about a million advanced configuration options for the logging module, this solution is quite sufficient for simple programs and scripts.
+尽管对于 logging 模块而已有很多更高级的配置选项， 不过这里的方案对于简单的程序和脚本已经足够了
+
+Simply make sure that you execute the basicConfig() call prior to making any logging calls, and your program will generate logging output.
+ 只想在调用日志操作前先执行下basicConfig()函数方法，你的程序就能产生日志输出了
+
+If you want the logging messages to route to standard error instead of a file, don’t supply any filename information to basicConfig().
+如果你想要你的日志消息写到标准错误中，而不是日志文件中，调用 basicConfig() 时不传文件名参数即可
+
+For example, simply do this:
+例如：
+
+One subtle aspect of basicConfig() is that it can only be called once in your program.
+basicConfig() 在程序中只能被执行一次
+
+If you later need to change the configuration of the logging module, you need to obtain the root logger and make changes to it directly.
+如果你稍后想改变日志配置， 就需要先获取 root logger ，然后直接修改它
+
+For example:
+例如：
+
+It must be emphasized that this recipe only shows a basic use of the logging module.
+需要强调的是本节只是演示了 logging 模块的一些基本用法
+
+There are significantly more advanced customizations that can be made.
+ 它可以做更多更高级的定制
+
+An excellent resource for such customization is the "Logging Cookbook".
+ 关于日志定制化一个很好的资源是 Logging Cookbook
+
+Adding Logging to Libraries
+13.12 给函数库增加日志功能¶
+
+You would like to add a logging capability to a library, but don’t want it to interfere with programs that don’t use logging.
+你想给某个函数库增加日志功能，但是又不能影响到那些不使用日志功能的程序
+
+For libraries that want to perform logging, you should create a dedicated logger object, and initially configure it as follows:
+对于想要执行日志操作的函数库而已，你应该创建一个专属的 logger 对象，并且像下面这样初始化配置：
+
+With this configuration, no logging will occur by default.
+使用这个配置，默认情况下不会打印日志
+
+For example:
+例如：
+
+However, if the logging system gets configured, log messages will start to appear.
+不过，如果配置过日志系统，那么日志消息打印就开始生效，例如：
+
+Libraries present a special problem for logging, since information about the environment in which they are used isn’t known.
+通常来讲，你不应该在函数库代码中自己配置日志系统，或者是已经假定有个已经存在的日志配置了
+
+The call to getLogger(__name__) creates a logger module that has the same name as the calling module.
+调用 getLogger(__name__) 创建一个和调用模块同名的logger模块
+
+Since all modules are unique, this creates a dedicated logger that is likely to be separate from other loggers.
+ 由于模块都是唯一的，因此创建的logger也将是唯一的
+
+The log.addHandler(logging.NullHandler()) operation attaches a null handler to the just created logger object.
+log.addHandler(logging.NullHandler()) 操作将一个空处理器绑定到刚刚已经创建好的logger对象上
+
+A null handler ignores all logging messages by default.
+ 一个空处理器默认会忽略调用所有的日志消息
+
+Thus, if the library is used and logging is never configured, no messages or warnings will appear.
+ 因此，如果使用该函数库的时候还没有配置日志，那么将不会有消息或警告出现
+
+One subtle feature of this recipe is that the logging of individual libraries can be independently configured, regardless of other logging settings.
+还有一点就是对于各个函数库的日志配置可以是相互独立的，不影响其他库的日志配置
+
+For example, consider the following code:
+ 例如，对于如下的代码：
+
+Here, the root logger has been configured to only output messages at the ERROR level or higher.
+在这里，根日志被配置成仅仅输出ERROR或更高级别的消息
+
+However, the level of the logger for somelib has been separately configured to output debugging messages.
+ 不过 ，somelib 的日志级别被单独配置成可以输出debug级别的消息，它的优先级比全局配置高
+
+That setting takes precedence over the global setting.
+ 
+
+The ability to change the logging settings for a single module like this can be a useful debugging tool, since you don’t have to change any of the global logging settings—simply change the level for the one module where you want more output.
+像这样更改单独模块的日志配置对于调试来讲是很方便的， 因为你无需去更改任何的全局日志配置——只需要修改你想要更多输出的模块的日志等级
+
+The "Logging HOWTO" has more information about configuring the logging module and other useful tips.
+Logging HOWTO 详细介绍了如何配置日志模块和其他有用技巧，可以参阅下
+
+Making a Stopwatch Timer
+13.13 实现一个计时器¶
+
+You want to be able to record the time it takes to perform various tasks.
+你想记录程序执行多个任务所花费的时间
+
+The time module contains various functions for performing timing-related functions.
+time 模块包含很多函数来执行跟时间有关的函数
+
+However, it’s often useful to put a higher-level interface on them that mimics a stop watch.
+ 尽管如此，通常我们会在此基础之上构造一个更高级的接口来模拟一个计时器
+
+For example:
+例如：
+
+This class defines a timer that can be started, stopped, and reset as needed by the user.
+这个类定义了一个可以被用户根据需要启动、停止和重置的计时器
+
+It keeps track of the total elapsed time in the elapsed attribute.
+ 它会在 elapsed 属性中记录整个消耗时间
+
+Here is an example that shows how it can be used:
+ 下面是一个例子来演示怎样使用它：
+
+This recipe provides a simple yet very useful class for making timing measurements and tracking elapsed time.
+本节提供了一个简单而实用的类来实现时间记录以及耗时计算
+
+It’s also a nice illustration of how to support the context-management protocol and the with statement.
+ 同时也是对使用with语句以及上下文管理器协议的一个很好的演示
+
+One issue in making timing measurements concerns the underlying time function used to do it.
+在计时中要考虑一个底层的时间函数问题
+
+As a general rule, the accuracy of timing measurements made with functions such as time.time() or time.clock() varies according to the operating system.
+一般来说， 使用 time.time() 或 time.clock() 计算的时间精度因操作系统的不同会有所不同
+
+In contrast, the time.perf_counter() function always uses the highest-resolution timer available on the system.
+ 而使用 time.perf_counter() 函数可以确保使用系统上面最精确的计时器
+
+As shown, the time recorded by the Timer class is made according to wall-clock time, and includes all time spent sleeping.
+上述代码中由 Timer 类记录的时间是钟表时间，并包含了所有休眠时间
+
+If you only want the amount of CPU time used by the process, use time.process_time() instead.
+ 如果你只想计算该进程所花费的CPU时间，应该使用 time.process_time() 来代替：
+
+Both the time.perf_counter() and time.process_time() return a "time" in fractional seconds.
+time.perf_counter() 和 time.process_time() 都会返回小数形式的秒数时间
+
+However, the actual value of the time doesn’t have any particular meaning.
+ 实际的时间值没有任何意义，为了得到有意义的结果，你得执行两次函数然后计算它们的差值
+
+More examples of timing and profiling are given in “Profiling and Timing Your Program”.
+更多关于计时和性能分析的例子请参考14.13小节
+
+Putting Limits on Memory and CPU Usage
+13.14 限制内存和CPU的使用量¶
+
+You want to place some limits on the memory or CPU use of a program running on Unix system.
+你想对在Unix系统上面运行的程序设置内存或CPU的使用限制
+
+The resource module can be used to perform both tasks.
+resource 模块能同时执行这两个任务
+
+For example, to restrict CPU time, do the following:
+例如，要限制CPU时间，可以像下面这样做：
+
+When this runs, the SIGXCPU signal is generated when the time expires.
+程序运行时，SIGXCPU 信号在时间过期时被生成，然后执行清理并退出
+
+To restrict memory use, put a limit on the total address space in use.
+要限制内存使用，设置可使用的总内存值即可，如下：
+
+With a memory limit in place, programs will start generating MemoryError exceptions when no more memory is available.
+像这样设置了内存限制后，程序运行到没有多余内存时会抛出 MemoryError 异常
+
+In this recipe, the setrlimit() function is used to set a soft and hard limit on a particular resource.
+在本节例子中，setrlimit() 函数被用来设置特定资源上面的软限制和硬限制
+
+The soft limit is a value upon which the operating system will typically restrict or notify the process via a signal.
+ 软限制是一个值，当超过这个值的时候操作系统通常会发送一个信号来限制或通知该进程
+
+The hard limit represents an upper bound on the values that may be used for the soft limit.
+ 硬限制是用来指定软限制能设定的最大值
+
+Typically, this is controlled by a system-wide parameter set by the system administrator.
+通常来讲，这个由系统管理员通过设置系统级参数来决定
+
+Although the hard limit can be lowered, it can never be raised by user processes (even if the process lowered itself).
+ 尽管硬限制可以改小一点，但是最好不要使用用户进程去修改
+
+The setrlimit() function can additionally be used to set limits on things such as the number of child processes, number of open files, and similar system resources.
+setrlimit() 函数还能被用来设置子进程数量、打开文件数以及类似系统资源的限制
+
+Consult the documentation for the resource module for further details.
+ 更多详情请参考 resource 模块的文档
+
+Be aware that this recipe only works on Unix systems, and that it might not work on all of them.
+需要注意的是本节内容只能适用于Unix系统，并且不保证所有系统都能如期工作
+
+For example, when tested, it works on Linux but not on OS X.
+ 比如我们在测试的时候，它能在Linux上面正常运行，但是在OS X上却不能
+
+Launching a Web Browser
+13.15 启动一个WEB浏览器¶
+
+You want to launch a browser from a script and have it point to some URL that you specify.
+你想通过脚本启动浏览器并打开指定的URL网页
+
+The webbrowser module can be used to launch a browser in a platform-independent manner.
+webbrowser 模块能被用来启动一个浏览器，并且与平台无关
+
+For example:
+例如：
+
+This opens the requested page using the default browser.
+它会使用默认浏览器打开指定网页
+
+If you want a bit more control over how the page gets opened, you can use one of the following functions:
+如果你还想对网页打开方式做更多控制，还可以使用下面这些函数：
+
+These will try to open the page in a new browser window or tab, if possible and supported by the browser.
+这样就可以打开一个新的浏览器窗口或者标签，只要浏览器支持就行
+
+If you want to open a page in a specific browser, you can use the webbrowser.get() function to specify a particular browser.
+如果你想指定浏览器类型，可以使用 webbrowser.get() 函数来指定某个特定浏览器
+
+For example:
+例如：
+
+A full list of supported browser names can be found in the Python documentation.
+对于支持的浏览器名称列表可查阅`Python文档 <http://docs.python.org/3/library/webbrowser.html>`_
+
+Being able to easily launch a browser can be a useful operation in many scripts.
+在脚本中打开浏览器有时候会很有用
+
+For example, maybe a script performs some kind of deployment to a server and you’d like to have it quickly launch a browser so you can verify that it’s working.
+例如，某个脚本执行某个服务器发布任务， 你想快速打开一个浏览器来确保它已经正常运行了
+
+Or maybe a program writes data out in the form of HTML pages and you’d just like to fire up a browser to see the result.
+ 或者是某个程序以HTML网页格式输出数据，你想打开浏览器查看结果
+
+Either way, the webbrowser module is a simple solution.
+ 不管是上面哪种情况，使用 webbrowser 模块都是一个简单实用的解决方案
+

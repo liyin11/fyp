@@ -1,0 +1,51 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+7.4. Using the {n,m} Syntax
+7.4. 使用 {n,m} 语法
+
+In the previous section, you were dealing with a pattern where the same character could be repeated up to three times.
+在前面的章节，你处理了相同字符可以重复三次的情况
+
+There is another way to express this in regular expressions, which some people find more readable.
+在正则表达式中，有另外一个方式来表达这种情况，并且能提高代码的可读性
+
+First look at the method we already used in the previous example.
+首先看看我们在前面的例子中使用的方法
+
+Now let's expand the Roman numeral regular expression to cover the tens and ones place.
+现在我们来扩展一下关于罗马数字的正则表达式，以匹配十位数和个位数，下面的例子展示十位数的校验方法
+
+The expression for the ones place follows the same pattern.
+对于个位数的正则表达式有类似的表达方式，我将省略细节，直接展示结果
+
+So what does that look like using this alternate {n,m} syntax?
+用另一种 {n,m} 语法表达这个正则表达式会如何呢
+
+This example shows the new syntax.
+这个例子展示新的语法
+
+If you followed all that and understood it on the first try, you're doing better than I did.
+如果你在第一遍就跟上并理解了所讲的这些，那么你做的比我还要好
+
+Now imagine trying to understand someone else's regular expressions, in the middle of a critical function of a large program.
+现在，你可以尝试着理解别人大规模程序里关键函数中的正则表达式了
+
+Or even imagine coming back to your own regular expressions a few months later.
+或者想象着几个月后回头理解你自己的正则表达式
+
+I've done it, and it's not a pretty sight.
+我曾经做过这样的事情，但是它并不是那么有趣
+
+In the next section you'll explore an alternate syntax that can help keep your expressions maintainable.
+在下一节里，你将会研究另外一种正则表达式语法，它可以使你的表达式具有更好的可维持性
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

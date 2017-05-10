@@ -1,0 +1,60 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+5.4. Instantiating Classes
+5.4. 类的实例化
+
+Instantiating classes in Python is straightforward.
+在 Python 中对类进行实例化很直接
+
+To instantiate a class, simply call the class as if it were a function, passing the arguments that the __init__ method defines.
+要对类进行实例化，只要调用类 (就好像它是一个函数)，传入定义在 __init__ 方法中的参数
+
+The return value will be the newly created object.
+返回值将是新创建的对象
+
+If creating new instances is easy, destroying them is even easier.
+如果说创建一个新的实例是容易的，那么销毁它们甚至更容易
+
+In general, there is no need to explicitly free instances, because they are freed automatically when the variables assigned to them go out of scope.
+通常，不需要明确地释放实例，因为当指派给它们的变量超出作用域时，它们会被自动地释放
+
+Memory leaks are rare in Python.
+内存泄漏在 Python 中很少见
+
+The technical term for this form of garbage collection is “reference counting”.
+对于这种垃圾收集的方式，技术上的术语叫做“引用计数”
+
+Python keeps a list of references to every instance created.
+Python 维护着对每个实例的引用列表
+
+In the above example, there was only one reference to the FileInfo instance: the local variable f.
+在上面的例子中，只有一个 FileInfo 的实例引用：局部变量 f
+
+When the function ends, the variable f goes out of scope, so the reference count drops to 0, and Python destroys the instance automatically.
+当函数结束时，变量 f 超出作用域，所以引用计数降为 0，则 Python 自动销毁掉实例
+
+In previous versions of Python, there were situations where reference counting failed, and Python couldn't clean up after you.
+在 Python 的以前版本中，存在引用计数失败的情况，这样 Python 不能在后面进行清除
+
+If you created two instances that referenced each other (for instance, a doubly-linked list, where each node has a pointer to the previous and next node in the list), neither instance would ever be destroyed automatically because Python (correctly) believed that there is always a reference to each instance.
+如果你创建两个实例，它们相互引用 (例如，双重链表，每一个结点有都一个指向列表中前一个和后一个结点的指针)，任一个实例都不会被自动销毁，因为 Python (正确) 认为对于每个实例都存在一个引用
+
+Python 2.0 has an additional form of garbage collection called “mark-and-sweep” which is smart enough to notice this virtual gridlock and clean up circular references correctly.
+Python 2.0 有一种额外的垃圾回收方式，叫做“标记后清除”，它足够聪明，可以正确地清除循环引用
+
+As a former philosophy major, it disturbs me to think that things disappear when no one is looking at them, but that's exactly what happens in Python.
+作为曾经读过哲学专业的一员，让我感到困惑的是，当没有人对事物进行观察时，它们就消失了，但是这确实是在 Python 中所发生的
+
+In general, you can simply forget about memory management and let Python clean up after you.
+通常，你可以完全忘记内存管理，让 Python 在后面进行清理
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

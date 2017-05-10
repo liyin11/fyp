@@ -1,0 +1,21 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+1.7. Python Installation from Source
+1.7. 从源代码安装 Python
+
+If you prefer to build from source, you can download the Python source code from http://www.python.org/ftp/python/.
+如果您宁愿从源码创建，可以从 http://www.python.org/ftp/python/下载 Python 的源代码
+
+Select the highest version number listed, download the .tgz file), and then do the usual configure, make, make install dance.
+选择最新的版本，下载.tgz 文件，执行通常的 configure, make, make install 步骤
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

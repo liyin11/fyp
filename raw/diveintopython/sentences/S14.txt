@@ -1,0 +1,24 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+3.3. Introducing Tuples
+3.3. Tuple 介绍
+
+A tuple is an immutable list.
+Tuple 是不可变的 list
+
+A tuple can not be changed in any way once it is created.
+一旦创建了一个 tuple，就不能以任何方式改变它
+
+So what are tuples good for?
+那么使用 tuple 有什么好处呢
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

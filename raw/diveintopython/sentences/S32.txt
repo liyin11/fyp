@@ -1,0 +1,69 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+5.6. Special Class Methods
+5.6. 专用类方法
+
+In addition to normal class methods, there are a number of special methods that Python classes can define.
+除了普通的类方法，Python 类还可以定义专用方法
+
+Instead of being called directly by your code (like normal methods), special methods are called for you by Python in particular circumstances or when specific syntax is used.
+专用方法是在特殊情况下或当使用特别语法时由 Python 替你调用的，而不是在代码中直接调用 (像普通的方法那样)
+
+As you saw in the previous section, normal methods go a long way towards wrapping a dictionary in a class.
+就像你在上一节所看到的，普通的方法对在类中封装字典很有帮助
+
+But normal methods alone are not enough, because there are a lot of things you can do with dictionaries besides call methods on them.
+但是只有普通方法是不够的，因为除了对字典调用方法之外，还有很多事情可以做的
+
+For starters, you can get and set items with a syntax that doesn't include explicitly invoking methods.
+例如，你可以通过一种没有包括明确方法调用的语法来获得和设置数据项
+
+This is where special class methods come in: they provide a way to map non-method-calling syntax into method calls.
+这就是专用方法产生的原因：它们提供了一种方法，可以将非方法调用语法映射到方法调用上
+
+Of course, Python has a __setitem__ special method to go along with __getitem__, as shown in the next example.
+当然，Python 有一个与 __getitem__ 类似的 __setitem__ 专用方法，参见下面的例子
+
+__setitem__ is a special class method because it gets called for you, but it's still a class method.
+__setitem__ 是一个专用类方法，因为它可以让 Python 来替你调用，但是它仍然是一个类方法
+
+Just as easily as the __setitem__ method was defined in UserDict, you can redefine it in the descendant class to override the ancestor method.
+就像在 UserDict 中定义 __setitem__ 方法一样容易，我们可以在子类中重新定义它，对父类的方法进行覆盖
+
+This allows you to define classes that act like dictionaries in some ways but define their own behavior above and beyond the built-in dictionary.
+这就允许我们定义出在某些方面像字典一样动作的类，但是可以定义它自已的行为，超过和超出内置的字典
+
+This concept is the basis of the entire framework you're studying in this chapter.
+这个概念是本章中我们正在学习的整个框架的基础
+
+Each file type can have a handler class that knows how to get metadata from a particular type of file.
+每个文件类型可以拥有一个处理器类，这些类知道如何从一个特殊的文类型得到元数据
+
+Once some attributes (like the file's name and location) are known, the handler class knows how to derive other attributes automatically.
+只要知道了某些属性 (像文件名和位置)，处理器类就知道如何自动地得到其它的属性
+
+This is done by overriding the __setitem__ method, checking for particular keys, and adding additional processing when they are found.
+它的实现是通过覆盖 __setitem__ 方法，检查特别的关键字，然后当找到后加入额外的处理
+
+For example, MP3FileInfo is a descendant of FileInfo.
+例如，MP3FileInfo 是 FileInfo 的子类
+
+When an MP3FileInfo's name is set, it doesn't just set the name key (like the ancestor FileInfo does);
+在设置了一个 MP3FileInfo 类的 name 时，并不只是设置 name 关键字 (像父类 FileInfo 所做的)
+
+it also looks in the file itself for MP3 tags and populates a whole set of keys.
+它还要在文件自身内进行搜索 MP3 的标记然后填充一整套关键字
+
+The next example shows how this works.
+下面的例子将展示其工作方式
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

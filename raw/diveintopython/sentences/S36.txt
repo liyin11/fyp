@@ -1,0 +1,27 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+5.10. Summary
+5.10. 小结
+
+That's it for the hard-core object trickery.
+实打实的对象把戏到此为止
+
+You'll see a real-world application of special class methods in Chapter 12, which uses getattr to create a proxy to a remote web service.
+你将在 第 12 章 中看到一个真实世界应用程序的专有类方法，它使用 getattr 创建一个到远程 Web 服务的代理
+
+The next chapter will continue using this code sample to explore other Python concepts, such as exceptions, file objects, and for loops.
+下一章将继续使用本章的例程探索其他 Python 的概念，例如：异常、文件对象 和 for 循环
+
+Before diving into the next chapter, make sure you're comfortable doing all of these things:
+在研究下一章之前，确保你可以无困难地完成下面的事情：
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

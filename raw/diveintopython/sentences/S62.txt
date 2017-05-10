@@ -1,0 +1,21 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+9.6. Accessing element attributes
+9.6. 访问元素属性
+
+XML elements can have one or more attributes, and it is incredibly simple to access them once you have parsed an XML document.
+XML 元素可以有一个或者多个属性，只要已经解析了一个 XML 文档，访问它们就太简单了
+
+For this section, you'll be using the binary.xml grammar file that you saw in the previous section.
+在这部分中，将使用 binary.xml 语法文件，你在上一节中已经看到过了
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

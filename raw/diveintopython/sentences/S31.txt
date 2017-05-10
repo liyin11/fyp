@@ -1,0 +1,30 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+5.5. Exploring UserDict: A Wrapper Class
+5.5. 探索 UserDict：一个封装类
+
+As you've seen, FileInfo is a class that acts like a dictionary.
+如你所见，FileInfo 是一个有着像字典一样的行为方式的类
+
+To explore this further, let's look at the UserDict class in the UserDict module, which is the ancestor of the FileInfo class.
+为了进一步揭示这一点，让我们看一看在 UserDict 模块中的 UserDict 类，它是我们的 FileInfo 类的父类
+
+This is nothing special;
+它没有什么特别的，也是用 Python 写的，并且保存在一个 .py 文件里，就像我们其他的代码
+
+the class is written in Python and stored in a .py file, just like any other Python code.
+特别之处在于，它保存在你的 Python 安装目录的 lib 目录下
+
+In Python, you can inherit directly from the dict built-in datatype, as shown in this example.
+如例子中所示，在 Python 中，你可以直接继承自内建数据类型 dict，这样做有三点与 UserDict 不同
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+[3] 实际上，这一点并不是那么难以理解
+

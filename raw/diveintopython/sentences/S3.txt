@@ -1,0 +1,30 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+1.5. Python on RedHat Linux
+1.5. RedHat Linux 上的 Python
+
+Installing under UNIX-compatible operating systems such as Linux is easy if you're willing to install a binary package.
+在类 UNIX 的操作系统 (如 Linux) 上安装二进制包很容易
+
+Pre-built binary packages are available for most popular Linux distributions.
+预编译好的二进制包对大多数 Linux 发行版是可用的
+
+Or you can always compile from source.
+或者您可以通过源码进行编译
+
+Download the latest Python RPM by going to http://www.python.org/ftp/python/ and selecting the highest version number listed, then selecting the rpms/ directory within that.
+在 http://www.python.org/ftp/python/ 选择列出的最新的版本号, 然后选择 其中的rpms/ 目录下载最新的 Python RPM 包
+
+Then download the RPM with the highest version number.
+ 使用 rpm 命令进行安装，操作如下所示:
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

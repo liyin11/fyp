@@ -1,0 +1,24 @@
+Appendix A. Further Reading
+附录A¶
+
+In this appendix, we provide a few selected links to material that may be particularly useful in the context of Python 3 programming and the recipes contained in this book.
+如果你需要深入了解探究语言和模块的细节，那么不必说，Python自家的在线文档是一个卓越的资源
+
+This is by no means an exhaustive list of resources, so you should definitely check to see if new titles or more up-to-date editions of these books have been published.
+只要保证你查看的是python 3 的文档而不是以前的老版本
+
+Online Resources
+在线资源¶
+
+Books for Learning Python
+Python学习书籍¶
+
+The following books provide an introduction to Python with a focus on Python 3:
+下面这些书籍提供了对Python编程的入门介绍，且重点放在了Python 3上
+
+Advanced Books
+高级书籍¶
+
+The following books provide more advanced coverage and include Python 3 topics:
+下面的这些书籍提供了更多高级的范围，也包含Python 3方面的内容
+

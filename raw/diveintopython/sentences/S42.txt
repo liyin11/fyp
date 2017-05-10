@@ -1,0 +1,21 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+6.7. Summary
+6.7. 小结
+
+The fileinfo.py program introduced in Chapter 5 should now make perfect sense.
+在 第 5 章 介绍的 fileinfo.py 程序现在应该完全理解了
+
+Before diving into the next chapter, make sure you're comfortable doing the following things:
+在研究下一章之前，确保你可以无困难地完成下面的事情：
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

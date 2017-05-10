@@ -1,0 +1,39 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+7.5. Verbose Regular Expressions
+7.5. 松散正则表达式
+
+So far you've just been dealing with what I'll call “compact” regular expressions.
+迄今为止，你只是处理过被我称之为“紧凑”类型的正则表达式
+
+As you've seen, they are difficult to read, and even if you figure out what one does, that's no guarantee that you'll be able to understand it six months later.
+正如你曾看到的，它们难以阅读，即使你清楚正则表达式的含义，你也不能保证六个月以后你还能理解它
+
+What you really need is inline documentation.
+你真正所需的就是利用内联文档 (inline documentation)
+
+Python allows you to do this with something called verbose regular expressions.
+Python 允许用户利用所谓的松散正则表达式 来完成这个任务
+
+A verbose regular expression is different from a compact regular expression in two ways:
+一个松散正则表达式和一个紧凑正则表达式主要区别表现在两个方面：
+
+This will be more clear with an example.
+用一个例子可以解释得更清楚
+
+Let's revisit the compact regular expression you've been working with, and make it a verbose regular expression.
+让我们重新来看前面的紧凑正则表达式，利用松散正则表达式重新表达
+
+This example shows how.
+下面的例子显示实现方法
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

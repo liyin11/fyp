@@ -1,0 +1,30 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+9.5. Searching for elements
+9.5. 搜索元素
+
+Traversing XML documents by stepping through each node can be tedious.
+通过一步步访问每一个节点的方式遍历 XML 文档可能很乏味
+
+If you're looking for something in particular, buried deep within your XML document, there is a shortcut you can use to find it quickly: getElementsByTagName.
+如果你正在寻找些特别的东西，又恰恰它们深深埋入了你的 XML 文档，有个捷径让你可以快速找到它：getElementsByTagName 
+
+For this section, you'll be using the binary.xml grammar file, which looks like this:
+在这部分，将使用 binary.xml 语法文件，它的内容如下：
+
+It has two refs, 'bit' and 'byte'.
+它有两个 ref，'bit' (位) 和 'byte' (字节)
+
+A bit is either a '0' or '1', and a byte is 8 bits.
+一个 bit 是 '0' 或者 '1'，而一个 byte 是 8 个 bit
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

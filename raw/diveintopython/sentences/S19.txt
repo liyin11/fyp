@@ -1,0 +1,24 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+3.8. Summary
+3.8. 小结
+
+The odbchelper.py program and its output should now make perfect sense.
+现在 odbchelper.py 程序和它的输出结果都应该非常清楚了
+
+Here is the output of odbchelper.py:
+下面是 odbchelper.py 的输出结果：
+
+Before diving into the next chapter, make sure you're comfortable doing all of these things:
+在深入下一章学习之前，确保您可以无阻碍地完成下面的事情：
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

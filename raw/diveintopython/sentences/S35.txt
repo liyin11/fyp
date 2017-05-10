@@ -1,0 +1,45 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+5.9. Private Functions
+5.9. 私有函数
+
+Like most languages, Python has the concept of private elements:
+与大多数语言一样，Python 也有私有的概念：
+
+Unlike in most languages, whether a Python function, method, or attribute is private or public is determined entirely by its name.
+与大多数的语言不同，一个 Python 函数，方法，或属性是私有还是公有，完全取决于它的名字
+
+If the name of a Python function, class method, or attribute starts with (but doesn't end with) two underscores, it's private;
+如果一个 Python 函数，类方法，或属性的名字以两个下划线开始 (但不是结束)，它是私有的
+
+everything else is public.
+其它所有的都是公有的
+
+Python has no concept of protected class methods (accessible only in their own class and descendant classes).
+ Python 没有类方法保护 的概念 (只能用于它们自已的类和子类中)
+
+Class methods are either private (accessible only in their own class) or public (accessible from anywhere).
+类方法或者是私有 (只能在它们自已的类中使用) 或者是公有 (任何地方都可使用)
+
+In MP3FileInfo, there are two methods: __parse and __setitem__.
+在 MP3FileInfo 中，有两个方法：__parse 和 __setitem__
+
+As you have already discussed, __setitem__ is a special method;
+正如我们已经讨论过的，__setitem__ 是一个专有方法
+
+normally, you would call it indirectly by using the dictionary syntax on a class instance, but it is public, and you could call it directly (even from outside the fileinfo module) if you had a really good reason.
+通常，你不直接调用它，而是通过在一个类上使用字典语法来调用，但它是公有的，并且如果有一个真正好的理由，你可以直接调用它 (甚至从 fileinfo 模块的外面)
+
+However, __parse is private, because it has two underscores at the beginning of its name.
+然而，__parse 是私有的，因为在它的名字前面有两个下划线
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

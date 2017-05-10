@@ -1,0 +1,21 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+11.10. Summary
+11.10. 小结
+
+The openanything.py and its functions should now make perfect sense.
+openanything.py 及其函数现在可以完美地工作了
+
+There are 5 important features of HTTP web services that every client should support:
+每个客户端都应该支持 HTTP web 服务的以下 5 个重要特性：
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

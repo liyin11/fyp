@@ -1,0 +1,75 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+4.3. Using type, str, dir, and Other Built-In Functions
+4.3. 使用 type、str、dir 和其它内置函数
+
+Python has a small set of extremely useful built-in functions.
+Python 有小部分相当有用的内置函数
+
+All other functions are partitioned off into modules.
+除这些函数之外，其它所有的函数都被分到了各个模块中
+
+This was actually a conscious design decision, to keep the core language from getting bloated like other scripting languages (cough cough, Visual Basic).
+其实这是一个非常明智的设计策略，避免了核心语言变得像其它脚本语言一样臃肿 (咳 咳，Visual Basic)
+
+The type function returns the datatype of any arbitrary object.
+type 函数返回任意对象的数据类型
+
+The possible types are listed in the types module.
+在 types 模块中列出了可能的数据类型
+
+This is useful for helper functions that can handle several types of data.
+这对于处理多种数据类型的帮助者函数 [1] 非常有用
+
+The str coerces data into a string.
+str 将数据强制转换为字符串
+
+Every datatype can be coerced into a string.
+每种数据类型都可以强制转换为字符串
+
+At the heart of the info function is the powerful dir function.
+info 函数的核心是强大的 dir 函数
+
+dir returns a list of the attributes and methods of any object: modules, functions, strings, lists, dictionaries...
+dir 函数返回任意对象的属性和方法列表，包括模块对象、函数对象、字符串对象、列表对象、字典对象 …… 相当多的东西
+
+Finally, the callable function takes any object and returns True if the object can be called, or False otherwise.
+最后是 callable 函数，它接收任何对象作为参数，如果参数对象是可调用的，返回 True
+
+Callable objects include functions, class methods, even classes themselves.
+否则返回 False
+
+(More on classes in the next chapter.)
+可调用对象包括函数、类方法，甚至类自身 (下一章将更多的关注类)
+
+type, str, dir, and all the rest of Python's built-in functions are grouped into a special module called __builtin__.
+type、str、dir 和其它的 Python 内置函数都归组到了 __builtin__ (前后分别是双下划线) 这个特殊的模块中
+
+(That's two underscores before and after.) If it helps, you can think of Python automatically executing from __builtin__ import * on startup, which imports all the “built-in” functions into the namespace so you can use them directly.
+如果有帮助的话，你可以认为 Python 在启动时自动执行了 from __builtin__ import *，此语句将所有的 “内置” 函数导入该命名空间，所以在这个命名空间中可以直接使用这些内置函数
+
+The advantage of thinking like this is that you can access all the built-in functions and attributes as a group by getting information about the __builtin__ module.
+像这样考虑的好处是，你是可以获取 __builtin__ 模块信息的，并以组的形式访问所有的内置函数和属性
+
+And guess what, Python has a function called info.
+猜到什么了吗，现在我们的 Python 有一个称为 info 的函数
+
+Try it yourself and skim through the list now.
+自己尝试一下，略看一下结果列表
+
+We'll dive into some of the more important functions later.
+后面我们将深入到一些更重要的函数
+
+(Some of the built-in error classes, like AttributeError, should already look familiar.)
+(一些内置的错误类，比如 AttributeError，应该看上去已经很熟悉了
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

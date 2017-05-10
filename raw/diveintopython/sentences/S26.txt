@@ -1,0 +1,93 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+4.8. Putting It All Together
+4.8. 全部放在一起
+
+The last line of code, the only one you haven't deconstructed yet, is the one that does all the work.
+最后一行代码是唯一还没有解释过的，它完成全部的工作
+
+But by now the work is easy, because everything you need is already set up just the way you need it.
+但是现在工作已经简单了，因为所需要的每件事都已经按照需求建立好了
+
+All the dominoes are in place;
+所有的多米诺骨牌已经就位，到了将它们推倒的时候了
+
+This is the meat of apihelper.py:
+下面是 apihelper.py 的关键
+
+Note that this is one command, split over multiple lines, but it doesn't use the line continuation character (\).
+注意这是一条命令，被分隔成了多行，但是并没有使用续行符 (\)
+
+Remember when I said that some expressions can be split into multiple lines without using a backslash?
+还记得我说过一些表达式可以分割成多行而不需要使用反斜线吗
+
+A list comprehension is one of those expressions, since the entire expression is contained in square brackets.
+列表解析就是这些表达式之一，因为整个表达式包括在方括号里
+
+Now, let's take it from the end and work backwards.
+现在，让我们从后向前分析
+
+shows that this is a list comprehension.
+告诉我们这是一个列表解析
+
+As you know, methodList is a list of all the methods you care about in object.
+如你所知 methodList 是 object 中所有你关心的方法的一个列表
+
+So you're looping through that list with method.
+所以你正在使用 method 遍历列表
+
+The next piece of the puzzle is the use of str around the doc string.
+接下来令人困惑的是 doc string 周围 str 的使用
+
+As you may recall, str is a built-in function that coerces data into a string.
+你可能记得，str 是一个内置函数，它可以强制将数据转化为字符串
+
+But a doc string is always a string, so why bother with the str function?
+但是一个 doc string 应该总是一个字符串，为什么还要费事地使用 str 函数呢
+
+The answer is that not every function has a doc string, and if it doesn't, its __doc__ attribute is None.
+答案就是：不是每个函数都有 doc string ，如果没有，这个 __doc__ 属性为 None
+
+Now that you are guaranteed to have a string, you can pass the string to processFunc, which you have already defined as a function that either does or doesn't collapse whitespace.
+现在你确保有了一个字符串，可以把这个字符串传给 processFunc，这个函数已经定义是一个既可以压缩空白也可以不压缩空白的函数
+
+Now you see why it was important to use str to convert a None value into a string representation.
+现在你看出来为什么使用 str 将 None 转化为一个字符串很重要了
+
+processFunc is assuming a string argument and calling its split method, which would crash if you passed it None because None doesn't have a split method.
+processFunc 假设接收到一个字符串参数然后调用 split 方法，如果你传入 None ，将导致程序崩溃，因为 None 没有 split 方法
+
+Stepping back even further, you see that you're using string formatting again to concatenate the return value of processFunc with the return value of method's ljust method.
+再往回走一步，你再一次使用了字符串格式化来连接 processFunc 的返回值 和 method 的 ljust 方法的返回值
+
+This is a new string method that you haven't seen before.
+ljust 是一个你之前没有见过的新字符串方法
+
+You're almost finished.
+几乎已经完成了
+
+Given the padded method name from the ljust method and the (possibly collapsed) doc string from the call to processFunc, you concatenate the two and get a single string.
+有了 ljust 方法填充过的方法名称和来自调用 processFunc 方法得到的 doc string (可能压缩过)，你就可以将两者连接起来并得到单个字符串
+
+Since you're mapping methodList, you end up with a list of strings.
+因为对 methodList 进行了映射，最终你将获得一个字符串列表
+
+Using the join method of the string "\n", you join this list into a single string, with each element of the list on a separate line, and print the result.
+利用 "\n" 的 join 函数，将这个列表连接为单个字符串，列表中每个元素独占一行，接着打印出结果
+
+That's the last piece of the puzzle.
+上述就是最后一个令人困惑的地方了
+
+You should now understand this code.
+但是现在你应该已经理解这段代码了
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

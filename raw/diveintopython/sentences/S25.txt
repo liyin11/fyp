@@ -1,0 +1,81 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+4.7. Using lambda Functions
+4.7. 使用 lambda 函数
+
+Python supports an interesting syntax that lets you define one-line mini-functions on the fly.
+Python 支持一种有趣的语法，它允许你快速定义单行的最小函数
+
+Borrowed from Lisp, these so-called lambda functions can be used anywhere a function is required.
+这些叫做 lambda 的函数，是从 Lisp 借用来的，可以用在任何需要函数的地方
+
+To generalize, a lambda function is a function that takes any number of arguments (including optional arguments) and returns the value of a single expression.
+总的来说，lambda 函数可以接收任意多个参数 (包括可选参数) 并且返回单个表达式的值
+
+lambda functions can not contain commands, and they can not contain more than one expression.
+lambda 函数不能包含命令，包含的表达式不能超过一个
+
+Don't try to squeeze too much into a lambda function;
+不要试图向 lambda 函数中塞入太多的东西
+
+if you need something more complex, define a normal function instead and make it as long as you want.
+如果你需要更复杂的东西，应该定义一个普通函数，然后想让它多长就多长
+
+Here are the lambda functions in apihelper.py:
+apihelper.py 中的 lambda 函数：
+
+Notice that this uses the simple form of the and-or trick, which is okay, because a lambda function is always true in a boolean context.
+注意这里使用了 and-or 技巧的简单形式，它是没问题的，因为 lambda 函数在布尔环境中总是为真
+
+(That doesn't mean that a lambda function can't return a false value.
+(这并不意味这 lambda 函数不能返回假值
+
+The function is always true;
+这个函数对象的布尔值为真
+
+its return value could be anything.)
+它的返回值可以是任何东西
+
+Also notice that you're using the split function with no arguments.
+还要注意的是使用了没有参数的 split 函数
+
+You've already seen it used with one or two arguments, but without any arguments it splits on whitespace.
+你已经看到过它带一个或者两个参数的使用，但是不带参数它按空白进行分割
+
+So what is the info function actually doing with these lambda functions, splits, and and-or tricks?
+那么 info 函数到底用这些 lambda 函数、split 函数和 and-or 技巧做了些什么呢
+
+processFunc is now a function, but which function it is depends on the value of the collapse variable.
+processFunc 现在是一个函数，但是它到底是哪一个函数还要取决于 collapse 变量
+
+If collapse is true, processFunc(string) will collapse whitespace;
+如果 collapse 为真，processFunc(string) 将压缩空白
+
+otherwise, processFunc(string) will return its argument unchanged.
+否则 processFunc(string) 将返回未改变的参数
+
+To do this in a less robust language, like Visual Basic, you would probably create a function that took a string and a collapse argument and used an if statement to decide whether to collapse the whitespace or not, then returned the appropriate value.
+在一个不很健壮的语言中实现它，像 Visual Basic，你很有可能要创建一个函数，接受一个字符串参数和一个 collapse 参数，并使用 if 语句确定是否压缩空白，然后再返回相应的值
+
+This would be inefficient, because the function would need to handle every possible case.
+这种方式是低效的，因为函数可能需要处理每一种可能的情况
+
+Every time you called it, it would need to decide whether to collapse whitespace before it could give you what you wanted.
+每次你调用它，它将不得不在给出你所想要的东西之前，判断是否要压缩空白
+
+In Python, you can take that decision logic out of the function and define a lambda function that is custom-tailored to give you exactly (and only) what you want.
+在 Python 中，你可以将决策逻辑拿到函数外面，而定义一个裁减过的 lambda 函数提供确切的 (唯一的) 你想要的
+
+This is more efficient, more elegant, and less prone to those nasty oh-I-thought-those-arguments-were-reversed kinds of errors.
+这种方式更为高效、更为优雅，而且很少引起那些令人讨厌 (哦，想到那些参数就头昏) 的错误
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+

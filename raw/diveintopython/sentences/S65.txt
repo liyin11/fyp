@@ -1,0 +1,63 @@
+Dive Into Python
+深入 Python :Dive Into Python 中文版
+
+Python from novice to pro
+Python 从新手到专家 [Dip_5.4b_CPyUG_Release]
+
+Find: 
+Find: 
+
+10.3. Caching node lookups
+10.3. 查询缓冲节点
+
+kgp.py employs several tricks which may or may not be useful to you in your XML processing.
+kgp.py 使用了多种技巧，在你进行 XML 处理时，它们或许能派上用场
+
+The first one takes advantage of the consistent structure of the input documents to build a cache of nodes.
+第一个就是，利用输入文档的结构稳定特征来构建节点缓冲
+
+A grammar file defines a series of ref elements.
+一个语法文件定义了一系列的 ref 元素
+
+Each ref contains one or more p elements, which can contain a lot of different things, including xrefs.
+每个 ref 包含了一个或多个 p 元素，p 元素则可以包含很多不同的东西，包括 xref
+
+Whenever you encounter an xref, you look for a corresponding ref element with the same id attribute, and choose one of the ref element's children and parse it.
+对于每个 xref，你都能找到相对应的 ref 元素 (它们具有相同的 id 属性)，然后选择 ref 元素的子元素之一进行解析
+
+(You'll see how this random choice is made in the next section.)
+(在下一部分中你将看到是如何进行这种随机选择的
+
+This is how you build up the grammar: define ref elements for the smallest pieces, then define ref elements which "include" the first ref elements by using xref, and so forth.
+语法的构建方式如下：先为最小的片段定义 ref 元素，然后使用 xref 定义“包含”第一个 ref 元素的 ref 元素，等等
+
+Then you parse the "largest" reference and follow each xref, and eventually output real text.
+然后，解析“最大的”引用并跟着 xref 跳来跳去，最后输出真实的文本
+
+The text you output depends on the (random) decisions you make each time you fill in an xref, so the output is different each time.
+输出的文本依赖于你每次填充 xref 时所做的 (随机) 决策，所以每次的输出都是不同的
+
+This is all very flexible, but there is one downside: performance.
+这种方式非常灵活，但是有一个不好的地方：性能
+
+When you find an xref and need to find the corresponding ref element, you have a problem.
+当你找到一个 xref 并需要找到相应的 ref 元素时，会遇到一个问题
+
+The xref has an id attribute, and you want to find the ref element that has that same id attribute, but there is no easy way to do that.
+xref 有 id 属性，而你要找拥有相同 id 属性的 ref 元素，但是没有简单的方式做到这件事
+
+The slow way to do it would be to get the entire list of ref elements each time, then manually loop through and look at each id attribute.
+较慢的方式是每次获取所有 ref 元素的完整列表，然后手动遍历并检视每一个 id 属性
+
+The fast way is to do that once and build a cache, in the form of a dictionary.
+较快的方式是只做一次，然后以字典形式构建一个缓冲
+
+Once you build this cache, whenever you come across an xref and need to find the ref element with the same id attribute, you can simply look it up in self.refs.
+只要构建了这个缓冲，无论何时你遇到一个 xref 并且需要找到具有相同 id 属性的 ref 元素，都只需在 self.refs 中查找它
+
+You'll explore the randomChildElement function in the next section.
+你将在下一部分探究 randomChildElement 函数
+
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+Copyright © 2000, 2001, 2002, 2003, 2004 Mark Pilgrim
+
