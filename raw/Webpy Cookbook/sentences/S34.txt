@@ -1,0 +1,21 @@
+Alternating Style
+交替风格
+
+code.py
+code.py
+
+template.html
+template.html
+
+New Templetor
+New Templetor
+
+In the new implementation of templetor (which will be the default when version .3 is released), within any template loop you have access to a $loop variable.
+In the new implementation of templetor (which will be the default when version .3 is released), within any template loop you have access to a $loop variable. This works like so:
+
+started by Aaron Swartz (webpy@aaronsw.com)
+started by Aaron Swartz (webpy@aaronsw.com)
+
+fork this page on GitHub
+fork this page on GitHub
+

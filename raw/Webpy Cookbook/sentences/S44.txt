@@ -1,0 +1,18 @@
+Store an uploaded file
+保存上传的文件
+
+You want to upload a file and store it in a predefined folder.
+上传文件，并将其保存到预先设定的某个目录下
+
+Solution
+方法
+
+Hang ups
+Hang ups
+
+A couple of things to watch out for:
+同时还需要注意如下几点:
+
+started by Aaron Swartz (webpy@aaronsw.com)
+started by Aaron Swartz (webpy@aaronsw.com)
+

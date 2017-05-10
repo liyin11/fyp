@@ -1,0 +1,60 @@
+Understanding URL Handling
+理解URL控制
+
+Other languages : français | ...
+问题: 如何为整个网站设计一个URL控制方案 / 调度模式
+
+Problem: how to design a url handling / dispatching scheme for the entire site
+解决:
+
+Solution:
+web.py的URL控制模式是简单的、强大的、灵活的
+
+web.py's URL handling scheme is simple yet powerful and flexible.
+这些元组的格式是: URL路径, 处理类 这组定义有多少可以定义多少
+
+at the top of each application, you usually see the full URL dispatching scheme defined as a tuple:
+如果你并不知道URL路径和处理类之间的关系，请在阅读cookbook之前先阅读Hello World example，或者快速入门
+
+The format of this tuple is: url-path-pattern, handler-class this pattern will repeat as more url patterns are defined.
+路径匹配
+
+Path Matching
+你可以利用强大的正则表达式去设计更灵活的URL路径
+
+You can utilize the power of regular expressions to design more flexible url patterns.
+这个URL的路径是 /myapp/greetings/hello
+
+For example, /(test1|test2) will catch either /test1 or /test2.
+web.py会在内部给URL路径加上^ 和$ ，这样 /tasks/ 不会匹配 /tasks/addnew
+
+The key point to understand is that this matching happens on the path of your URL.
+URL匹配依赖于“路径”，所以不能这样使用，如： /tasks/delete
+
+For example, the following URL:
+name=(.+) ,
+
+The path of this URL is /myapp/greetings/hello.
+捕捉参数
+
+Capture Parameters
+你可以捕捉URL的参数，然后用在处理类中:
+
+In the url pattern you can catch parameters which can be used in your handler class:
+在 list/后面的这块会被捕捉，然后作为参数被用在GET或POST:
+
+The chunk after list/ are captured and can be used as a parameter in GET or POST:
+你可以根据需要定义更多参数
+
+You can define more than one parameters as you wish.
+开发子程序的时候注意
+
+Note on sub-applications
+为了更好的控制大型web应用，web.py支持子程序
+
+To better handle larger web applications, web.py support sub-applications.
+started by Aaron Swartz (webpy@aaronsw.com)
+
+started by Aaron Swartz (webpy@aaronsw.com)
+fork this page on GitHub
+

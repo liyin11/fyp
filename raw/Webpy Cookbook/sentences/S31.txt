@@ -1,0 +1,15 @@
+Webservice + WSDL
+用soaplib实现webservice
+
+And you can view the WSDL in http://localhost:8080/hello.wsdl
+可以用soaplib客户端测试一下：
+
+For more information of webservice see: soaplib,
+可以在http://localhost:8080/hello.wsdl查看WSDL
+
+started by Aaron Swartz (webpy@aaronsw.com)
+欲了解更多，请查看 soaplib,
+
+fork this page on GitHub
+started by Aaron Swartz (webpy@aaronsw.com)
+

@@ -1,0 +1,75 @@
+db.select
+db.select 查询
+
+Problem:
+问题:
+
+You want to select data from a database
+怎样执行数据库查询
+
+Solution:
+解决方案:
+
+With version 0.3, databases are defined like this:
+如果是0.3版本, 连接部分大致如下:
+
+Once the database is defined as such, performing selects can be performed like this:
+当获取数据库连接后, 可以这样执行查询数据库:
+
+The select statement takes the following keyword arguments:
+select方法有下面几个参数:
+
+vars
+vars
+
+The vars variable is used to populate the rest of the statements.
+vars变量用来填充查询条件. 如:
+
+what
+what
+
+The what variable defaults to *, but can take a list of items you want selected if the entire entry isn't desired.
+what是标明需要查询的列名, 默认是*, 但是你可以标明需要查询哪些列.
+
+where
+where
+
+The where variable lets you pass where clauses to the SQL select, such as:
+where查询条件, 如:
+
+order
+order
+
+The order variable lets the order be specified.
+排序方式:
+
+group
+group
+
+Grouping lets you combine things that are common.
+按group组排列.
+
+limit
+limit
+
+Limits set how many results are returned.
+从多行中返回limit查询.
+
+offset
+offset
+
+Offsets start returning results after a certain point;
+偏移量, 从第几行开始.
+
+_test
+_test
+
+The _test variable lets you see the SQL produced by the statement:
+查看运行时执行的SQL语句:
+
+started by Aaron Swartz (webpy@aaronsw.com)
+started by Aaron Swartz (webpy@aaronsw.com)
+
+fork this page on GitHub
+fork this page on GitHub
+

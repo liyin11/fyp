@@ -1,0 +1,18 @@
+Custom NotFound message
+自定义NotFound消息
+
+How to customize notfound and other messages?
+如何定义NotFound消息和其他消息
+
+Solution
+解法
+
+And to return the custom 404 from your code, just do:
+要返回自定义的NotFound消息，这么做即可：
+
+In the same way InternalError message can also be customized.
+也可以用同样的方法自定义500错误消息：
+
+started by Aaron Swartz (webpy@aaronsw.com)
+started by Aaron Swartz (webpy@aaronsw.com)
+

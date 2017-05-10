@@ -1,0 +1,33 @@
+Webpy + Nginx with FastCGI
+Webpy + Nginx with FastCGI搭建Web.py
+
+This cookbook entry explains how to run web.py on Nginx with Fastcgi.
+这一节讲解的是如何使用Nginx和FastCGI搭建Web.py应用
+
+Requirements
+环境依赖的软件包
+
+Older versions may work, but aren't tested.
+注意：Flup是最常见的忘记装的软件，需要安装
+
+Start:
+对于静态文件可以添加如下配置:
+
+Shutdown:
+注意: 地址和端口号可能会是不同的
+
+Save the following code in your www directory and call the file index.py (or whatever you like).
+可以通过一下命令启动一个Spawn-fcgi进程:
+
+To check if it runs do ps aux | grep index.py or simply visit the page in your browser.
+启动:
+
+To reload your configuration:
+关闭:
+
+And to stop:
+Note: 你可以随意填写地址和端口信息，但是一定需要和Nginx配置文件相匹配
+
+NOTES
+Hello world!
+

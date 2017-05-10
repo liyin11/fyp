@@ -1,0 +1,69 @@
+cookies
+如何操作Cookie
+
+You want to set and retrieve cookies for a user browsing the site.
+如何设置和获取用户的Cookie
+
+Solution
+解法
+
+Web.py comes with an easy to use method for setting/getting cookies.
+对web.py而言，设置/获取Cookie非常方便
+
+Setting Cookies
+设置Cookies
+
+Overview
+概述
+
+Example
+示例
+
+web.setcookie() can be used to set the cookie for a user, like this:
+用web.setcookie() 设置cookie,如下:
+
+Calling the above class with GET will set a cookie named "age" with a default value equal to "25" (this default value actually comes from the web.input processing, NOT the setcookie function), which expires in 1 hour (3600 seconds).
+用 GET方式调用上面的类将设置一个名为age,默认值是25的cookie(实际上，默认值25是在web.input中赋予i.age的，从而间接赋予 cookie，而不是在setcookie函式中直接赋予cookie的)
+
+The third (and optional) argument to web.setcookie(), "expires", allows you to set when you want your cookie to expire.
+web.setcookie()的第三个参数－"expires"是一个可选参数，它用来设定cookie过期的时间
+
+Any negative number will expire the cookie immediately.
+如果是负数，cookie将立刻过期
+
+Any positive number is the number of seconds that the cookie will last (3600 would result in an hour long cookie).
+如果是正数，就表示cookie的有效时间是多久，以秒为单位
+
+Leaving this argument empty results in a session cookie, which expires when your browser shuts down.
+如果该参数为空，cookie就永不过期
+
+Retrieving Cookies
+获得Cookies
+
+Overview
+概述
+
+There are many methods to retrieve cookies, depending on the desired reaction to a missing cookie.
+获取Cookie的值有很多方法，它们的区别就在于找不到cookie时如何处理
+
+Example
+示例：
+
+web.cookies() can be used to access an already set cookie.
+用web.cookies() 访问cookie. 如果已经用web.setcookie()设置了Cookie, 就可以象下面这样获得Cookie:
+
+The example sets a default value for the cookie if it does not exist.
+这个例子为cookie设置了默认值
+
+The reason for setting a default value is that if the cookie is attempted to be accessed, but does not exist, web.cookies() raises an exception.
+这么做的原因是在访问时，若cookie不存在，web.cookies()就会抛出异常，如果事先设置了默认值就不会出现这种情况
+
+Sometimes, you want to know specifically if something doesn't exist, in which case you can use something like the following:
+如果要确认cookie值是否存在，可以这样做：
+
+This code attempts to use the cookie submitted by the browser, but does not give it a default value.
+或
+
+or
+started by Aaron Swartz (webpy@aaronsw.com)
+

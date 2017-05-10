@@ -1,0 +1,18 @@
+using subapplications
+使用子应用
+
+How do you include an application defined in another file in your application?
+如何在当前应用中包含定义在其他文件中的某个应用
+
+Solution
+解法
+
+In blog.py:
+在blog.py中:
+
+In your main code.py:
+当前的主应用code.py:
+
+started by Aaron Swartz (webpy@aaronsw.com)
+started by Aaron Swartz (webpy@aaronsw.com)
+

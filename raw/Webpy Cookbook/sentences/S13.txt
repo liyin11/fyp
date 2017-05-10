@@ -1,0 +1,15 @@
+Reading raw data from post
+从post读取原始数据
+
+Sometimes, the client sends a lot of data by the POST method.
+有时候，浏览器会通过post发送很多数据
+
+In webpy, you can handle it like this.
+在webpy，你可以这样操作
+
+Code
+代码
+
+started by Aaron Swartz (webpy@aaronsw.com)
+started by Aaron Swartz (webpy@aaronsw.com)
+

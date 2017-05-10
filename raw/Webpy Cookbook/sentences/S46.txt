@@ -1,0 +1,27 @@
+web.input
+web.input
+
+The web.input() method returns a web.storage object (a dictionary-like object) that contains the variables from the url (in a GET) or in the http header (in a POST).
+有时你想指定一个默认变量,而不想使用None.参考下面的代码:
+
+Sometimes you may want to specify a default variable, in case none is given.
+注意,web.input()取得的值都会被当作string类型,即使你传递的是一些数字.
+
+Note that the web.input() values will be strings even if there are numbers passed to it.
+如果你想传递一个多值变量,比如像这样:
+
+What if you pass several of the same variable names, like this:
+foobarbaz
+
+foobarbaz
+你需要让web.input知道这是一个多值变量,否则会变成一串而不是一个变量 .传递一个list给 web.input 作为默认值,就会正常工作.举个例子, 访问 http://example.com
+
+You need to let web.input know to expect multiple inputs, or it will clobber all but one.
+译者补充: 多值变量这儿,在WEB上除了上面所说的multiple select 和query strings外,用得最多的就是复选框(checkbox)了,另外还有多文件上传时的<input type="file" ...>.
+
+started by Aaron Swartz (webpy@aaronsw.com)
+started by Aaron Swartz (webpy@aaronsw.com)
+
+fork this page on GitHub
+fork this page on GitHub
+

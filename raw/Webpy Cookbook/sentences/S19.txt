@@ -1,0 +1,21 @@
+Logging
+管理自带webserver日志
+
+You want to control logging for default HTTPServer.
+如何操作web.py自带的webserver的日志
+
+Solution:
+解法
+
+With the built-in webserver you can control logging by using wsgilog and passing it to your app as middleware.
+我们可以用wsgilog来操作内置的webserver的日志，并做其为中间件加到应用中
+
+This code works for wsgilog version 0.2
+如下，写一个Log类继承wsgilog.WsgiLog，在init中把参数传给基类，如这个例子：
+
+Then when you run your app, you pass a reference to to the class e.g.
+接下来，当应用运行时，传递一个引用给上例中的Log类即可(假设上面代码是'mylog'模块的一部分，代码如下)：
+
+started by Aaron Swartz (webpy@aaronsw.com)
+started by Aaron Swartz (webpy@aaronsw.com)
+

@@ -1,0 +1,30 @@
+Serving Static Files (such as js, css and images)
+提供静态文件 (诸如js脚本, css样式表和图象文件)
+
+How to serve static files?
+如何在web.py自带的web server中提供静态文件访问
+
+Solution
+解法
+
+web.py server
+web.py 服务器
+
+Create a directory (also known as a folder) called static in the location of the script that runs the web.py server.
+在当前应用的目录下，创建一个名为static的目录，把要提供访问的静态文件放在里面即可
+
+For example, the URL http://localhost/static/logo.png will send the image ./static/logo.png to the client.
+例如, 网址 http://localhost/static/logo.png 将发送 ./static/logo.png 给客户端
+
+Apache
+Apache
+
+To serve static files with Apache an Alias directive can be used to map the request for a URL to a chosen directory, before it is handled by web.py.
+在 Apache 中可以使用 Alias 指令，在处理 web.py 之前将请求映射到指定的目录
+
+Here is an example Virtual Host configured on a Unix like system with an Alias directive in effect:
+这是一个在 Unix like 系统上虚拟主机配置的例子：
+
+started by Aaron Swartz (webpy@aaronsw.com)
+started by Aaron Swartz (webpy@aaronsw.com)
+

@@ -1,0 +1,54 @@
+Render individual form fields
+个别显示表单字段
+
+Problem
+问题：
+
+You want to render individual form fields in templates
+怎样在模板中个别显示表单字段
+
+Solution
+解决：
+
+You can use the render() method for individual fields to render the fields in your template.
+你可以使用'render()'方法在你的模板中显示部分的表单字段
+
+Let's assume you want to create a name/surname form.
+假设你想创建一个名字/姓氏表单
+
+Very simple, with only two fields, and no validation, just for testing purposes.
+很简单，只有两个字段，不需要验证，只是为了测试目的
+
+Usually you would either use simple_form.render() or simple_form.render_css().
+通常你可以使用simple_form.render（）或simple_form.render_css（）
+
+But what if you want to render individual form fields one by one, so you can have more control over how it appears in your template?
+ 但如你果你想一个一个的显示表单的字段，或者你怎样才能对模板中的表单显示拥有更多的控制权限
+
+For that, you can use the render() method on individual fields.
+如果是这样，你可以对你的个别字段使用render()方法
+
+We have defined two fields with names name and surname.
+我们定义了两个字段名称为name和surname
+
+Those names automatically become attributes of simple_form object.
+这些名称将自动成为simple_form对象的属性
+
+You can also render individual descriptions in a similar way:
+你同样可以通过类似的方法显示个别的描述：
+
+What if you have a small template snippet (partial template) that you'd like to use universally for all form fields you have defined?
+如果你有一个小模板片段（局部模板），你想统一的使用你所定义的所有表单字段
+
+You can iterate fields by using the inputs attribute of your form object.
+你可以使用表单对象的inputs属性迭代每个字段
+
+Here's an example:
+下面是一个示例：
+
+started by Aaron Swartz (webpy@aaronsw.com)
+started by Aaron Swartz (webpy@aaronsw.com)
+
+fork this page on GitHub
+fork this page on GitHub
+

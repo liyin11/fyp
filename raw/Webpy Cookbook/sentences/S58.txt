@@ -1,0 +1,27 @@
+Using a dictionary as where clause
+使用字典动态构造where子句
+
+Problem
+问题
+
+You want to create a dictionary of where clauses dynamically and use it in a query.
+你希望创建一个字典来构造动态的where子句并且希望能够在查询语句中使用
+
+Solution
+解决
+
+Explanation
+解释
+
+web.db.sqlwhere takes a Python dictionary as an argument and converts it into a string useful for where clause in different queries.
+web.db.sqlwhere takes a Python dictionary as an argument and converts it into a string useful for where clause in different queries. You can also use an optional grouping argument to define the exact gouping of the individual keys. For instance:
+
+Default for grouping is ' AND '.
+web.db.sqlwhere将Python的字典作为参数并且转换为适用于不同的查询语句的where子句的string类型数据
+
+started by Aaron Swartz (webpy@aaronsw.com)
+grouping 的默认值为 ' AND '.
+
+fork this page on GitHub
+started by Aaron Swartz (webpy@aaronsw.com)
+

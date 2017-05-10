@@ -1,0 +1,60 @@
+ctx
+web.ctx
+
+You want to use contextual variables in your code such as the referring page or the client's browser.
+如何在代码中得到客户端信息
+
+Solution
+解法
+
+Using web.ctx makes this possible.
+使用web.ctx即可
+
+First a little architecture: web.ctx is based on the class threadeddict a.k.a.
+首先讲一点架构的东西：web.ctx基于threadeddict类，又被叫做ThreadDict
+
+ThreadedDict.
+这个类创建了一个类似字典(dictionary-like)的对象，对象中的值都是与线程id相对应的
+
+This class creates a dictionary-like object that has attributes specific to the thread process id.
+这样做很妙,因为很多用户同时访问系统时，这个字典对象能做到仅为某一特定的HTTP请求提供数据(因为没有数据共享，所以对象是线程安全的)
+
+web.ctx holds variables for each request that contain specific information to each request such as the client environment variable.
+web.ctx保存每个HTTP请求的特定信息，比如客户端环境变量
+
+Assuming you want to determine what the referring page was for a user accessing a page:
+假设，我们想知道正在访问某页面的用户是从哪个网页跳转而来的：
+
+Example
+例子
+
+This code uses web.ctx.env to access the HTTP_REFERER environment variable.
+上述代码用web.ctx.env获取HTTP_REFERER的值
+
+If there isn't one, it defaults to google.com.
+如果HTTP＿REFERER不存在，就会将google.com做为默认值
+
+Finally, it redirects the user to the page they came from.
+接下来，用户就会被重定向回到之前的来源页面
+
+web.ctx is also useful because it can be set by a loadhook.
+web.ctx另一个特性，是它可以被loadhook赋值
+
+Session data, for example, is set each time a request is handled and the data is stored in web.ctx.
+例如：当一个请求被处理时，会话(Session)就会被设置并保存在web.ctx中
+
+Since web.ctx is thread-safe, you can use the session data as if it were a regular python object.
+由于web.ctx是线程安全的，所以我们可以象使用普通的python对象一样，来操作会话(Session)
+
+Data Found in ctx
+'ctx'中的数据成员
+
+Request
+Request
+
+Response
+Response
+
+started by Aaron Swartz (webpy@aaronsw.com)
+started by Aaron Swartz (webpy@aaronsw.com)
+

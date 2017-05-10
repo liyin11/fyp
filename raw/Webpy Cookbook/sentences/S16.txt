@@ -1,0 +1,54 @@
+How to use web.background
+如何使用web.background
+
+WARNING web.backgrounder was moved to experimental with web.py 3.x and it no longer part of the default distribution.
+注意
+
+You can get it from here and put it in the same directory as application.py i.e.
+
+
+the web directory for this to work.
+ web.backgrounder已转移到web.py 3.X实验版本中，不再是发行版中的一部分
+
+Intro
+介绍
+
+web.background (and web.backgrounder) are python function decorators which allow you to execute a function in a separate background thread to that thread which served the current HTTP request and later report back on the status of the background thread (the stdout of the background function is in effect returned to the "backgrounder" that initiated the thread.
+web.background和web.backgrounder都是python装饰器，它可以让某个函式在一个单独的background线程中运行，而主线程继续处理当前的HTTP请求，并在稍后报告background线程的状态(事实上，后台函式的标准输出(stdout)被返回给启动该线程的"backrounder")
+
+This allows you to respond quickly to the client and move to to serving other http requests, while the background thread performs some long running function.
+这样，服务器就可以在处理其他http请求的同时，快速及时地响应当前客户端请求
+
+Example
+例子
+
+On requesting http://localhost:8080/ you will be redirected automatically to a URL like http://localhost:8080/?_t=3080772748 ( depending on the background thread id) and (after you hit refresh a few times) you'll see something like;
+在请求http://localhost:8080/时，将自动重定向到类似http://localhost:8080/
+
+Notes
+提示
+
+web.py keeps track of threads in the background.threaddb dictionary.
+web.py在background.threaddb字典中保存线程信息
+
+It's easy to examine the state of it like;
+这就很容易检查线程的状态
+
+web.py doesn't attempt to clean up threaddb dictionary, which allows the output (like http://localhost:8080/?_t=3080772748 ) to continue to be served but is going to fill up memory over time.
+web.py并不会主动去清空threaddb词典，这使得输出(如http://localhost:8080/
+
+Probably the backgrounder needs to clean up, as it's able to determine the thread id (from web.input() - '_t') although it's actually the background function which knows when it's finished, but doesn't know it's thread ID.
+通常是在backgrounder函式中做线程清理工作，是因为backgrounder可以获得线程id(通过web.input()得到"_t"的值，就是线程id)，从而根据线程id来回收资源
+
+Note also How not to do thread local storage with Python - thread id's are going to get re-used at some point (there's probably bugs to report here).
+还要注意 How not to do thread local storage with Python 在python中如何避免多线程本地存储 - 线程ID有时会被重用(可能会引发错误)
+
+In other words, handle with care.
+在使用web.background时，还是那句话－－“小心为上”
+
+started by Aaron Swartz (webpy@aaronsw.com)
+started by Aaron Swartz (webpy@aaronsw.com)
+
+fork this page on GitHub
+fork this page on GitHub
+

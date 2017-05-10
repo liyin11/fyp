@@ -1,0 +1,12 @@
+How to Stream Large Files
+如何流传输大文件
+
+You want to use web.py to stream large files.
+如何流传输大文件
+
+You can't mix basic string and Yield returns in the same method.
+要流传输大文件，需要添加传输译码(Transfer-Encoding)区块头，这样才能一边下载一边显示
+
+If you use Yield, you'll have to use yield for everything because your function becomes a generator.
+否则，浏览器将缓冲所有数据直到下载完毕才显示
+

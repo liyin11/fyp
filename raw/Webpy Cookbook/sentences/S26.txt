@@ -1,0 +1,33 @@
+user authentication
+用户认证
+
+I'm still working on this page, please no body else edit
+原作者没有写完，但是可以参照下一节，写得很详细
+
+You want a system to authenticate users.
+如何完成一个用户认证系统
+
+Solution
+解法
+
+A user authentication system is made up of a few parts.
+用户认证系统由这几个部分组成：用户添加，用户登录，用户注销以及验证用户是否已登录
+
+Adding users, logging users in, logging users out and checking if users are logged in.
+用户认证系统一般都需要一个数据库
+
+It also requires a database.
+在这个例子中，我们要用到MD5和SQLite
+
+#
+#
+
+Notes
+注意
+
+Do not use this code on real site - this is only for illustration.
+这仅仅是个例子，可不要在真实的生产环境中应用哦
+
+started by Aaron Swartz (webpy@aaronsw.com)
+started by Aaron Swartz (webpy@aaronsw.com)
+

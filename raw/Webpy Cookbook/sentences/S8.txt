@@ -1,0 +1,14 @@
+How to write hello world with web.py
+如何用web.py实现Hello World!
+
+Solution
+解法
+
+Tip: Make url ending with or without '/' going to the same class.
+提示：要保证网址有无'/'结尾，都能指向同一个类
+
+add the following to the beginning of urls.
+在URL开头添加代码：
+
+and have the following class to handle those urls.
+然后用redirect类处理以'/'结尾的网址：

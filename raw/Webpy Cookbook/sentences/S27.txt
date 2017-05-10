@@ -1,0 +1,78 @@
+User Authentication with PostgreSQL database
+在PostgreSQL下实现用户认证
+
+Problem
+问题
+
+Solution
+解法
+
+Needed
+必需
+
+#
+#
+
+2nd: the urls
+第二步：确定网址
+
+There will be 2 states during the login/logout session:
+登录和注销对应两个网址：
+
+"Login" is for the login page
+"Login" 对应登录页
+
+"Reset" for the logout page.
+"Reset" 对应注销页
+
+3rd: Logged or not logged ?
+第三步：判断用户是否登录
+
+To manage the access for people who are logged or not is very easy.
+要判断用户是否已登录，是非常简单的，只要有个变量记录用户登录的状态即可
+
+Just define the logged expression like this, and use it for your login/reset classes:
+在login/reset类中使用这段代码:
+
+#
+#
+
+4th: Easy Privleges Management
+第四步：简单的权限管理
+
+I manage my users in 4 categories: admin+user+reader (logged), and visitors (not logged).
+我把我的用户划为四类：管理员，用户，读者（已登录），访客（未登录）
+
+The directory template is choosing according to the privilege specified in the table example_users.
+根据example_users表中定义的不同权限，选择不同的模板路径
+
+#
+#
+
+5th: Login and Reset Python Classes
+第五：登录(Login)和注销(Reset)的python类
+
+Now, let's have fun: - If you are already logged, you are redirecting to the login_double.html template file - Else, to the login.html.
+现在，让我们用个轻松的方法来解决： - 如果你已登录，就直接重定向到login_double.html模板文件 - 否则，还是到login.html
+
+#
+#
+
+For the reset function, we just kill the session, and redirect to the logout.html template file.
+对于reset方法，只要清除用户session，再重定向到logout.html模板页即可
+
+#
+#
+
+6th: HTML templates help
+6th: 第六步：HTML模板帮助
+
+Well, I think that nobody will need this, but, I prefer to give all the informations.
+嗯，我认为没有人想看这个，但我喜欢把所有的信息都提供出来
+
+The most important is the login.html.
+最重要的就是login.html
+
+#
+#
+

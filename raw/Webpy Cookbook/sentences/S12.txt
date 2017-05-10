@@ -1,0 +1,30 @@
+Serving XML
+提供XML访问
+
+How to serve XML files correctly?
+如何在web.py中提供XML访问
+
+This is needed when you have a third-party application posting data to your service and expecting some kind of XML response.
+如果需要为第三方应用收发数据，那么提供xml访问是很有必要的
+
+Solution
+解法
+
+Create your XML template with the XML file you want to serve (i.e.
+根据要访问的xml文件(如response.xml)创建一个XML模板
+
+response.xml).
+如果XML中有变量，就使用相应的模板标签进行替换
+
+If the XML has any variables, use the corresponding web.py templating code.
+下面是一个例子：
+
+To serve this file, create a standard Web.Py program (i.e.
+为了提供这个XML，需要创建一个单独的web.py程序(如response.py)，它要包含下面的代码
+
+response.py) and use the following code.
+注意：要用"web.header('Content-Type', 'text/xml')"来告知客户端－－正在发送的是一个XML文件
+
+started by Aaron Swartz (webpy@aaronsw.com)
+started by Aaron Swartz (webpy@aaronsw.com)
+

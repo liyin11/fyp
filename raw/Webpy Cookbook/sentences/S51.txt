@@ -1,0 +1,24 @@
+db.update
+db.upate 数据更新
+
+Problem
+问题
+
+You want to update data that's been entered into a database.
+向数据库中更新数据
+
+Solution
+解决方案
+
+See the select for more information on arguments that are accepted by update.
+在 查询 中有更多关于可用参数的信息
+
+The update method returns the number of rows updated.
+该更新操作会返回更新的影响行数
+
+started by Aaron Swartz (webpy@aaronsw.com)
+started by Aaron Swartz (webpy@aaronsw.com)
+
+fork this page on GitHub
+fork this page on GitHub
+

@@ -1,0 +1,18 @@
+Use Mako template engine in webpy
+在webpy中使用Mako模板引擎
+
+Problem
+问题
+
+How to use Mako template engine in webpy?
+如何在webpy中使用Mako模板引擎
+
+Solution
+解决方案
+
+You need to install both Mako and webpy(0.3) first: http://www.makotemplates.org/ and then try out the following code snippet:
+首先需要安装Mako和web.py(0.3):http://www.makotemplates.org/ 然后尝试下面的代码:
+
+You can use relative paths in order to make it easier too.
+如果你使用Apache+mod_wsgi来部署webpy程序, 你也许会在Apache错误日志中得到下面的错误信息: [Sat Jun 21 21:56:22 2008] [error] [client 192.168.122.1] TopLevelLookupException: Cant locate template for uri 'index.html'
+

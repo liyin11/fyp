@@ -1,0 +1,48 @@
+Sessions
+Sessions
+
+How to use sessions in web.py.
+如何在web.py中使用session
+
+Solution
+解法
+
+sessions doesn't work in debug mode because it interfere with reloading.
+注意
+
+see session_with_reloader for more details.
+
+
+The web.session module provides session support.
+web.session模块提供session支持
+
+Here is a simple application to count using sessions.
+下面是一个简单的例子－－统计有多少人正在使用session(session计数器)：
+
+The session object is loaded with the session data before handling the request and saves the session data after handling the request, if modified.
+web.py在处理请求之前，就加载session对象及其数据
+
+Note in the current (11-22-2008) version of web.py, one must turn off debug to use the development server with sessions.
+在请求处理完之后，会检查session数据是否被改动
+
+The optional initializer argument to Session specifies the initial session.
+上例中的initializer参数决定了session初始化的值，它是个可选参数
+
+You can use DBStore instead of DiskStore if you prefer to store sessions in database instead of disk.
+如果用数据库代替磁盘文件来存储session信息，只要用DBStore代替DiskStore即可
+
+For using DBStore you need to have a table with the following schema.
+使用DBStore需要建立一个表，结构如下：
+
+And you need to pass db object and session table name to the constructor of DBStore.
+DBStore被创建要传入两个参数：db对象和session的表名
+
+Options related to sessions can be modified using the sessions_parameters dict in web.config.
+｀web.config｀中的sessions_parameters保存着session的相关设置，sessions_parameters本身是一个字典，可以对其修改
+
+The default values are shown below.
+默认设置如下：
+
+started by Aaron Swartz (webpy@aaronsw.com)
+started by Aaron Swartz (webpy@aaronsw.com)
+
