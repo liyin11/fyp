@@ -1,0 +1,78 @@
+Logging¶
+日志（Logging）¶
+
+The logging module has been a part of Python’s Standard Library since version 2.3.
+日志 模块自2.3版本开始便是Python标准库的一部分
+
+It is succinctly described in PEP 282.
+它被简洁的描述在 PEP 282
+
+The documentation is notoriously hard to read, except for the basic logging tutorial.
+众所周知，除了 基础日志指南 部分，该文档并不容易阅读
+
+Logging serves two purposes:
+日志的两个目的：
+
+...
+... 或者用打印(Print)
+
+or Print?¶
+¶
+
+The only time that print is a better option than logging is when the goal is to display a help statement for a command line application.
+当需要在命令行应用中显示帮助文档时， 打印 是一个相对于日志更好的选择
+
+Other reasons why logging is better than print:
+而在其他时候，日志总能优于 打印 ，理由如下：
+
+Logging in a Library¶
+库中的日志¶
+
+Notes for configuring logging for a library are in the logging tutorial.
+日志指南 中含 库日志配置 的说明
+
+Because the user, not the library, should dictate what happens when a logging event occurs, one admonition bears repeating:
+由于是 用户 ，而非库来指明如何响应日志事件，因此这里有一个值得反复说明的忠告：
+
+Note
+注解
+
+It is strongly advised that you do not add any handlers other than NullHandler to your library’s loggers.
+强烈建议不要向你的库日志中加入除NullHandler外的其它处理程序
+
+Best practice when instantiating loggers in a library is to only create them using the __name__ global variable: the logging module creates a hierarchy of loggers using dot notation, so using __name__ ensures no name collisions.
+在库中，声明日志的最佳方式是通过 __name__ 全局变量：日志 模块通过点(dot)运算符创建层级排列的日志，因此，用 __name__ 可以避免名字冲突
+
+Here is an example of best practice from the requests source – place this in your __init__.py
+以下是来自 资源请求 的一个例子–把它放置在你的 __init__.py 文件中
+
+Logging in an Application¶
+应用程序中的日志¶
+
+The twelve factor app, an authoritative reference for good practice in application development, contains a section on logging best practice.
+应用程序开发的权威指南， 应用的12要素 ，也在其中一节描述了 日志的作用 
+
+It emphatically advocates for treating log events as an event stream, and for sending that event stream to standard output to be handled by the application environment.
+它特别强调将日志视为事件流，并将其发送至由应用环境所处理的标准输出中
+
+There are at least three ways to configure a logger:
+我们假设文件名为 logging_config.ini 
+
+Let us say the file is named logging_config.ini.
+然后在源码中调用 logging.config.fileConfig() 方法：
+
+Then use logging.config.fileConfig() in the code:
+Python 2.7中，你可以使用字典实现详细配置
+
+Receive updates on new releases and upcoming projects.
+本指南目前持续不断地更新与完善
+
+Follow @kennethreitz
+获得新版本和未来项目的更新
+
+Join Mailing List.
+订阅Newsletter
+
+This guide is now available for pre-order in tangible book form!
+如果你享受这份指南,想要支持作者， 请戳Gittip
+

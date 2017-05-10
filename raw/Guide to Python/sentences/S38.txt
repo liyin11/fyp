@@ -1,0 +1,57 @@
+News¶
+新闻¶
+
+Planet Python¶
+Planet Python¶
+
+This is an aggregate of Python news from a growing number of developers.
+这是一个聚合的，展示不断增长的开发者内容的Python新闻
+
+/r/python¶
+/r/python¶
+
+/r/python is the Reddit Python community where users contribute and vote on Python-related news.
+/r/python是Reddit的Python社区，在这里用户会贡献和投票出和Python相关的新闻
+
+Pycoder’s Weekly¶
+Pycoder’s Weekly¶
+
+Pycoder’s Weekly is a free weekly Python newsletter for Python developers by Python developers (Projects, Articles, News, and Jobs).
+Pycoder’s Weekly是一个面向Python开发者的免费的每周简讯，包括项目、文章、新闻和工作
+
+Python Weekly¶
+Python Weekly¶
+
+Python Weekly is a free weekly newsletter featuring curated news, articles, new releases, jobs, etc.
+Python Weekly是一个免费的每周简讯，其特色包括与Python相关的新闻、文章、新的发行版本、工作等
+
+Python News¶
+Python News¶
+
+Python News is the news section in the official Python web site (www.python.org).
+Python News是Python官方网站的新闻章节
+
+It briefly highlights the news from the Python community.
+它简短突出来自Python社区的新闻
+
+Import Python Weekly¶
+Import Python Weekly¶
+
+Weekly Python Newsletter containing Python Articles, Projects, Videos, Tweets delivered in your inbox.
+Weekly Python Newsletter包含有Python文章、项目、视频、Tweets，并发送到你的收件箱
+
+Keep Your Python Programming Skills Updated.
+能够保持你的Python编程技能持续更新
+
+This opinionated guide exists to provide both novice and expert Python developers a best practice handbook to the installation, configuration, and usage of Python on a daily basis.
+本指南目前持续不断地更新与完善
+
+Receive updates on new releases and upcoming projects.
+获得新版本和未来项目的更新
+
+Follow @kennethreitz
+订阅Newsletter
+
+Join Mailing List.
+如果你享受这份指南,想要支持作者， 请戳Gittip
+

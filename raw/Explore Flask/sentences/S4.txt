@@ -1,0 +1,192 @@
+Configuration¶
+配置¶
+
+When you’re learning Flask, configuration seems simple.
+当你学习 Flask 的时候，配置看起来很简单
+
+You just define some variables in config.py and everything works.
+你只要在 config.py 中定义一些变量接着一切就能工作了
+
+That simplicity starts to fade away when you have to manage configuration for a production application.
+当你开始必须要管理生产应用的配置的时候，这些简单性开始消失了
+
+You may need to protect secret API keys or use different configurations for different environments (e.g.
+你可能需要保护 API 密钥以及为不同的环境使用不同的配置（例如，开发和生产环境）
+
+development and production environments).
+在本章节中我们会介绍 Flask 一些先进的功能，它可以使得管理配置容易些
+
+The simple case¶
+简单的例子¶
+
+A simple application may not need any of these complicated features.
+一个简单的应用程序可能不会需要任何这些复杂的功能
+
+You may just need to put config.py in the root of your repository and load it in app.py or yourapp/__init__.py
+你可能只需要把 config.py 放在你的仓库/版本库的根目录并且在 app.py 或者 yourapp/__init__.py 中加载它
+
+The config.py file should contain one variable assignment per line.
+config.py 文件中应该每行包含一个配置变量赋值
+
+When your app is initialized, the variables in config.py are used to configure Flask and its extensions are accessible via the app.config dictionary – e.g.
+当你的应用程序初始化的时候，在 config.py 中的配置变量用于配置 Flask 和它的扩展并且它们能够通过 app.config 字典访问到 – 例如，app.config["DEBUG"]
+
+Configuration variables can be used by Flask, extensions or you.
+配置的变量可以被 Flask，它的扩展或者你来使用
+
+In this example, we could use app.config["MAIL_FROM_EMAIL"] whenever we needed the default “from” address for a transactional email – e.g.
+这个例子中， 每当我们在一封事务性邮件中需要默认的 “发件人” 的时候，我们可以使用 app.config["MAIL_FROM_EMAIL"] – 例如，密码重置
+
+password resets.
+把这些信息放置于一个配置变量中使得以后能够容易地修改它
+
+Warning
+Warning
+
+Make sure DEBUG is set to False in production.
+确保在生产环境中 DEBUG 设置成 False
+
+Leaving it on will allow users to run arbitrary Python code on your server.
+如果保留 DEBUG 为 True，它允许用户在你的服务器上执行任意的 Python
+
+Instance folder¶
+实例文件夹¶
+
+Sometimes you’ll need to define configuration variables that contain sensitive information.
+有时候你需要定义包含敏感信息的配置变量
+
+We’ll want to separate these variables from those in config.py and keep them out of the repository.
+我们想要从 config.py 中分离这些变量并且让它们保留在仓库/版本库之外
+
+You may be hiding secrets like database passwords and API keys, or defining variables specific to a given machine.
+你可能会隐藏像数据库密码以及 API 密钥的一些敏感信息，或者定义于特定于指定机器的配置变量
+
+To make this easy, Flask gives us a feature called instance folders.
+为让实现这些要求更加容易些，Flask 提供了一个叫做 instance folders 的功能
+
+The instance folder is a sub-directory of the repository root and contains a configuration file specifically for this instance of the application.
+实例文件夹是仓库/版本库下的一个子目录并且包含专门为这个应用程序的实例的一个配置文件
+
+We don’t want to commit it into version control.
+我们不希望它提交到版本控制
+
+Using instance folders¶
+使用实例文件夹¶
+
+To load configuration variables from an instance folder, we use app.config.from_pyfile().
+我们使用 app.config.from_pyfile() 来从一个实例文件夹中加载配置变量
+
+If we set instance_relative_config=True when we create our app with the Flask() call, app.config.from_pyfile() will load the specified file from the instance/ directory.
+当我们调用 Flask() 来创建我们的应用的时候，如果我们设置了 instance_relative_config=True，app.config.from_pyfile() 将会从 instance/ 目录加载指定文件
+
+Now, we can define variables in instance/config.py just like you did in config.py.
+现在我们可以像在 config.py 中那样在 instance/config.py 中定义配置变量
+
+You should also add the instance folder to your version control system’s ignore list.
+你也应该把你的实例文件夹加入到版本控制系统的忽略列表中
+
+To do this with Git, you would add instance/ on a new line in .gitignore.
+要使用 Git 做到这一点的话，你需要在 .gitignore 新的一行中添加 instance/ 
+
+Secret keys¶
+密钥¶
+
+The private nature of the instance folder makes it a great candidate for defining keys that you don’t want exposed in version control.
+实例文件夹的隐私性成为在其里面定义不想暴露到版本控制的密钥的最佳候选
+
+These may include your app’s secret key or third-party API keys.
+这些密钥可能包含了你的应用的密钥或者第三方 API 密钥
+
+This is especially important if your application is open source, or might be at some point in the future.
+如果你的应用是开源的或者以后可能会公开的话，这一点特别重要
+
+We usually want other users and contributors to use their own keys.
+我们通常要求其他用户或者贡献者使用自己的密钥
+
+Minor environment-based configuration¶
+基于环境的配置¶
+
+If the difference between your production and development environments are pretty minor, you may want to use your instance folder to handle the configuration changes.
+如果在你的生产环境和开发环境中的差异非常小的话，你可能想要使用实例文件夹来处理配置的变化
+
+Variables defined in the instance/config.py file can override the value in config.py.
+定义在 instance/config.py 文件中的配置变量能够覆盖 config.py 中的值
+
+You just need to make the call to app.config.from_pyfile() after app.config.from_object().
+你只需要在 app.config.from_object() 后调用 app.config.from_pyfile()
+
+One way to take advantage of this is to change the way your app is configured on different machines.
+这样用法的好处之一就是在不同的机器上修改你的应用的配置
+
+In production, we would leave the variables in the above listing out of instance/config.py and it would fall back to the values defined in config.py.
+在生产环境上，我们略去上面 instance/-config.py 中的配置变量，它会退回到定义在 config.py 中的值
+
+Note
+Note
+
+Read more about Flask-SQLAlchemy’s configuration keys
+了解更多关于 Flask-SQLAlchemy 的 配置项
+
+Configuring based on environment variables¶
+基于环境变量配置¶
+
+The instance folder shouldn’t be in version control.
+实例文件夹不应该出现在版本控制中
+
+This means that you won’t be able to track changes to your instance configurations.
+这就意味着你将无法跟踪你的实例配置的变化
+
+That might not be a problem with one or two variables, but if you have finely tuned configurations for various environments (production, staging, development, etc.) you don’t want to risk losing that.
+如果只是一、两个变量这可能不是什么问题，但是如果你在不同的环境上（生产，预升级，开发，等等）配置都有些微调话，你就不会想要存在丢失它们的风险
+
+Flask gives us the ability to choose a configuration file on load based on the value of an environment variable.
+Flask 给我们选择配置文件的能力，它可以基于一个环境变量的值来加载不同的配置文件
+
+This means that we can have several configuration files in our repository and always load the right one.
+这就意味着在我们的仓库/版本库里，我们可以有多个配置文件并且总会加载正确的那一个
+
+Once we have several configuration files, we can move them to their own config directory.
+一旦我们有多个配置文件的话，我可以把它们移入它们自己 config 文件夹中
+
+In this listing we have a few different configuration files.
+在上面的文件列表中我们有多个不同的配置文件
+
+To decide which configuration file to load, we’ll call app.config.from_envvar().
+为了决定要加载哪个配置文件，我们会调用 app.config.from_envvar()
+
+The value of the environment variable should be the absolute path to a configuration file.
+环境变量的值应该是配置文件的绝对路径
+
+How we set this environment variable depends on the platform in which we’re running the app.
+我们如何设置这个环境变量取决于我们运行应用所在的平台
+
+If we’re running on a regular Linux server, we can set up a shell script that sets our environment variables and runs run.py.
+如果我们运行在一个普通的 Linux 服务器上，我们可以编写一个设置环境变量的 shell 脚本并且运行 run.py
+
+start.sh is unique to each environment, so it should be left out of version control.
+start.sh 对于每一个环境都是独一无二的，因此它应该被排除在版本控制之外
+
+On Heroku, we’ll want to set the environment variables with the Heroku tools.
+在 Heroku 上，我们需要使用 Heroku 工具来设置环境变量
+
+The same idea applies to other PaaS platforms.
+这种设置方式也适用于其它的 PaaS 平台
+
+Summary¶
+摘要¶
+
+A simple app may only need one configuration file: config.py.
+一个简单的应用程序可能仅仅需要一个配置文件：config.py
+
+Instance folders can help us hide secret configuration values.
+实例文件夹能够帮助我们隐藏敏感的配置值
+
+Instance folders can be used to alter an application’s configuration for a specific environment.
+实例文件夹能够用于针对每个特定的环境需要改变应用程序的配置的场景
+
+We should use environment variables and app.config.from_envvar() for more complicated environment-based configurations.
+我们应该在一些复杂的以及多个的环境中使用环境变量以及 app.config.from_envvar() 
+
+© Copyright 2014, Robert Picard.
+京ICP备14002119号-1   | © Copyright 2014, Robert Picard, Translated by D.D.
+

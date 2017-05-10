@@ -1,0 +1,153 @@
+10.1.
+10.1. 操作系统接口¶
+
+The os module provides dozens of functions for interacting with the operating system:
+os 模块提供了很多与操作系统交互的函数:
+
+Be sure to use the import os style instead of from os import *.
+应该用 import os 风格而非 from os import *
+
+This will keep os.open() from shadowing the built-in open() function which operates much differently.
+这样可以保证随操作系统不同而有所变化的 os.open() 不会覆盖内置函数 open()
+
+The built-in dir() and help() functions are useful as interactive aids for working with large modules like os:
+在使用一些像 os 这样的大型模块时内置的 dir() 和 help() 函数非常有用:
+
+For daily file and directory management tasks, the shutil module provides a higher level interface that is easier to use:
+针对日常的文件和目录管理任务，shutil 模块提供了一个易于使用的高级接口:
+
+10.2.
+10.2. 文件通配符¶
+
+The glob module provides a function for making file lists from directory wildcard searches:
+glob 模块提供了一个函数用于从目录通配符搜索中生成文件列表:
+
+10.3.
+10.3. 命令行参数¶
+
+Common utility scripts often need to process command line arguments.
+通用工具脚本经常调用命令行参数
+
+These arguments are stored in the sys module’s argv attribute as a list.
+这些命令行参数以链表形式存储于 sys 模块的 argv 变量
+
+For instance the following output results from running python demo.py one two three at the command line:
+例如在命令行中执行 python demo.py one two three 后可以得到以下输出结果:
+
+The getopt module processes sys.argv using the conventions of the Unix getopt() function.
+getopt 模块使用 Unix getopt() 函数处理 sys.argv
+
+More powerful and flexible command line processing is provided by the argparse module.
+更多的复杂命令行处理由 argparse 模块提供
+
+10.4.
+10.4. 错误输出重定向和程序终止¶
+
+The sys module also has attributes for stdin, stdout, and stderr.
+sys 还有 stdin， stdout 和 stderr 属性，即使在 stdout 被重定向时，后者也可以用于显示警告和错误信息:
+
+The most direct way to terminate a script is to use sys.exit().
+大多脚本的定向终止都使用 sys.exit() 
+
+10.5.
+10.5. 字符串正则匹配¶
+
+The re module provides regular expression tools for advanced string processing.
+re 模块为高级字符串处理提供了正则表达式工具
+
+For complex matching and manipulation, regular expressions offer succinct, optimized solutions:
+对于复杂的匹配和处理，正则表达式提供了简洁、优化的解决方案:
+
+When only simple capabilities are needed, string methods are preferred because they are easier to read and debug:
+只需简单的操作时，字符串方法最好用，因为它们易读，又容易调试:
+
+10.6.
+10.6. 数学¶
+
+The math module gives access to the underlying C library functions for floating point math:
+math 模块为浮点运算提供了对底层 C 函数库的访问:
+
+The random module provides tools for making random selections:
+random 提供了生成随机数的工具:
+
+10.7.
+10.7. 互联网访问¶
+
+There are a number of modules for accessing the internet and processing internet protocols.
+有几个模块用于访问互联网以及处理网络通信协议
+
+Two of the simplest are urllib2 for retrieving data from URLs and smtplib for sending mail:
+其中最简单的两个是用于处理从 urls 接收的数据的 urllib2 以及用于发送电子邮件的 smtplib:
+
+(Note that the second example needs a mailserver running on localhost.)
+(注意第二个例子需要在 localhost 运行一个邮件服务器
+
+10.8.
+10.8. 日期和时间¶
+
+The datetime module supplies classes for manipulating dates and times in both simple and complex ways.
+datetime 模块为日期和时间处理同时提供了简单和复杂的方法
+
+While date and time arithmetic is supported, the focus of the implementation is on efficient member extraction for output formatting and manipulation.
+支持日期和时间算法的同时，实现的重点放在更有效的处理和格式化输出
+
+The module also supports objects that are timezone aware.
+该模块还支持时区处理:
+
+10.9.
+10.9. 数据压缩¶
+
+Common data archiving and compression formats are directly supported by modules including: zlib, gzip, bz2, zipfile and tarfile.
+以下模块直接支持通用的数据打包和压缩格式：zlib，gzip，bz2，zipfile 以及 tarfile:
+
+10.10.
+10.10. 性能度量¶
+
+Some Python users develop a deep interest in knowing the relative performance of different approaches to the same problem.
+有些用户对了解解决同一问题的不同方法之间的性能差异很感兴趣
+
+Python provides a measurement tool that answers those questions immediately.
+Python 提供了一个度量工具，为这些问题提供了直接答案
+
+For example, it may be tempting to use the tuple packing and unpacking feature instead of the traditional approach to swapping arguments.
+例如，使用元组封装和拆封来交换元素看起来要比使用传统的方法要诱人的多
+
+The timeit module quickly demonstrates a modest performance advantage:
+timeit 证明了后者更快一些:
+
+In contrast to timeit‘s fine level of granularity, the profile and pstats modules provide tools for identifying time critical sections in larger blocks of code.
+相对于 timeit 的细粒度，profile 和 pstats 模块提供了针对更大代码块的时间度量工具
+
+10.11.
+10.11. 质量控制¶
+
+One approach for developing high quality software is to write tests for each function as it is developed and to run those tests frequently during the development process.
+开发高质量软件的方法之一是为每一个函数开发测试代码，并且在开发过程中经常进行测试
+
+The doctest module provides a tool for scanning a module and validating tests embedded in a program’s docstrings.
+doctest 模块提供了一个工具，扫描模块并根据程序中内嵌的文档字符串执行测试
+
+Test construction is as simple as cutting-and-pasting a typical call along with its results into the docstring.
+测试构造如同简单的将它的输出结果剪切并粘贴到文档字符串中
+
+This improves the documentation by providing the user with an example and it allows the doctest module to make sure the code remains true to the documentation:
+通过用户提供的例子，它发展了文档，允许 doctest 模块确认代码的结果是否与文档一致:
+
+The unittest module is not as effortless as the doctest module, but it allows a more comprehensive set of tests to be maintained in a separate file:
+unittest 模块不像 doctest 模块那么容易使用，不过它可以在一个独立的文件里提供一个更全面的测试集:
+
+10.12.
+10.12. “瑞士军刀”¶
+
+Python has a “batteries included” philosophy.
+Python 展现了“瑞士军刀”的哲学
+
+This is best seen through the sophisticated and robust capabilities of its larger packages.
+这可以通过它更大的包的高级和健壮的功能来得到最好的展现
+
+For example:
+例如:
+
+9.
+尽管模块有这样的名字，用户无需拥有XML的知识或处理 XML
+

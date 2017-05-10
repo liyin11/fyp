@@ -1,0 +1,63 @@
+Databases¶
+数据库¶
+
+DB-API¶
+DB-API¶
+
+The Python Database API (DB-API) defines a standard interface for Python database access modules.
+Python数据库API（DB-API）定义了一个Python数据库访问模块的标准接口
+
+It’s documented in PEP 249.
+它的文档在 PEP 249 可以查看
+
+Nearly all Python database modules such as sqlite3, psycopg and mysql-python conform to this interface.
+ 几乎所有Python数据库模块，诸如 sqlite3， psycopg 以及 mysql-python 都遵循这个接口
+
+Tutorials that explain how to work with modules that conform to this interface can be found here and here.
+关于如何与遵守这一接口的模块交互的教程可以在这里找到： 这里 以及 这里 
+
+SQLAlchemy¶
+SQLAlchemy¶
+
+SQLAlchemy is a commonly used database toolkit.
+SQLAlchemy 是一个流行的数据库工具
+
+Unlike many database libraries it not only provides an ORM layer but also a generalized API for writing database-agnostic code without SQL.
+不像很多 数据库库，它不仅提供一个ORM层，而且还有一个通用API来编写避免SQL的数据库无关代码
+
+Records¶
+Django ORM¶
+
+Records is minimalist SQL library, designed for sending raw SQL queries to various databases.
+Django ORM 是 Django 用来进行数据库访问的接口
+
+Also included is a command-line tool for exporting SQL data.
+它的思想建立在 models ， 之上
+
+PonyORM¶
+PonyORM¶
+
+PonyORM is an ORM that takes a different approach to querying the database.
+PonyORM 是一个ORM，它使用与众不同的方法查询数据库，有别于 使用类似SQL的语言或者布尔表达式，它使用Python的生成器达到目的
+
+Instead of writing an SQL-like language or boolean expressions, Python’s generator syntax is used.
+而且还有一个图形化 schema编辑器生成PonyORM实体
+
+There’s also an graphical schema editor that can generate PonyORM entities for you.
+它支持Python2.6+与3.3+并且可以连接SQLite，MySQL，Postgres与Oracle
+
+SQLObject¶
+SQLObject¶
+
+SQLObject is yet another ORM.
+SQLObject 是另一个ORM
+
+It supports a wide variety of databases: Common database systems MySQL, Postgres and SQLite and more exotic systems like SAP DB, SyBase and MSSQL.
+它支持广泛的数据库，常见的 MySQL，Postgres以及SQLite与更多的特别系统如SAP DB，SyBase与MSSQL
+
+It only supports Python 2 from Python 2.6 upwards.
+它只支持Python 2
+
+Follow @kennethreitz
+本指南目前持续不断地更新与完善
+

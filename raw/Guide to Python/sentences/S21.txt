@@ -1,0 +1,75 @@
+Continuous Integration¶
+持续集成¶
+
+Why?¶
+为什么
+
+Martin Fowler, who first wrote about Continuous Integration (short: CI) together with Kent Beck, describes the CI as follows:
+Martin Fowler 和 Kent Beck 首次提出 Continuous Integration （简称：CI），将之描述为：
+
+Jenkins¶
+Jenkins¶
+
+Jenkins CI is an extensible continuous integration engine.
+Jenkins CI 可扩展的持续集成引擎
+
+Use it.
+ 使用它吧
+
+Buildbot¶
+Buildbot¶
+
+Buildbot is a Python system to automate the compile/test cycle to validate code changes.
+Buildbot 是一个检查代码变化的自动化编译/ 测试的Python系统
+
+Tox¶
+Mule¶
+
+tox is an automation tool providing packaging, testing and deployment of Python software right from the console or CI server.
+Mule 是一个轻量级的集成平台，它允许你在任何地方连接任何事物
+
+It is a generic virtualenv management and test command line tool which provides the following features:
+你可以使用Mule智能地管理 节点之间的消息路由、数据映射、编制、可靠性、安全性和可扩展性
+
+Travis-CI¶
+Tox¶
+
+Travis-CI is a distributed CI server which builds tests for open source projects for free.
+Tox 是一款为Python软件提供打包、测试和 开发的自动化工具，基于命令行或CI服务器
+
+It provides multiple workers to run Python tests on and seamlessly integrates with GitHub.
+它是一个通用的虚拟环境管理和测试的命令行 工具，提供如下特性：
+
+This will get your project tested on all the listed Python versions by running the given script, and will only build the master branch.
+Travis-CI 是一个分布式CI服务器，免费为开源项目构建测试
+
+There are a lot more options you can enable, like notifications, before and after steps and much more.
+ 它提供多个worker运行Python测试，并能和GitHub无缝集成
+
+The travis-ci docs explain all of these options, and are very thorough.
+你甚至可以用它对你的Pull Requests 评论是否构建这个特定的变更集
+
+In order to activate testing for your project, go to the travis-ci site and login with your GitHub account.
+作为开始，将 .travis.yml 文件加入到你的仓库中，内容如下:
+
+This opinionated guide exists to provide both novice and expert Python developers a best practice handbook to the installation, configuration, and usage of Python on a daily basis.
+这将会使你的工程在罗列的Python版本中，用给定的脚本进行测试，而且只会构建主干分支
+
+Receive updates on new releases and upcoming projects.
+为了激活你的工程的测试，去 travis-ci 网站 登录你的GitHub 账号
+
+Join Mailing List.
+本指南目前持续不断地更新与完善
+
+This guide is now available for pre-order in tangible book form!
+获得新版本和未来项目的更新
+
+All proceeds are being directly donated to the DjangoGirls organization.
+订阅Newsletter
+
+More Kenneth Reitz projects:
+如果你享受这份指南,想要支持作者， 请戳Gittip
+
+Enter search terms or a module, class or function name.
+输入相关的术语，模块，类或者函数名称进行搜索
+

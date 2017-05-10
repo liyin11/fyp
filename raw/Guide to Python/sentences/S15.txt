@@ -1,0 +1,81 @@
+HTML Scraping¶
+HTML 抓取¶
+
+Web Scraping¶
+Web抓取¶
+
+Web sites are written using HTML, which means that each web page is a structured document.
+Web站点使用HTML描述，这意味着每个web页面是一个结构化的文档
+
+Sometimes it would be great to obtain some data from them and preserve the structure while we’re at it.
+有时从中 获取数据同时保持它的结构是有用的
+
+Web sites don’t always provide their data in comfortable formats such as csv or json.
+web站点不总是以容易处理的格式， 如 csv 或者 json 提供它们的数据
+
+This is where web scraping comes in.
+这正是web抓取出场的时机
+
+Web scraping is the practice of using a computer program to sift through a web page and gather the data that you need in a format most useful to you while at the same time preserving the structure of the data.
+Web抓取是使用计算机程序将web页面数据进行收集 并整理成所需格式,同时保存其结构的实践
+
+lxml and Requests¶
+lxml和Requests¶
+
+lxml is a pretty extensive library written for parsing XML and HTML documents very quickly, even handling messed up tags in the process.
+lxml 是一个优美的扩展库，用来快速解析XML以及HTML文档 即使所处理的标签非常混乱
+
+We will also be using the Requests module instead of the already built-in urllib2 module due to improvements in speed and readability.
+我们也将使用 Requests 模块取代内建的urllib2模块，因为其速度更快而且可读性更好
+
+You can easily install both using pip install lxml and pip install requests.
+你可以通过使用 pip install lxml 与 pip install requests 命令来安装这两个模块
+
+Let’s start with the imports:
+让我们以下面的导入开始：
+
+Next we will use requests.get to retrieve the web page with our data, parse it using the html module and save the results in tree:
+下一步我们将使用 requests.get 来从web页面中取得我们的数据， 通过使用 html 模块解析它，并将结果保存到 tree 中
+
+(We need to use page.content rather than page.text because html.fromstring implicitly expects bytes as input.)
+tree 现在包含了整个HTML文件到一个优雅的树结构中，我们可以使用两种 方法访问：XPath以及CSS选择器
+
+tree now contains the whole HTML file in a nice tree structure which we can go over two different ways: XPath and CSSSelect.
+XPath是一种在结构化文档（如HTML或XML）中定位信息的方式
+
+In this example, we will focus on the former.
+一个关于XPath的 不错的介绍参见 W3Schools 
+
+XPath is a way of locating information in structured documents such as HTML or XML documents.
+有很多工具可以获取元素的XPath，如Firefox的FireBug或者Chrome的Inspector
+
+A good introduction to XPath is on W3Schools .
+ 如果你使用Chrome，你可以右键元素，选择 ‘Inspect element’，高亮这段代码， 再次右击，并选择 ‘Copy XPath’
+
+There are also various tools for obtaining the XPath of elements such as FireBug for Firefox or the Chrome Inspector.
+在进行一次快速分析后，我们看到在页面中的数据保存在两个元素中，一个是title是 ‘buyer-name’ 的div，另一个class是 ‘item-price’ 的span：
+
+After a quick analysis, we see that in our page the data is contained in two elements - one is a div with title ‘buyer-name’ and the other is a span with class ‘item-price’:
+知道这个后，我们可以创建正确的XPath查询并且使用lxml的 xpath 函数， 像下面这样：
+
+Knowing this we can create the correct XPath query and use the lxml xpath function like this:
+让我们看看我们得到了什么：
+
+Let’s see what we got exactly:
+恭喜
+
+Congratulations!
+我们可以考虑一些更酷的想法：修改这个脚本来遍历该例数据集中剩余的页面，或者 使用多线程重写这个应用从而提升它的速度
+
+Receive updates on new releases and upcoming projects.
+本指南目前持续不断地更新与完善
+
+Follow @kennethreitz
+获得新版本和未来项目的更新
+
+Join Mailing List.
+订阅Newsletter
+
+This guide is now available for pre-order in tangible book form!
+如果你享受这份指南,想要支持作者， 请戳Gittip
+

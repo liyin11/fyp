@@ -1,0 +1,156 @@
+Navigation
+Navigation
+
+Switching from other Template Engines¶
+从其它的模板引擎切换¶
+
+If you have used a different template engine in the past and want to switch to Jinja2 here is a small guide that shows the basic syntactic and semantic changes between some common, similar text template engines for Python.
+如果你过去使用一个不同的模板引擎，并且想要转换到 Jinja2 ，这里是一份简小的 指导展示了一些常见的、相似的 Python 文本模板引擎基本语法和语义差异
+
+Jinja1¶
+Jinja1¶
+
+Jinja2 is mostly compatible with Jinja1 in terms of API usage and template syntax.
+Jinja2 与 Jinja1 在 API 使用和模板语法上最为兼容
+
+The differences between Jinja1 and 2 are explained in the following list.
+下面的列表解释了 Jinja1 和 Jinja2 的区别
+
+API¶
+API¶
+
+Templates¶
+模板¶
+
+Jinja2 has mostly the same syntax as Jinja1.
+Jinja2 与 Jinja1 的语法几乎相同
+
+What’s different is that macros require parentheses around the argument list now.
+区别是，现在宏需要用小括号包裹参数
+
+Additionally Jinja2 allows dynamic inheritance now and dynamic includes.
+此外， Jinja2 允许动态继承和动态包含
+
+The old helper function rendertemplate is gone now, include can be used instead.
+老的辅助函数 rendertemplate 作古， 而使用 include 
+
+Includes no longer import macros and variable assignments, for that the new import tag is used.
+包含不再导入宏和变量声明，因为采用了新的 import 标签
+
+This concept is explained in the Import documentation.
+ 这个概念在 导入 文档中做了解释
+
+Another small change happened in the for-tag.
+另一个改变发生在 for 标签里
+
+The special loop variable doesn’t have a parent attribute, instead you have to alias the loop yourself.
+特殊的循环变量不再拥有 parent 属性，而 你需要自己给循环起别名
+
+See Accessing the parent Loop for more details.
+见 访问父级循环 了解更多细节
+
+Django¶
+Django¶
+
+If you have previously worked with Django templates, you should find Jinja2 very familiar.
+如果你之前使用 Django 模板，你应该会发现跟 Jinja2 非常相似
+
+In fact, most of the syntax elements look and work the same.
+实际上， 很多的语法元素看起来相同，工作也相同
+
+However, Jinja2 provides some more syntax elements covered in the documentation and some work a bit different.
+尽管如此， Jinja2 提供了更多的在之前文档中描述的语法元素，并且某些 工作会有一点不一样
+
+This section covers the template changes.
+本节介绍了模板差异
+
+As the API is fundamentally different we won’t cover it here.
+由于 API 是从根本上不同，我们不会再这里赘述
+
+Method Calls¶
+方法调用¶
+
+In Django method calls work implicitly, while Jinja requires the explicit Python syntax.
+在 Django 中，方法调用是隐式的
+
+Thus this Django code:
+在 Jinja2 中，你必须指定你要调用一个对象
+
+...looks like this in Jinja:
+在 Jinja 中应该是这样:
+
+This allows you to pass variables to the method, which is not possible in Django.
+这允许你给函数传递变量，且宏也使用这种方式，而这在 Django 中是不可能的
+
+Filter Arguments¶
+过滤器参数¶
+
+Jinja2 provides more than one argument for filters.
+Jinja2 为过滤器提供不止一个参数
+
+Also the syntax for argument passing is different.
+参数传递的语法也是不同的
+
+A template that looks like this in Django:
+一个这样的 Django 模板:
+
+looks like this in Jinja2:
+在 Jinja2 中是这样:
+
+It is a bit more verbose, but it allows different types of arguments - including variables - and more than one of them.
+实际上这有点冗赘，但它允许不同类型的参数——包括变量——且不仅是一种
+
+Tests¶
+测试¶
+
+In addition to filters there also are tests you can perform using the is operator.
+除过滤器外，同样有用 is 操作符运行的测试
+
+Here are some examples:
+这里是一些例子:
+
+Loops¶
+循环¶
+
+For loops work very similarly to Django, but notably the Jinja2 special variable for the loop context is called loop, not forloop as in Django.
+因为循环与 Django 中的十分相似，仅有的不兼容是 Jinja2 中循环上下文的特殊变 量名为 loop 而不是 Django 中的 forloop 
+
+Cycle¶
+周期计¶
+
+The {% cycle %} tag does not exist in Jinja2;
+Jinja 中没有 {% cycle %} 标签，因为它是隐式的性质
+
+however, you can achieve the same output by using the cycle method on the loop context special variable.
+而你可以用循环对象 的 cycle 方法实现几乎相同的东西
+
+The following Django template:
+下面的 Django 模板:
+
+...looks like this in Jinja2:
+Jinja 中看起来是这样:
+
+There is no equivalent of {% cycle ...
+没有与 {% cycle ... as variable %} 等价的
+
+Mako¶
+Mako¶
+
+If you have used Mako so far and want to switch to Jinja2 you can configure Jinja2 to look more like Mako:
+如果你迄今使用 Mako 并且想要转换到 Jinja2 ，你可以把 Jinja2 配置成 Mako 一 样:
+
+With an environment configured like that, Jinja2 should be able to interpret a small subset of Mako templates.
+环境配置成这样后， Jinja2 应该可以解释一个 Mako 模板的小型子集
+
+Jinja2 does not support embedded Python code, so you would have to move that out of the template.
+ Jinja2 不支持 嵌入 Python 代码，所以你可能需要把它们移出模板
+
+The syntax for defs (which are called macros in Jinja2) and template inheritance is different too.
+ def 的语法（在 Jinja2 中 def 被叫做宏）并且模板继承也是不同的
+
+The following Mako template:
+下面的 Mako 模板:
+
+Looks like this in Jinja2 with the above configuration:
+在以上配置的 Jinja2 中看起来是这样:
+

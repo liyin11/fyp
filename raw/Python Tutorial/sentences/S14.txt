@@ -1,0 +1,102 @@
+15.1.
+15.1. 交互模式¶
+
+15.1.1.
+15.1.1. 错误处理¶
+
+When an error occurs, the interpreter prints an error message and a stack trace.
+有错误发生时，解释器会打印一个错误信息和栈跟踪器
+
+In interactive mode, it then returns to the primary prompt;
+在交互模式下，它返回主提示符，如果从文件输入执行，它在打印栈跟踪器后以非零状态退出
+
+when input came from a file, it exits with a nonzero exit status after printing the stack trace.
+(异常可以由 try 语句中的 except 子句来控制，这样就不会出现上文中的错误信息) 有一些非常致命的错误会导致非零状态下退出，这通常由内部矛盾和内存溢出造成
+
+(Exceptions handled by an except clause in a try statement are not errors in this context.) Some errors are unconditionally fatal and cause an exit with a nonzero exit;
+所有的错误信息都写入标准错误流
+
+this applies to internal inconsistencies and some cases of running out of memory.
+命令中执行的普通输出写入标准输出
+
+Typing the interrupt character (usually Control-C or Delete) to the primary or secondary prompt cancels the input and returns to the primary prompt.
+在主提示符或从属提示符中输入中断符 (通常是 Control-C 或者 DEL) 就会取消当前输入，回到主命令行
+
+[1] Typing an interrupt while a command is executing raises the KeyboardInterrupt exception, which may be handled by a try statement.
+[1] 执行命令时输入一个中断符会抛出一个 KeyboardInterrupt 异常，它可以被 try 语句截获
+
+15.1.2.
+15.1.2. 执行 Python 脚本¶
+
+On BSD’ish Unix systems, Python scripts can be made directly executable, like shell scripts, by putting the line
+BSD 类的 Unix 系统中，Python 脚本可以像 Shell 脚本那样直接执行
+
+(assuming that the interpreter is on the user’s PATH) at the beginning of the script and giving the file an executable mode.
+(首先要确认 Python 解释器在用户的 PATH 中) #! 必须是文件的前两个字符，在某些平台上，第一行必须以 Unix 风格的行结束符 ('\n')结束，不能用 Windows ('\r\n') 的结束符
+
+The #!
+注意，'#' 是 Python 中是行注释的起始符
+
+The script can be given an executable mode, or permission, using the chmod command.
+脚本可以通过 chmod 命令指定执行模式和权限
+
+On Windows systems, there is no notion of an “executable mode”.
+Windows 系统上没有“执行模式”
+
+The Python installer automatically associates .py files with python.exe so that a double-click on a Python file will run it as a script.
+Python 安装程序自动将 .py 文件关联到 python.exe ，所以在 Python 文件图标上双击，它就会作为脚本执行
+
+The extension can also be .pyw, in that case, the console window that normally appears is suppressed.
+同样 .pyw 也做了这样的关联，通常它执行时不会显示控制台窗口
+
+15.1.3.
+15.1.3. 交互执行文件¶
+
+When you use Python interactively, it is frequently handy to have some standard commands executed every time the interpreter is started.
+使用 Python 解释器的时候，我们可能需要在每次解释器启动时执行一些命令
+
+You can do this by setting an environment variable named PYTHONSTARTUP to the name of a file containing your start-up commands.
+你可以在一个文件中包含你想要执行的命令，设定一个名为 PYTHONSTARTUP 的环境变量来指定这个文件
+
+This is similar to the .profile feature of the Unix shells.
+这类似于 Unix shell 的 .profile 文件
+
+This file is only read in interactive sessions, not when Python reads commands from a script, and not when /dev/tty is given as the explicit source of commands (which otherwise behaves like an interactive session).
+这个文件在交互会话期是只读的，当 Python 从脚本中解读文件或以终端 /dev/tty 做为外部命令源时则不会如此 (尽管它们的行为很像是处在交互会话期) 它与解释器执行的命令处在同一个命名空间，所以由它定义或引用的一切可以在解释器中不受限制地使用
+
+It is executed in the same namespace where interactive commands are executed, so that objects that it defines or imports can be used without qualification in the interactive session.
+你也可以在这个文件中改变 sys.ps1 和 sys.ps2 指令
+
+If you want to read an additional start-up file from the current directory, you can program this in the global start-up file using code like if os.path.isfile('.pythonrc.py'): exec(open('.pythonrc.py').read()).
+如果你想要在当前目录中执行附加的启动文件，可以在全局启动文件中加入类似以下的代码：if os.path.isfile('.pythonrc.py'): execfile('.pythonrc.py')
+
+If you want to use the startup file in a script, you must do this explicitly in the script:
+如果你想要在某个脚本中使用启动文件，必须要在脚本中写入这样的语句:
+
+15.1.4.
+15.1.4. 定制模块¶
+
+Python provides two hooks to let you customize it: sitecustomize and usercustomize.
+Python 提供了两个钩子 (方法) 来本地化: sitecustomize 和 usercustomize
+
+To see how it works, you need first to find the location of your user site-packages directory.
+为了见识它们，你首先需要找到你的 site-packages 的目录
+
+Start Python and run this code:
+启动 python 执行下面的代码:
+
+Now you can create a file named usercustomize.py in that directory and put anything you want in it.
+现在你可以在 site-packages 的目录下创建 usercustomize.py 文件，内容就悉听尊便了
+
+It will affect every invocation of Python, unless it is started with the -s option to disable the automatic import.
+这个文件将会影响 python 的每次调用，除非启动的时候加入 -s 选项禁止自动导入
+
+sitecustomize works in the same way, but is typically created by an administrator of the computer in the global site-packages directory, and is imported before usercustomize.
+sitecustomize 的工作方式一样，但是是由电脑的管理账户创建以及在 usercustomize 之前导入
+
+See the documentation of the site module for more details.
+具体可以参见 site 
+
+Footnotes
+Footnotes
+

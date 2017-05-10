@@ -1,0 +1,60 @@
+Network Applications¶
+网络应用¶
+
+HTTP¶
+HTTP¶
+
+The Hypertext Transfer Protocol (HTTP) is an application protocol for distributed, collaborative, hypermedia information systems.
+超文本传输协议(HTTP)是为分布式的、协同的多媒体信息系统而设计的应用协议，是万维网数据传输的基础
+
+Python’s standard urllib2 module provides most of the HTTP capabilities you need, but the API is thoroughly broken.
+Python的urllib2标准模块涵盖了所需的大多数HTTP功能，但它的API却是支离破碎的
+
+It was built for a different time — and a different web.
+它构建在一个和现今完全不同的时期——以及为了一个不一样的网络
+
+It requires an enormous amount of work (even method overrides) to perform the simplest of tasks.
+一个简单的任务便需要耗费它大量的工作(即使重写函数也无济于事)
+
+Requests takes all of the work out of Python HTTP — making your integration with web services seamless.
+Requests将所有Python HTTP相关的功能剥离了出来，并与网络服务无缝衔接
+
+There’s no need to manually add query strings to your URLs, or to form-encode your POST data.
+Requests无需再在URL中添加查询语句或格式编码的POST数据
+
+Keep-alive and HTTP connection pooling are 100% automatic, powered by urllib3, which is embedded within Requests.
+而集成在Requests中urllib3，则实现了持久连接和HTTP连接池的完全自动化
+
+Distributed Systems¶
+分布式系统¶
+
+ØMQ (also spelled ZeroMQ, 0MQ or ZMQ) is a high-performance asynchronous messaging library aimed at use in scalable distributed or concurrent applications.
+ØMQ(也被称作ZeroMQ, 0MQ 或 ZMQ)是一种高性能异步消息传递库，旨在应用于可扩展分布的或并发的应用
+
+It provides a message queue, but unlike message-oriented middleware, a ØMQ system can run without a dedicated message broker.
+它提供一个消息队列，但与面向消息的中间件不同，ØMQ系统可在不依赖专用消息代理的情况下运行
+
+The library is designed to have a familiar socket-style API.
+ØMQ旨在设计成为类似于socket风格的API
+
+RabbitMQ is an open source message broker software that implements the Advanced Message Queuing Protocol (AMQP).
+RabbitMQ是一种使用了高级消息队列协议(AMQP)的开源消息代理软件
+
+The RabbitMQ server is written in the Erlang programming language and is built on the Open Telecom Platform framework for clustering and failover.
+RabbitMQ服务由Erlang编程语言写成，并构建在开放电信平台框架上，应用于集群和故障转移
+
+Client libraries to interface with the broker are available for all major programming languages.
+与该代理交互的客户端库支持所有主流编程语言
+
+Follow @kennethreitz
+本指南目前持续不断地更新与完善
+
+Join Mailing List.
+获得新版本和未来项目的更新
+
+This guide is now available for pre-order in tangible book form!
+订阅Newsletter
+
+All proceeds are being directly donated to the DjangoGirls organization.
+如果你享受这份指南,想要支持作者， 请戳Gittip
+

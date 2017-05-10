@@ -1,0 +1,18 @@
+License¶
+许可证¶
+
+The Guide is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported license.
+本指南基于 Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported license 的许可
+
+Follow @kennethreitz
+本指南目前持续不断地更新与完善
+
+Join Mailing List.
+获得新版本和未来项目的更新
+
+This guide is now available for pre-order in tangible book form!
+订阅Newsletter
+
+All proceeds are being directly donated to the DjangoGirls organization.
+如果你享受这份指南,想要支持作者， 请戳Gittip
+

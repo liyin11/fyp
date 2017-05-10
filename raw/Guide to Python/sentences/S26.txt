@@ -1,0 +1,57 @@
+JSON¶
+JSON¶
+
+The json library can parse JSON from strings or files.
+json 库可以自字符串或文件中解析JSON
+
+The library parses JSON into a Python dictionary or list.
+ 该库解析JSON后将其转为Python字典或者列表
+
+It can also convert Python dictionaries or lists into JSON strings.
+它也可以转换Python字典或列表为JSON字符串
+
+Parsing JSON¶
+解析JSON¶
+
+Take the following string containing JSON data:
+创建下面包含JSON数据的字符串
+
+It can be parsed like this:
+它可以被这样解析：
+
+and can now be used as a normal dictionary:
+然后它可以像一个常规的字典那样使用:
+
+You can also convert the following to JSON:
+你可以把下面这个对象转为JSON：
+
+simplejson¶
+simplejson¶
+
+The JSON library was added to Python in version 2.6.
+JSON库是Python2.6版中加入的
+
+If you’re using an earlier version of Python, the simplejson library is available via PyPI.
+如果你使用更早版本的Python， 可以通过PyPI获取 simplejson 库
+
+simplejson mimics the json standard library.
+simplejson类似json标准库，它使得使用老版本Python的开发者们可以使用json库中的最新特性
+
+You can start using simplejson when the json library is not available by importing simplejson under a different name:
+如果json库不可用，你可以将simplejson取别名为json来使用：
+
+After importing simplejson as json, the above examples will all work as if you were using the standard json library.
+在将simplejson当成json导入后，上面的例子会像你在使用标准json库一样正常运行
+
+Follow @kennethreitz
+本指南目前持续不断地更新与完善
+
+Join Mailing List.
+获得新版本和未来项目的更新
+
+This guide is now available for pre-order in tangible book form!
+订阅Newsletter
+
+All proceeds are being directly donated to the DjangoGirls organization.
+如果你享受这份指南,想要支持作者， 请戳Gittip
+

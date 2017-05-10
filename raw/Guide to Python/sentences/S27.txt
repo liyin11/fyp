@@ -1,0 +1,36 @@
+Cryptography¶
+密码学¶
+
+Cryptography¶
+Cryptography¶
+
+Cryptography is an actively developed library that provides cryptographic recipes and primitives.
+Cryptography 是一个开发活跃的库，它提供 了加密方法（recipes）和基元（primitives），支持Python 2.6-2.7、Python 3.2+ 和 PyPy
+
+Cryptography is divided into two layers of recipes and hazardous materials (hazmat).
+Cryptography 分为两个层，方法（recipes）层和危险底层（hazardous materials，简称hazmat）
+
+The recipes layer provides simple API for proper symmetric encryption and the hazmat layer provides low-level cryptographic primitives.
+ 方法层提供用于适当的对称加密，hazmat层提供底层的加密基元
+
+Example code using high level symmetric encryption recipe:
+示例代码使用了高层的对称加密方法：
+
+PyCrypto¶
+PyCrypto¶
+
+PyCrypto is another library, which provides secure hash functions and various encryption algorithms.
+PyCrypto 是另一个密码库，它提供 安全的哈希函数和各种加密算法，支持Python 2.1到3.3
+
+Follow @kennethreitz
+本指南目前持续不断地更新与完善
+
+Join Mailing List.
+获得新版本和未来项目的更新
+
+This guide is now available for pre-order in tangible book form!
+订阅Newsletter
+
+All proceeds are being directly donated to the DjangoGirls organization.
+如果你享受这份指南,想要支持作者， 请戳Gittip
+

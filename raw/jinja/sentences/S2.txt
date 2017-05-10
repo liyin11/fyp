@@ -1,0 +1,123 @@
+Navigation
+Navigation
+
+The Jinja2 sandbox can be used to evaluate untrusted code.
+假定在默认配置中 env 是一个 SandboxedEnvironment 实例，下面的代码展示 了它如何工作:
+
+The sandboxed environment.
+If the template tries to access insecure code a SecurityError is raised. However also other exceptions may occour during the rendering so the caller has to ensure that all exceptions are catched.
+
+If the template tries to access insecure code a SecurityError is raised.
+For intercepted binary operator calls (intercepted_binops()) this function is executed instead of the builtin operator. This can be used to fine tune the behavior of certain operators.
+
+For intercepted binary operator calls (intercepted_binops()) this function is executed instead of the builtin operator.
+New in version 2.6.
+
+New in version 2.6.
+For intercepted unary operator calls (intercepted_unops()) this function is executed instead of the builtin operator. This can be used to fine tune the behavior of certain operators.
+
+For intercepted unary operator calls (intercepted_unops()) this function is executed instead of the builtin operator.
+New in version 2.6.
+
+New in version 2.6.
+default callback table for the binary operators. A copy of this is available on each instance of a sandboxed environment as binop_table
+
+default callback table for the binary operators.
+default callback table for the unary operators. A copy of this is available on each instance of a sandboxed environment as unop_table
+
+default callback table for the unary operators.
+a set of binary operators that should be intercepted. Each operator that is added to this set (empty by default) is delegated to the call_binop() method that will perform the operator. The default operator callback is specified by binop_table.
+
+a set of binary operators that should be intercepted.
+The following binary operators are interceptable: //, %, +, *, -, /, and **
+
+The following binary operators are interceptable: //, %, +, *, -, /, and **
+The default operation form the operator table corresponds to the builtin function. Intercepted calls are always slower than the native operator call, so make sure only to intercept the ones you are interested in.
+
+The default operation form the operator table corresponds to the builtin function.
+New in version 2.6.
+
+New in version 2.6.
+a set of unary operators that should be intercepted. Each operator that is added to this set (empty by default) is delegated to the call_unop() method that will perform the operator. The default operator callback is specified by unop_table.
+
+a set of unary operators that should be intercepted.
+The following unary operators are interceptable: +, -
+
+The following unary operators are interceptable: +, -
+The default operation form the operator table corresponds to the builtin function. Intercepted calls are always slower than the native operator call, so make sure only to intercept the ones you are interested in.
+
+The default operation form the operator table corresponds to the builtin function.
+New in version 2.6.
+
+New in version 2.6.
+The sandboxed environment will call this method to check if the attribute of an object is safe to access. Per default all attributes starting with an underscore are considered private as well as the special attributes of internal python objects as returned by the is_internal_attribute() function.
+
+The sandboxed environment will call this method to check if the attribute of an object is safe to access.
+Check if an object is safely callable. Per default a function is considered safe unless the unsafe_callable attribute exists and is True. Override this method to alter the behavior, but this won’t affect the unsafe decorator from this module.
+
+Check if an object is safely callable.
+Works exactly like the regular SandboxedEnvironment but does not permit modifications on the builtin mutable objects list, set, and dict by using the modifies_known_mutable() function.
+
+Works exactly like the regular SandboxedEnvironment but does not permit modifications on the builtin mutable objects list, set, and dict by using the modifies_known_mutable() function.
+Raised if a template tries to do something insecure if the sandbox is enabled.
+
+Raised if a template tries to do something insecure if the sandbox is enabled.
+Marks a function or method as unsafe.
+
+Marks a function or method as unsafe.
+Test if the attribute given is an internal python attribute. For example this function returns True for the func_code attribute of python objects. This is useful if the environment method is_safe_attribute() is overridden.
+
+Test if the attribute given is an internal python attribute.
+This function checks if an attribute on a builtin mutable object (list, dict, set or deque) would modify it if called. It also supports the “user”-versions of the objects (sets.Set, UserDict.* etc.) and with Python 2.6 onwards the abstract base classes MutableSet, MutableMapping, and MutableSequence.
+
+This function checks if an attribute on a builtin mutable object (list, dict, set or deque) would modify it if called.
+If called with an unsupported object (such as unicode) False is returned.
+
+If called with an unsupported object (such as unicode) False is returned.
+提示
+
+Note
+Jinja2 沙箱自己并没有彻底解决安全问题
+
+The Jinja2 sandbox alone is no solution for perfect security.
+同样，沙箱的好处取决于配置
+
+Especially for web applications you have to keep in mind that users may create templates with arbitrary HTML in so it’s crucial to ensure that (if you are running multiple users on the same server) they can’t harm each other via JavaScript insertions and much more.
+我们强烈建议只向模板传递非共享资源，并 且使用某种属性白名单
+
+Also the sandbox is only as good as the configuration.
+也请记住，模板会抛出运行时或编译期错误，确保捕获它们
+
+New in version 2.6.
+为了性能最大化， Jinja2 会让运算符直接条用类型特定的回调方法
+
+For maximum performance Jinja2 will let operators call directly the type specific callback methods.
+在 Jinja 2.6 中，开始支持显式的运算符拦截
+
+This means that it’s not possible to have this intercepted by overriding Environment.call().
+必要时也可以用于自定义的特定 运算符
+
+Furthermore a conversion from operator to special method is not always directly possible due to how operators work.
+为了拦截运算符，需要覆写 SandboxedEnvironment.intercepted_binops 属性
+
+For instance for divisions more than one special method exist.
+当需要拦截的运算符 被添加到这个集合， Jinja2 会生成调用 SandboxedEnvironment.call_binop() 函数的字节码
+
+With Jinja 2.6 there is now support for explicit operator intercepting.
+SandboxedEnvironment.call_binop 的默认实现会使用 SandboxedEnvironment.binop_table 来把运算符标号翻译成执行默认 运算符行为的回调
+
+The default implementation of SandboxedEnvironment.call_binop will use the SandboxedEnvironment.binop_table to translate operator symbols into callbacks performing the default operator behavior.
+这个例子展示了幂（ ** ）操作符可以在 Jinja2 中禁用:
+
+This example shows how the power (**) operator can be disabled in Jinja2:
+确保始终调入 super 方法，即使你不拦截这个调用
+
+Table Of Contents
+Related Topics
+
+Versions
+This Page
+
+Related Topics
+Quick search
+

@@ -1,0 +1,225 @@
+Advanced patterns for views and routing¶
+视图和路由的进阶技能¶
+
+View decorators¶
+视图装饰器¶
+
+Python decorators are functions that are used to transform other functions.
+Python 装饰器是用于转换其它函数的函数
+
+When a decorated function is called, the decorator is called instead.
+当一个装饰的函数被调用的时候，装饰器也会被调用
+
+The decorator can then take action, modify the arguments, halt execution or call the original function.
+接着装饰器就会采取行动，修改参数，停止执行或者调用原始函数
+
+We can use decorators to wrap views with code we’d like to run before they are executed.
+我们可以使用装饰器来包装视图，让它们在执行之前运行我们希望的代码
+
+If you’ve gone through the Flask tutorial, the syntax in this code block might look familiar to you.
+如果你已经浏览了 Flask 教程，在这个代码块的语法看起来很熟悉
+
+@app.route is a decorator used to match URLs to view functions in Flask apps.
+@app.route 是用于为 Flask 应用程序的视图函数匹配 URLs 的装饰器
+
+Let’s take a look at some other decorators you can use in your Flask apps.
+让我们看看其它的装饰器，你可能会在你的 Flask 应用中使用到它们
+
+Authentication¶
+认证¶
+
+The Flask-Login extension makes it easy to implement a login system.
+Flask-Login 扩展可以很容易地实现登录系统
+
+In addition to handling the details of user authentication, Flask-Login gives us a decorator to restrict certain views to authenticated users: @login_required.
+除了处理用户认证的细节，Flask-Login 提供给我们一个装饰器，它用来限制只允许登录的用户访问某些视图： @login_required
+
+Warning
+Warning
+
+@app.route should always be the outermost view decorator.
+@app.route 应该是外层的视图装饰器（换句话说，@app.route 应该在所有装饰器的最前面）
+
+Only an authenticated user will be able to access the /dashboard route.
+一个登录过的用户才能够访问 /dashboard 路由
+
+We can configure Flask-Login to redirect unauthenticated users to a login page, return an HTTP 401 status or anything else we’d like it to do with them.
+我们可以配置 Flask-Login，让未登录的用户重定向到一个登录页，返回一个 HTTP 401 状态码或者我们想要它做的任何东西
+
+Note
+Note
+
+Read more about using Flask-Login in the official docs.
+了解更多使用 Flask-Login 的内容，请参阅 官方文档 （中文翻译文档位于：http://www.pythondoc.com/flask-login/index.html）
+
+Caching¶
+缓存¶
+
+Imagine that an article mentioning our application just appeared on CNN and some other news sites.
+想象下在 CNN 以及其它一些新闻网站中提到我们的应用程序，我们可能会在不久之后接收每秒数千次的请求
+
+We’re getting thousands of requests per second.
+我们的主页针对每一次请求都要多次访问数据库，因此所有这些因素都会导致系统越来越慢，用户访问等待的时间越来越长
+
+Our homepage makes several trips to the database for each request, so all of this attention is slowing things down to a crawl.
+如何才能加快访问速度，让所有的访客都不会错过我们的网站
+
+There are a lot of good answers, but this section is about caching, so we’ll talk about that.
+有很多好的答案，但是这一章是关于缓存，因此我们就来讨论它
+
+Specifically, we’re going to use the Flask-Cache extension.
+确切地来说，我们将要使用 Flask-Cache 扩展
+
+This extension provides us with a decorator that we can use on our index view to cache the response for some period of time.
+这个扩展提供我们一个装饰器，我们可以在我们的首页视图上使用这个装饰器用来在一段时间内缓存响应
+
+Flask-Cache can be configured to work with a bunch of different caching backends.
+Flask-Cache 可以被配置成与一堆不同的缓存后端一起工作
+
+A popular choice is Redis, which is easy to set-up and use.
+一个流行的选择是 Redis，Redis 很容易设置和使用
+
+Assuming Flask-Cache is already configured, this code block shows what our decorated view would look like.
+假设 Flask-Cache 已经配置好，这个代码块显示我们的缓存装饰器视图是什么样子的
+
+Now the function will only be run once every 60 seconds, when the cache expires.
+现在函数将每 60 秒会执行一次，因为 60 秒后缓存就过期
+
+The response will be saved in our cache and pulled from there for any intervening requests.
+响应将会保存在我们的缓存中，在缓存没有过期之前，所有针对首页的请求都会直接从缓存中读取
+
+Note
+Note
+
+Flask-Cache also lets us memoize functions — or cache the result of a function being called with certain arguments.
+Flask-Cache 也为我们提供了 memoize 函数 — 或者缓存一个函数调用某些参数的结果
+
+You can even cache computationally expensive Jinja2 template snippets.
+你甚至可以缓存计算开销很高的 Jinja2 模板片段
+
+Custom decorators¶
+自定义装饰器¶
+
+For this section, let’s imagine we have an application that charges users each month.
+对于本章节，先让我们想象下我们有一个应用程序，该应用程序每个月都会向用户收费
+
+If a user’s account is expired, we’ll redirect them to the billing page and tell them to upgrade.
+如果用户的账号已经过期，我们将会重定向到收费页面并且让用户升级
+
+When we stack decorators, the topmost decorator will run first, then call the next function in line: either the view function or the next decorator.
+当我们叠加装饰器的时候，最上层的装饰器会首先运行，接着调用下一行的下一个函数：要么是视图函数，要么就是装饰器
+
+The decorator syntax is just a little syntactic sugar.
+装饰器的语法只是 Python 提供的一个语法糖
+
+This code block shows an example using our custom decorator and the @login_required decorator from the Flask-Login extension.
+此代码块展示了一个使用我们自定义的装饰器和来自 Flask-Login 扩展的 @login_required 装饰器的示例
+
+We can use multiple decorators by stacking them.
+我们可以通过叠加使用多个装饰器
+
+Now when a user tries to access /use_app, check_expired() will make sure that their account hasn’t expired before running the view function.
+现在当一个用户试图访问 /use_app，check_expired() 将会确保在运行视图函数之前用户的账号没有过期
+
+Note
+Note
+
+Read more about what the wraps() function does in the Python docs.
+在 Python 文档 中阅读更多关于 wraps() 函数工作原理的内容.
+
+URL Converters¶
+URL 转换器(converters)¶
+
+Built-in converters¶
+内置转换器(converters)¶
+
+When you define a route in Flask, you can specify parts of it that will be converted into Python variables and passed to the view function.
+当你在 Flask 中定义路由的时候，你可以指定路由的一部分，它们将会转换成 Python 变量并且传递到视图函数
+
+Whatever is in the part of the URL labeled  will get passed to the view as the username argument.
+在 URL 中的  将会作为 username 参数传入到视图
+
+You can also specify a converter to filter the variable before it’s passed to the view.
+你也可以指定一个转换器，用来在变量传入视图之前对其进行过滤筛选
+
+In this code block, the URL http://myapp.com/user/id/Q29kZUxlc3NvbiEh will return a 404 status code – not found.
+在这个代码块中，URL：http://myapp.com/user/id/Q29kZUxlc3NvbiEh 将会返回一个 404 状态码 – 未找到
+
+This is because the part of the URL that is supposed to be an integer is actually a string.
+这是因为 URL 中的 user_id 要求的是一个整数但实际上是一个字符串
+
+We could have a second view that looks for a string as well.
+我们也可以有第二个视图用来处理 user_id 为字符串，/user/id/Q29kZUxlc3NvbiEh/ 可以调用该视图而 /user/id/124 可以调用第一个视图
+
+This table shows Flask’s built-in URL converters.
+本表格显示了 Flask 内置的 URL 转换器
+
+Custom converters¶
+自定义转换器(converters)¶
+
+We can also make custom converters to suit our needs.
+我们也能准备自定义转换器来满足自己的需求
+
+On Reddit — a popular link sharing site — users create and moderate communities for theme-based discussion and link sharing.
+在 Reddit 上 — 一个受欢迎的链接共享网站 — 用户创建和主持的以主题为基础的讨论和链接共享的社区
+
+Some examples are /r/python and /r/flask, denoted by the path in the URL: reddit.com/r/python and reddit.com/r/flask respectively.
+例如，/r/python 和 /r/flask 就是分别用 URL：redit.com/r/python 和 reddit.com/r/flask 来表示
+
+An interesting feature of Reddit is that you can view the posts from multiple subreddits as one by seperating the names with a plus-sign in the URL, e.g.
+Reddit 一个有意思的功能就是你可以查看多个 subreddits 的文章，通过在 URL 中使用加号（+）来连接每一个 subreddits 的名称，例如，reddit.com/r/python+flask
+
+We can use a custom converter to implement this feature in our own Flask apps.
+我们可以在我们自己的 Flask 应用程序中使用一个自定义的转换器来实现这个功能
+
+We’ll take an arbitrary number of elements separated by plus-signs, convert them to a list with a ListConverter class and pass the list of elements to the view function.
+我们将接受通过加号（+）分离的任意数量的元素，转换它们成一个列表（这里实现了一个叫做 ListConverter 的类）并且把列表元素传给视图函数
+
+We need to define two methods: to_python() and to_url().
+我们需要定义两个方法：to_python() 和 to_url()
+
+As the names suggest, to_python() is used to convert the path in the URL to a Python object that will be passed to the view and to_url() is used by url_for() to convert arguments to their appropriate forms in the URL.
+正如名称暗示的一样，to_python() 是用于转换 URL 中的路径成为一个 Python 对象，该对象将会传递给视图
+
+To use our ListConverter, we first have to tell Flask that it exists.
+为了使用我们的 ListConverter，我们首先必须告诉 Flask 它的存在
+
+Warning
+Warning
+
+This is another chance to run into some circular import problems if your util module has a from .
+这里可能有机会碰到循环导入的问题如果你的 util 模块有 from . import app 这一行
+
+import app line.
+这是我为什么要等到 app 已经初始化后才导入 ListConverter
+
+Now we can use our converter just like one of the built-ins.
+现在我们就可以像使用内置的转换器一样使用自己的转换器
+
+We specified the key in the dictionary as “list” so that’s how we use it in @app.route().
+我们可以在 @app.route() 中使用 “list”，就像使用内置的 int，float，string，path 一样
+
+This should work just like Reddit’s multi-reddit system.
+这应该会像 Reddit 的多 reddit 系统一样工作
+
+This same method can be used to make any URL converter we can dream of.
+同样的方法可以被使用来做我们想要的任何 URL 转换
+
+Summary¶
+摘要¶
+
+The @login_required decorator from Flask-Login helps you limit views to authenticated users.
+Flask-Login 中的 @login_required 装饰器帮助你限制只允许登录的用户访问视图
+
+The Flask-Cache extension gives you a bunch of decorators to implement various methods of caching.
+Flask-Cache 扩展为你提供了大量的装饰器用来实现各种的缓存方法
+
+We can develop custom view decorators to help us organize our code and stick to DRY (Don’t Repeat Yourself) coding principles.
+我们能够开发自定义视图装饰器用来帮助我们组织代码并且坚持 DRY（不要重复你自己）的编码原则
+
+Custom URL converters can be a great way to implement creative features involving URL’s.
+自定义的 URL 转换器是实现涉及到 URL 的创新功能的一个很好的方式
+
+© Copyright 2014, Robert Picard.
+京ICP备14002119号-1   | © Copyright 2014, Robert Picard, Translated by D.D.
+

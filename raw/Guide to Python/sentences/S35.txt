@@ -1,0 +1,87 @@
+The Community¶
+社区¶
+
+BDFL¶
+BDFL¶
+
+Guido van Rossum, the creator of Python, is often referred to as the BDFL — the Benevolent Dictator For Life.
+Python的创始人Guido van Rossum 通常被称为BDFL —— 生活的仁慈独裁者
+
+Python Software Foundation¶
+Python软件基金会¶
+
+The mission of the Python Software Foundation is to promote, protect, and advance the Python programming language, and to support and facilitate the growth of a diverse and international community of Python programmers.
+Python软件基金会的任务是促进、保护和发展Python编程语言，同时支持和帮助Python编程者的多样、国际化的社区的成长
+
+Learn More about the PSF.
+了解更多关于PSF的内容.
+
+PEPs¶
+PEPs¶
+
+PEPs are Python Enhancement Proposals.
+PEPs是 Python 增强提议
+
+They describe changes to Python itself, or the standards around it.
+它们描述了Python自身或者相关库的变化
+
+There are three different types of PEPs (as defined by PEP 1):
+这里有三种不同的PEPs类型（由 PEP 1 定义）：
+
+There are a few PEPs that could be considered required reading:
+这里有少许PEPs可以认为是要求阅读的：
+
+Read this.
+完整阅读它，并照着做
+
+A list of 19 statements that briefly explain the philosophy behind Python.
+一个19行的小诗，简述了Python背后的哲学
+
+Gives guidelines for semantics and conventions associated with Python docstrings.
+给出了与Python文档字符串相关的语义和约定的指导方针
+
+You can read more at The PEP Index.
+你可以在 PEP 索引 上了解更多
+
+PEPs are peer-reviewed and accepted/rejected after much discussion.
+PEPs会被同行审阅，并在大量的讨论后决定接受或拒绝
+
+Anyone can write and submit a PEP for review.
+任何人都能编写和提交一个PEP供以审阅
+
+Here’s an overview of the PEP acceptance workflow:
+这里有一个接受PEP的工作流：
+
+Python Conferences¶
+Python会议¶
+
+The major events for the Python community are developer conferences.
+Python社区主要的事件就是开发者会议
+
+The two most notable conferences are PyCon, which is held in the US, and its European sibling, EuroPython.
+两个最著名的会议就是在美国举办的PyCon，和在欧洲举办的姊妹版会议EuroPython
+
+A comprehensive list of conferences is maintained at pycon.org.
+会议的综合列表维护在 pycon.org 上
+
+Python User Groups¶
+Python用户组¶
+
+User Groups are where a bunch of Python developers meet to present or talk about Python topics of interest.
+用户组就是一群Python开发者见面现身或讨论感兴趣的Python话题的地方
+
+A list of local user groups is maintained at the Python Software Foundation Wiki.
+一系列本地用户组维护在 Python 软件基金会 Wiki 中
+
+Follow @kennethreitz
+本指南目前持续不断地更新与完善
+
+Join Mailing List.
+获得新版本和未来项目的更新
+
+This guide is now available for pre-order in tangible book form!
+订阅Newsletter
+
+All proceeds are being directly donated to the DjangoGirls organization.
+如果你享受这份指南,想要支持作者， 请戳Gittip
+

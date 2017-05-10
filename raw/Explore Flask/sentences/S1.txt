@@ -1,0 +1,153 @@
+Coding conventions¶
+编码约定¶
+
+There are a number of conventions in the Python community to guide the way you format your code.
+在 Python 社区有一些指导你格式化代码的约定
+
+If you’ve been developing with Python for a while, then you might already be familiar with some of these conventions.
+如果你使用 Python 进行了一段时间开发，那么你可能已经熟悉了这些约定
+
+I’ll keep things brief and leave a few URLs where you can find more information if you haven’t come across these topics before.
+我会继续让事情简单些并且留下一些 URLs，如果以前你还没有碰过这些话题的话你能够在这里 URLs 中找到更多的信息
+
+Let’s have a PEP rally!¶
+让我们来个 PEP 动员
+
+A PEP is a “Python Enhancement Proposal.” These proposals are indexed and hosted at python.org.
+PEP 是“Python 增强倡议”，这些倡议是被索引以及托管在 python.org
+
+In the index, PEPs are grouped into a number of categories, including meta-PEPs, which are more informational than technical.
+在索引中，PEPs 被分成了几类，包含 meta-PEPs，这是比起技术更具有信息性
+
+The technical PEPs, on the other hand, often describe things like improvements to Python’s internals.
+另一方面，技术的 PEPs 通常是用来描述像改进 Python 内部运行机制（一般是改进或者优化等等）
+
+There are a few PEPs, like PEP 8 and PEP 257 that are meant to guide the way we write our code.
+这里有几个比较常用的 PEPs，像 PEP 8 以及 PEP 257，它们的目的是指导我们编写代码的方式
+
+PEP 8 contains coding style guidelines.
+PEP 8 包含编码风格的指南
+
+PEP 257 contains guidelines for docstrings, the generally accepted method of documenting code.
+PEP 257 包含文档字符串指南，普遍的可接受的编写代码文档的方法
+
+PEP 8: Style Guide for Python Code¶
+PEP 8: Python 代码的风格指南¶
+
+PEP 8 is the official style guide for Python code.
+PEP 8 是官方的 Python 代码风格指南
+
+I recommend that you read it and apply its recommendations to your Flask projects (and all of your other Python code).
+我建议你们阅读它并且在你的 Flask 项目中（以及你所有其它的 Python 代码）使用建议规范
+
+Your code will be much more approachable when it starts growing to many files with hundreds, or thousands, of lines of code.
+你的代码会更加平易近人的，当开始有越来越多的代码行的时候
+
+The PEP 8 recommendations are all about having more readable code.
+PEP 8 中的建议都是关于代码更具有可读性的
+
+Plus, if your project is going to be open source, potential contributors will likely expect and be comfortable working on code written with PEP 8 in mind.
+另外，如果你的项目将是开源的话，潜在的贡献者可能会期待或者愉快地使用 PEP 8 风格编写代码
+
+One particularly important recommendation is to use 4 spaces per indentation level.
+一个特别重要的建议就是每个缩进使用 4 个空格
+
+No real tabs.
+缩进不使用制表符（Tab）
+
+If you break this convention, it’ll be a burden on you and other developers when switching between projects.
+如果你违反这个约定（惯例）的话在项目进行切换的时候会给其他的开发人员带来负担
+
+That sort of inconsistency is a pain in any language, but white-space is especially important in Python, so switching between real tabs and spaces could result in any number of errors that are a hassle to debug.
+在任何语言中诸如此类的矛盾是很痛苦，但是空格符在 Python 中尤为重要，因此在真正的制表符（Tab）和空格符之间切换的话会导致许多问题，这对于调试是一个很大的麻烦
+
+PEP 257: Docstring Conventions¶
+PEP 257: 文档字符串约定¶
+
+PEP 257 covers another Python standard: docstrings.
+PEP 257 涉及到另一个 Python 标准：文档字符串
+
+You can read the definition and recommendations in the PEP itself, but here’s an example to give you an idea of what a docstring looks like:
+你可以在 PEP 257 里阅读定义和建议，但是这里只有一个示例，这个示例给你一个文档字符串看起来像什么的概念：
+
+These kinds of docstrings can be used by software such as Sphinx to generate documentation files in HTML, PDF and other formats.
+这种文档字符串可以使用软件比如 Sphinx 生成 HTML，PDF 以及其它格式的文本文件
+
+They also make it easier to understand your code.
+它们会让人更容易地理解你的代码
+
+Note
+Note
+
+PEP 8
+PEP 8
+
+PEP 257
+PEP 257
+
+Sphinx, the documentation generator created by the same folks who brought us Flask
+Sphinx，由 Flask 相同的团队创建的文档生成器
+
+Relative imports¶
+相对导入¶
+
+Relative imports make life a little easier when developing Flask apps.
+在开发 Flask 应用的时候，相对导入可以使得生活变得更加美好一些
+
+The premise is simple.
+前提是很简单的
+
+Let’s say you want to import the User model from the module myapp/models.py.
+比方说，我们想从 myapp/models.py 模块中导入 User 模型
+
+You might think to use the app’s package name, i.e.
+你可能会考虑使用应用程序的包名，比如，myapp.models
+
+myapp.models.
+使用相对导入，你应该指明相对于源文件的目标模块的位置
+
+Using relative imports, you would indicate the location of the target module relative to the source.
+要做到这一点，我们使用点符号（.），第一个点符号（.）表示当前目录，每一个随后的点符号（.）表示下一个父目录
+
+To do this we use a dot notation where the first dot indicates the current directory and each subsequent dot represents the next parent directory.
+下面示例展示了绝对导入和相对导入之间的不同
+
+The advantage of this method is that the package becomes a heck of a lot more modular.
+这种方法的优点就是软件包变得更加模块化
+
+Now you can rename your package and re-use modules from other projects without the need to update the hard-coded import statements.
+现在你可以重命名你的包并且在其它项目中不需要更新硬编码的导入语句而可以重用模块
+
+In my research I came across a Tweet that illustrates the benefit of relative imports.
+在我的研究中我偶遇了一条 Tweet，它能说明相对导入的好处
+
+Just had to rename our whole package.
+刚刚不得不重命名了我们整个包
+
+Took 1 second.
+花费 1 秒，包的相对导入真酷
+
+—David Beazley, @dabeaz
+—David Beazley, @dabeaz
+
+Note
+Note
+
+You can read a little more about the syntax for relative imports from this section in PEP 328.
+你可以从 PEP 328 这一章节中阅读一些关于相对导入的语法
+
+Summary¶
+摘要¶
+
+Try to follow the coding style conventions laid out in PEP 8.
+尽量遵循 PEP 8 中规定的编码风格约定
+
+Try to document your app with docstrings as defined in PEP 257.
+尝试用定义在 PEP 257 中的文档字符串来记录你的应用程序
+
+Use relative imports to import your app’s internal modules.
+使用相对导入来导入你的应用程序的内部模块
+
+© Copyright 2014, Robert Picard.
+京ICP备14002119号-1   | © Copyright 2014, Robert Picard, Translated by D.D.
+

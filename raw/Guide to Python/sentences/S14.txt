@@ -1,0 +1,225 @@
+Web Applications¶
+Web 应用¶
+
+As a powerful scripting language adapted to both fast prototyping and bigger projects, Python is widely used in web application development.
+Python作为一门强大的脚本语言，能够适应快速原型和较大项目的制作，它被广泛用于web应用程序的开发中
+
+Context¶
+Context¶
+
+The Web Server Gateway Interface (or “WSGI” for short) is a standard interface between web servers and Python web application frameworks.
+Web服务网关接口（Web Server Gateway Interface，简称“WSGI”）是一种在web服务器和Python web应用程序或框架之间的标准接口
+
+By standardizing behavior and communication between web servers and Python web frameworks, WSGI makes it possible to write portable Python web code that can be deployed in any WSGI-compliant web server.
+通过标准化web服务器和Python web应用程序或框架之间的行为和通信，WSGI使得编写可移植的的Python web代码变为可能，使其能够部署在任何 WSGI可用的 web 服务器 上
+
+WSGI is documented in PEP 3333.
+WSGI的文档在 PEP 3333
+
+Frameworks¶
+框架¶
+
+Broadly speaking, a web framework consists of a set of libraries and a main handler within which you can build custom code to implement a web application (i.e.
+广义地说，web框架包含一系列库和一个主要的handler，这样你就能够构建自己的代码来实现web应用（比如说一个交互式的网站）
+
+an interactive web site).
+大多数web框架包含模式和工具，至少实现以下功能：
+
+Django is a “batteries included” web application framework, and is an excellent choice for creating content-oriented websites.
+Django 是一个功能齐备的web应用框架
+
+By providing many utilities and patterns out of the box, Django aims to make it possible to build complex, database-backed web applications quickly, while encouraging best practices in code written using it.
+通过提供众多工具和模式，Django旨在使得快速构建复杂的、有数据库支持的web应用成为可能，同时鼓励使用它作为编写代码的最佳实践
+
+Django has a large and active community, and many pre-built re-usable modules that can be incorporated into a new project as-is, or customized to fit your needs.
+Django拥有非常庞大和活跃的社区
+
+There are annual Django conferences in the United States and in Europe.
+在 美国 和 欧洲 均有每年度的Django会议
+
+The majority of new Python web applications today are built with Django.
+Flask 是一款针对Python的“微型框架”
+
+Flask is a “microframework” for Python, and is an excellent choice for building smaller applications, APIs, and web services.
+Flask的 支持 能在邮件列表中找到
+
+Building an app with Flask is a lot like writing standard Python modules, except some functions have routes attached to them.
+Web.py web.py是一个针对Python的web框架，简单而又强大
+
+It’s really beautiful.
+Web.py中没有向导或者模板网站，必须从头构建
+
+Rather than aiming to provide everything you could possibly need, Flask implements the most commonly-used core components of a web application framework, like URL routing, request and response objects, and templates.
+一个全栈web框架和平台注重易用性
+
+If you use Flask, it is up to you to choose other components for your application, if any.
+Werkzeug 其实并不是真正的框架，但确实是一个构建web应用的非常有用的工具集
+
+For example, database access or form generation and validation are not built-in functions of Flask.
+它提供URL路由工具、请求和响应对象，以及基本的开发服务端
+
+This is great, because many web applications don’t need those features.
+在它的 mailing list.、 可以找到支持内容
+
+Flask is default choice for any Python web application that isn’t a good fit for Django.
+Tornado 是一个可扩展的、非阻塞的web服务端和web应用框架，拥有简单相近的用法
+
+Tornado is an asyncronous web framework for Python that has its own event loop.
+在Jinja2模板引擎例子中，它被用来渲染页面
+
+I do not recommend using Tornado unless you think you need it.
+Pyramid 介于大型框架（诸如Django）和小型框架之间：它拥有大量的库和功能，因此并不是轻量级的
+
+Pyramid is a very flexible framework with a heavy focus on modularity.
+在 文档 中获取 支持
+
+Nginx (pronounced “engine-x”) is a web server and reverse-proxy for HTTP, SMTP and other protocols.
+Nginx （发音为 “engine-x”）是一个web服务器，并是HTTP、SMTP和其他协议的反向代理
+
+It is known for its high performance, relative simplicity, and compatibility with many application servers (like WSGI servers).
+它由其高性能、相对简洁以及对众多应用服务器（比如WSGI服务器）兼容而著名
+
+It also includes handy features like load-balancing, basic authentication, streaming, and others.
+它也拥有便利的特性，比如负载均衡、基本的认证、流等
+
+Designed to serve high-load websites, Nginx is gradually becoming quite popular.
+Nginx被设计为承载高负载的网站，并逐渐变得广为流行
+
+WSGI Servers¶
+WSGI 服务器¶
+
+Stand-alone WSGI servers typically use less resources than traditional web servers and provide top performance [3].
+独立WSGI服务器相比传统web服务器，使用更少的资源，并提供最高的性能 [3]
+
+Gunicorn (Green Unicorn) is a pure-python WSGI server used to serve Python applications.
+Gunicorn （Green Unicorn，绿色独角兽）是一个WSGI服务器，用来支持Python应用
+
+Unlike other Python web servers, it has a thoughtful user-interface, and is extremely easy to use and configure.
+它是Ruby的 Unicorn 服务器的Python实现
+
+Gunicorn has sane and reasonable defaults for configurations.
+uWSGI 用来构建全栈式的主机服务
+
+However, some other servers, like uWSGI, are tremendously more customizable, and therefore, are much more difficult to effectively use.
+除了进程管理、进程监控和其他功能外，uWSGI也能作为一个应用服务器，适用于多种编程语言和协议 - 包括Python和WSIG
+
+Waitress is gaining popularity within the Python web development community.
+如今，自承载Python应用的主体托管与WSGI服务器（比如说 Gunicorn）或是直接或间接在轻量级web服务器（比如说 nginx）之后
+
+uWSGI is a full stack for building hosting services.
+WSGI服务器为Python应用服务，它能更好的处理诸如静态文件服务、请求路由、DDoS保护和基本认证的任务
+
+The majority of self-hosted Python applications today are hosted with a WSGI server such as Gunicorn, either directly or behind a lightweight web server such as nginx.
+平台即服务（PaaS）是一种云计算基础设施类型，抽象和管理基础设施、路由和网络应用的扩展
+
+The WSGI servers serve the Python applications while the web server handles tasks better suited for it such as static file serving, request routing, DDoS protection, and basic authentication.
+大多数Paas服务提供命令行接口，开发者可以设置和查询配置，以及部署新版本的应用
+
+Heroku offers first-class support for Python 2.7–3.5 applications.
+Heroku 的 Cedar stack 为Python 2.7应用提供一流的支持
+
+Heroku supports all types of Python web applications, servers, and frameworks.
+Heroku允许你运行所想要的尽可能多的Python web应用，并且是免费的
+
+Applications can be developed on Heroku for free.
+Heroku最恰当的描述是一个水平扩展的平台
+
+Once your application is ready for production, you can upgrade to a Hobby or Professional application.
+一旦你在同一时间“扩展”你的应用，使之运行在超过1个Dyno（抽象服务）上，他们便开始向你收费
+
+Heroku maintains detailed articles on using Python with Heroku, as well as step-by-step instructions on how to set up your first application.
+Heroku维护了使用Python和Heroku交互的 文章，同时也有 手把手指导 来告诉你如何建立第一个应用
+
+Heroku is the recommended PaaS for deploying Python web applications today.
+DotCloud 原生支持WSGI应用和后台/工作者任务在其平台上的运行
+
+Gondor is a PaaS specialized for deploying Django and Pinax applications.
+DotCloud使用自定义命令行API客户端，能与管理在git仓库货其他任何版本控制系统中的应用工作
+
+Gondor has a guide on deploying Django projects.
+DotCloud有一个使用有限数据库的免费计划，但没有额外的服务（如缓存……）
+
+Gondor is run by a small company and focuses on helping businesses find success with Python and Django.
+查阅 基于Python的DotCloud文档 来获取更多信息，帮助开始
+
+As template files are sometimes written by designers or front-end developers, it can be difficult to handle increasing complexity.
+Gondor有一个部署 Django 工程 的指南
+
+It uses a text-based template language and can thus be used to generate any type markup, not just HTML.
+多数WSGI应用响应HTTP请求，从而服务于HTML或其他标记语言中的内容
+
+It allows customization of filters, tags, tests and globals.
+关注点分离的概念建议我们使用模板，而不是直接由Python生成文本内容
+
+It features many improvements over Django’s templating system.
+模板引擎管理一系列的模板文件，其系统的层次性和包容性避免了不必要的重复
+
+Here some important html tags in Jinja2:
+由于模板文件有时是由设计师或者前端开发者编写，处理不断增长的复杂度会变得困难
+
+The next listings is an example of a web site in combination with the Tornado web server.
+一些通用的良好实践应用到了部分应用中，情景包括传递动态内容到模板引擎和模板自身中
+
+The base.html file can be used as base for all site pages which are for example implemented in the content block.
+Jinja2 是一个和Django模板系统类似的模板引擎，并有一些额外的特性
+
+The next listing is our site page (site.html) loaded in the Python app which extends base.html.
+这里有一些在Jinja2中重要的html标签：
+
+Jinja2 is the recommended templating library for new Python web applications.
+下面列举的内容是一个使用Tornado的站点的例子
+
+Chameleon Page Templates are an HTML/XML template engine implementation of the Template Attribute Language (TAL), TAL Expression Syntax (TALES), and Macro Expansion TAL (Metal) syntaxes.
+base.html 文件能够作为所有站点页面的基础，下面是实现的例子
+
+Chameleon is available for Python 2.5 and up (including 3.x and pypy), and is commonly used by the Pyramid Framework.
+接下来是我们的site页面（site.html），它由Python app载入，并扩展了 base.html
+
+Page Templates add within your document structure special element attributes and text markup.
+Chameleon 页面模板是使用 模板属性语言（Template Attribute Language, TAL）、 TAL表达语法（TAL Expression Syntax,TALES） 和 宏扩展TAL（Macro Expansion TAL, Metal） 语法的HTML/XML模板引擎实现
+
+The basic TAL language is simple enough to grasp from an example:
+Chameleon在Python2.5及以上版本（包括3.x和pypy）都是可用的，并常被 Pyramid Framework 使用
+
+The <span tal:replace=”expression” /> pattern for text insertion is common enough that if you do not require strict validity in your unrendered templates, you can replace it with a more terse and readable syntax that uses the pattern ${expression}, as follows:
+页面模板是在文档结构中添加特定元素属性和文本标记
+
+But keep in mind that the full <span tal:replace=”expression”>Default Text</span> syntax also allows for default content in the unrendered template.
+从下面的例子中能很快学到基本的TAL语言的用法：
+
+Being from the Pyramid world, Chameleon is not widely used.
+用作文本插入的 <span tal:replace=”expression” /> 形式非常常见
+
+Mako is a template language that compiles to Python for maximum performance.
+但是请记住，全部的 <span tal:replace=”expression”>Default Text</span> 语法也允许在未渲染的模板中有默认内容
+
+An example template in Mako looks like:
+Mako 是一种模板语言，为了最大的性能，它编译为了Python
+
+To render a very basic template, you can do the following:
+Mako的一个模板例子如下：
+
+Mako is well respected within the Python web community.
+要渲染一个非常基本的模板，你可以像下面这么做：
+
+References
+References
+
+[1]
+[1]
+
+The mod_python project is now officially dead
+The mod_python project is now officially dead
+
+[2]
+[2]
+
+mod_wsgi vs mod_python
+mod_wsgi vs mod_python
+
+[3]
+[3]
+
+Benchmark of Python WSGI Servers
+Benchmark of Python WSGI Servers
+

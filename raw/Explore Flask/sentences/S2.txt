@@ -1,0 +1,327 @@
+Environment¶
+环境¶
+
+Your application is probably going to require a lot of software to function properly.
+你的应用程序可能需要大量的软件包才能正常的工作
+
+If it doesn’t at least require the Flask package, you may be reading the wrong book.
+如果都不需要 Flask 包的话，你有可能读错了教程
+
+Your application’s environment is essentially all of the things that need to be around when it runs.
+当应用程序运行的时候，你的应用程序的 环境 基本上是所有一切事情的根基
+
+Lucky for us, there are a number of things that we can do to make managing our environment much less complicated.
+我们是幸运的，因为有许多方式使得我们能够轻松地管理我们的环境
+
+Use virtualenv to manage your environment¶
+使用 virtualenv 管理你的环境¶
+
+virtualenv is a tool for isolating your application in what is called a virtual environment.
+virtualenv 是用于在所谓 虚拟环境 中隔离你的应用程序的一个工具
+
+A virtual environment is a directory that contains the software on which your application depends.
+一个虚拟环境是包含了你的应用依赖的软件的一个目录
+
+A virtual environment also changes your environment variables to keep your development environment contained.
+一个虚拟环境也能够改变你的环境变量以维持你的开发环境包含的环境变量
+
+Instead of downloading packages, like Flask, to your system-wide — or user-wide — package directories, we can download them to an isolated directory used only for our current application.
+不用下载包，像 Flask， 到你系统级或者用户级的包目录，我们可以下载它们到一个独立的并且只为我们应用使用的目录
+
+This makes it easy to specify which Python binary to use and which dependencies we want to have available on a per project basis.
+这就可以很容易地指定使用的 Python 的版本以及每一个项目依赖的包
+
+Virtualenv also lets you use different versions of the same package for different projects.
+Virtualenv 也可以让你在不同的项目中使用相同的包的不同版本
+
+This flexibility may be important if you’re working on an older system with several projects that have different version requirements.
+这种灵活性可能是十分重要的，如果你正使用一个旧的系统并且它的上面有几个项目需要不同的版本
+
+When using virtualenv, you’ll generally have only a few Python packages installed globally on your system.
+当使用 virtualenv 的时候，你通常只需要安装几个的 Python 包在你的系统上
+
+One of these will be virtualenv itself.
+其中一个就是 virtualenv 本身
+
+You can install the virtualenv package with Pip.
+你可以使用 Pip 来安装 virtualenv 包
+
+Once you have virtualenv on your system, you can start creating virtual environments.
+一旦在你的系统上安装了 virtualenv，你可以开始创建虚拟环境
+
+Navigate to your project directory and run the virtualenv command.
+前往你项目所在的目录并且运行 virtualenv 命令
+
+It takes one argument, which is the destination directory of the virtual environment.
+它需要一个参数，这个参数就是虚拟环境的目标目录
+
+Listing~ shows what this looks like.
+下面展示了它大概的样子
+
+virtualenv creates a new directory where the dependencies will be installed.
+virtualenv 创建一个新的目录，依赖包将会安装到这个目录中
+
+Once the new virtual environment has been created, you must activate it by sourcing the bin/activate script that was created inside the virtual environment.
+一旦新的虚拟环境已经创建，你必须激活它，通过发动创建在虚拟环境里的 bin/activate 脚本
+
+The bin/activate script makes some changes to your shell’s environment variables so that everything points to the new virtual environment instead of your global system.
+bin/activate 脚本对你的 shell 环境变量进行一些改变以致一切都指向新的虚拟环境而不是全局系统
+
+You can see the effect in code block above.
+你可以在上面的代码块中看到效果
+
+After activation, the python command refers to the Python binary inside the virtual environment.
+激活后，python 命令指向虚拟环境的中 Python 的 bin 目录
+
+When a virtual environment is active, dependencies installed with Pip will be downloaded to that virtual environment instead of the global system.
+当虚拟环境激活后，使用 Pip 安装的依赖包会被下载到虚拟环境中而不是全局系统
+
+You may notice that the shell prompt has been changed too.
+你可能会注意到 shell 中的提示符也已经改变了
+
+virtualenv prepends the name of the currently activated virtual environment, so you know that you’re not working on the global system.
+virtualenv 预先设定目前激活虚拟环境的名称，因此你会知道你不是在全局系统上工作
+
+You can deactivate your virtual environment by running the deactivate command.
+你可以通过运行 deactivate 命令停用你的虚拟环境
+
+virtualenvwrapper¶
+virtualenvwrapper¶
+
+virtualenvwrapper is a package used to manage the virtual environments created by virtualenv.
+virtualenvwrapper 是一个用于管理 virtualenv 创建的虚拟环境的软件包
+
+I didn’t want to mention this tool until you had seen the basics of virtualenv so that you understand what it’s improving upon and understand why you should use it.
+我不想提到这个工具，直到你看到了 virtualenv 的基础知识以便你理解它改善了什么以及为什么我们应该使用它
+
+That virtual environment directory created in Listing~ref{code:venv_create} adds clutter to your project repository.
+上一部分创建的虚拟环境目录会给你的项目库带来一些混乱
+
+You only interact with it directly when activating the virtual environment and it shouldn’t be in version control, so there’s no need to have it in there.
+你只需要激活虚拟环境和它进行交互，但是它不应该出现在版本控制中，因此这个虚拟环境目录就不应该在这里
+
+The solution is to use virtualenvwrapper.
+解决方案就是使用 virtualenvwrapper
+
+This package keeps all of your virtual environments out of the way in a single directory, usually _~/.virtualenvs/_ by default.
+这个软件包会把所有你的虚拟环境放在一个目录的方式，通常默认是在 _~/.virtualenvs/_
+
+To install virtualenvwrapper, follow the instructions in the documentation.
+要安装 virtualenvwrapper，请按照文档中的说明，文档位于 http://virtualenvwrapper.readthedocs.org/en/latest/install.html 
+
+Warning
+Warning
+
+Make sure that you’ve deactivated all virtual environments before installing virtualenvwrapper.
+请确保在安装 virtualenvwrapper 之前你已经停用所有的虚拟环境
+
+You want it installed globally, not in a pre-existing environment.
+你需要把它安装在全局系统中，而不是虚拟环境中
+
+Now, instead of running virtualenv to create an environment, you’ll run mkvirtualenv:
+现在，不用运行 virtualenv 来创建一个环境，你需要运行 mkvirtualenv：
+
+mkvirtualenv creates a directory in your virtual environments folder and activates it for you.
+mkvirtualenv 在你虚拟环境目录中创建一个文件夹并且为你激活虚拟环境
+
+Just like with plain old virtualenv, python and pip now point to that virtual environment instead of the system binaries.
+就像上面的 virtualenv 一样，python 以及 pip 指向虚拟环境中而不是全局系统的二进制文件
+
+To activate a particular environment, use the command: workon [environment name].
+要激活一个特定的环境，使用命令：workon [environment name]
+
+deactivate still deactivates the environment.
+deactivate 仍然会停用虚拟环境
+
+Keeping track of dependencies¶
+安装依赖包¶
+
+As a project grows, you’ll find that the list of dependencies grows with it.
+随着项目的发展，你会发现依赖包的列表会增大
+
+It’s not uncommon to need dozens of Python packages installed to run a Flask application.
+需要几十个 Python 包来运行一个 Flask 应用程序的情况并不少见
+
+The easiest way to manage these is with a simple text file.
+管理这些最简单的方法是用一个简单的文本文件
+
+Pip can generate a text file listing all installed packages.
+Pip 能够生成一个列出所有已安装的包的文本文件
+
+It can also read in this list to install each of them on a new system, or in a freshly minted environment.
+在一个新的系统上，或者在一个新的刚创建的环境上也能读取文件中的列表并且安装它们中每一个
+
+pip freeze¶
+pip freeze¶
+
+requirements.txt is a text file used by many Flask applications to list all of the packages needed to run an application.
+requirements.txt 是一个文本文件，它被许多 Flask 应用程序用来列出运行应用所有需要的包
+
+This code block shows how to create this file and the following one shows how to use that text file to install your dependencies in a new environment.
+这个代码块用来说明如何创建这个文件接着下一个代码块用来说明在一个新环境中如果使用这个文件来安装依赖包
+
+Manually tracking dependencies¶
+人工管理依赖包¶
+
+As your project grows, you may find that certain packages listed by pip freeze aren’t actually needed to run the application.
+随着项目的发展，你可能会发现 pip freeze 列出的某些包实际上并不是运行应用必须的
+
+You’ll have packages that are installed for development only.
+你安装这些包仅仅为开发用的
+
+pip freeze doesn’t discriminate between the two, it just lists the packages that are currently installed.
+pip freeze 并不能区分，它仅仅列出目前已经安装的包
+
+As a result, you may want to manually track your dependencies as you add them.
+因此，你可能要手动地管理这些依赖包
+
+You can separate those packages needed to run your application and those needed to develop your application into require_run.txt and require_dev.txt respectively.
+你可以分别把那些运行应用必须的包放入 require_run.txt 以及那些开发应用程序需要的包放入 require_dev.txt 
+
+Version control¶
+版本控制¶
+
+Pick a version control system and use it.
+选择一个版本控制系统并且使用它
+
+I recommend Git.
+我推荐 Git
+
+From what I’ve seen, Git is the most popular choice for new projects these days.
+从我所看到的，Git 是这些天来新项目最流行的选择
+
+Being able to delete code without worrying about making an irreversible mistake is invaluable.
+能够删除代码而不必担心犯了一个不可逆转的错误是非常宝贵的
+
+You’ll be able to keep your project free of those massive blocks of commented out code, because you can delete it now and revert that change later should the need arise.
+你也可以让你的项目摆脱大量注释掉的代码的困扰，因为你可以删除它们，以后如有需要可以恢复它们
+
+Plus, you’ll have backup copies of your entire project on GitHub, Bitbucket or your own Gitolite server.
+另外，你可以在 GitHub，Bitbucket 或者你自己的 Gitolite 服务器上备份整个项目
+
+What to keep out of version control¶
+置身版本控制之外的文件¶
+
+I usually keep a file out of version control for one of two reasons.
+我通常会让一个文件置身版本控制之外有两个原因：要么就是它会让整个项目显得混乱，要么它就是一个很隐私的密钥/证书
+
+Either it’s clutter, or it’s a secret.
+编译的 .pyc 文件和虚拟环境 — 如果由于某些原因你没有使用 virtualenvwrapper — 就是让项目显得很混乱的例子
+
+Compiled .pyc files and virtual environments — if you’re not using virtualenvwrapper for some reason — are examples of clutter.
+它们不需要在版本控制之中因为它们能够分别地从 .py 文件和你的 requirements.txt 文件重新创建
+
+API keys, application secret keys and database credentials are examples of secrets.
+API 秘钥，应用程序秘钥以及数据库证书是很隐私的密钥/证书的示例
+
+They shouldn’t be in version control because their exposure would be a massive breach of security.
+它们不应该出现在版本控制中因为它们的曝光将是一个巨大的安全漏洞
+
+Note
+Note
+
+When making security related decisions, I always like to assume that my repository will become public at some point.
+当做跟安全有关的决定的时候，我总是喜欢假设我的版本库将在某个时候变成公开的
+
+This means keeping secrets out and never assuming that a security hole won’t be found because, “Who’s going to guess that they can do that?” This kind of assumption is known as security by obscurity and it’s a bad policy to rely on.
+这就意味着要保守秘密并且从不假设一个安全漏洞不会被发现，“谁来猜猜他们能做到”这类型的假设被称为通过隐匿来实现安全，这是十分槽糕的策略
+
+When using Git, you can create a special file called .gitignore in your repository.
+当使用 Git 的时候，你可以在你的版本库中创建名为 .gitignore 的一个特殊文件
+
+In it, list wildcard patterns to match against filenames.
+在这个文件里，使用列表通配符来匹配文件名
+
+Any filename that matches one of the patterns will be ignored by Git.
+任何匹配其中一个模式的文件名都会被 Git 给忽略掉
+
+I recommend using the .gitignore shown in Listing~ to get you started.
+我推荐使用 .gitignore 来控制不需要版本控制的文件
+
+Instance folders are used to make secret configuration variables available to your application in a more secure way.
+Instance 文件夹是用于以一种更安全地方式提供给你的应用程序敏感配置变量
+
+We’ll talk more about them later.
+我将会在后面更多地谈到它
+
+Note
+Note
+
+You can read more about .gitignore here: http://git-scm.com/docs/gitignore
+你可以阅读更多的关于 .gitignore 的内容从这里：http://git-scm.com/docs/gitignore
+
+Debugging¶
+调试¶
+
+Debug Mode¶
+调试模式¶
+
+Flask comes with a handy feature called debug mode.
+Flask 有一个称为调试模式方便的功能
+
+To turn it on, you just have to set debug = True in your development configuration.
+要打开调试功能的话，你只必须在你的开发配置中设置 debug = True
+
+When it’s on, the server will reload on code changes and errors will come with a stack trace and an interactive console.
+当它打开的时候，服务器会在代码变化的时候自动加载并且出错的时候会伴随着一个堆栈跟踪和一个交互式控制台
+
+Warning
+Warning
+
+Take care not to enable debug mode in production.
+小心
+
+The interactive console enables arbitrary code execution and would be a massive security vulnerability if it was left on in the live site.
+不要在生产环境中使用调试模式
+
+Flask-DebugToolbar¶
+Flask-DebugToolbar¶
+
+Flask-DebugToolbar is another great tool for debugging problems with your application.
+Flask-DebugToolbar 是另一个非常了不起的工具，它可以帮助在你的应用程序中调试问题
+
+In debug mode, it overlays a side-bar onto every page in your application.
+在调试模式下，它会把一个侧边栏置于你的应用程序的每一页上
+
+The side bar gives you information about SQL queries, logging, versions, templates, configuration and other fun stuff that makes it easier to track down problems.
+侧边栏提供了有关 SQL 查询，日志记录，版本，模板，配置和其它有趣的信息，使得更容易地跟踪问题
+
+Note
+Note
+
+Take a look at the quick start section on debug mode.
+看看快速入门中的 调试模式
+
+There is some good information on handling errors, logging and working with other debuggers in the flask docs.
+在 Flask 官方文档 中有一些关于错误处理，日志记录以及使用调试器等不错的信息
+
+Summary¶
+摘要¶
+
+Use virtualenv to keep your application’s dependencies together.
+使用 virtualenv 来保持你的应用程序的依赖包在一起
+
+Use virtualenvwrapper to keep your virtual environments together.
+使用 virtualenvwrapper 来保持你的虚拟环境在一起
+
+Keep track of dependencies with one or more text files.
+用一个或者多个文本文件来追踪依赖性
+
+Use a version control system.
+使用一个版本控制系统
+
+I recommend Git.
+我推荐 Git
+
+Use .gitignore to keep clutter and secrets out of version control.
+使用 .gitignore 来让杂乱和敏感信息远离版本控制
+
+Debug mode can give you information about problems in development.
+在开发中调试模式能够提供给你关于错误/问题的信息
+
+The Flask-DebugToolbar extension will give you even more of that information.
+Flask-DebugToolbar 扩展会提供给你更多的信息
+
+© Copyright 2014, Robert Picard.
+京ICP备14002119号-1   | © Copyright 2014, Robert Picard, Translated by D.D.
+

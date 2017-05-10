@@ -1,0 +1,90 @@
+Introduction¶
+介绍¶
+
+From the official Python website:
+来自 Python官方网站 的介绍：
+
+Python is a general-purpose, high-level programming language similar to Tcl, Perl, Ruby, Scheme, or Java.
+Python是一门通用的高级编程语言，类似于Tcl、Perl、Ruby、Scheme或者Java
+
+Some of its main key features include:
+其一些主要的关键特性包括：
+
+very clear, readable syntax
+非常清晰、可读的语法
+
+Python’s philosophy focuses on readability, from code blocks delineated with significant whitespace to intuitive keywords in place of inscrutable punctuation.
+Python的哲学注重可读性，从显著空格划定的代码块到使用直观关键字替代难懂符号
+
+extensive standard libraries and third party modules for virtually any task
+大量的标准库和第三方模块可用于几乎任何任务
+
+Python is sometimes described with the words “batteries included” because of its extensive standard library, which includes modules for regular expressions, file IO, fraction handling, object serialization, and much more.
+Python有时被描述为“自带电池（batteries included）”（引申为“功能完备”），就是因为它拥有大量的 标准库 ，这包括正则表达式、文件IO、分数处理、对象序列化等
+
+Additionally, the Python Package Index is available for users to submit their packages for widespread use, similar to Perl’s CPAN.
+此外，Python Package Index 允许用户提交他们的包以得到更广泛的使用，类似于Perl的 CPAN 
+
+There is a thriving community of very powerful Python frameworks and tools like the Django web framework and the NumPy set of math routines.
+Python拥有生机蓬勃的社区，他们开发出非常强大的Python框架和工具，比如 Django 网络框架和 NumPy 数学库
+
+integration with other systems
+和其他系统集成
+
+Python can integrate with Java libraries, enabling it to be used with the rich Java environment that corporate programmers are used to.
+Python能够和 Java 库 集成，从而能够使用合作编程者所用的丰富Java环境
+
+It can also be extended by C or C++ modules when speed is of the essence.
+当对速度的要求变得重要时，它也可以用 C or C++ 模块扩展 
+
+ubiquity on computers
+广泛适用于各平台
+
+Python is available on Windows, *nix, and Mac.
+Python能够在Windows、*nix、Mac上获取到，它能运行在Java虚拟机能运行的地方，而且其参考实现CPython能够使Python运行于C编译器能够工作的地方
+
+friendly community
+友好的社区
+
+Python has a vibrant and large community which maintains wikis, conferences, countless repositories, mailing lists, IRC channels, and so much more.
+Python拥有充满生机的、庞大的 社区 ，他们维护着wiki、会议、无数的库、邮件列表、IRC频道（Internet Relay Chat，因特网中继聊天）等
+
+Heck, the Python community is even helping to write this guide!
+见鬼了，他们甚至还帮助编写本指南
+
+About This Guide¶
+关于这份指南¶
+
+The Hitchhiker’s Guide to Python exists to provide both novice and expert Python developers a best practice handbook for the installation, configuration, and usage of Python on a daily basis.
+Hitchhiker的Python指南旨在为Python初学者和专家提供一个关于Python安装、配置、和日常使用的最佳实践手册
+
+This guide is architected and maintained by Kenneth Reitz in an open fashion.
+本指南由 Kenneth Reitz 以开放的形式进行架构和维护
+
+This is a community-driven effort that serves one purpose: to serve the community.
+这是由社区驱动的成果，服务目标就是服务社区
+
+All contributions to the Guide are welcome, from Pythonistas of all levels.
+所有水平的Python编程者对本指南所有的贡献都是欢迎的
+
+If you think there’s a gap in what the Guide covers, fork the Guide on GitHub and submit a pull request.
+如果你觉得本指南没有覆盖到某些内容，请在GitHub上fork指南，并提交一个pull请求
+
+Contributions are welcome from everyone, whether they’re an old hand or a first-time Pythonista, and the authors to the Guide will gladly help if you have any questions about the appropriateness, completeness, or accuracy of a contribution.
+欢迎每个人的贡献，不管是高手还是新手
+
+To get started working on The Hitchhiker’s Guide, see the Contribute page.
+想要开始为Hitchhiker的指南做贡献，请见 贡献 页面
+
+Follow @kennethreitz
+本指南目前持续不断地更新与完善
+
+Join Mailing List.
+获得新版本和未来项目的更新
+
+This guide is now available for pre-order in tangible book form!
+订阅Newsletter
+
+All proceeds are being directly donated to the DjangoGirls organization.
+如果你享受这份指南,想要支持作者， 请戳Gittip
+

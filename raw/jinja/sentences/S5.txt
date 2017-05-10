@@ -1,0 +1,48 @@
+Navigation
+Navigation
+
+Jinja2 provides some code for integration into other tools such as frameworks, the Babel library or your favourite editor for fancy code highlighting.
+帮助继承的文件在 这里 可 用
+
+Jinja provides support for extracting gettext messages from templates via a Babel extractor entry point called jinja2.ext.babel_extract.
+Gettext 消息从 trans 标签和代码表达式中抽取
+
+Gettext messages extracted from both trans tags and code expressions.
+要从模板中抽取 gettext 消息，项目需要在它的 Babel 抽取方法 mapping file 中 有一个 Jinja2 节:
+
+To extract gettext messages from templates, the project needs a Jinja2 section in its Babel extraction method mapping file:
+Environment 的语法相关选项也可作为 mapping file 的配置值
+
+The syntax related options of the Environment are also available as configuration values in the mapping file.
+扩展 可能也被定义为传递一个逗号分割的导入路径列表作为 extensions 值
+
+For example to tell the extraction that templates use % as line_statement_prefix you can use this code:
+ i18n 扩展会被自动添加
+
+Extensions may also be defined by passing a comma separated list of import paths as extensions value.
+Changed in version 2.7: 直到 2.7 模板语法错误始终被忽略
+
+The i18n extension is added automatically.
+因为许多人在模板文件夹中放置非模板的 html 文件，而这会随机报错，所以如此设定
+
+With Pylons 0.9.7 onwards it’s incredible easy to integrate Jinja into a Pylons powered application.
+模板引擎在 config/environment.py 中配置
+
+The template engine is configured in config/environment.py.
+之后，你可以用 pylons.templating 模块中的 render_jinja 函数渲染 Jinja 模板
+
+After that you can render Jinja templates by using the render_jinja function from the pylons.templating module.
+此外，设置 Pylons 的 c 对象为严格模式是个好主意
+
+A syntax plugin for Vim exists in the Vim-scripts directory as well as the ext folder at the root of the Jinja2 project.
+把这些文件复制到你的 syntax 文件夹
+
+Table Of Contents
+Related Topics
+
+Versions
+This Page
+
+Related Topics
+Quick search
+

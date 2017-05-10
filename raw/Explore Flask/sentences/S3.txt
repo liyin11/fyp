@@ -1,0 +1,135 @@
+Organizing your project¶
+组织你的项目¶
+
+Flask leaves the organization of your application up to you.
+Flask 把你的应用程序的组织交由你来决定
+
+This is one of the reasons I liked Flask as a beginner, but it does mean that you have to put some thought into how to structure your code.
+这是我喜欢把 Flask 推荐给初学者的原因之一，但是它确实意味着你必须花一些心思在组织你的代码上
+
+You could put your entire application in one file, or have it spread across multiple packages.
+你可以把你的整个应用程序放在一个文件中，或者让它们分布在多个包里
+
+There are a few organizational patterns that you can follow to make development and deployment easier.
+这里有一些你可以遵循的组织模式，它会让开发和部署更加容易
+
+Definitions¶
+定义¶
+
+Let’s define some of the terms that we’ll run into in this chapter.
+让我们定义一些术语，我们会在本章的后面碰到它们
+
+Repository - This is the base folder where your applications sits.
+仓库/版本库 - 这是你的应用程序所在的基础文件夹
+
+This term traditionally refers to version control systems, which you should be using.
+这个术语习惯上是指版本控制系统，这是你应该使用的
+
+When I refer to your repository in this chapter, I’m talking about the root directory of your project.
+当我在本章提及到它的时候，我是指你的项目的根目录
+
+You probably won’t need to leave this directory when working on your application.
+当致力工作于应用程序上的时候，你可能离不开这个目录
+
+Package - This refers to a Python package that contains your application’s code.
+包 - 这是指包含你的应用代码的一个 Python 包
+
+I’ll talk more about setting up your app as a package in this chapter, but for now just know that the package is a sub-directory of the repository.
+我会在这一章中更多地讨论创建你的应用作为一个包，但现在只需知道包是仓库/版本库的子目录
+
+Module - A module is a single Python file that can be imported by other Python files.
+模块 - 一个模块是指能被其它的 Python 文件导入的一个 Python 文件
+
+A package is essentially multiple modules packaged together.
+一个包基本上是打包在一起的多个模块
+
+Note
+Note
+
+Read more about Python modules in Python tutorial.
+在 Python 教程 中可以阅读更多关于 Python 模块的内容
+
+That same page has a section on packages.
+在上面同一个网址中有一个关于 包 的内容
+
+Organization patterns¶
+组织模式¶
+
+Single module¶
+单模块¶
+
+A lot of the Flask examples that you’ll come across will keep all of the code in a single file, often app.py.
+在很多 Flask 示例中你都会遇到所有的代码都放置于一个文件中，通常叫做 app.py
+
+This is great for quick projects (like the ones used for tutorials), where you just need to serve a few routes and you’ve got less than a few hundred lines of application code.
+这对于快速项目（像官方教程中的那个）是不错的，你只需要满足几个路由并且编写不到百行的应用程序的代码
+
+Package¶
+包¶
+
+When you’re working on a project that’s a little more complex, a single module can get messy.
+当你正在做一个稍微有些复杂的项目的时候，一个模块会显得有些混乱
+
+You’ll need to define classes for models and forms, and they’ll get mixed in with the code for your routes and configuration.
+你将需要为模型和表单定义类，并且它们也会引入到你的路由和配置的代码中
+
+All of this can frustrate development.
+ 所有这一切都可以妨碍开发工作
+
+To solve this problem, we can factor out the different components of our app into a group of inter-connected modules — a package.
+为了解决这个问题，我们可以把应用程序中不同的组件分解成有联系的模块 — 一个包
+
+The structure shown in this listing allows you to group the different components of your application in a logical way.
+上面展示的结构可以让你以一种合乎逻辑的方式把你的应用中不同的组件进行分组
+
+The class definitions for models are together in models.py, the route definitions are in views.py and forms are defined in forms.py (we have a whole chapter for forms later).
+模型的定义类一起放入 models.py，路由的定义放在 views.py 以及表单定义在 forms.py （我们后面有整个一章节是关于表单的内容）
+
+This table provides a basic rundown of the components you’ll find in most Flask applications.
+这张表格提供了包结构的基本纲要，你会发现大部分的 Flask 都能适用
+
+You’ll probably end up with a lot of other files in your repository, but these are common to most Flask applications.
+可能最终会有其它一些文件在你的仓库/版本库里，但是这些是大多数 Flask 应用程序最常见的
+
+Blueprints¶
+蓝图¶
+
+At some point you may find that you have a lot of related routes.
+在某些时候你可能发现你有许多相关的路由
+
+If you’re like me, your first thought will be to split views.py into a package and group those views into modules.
+如果你像我一样，你首先会想到把 views.py 分离到一个包并且把这些视图分组到模块
+
+When you’re at this point, it may be time to factor your application into blueprints.
+当你意识到这一点的时候，是时候把你的应用分解成蓝图
+
+Blueprints are essentially components of your app defined in a somewhat self-contained manner.
+蓝图本质上就是以某种独立的方式定义的应用程序的组件
+
+They act as apps within your application.
+它们在你的应用程序中扮演了应用
+
+You might have different blueprints for the admin panel, the front-end and the user dashboard.
+你可能针对管理面板，前端以及用户控制面板有着不同的蓝图
+
+This lets you group views, static files and templates by components, while letting you share models, forms and other aspects of your application between these components.
+这会让你依据组件分组视图，静态文件以及模板，同时会让你在这些组件之间共享你的应用程序的模型，表单以及其它方面
+
+We’ll talk about using Blueprints to organize your application soon.
+我们将会在后面讨论如何使用蓝图组织你的应用程序
+
+Summary¶
+摘要¶
+
+Using a single module for your application is good for quick projects.
+为你的应用程序使用单一模块是有益于快速项目
+
+Using a package for your application is good for projects with views, models, forms and other components.
+在你的应用程序中使用包是有益于含有视图，模型，表单以及其它组件的项目
+
+Blueprints are a great way to organize projects with several distinct components.
+蓝图是组织含有几个明显区别的组件的项目的一个很好的方式
+
+© Copyright 2014, Robert Picard.
+京ICP备14002119号-1   | © Copyright 2014, Robert Picard, Translated by D.D.
+

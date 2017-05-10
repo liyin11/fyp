@@ -1,0 +1,216 @@
+Preface¶
+前言¶
+
+This book is a collection of the best practices for using Flask.
+这本书是使用 Flask 的最佳实践的合集
+
+There are a lot of pieces to the average Flask application.
+有许多 Flask 应用程序常见的代码片段
+
+You’ll often need to interact with a database and authenticate users, for example.
+例如，你会经常需要与数据库交互和用户身份验证
+
+In the coming pages I’ll do my best to explain the “right way” to do this sort of stuff.
+在接下来的章节里我将尽我所能来解释做这样的事情的“正确的方式”
+
+My recommendations aren’t always going to apply, but I’m hoping that they’ll be a good option most of the time.
+我的建议并不总是适用的，但是我希望大部分时候它们是一个很好的选择
+
+Assumptions¶
+假设¶
+
+In order to present you with more specific advice, I’ve written this book with a few fundamental assumptions.
+为了给你们呈现更加具体的建议，我写这本书有几个基本的假设
+
+It’s important to keep this in mind when you’re reading and applying these recommendations to your own projects.
+当你阅读和运用这些建议到你自己的项目中的时候要牢记这一点
+
+Audience¶
+读者¶
+
+The content of this book builds upon the information in the official documentation.
+这本书的内容是基于官方文档中的信息
+
+I highly recommend that you go through the user guide and follow along with the tutorial.
+我强烈地建议你们浏览 用户指南 并且依照 官方教程 （官方教程中文翻译 ）
+
+This will give you a chance to become familiar with the vocabulary of Flask.
+这会给你一个机会去熟悉 Flask 的术语
+
+You should understand what views are, the basics of Jinja templating and other fundamental concepts defined for beginners.
+你应该会明白什么是视图，Jinja 模板基础知识以及其它一些为初学者定义的基本概念
+
+I’ve tried to avoid overlap with the information already available in the user guide, so if you read this book first, there’s a good chance that you’ll find yourself lost (is that an oxymoron?).
+我试图避免与用户指南已有的信息重叠，因此如果你第一次阅读本书的话，你可能会有些迷失
+
+With all of that said, the topics in this book aren’t highly advanced.
+除了上面所说，在这本书中的其它主题并不是非常高级的
+
+The goal is just to highlight best practices and patterns that will make development easier for you.
+我们的目标就是要强调使得开发变得更加容易地最佳实践和模式
+
+While I’m trying to avoid too much overlap with the official documentation, you may find that I reiterate certain concepts to make sure that they’re familiar.
+尽管我试图避免与官方文档有太多重叠，你可能会发现我会重申某些概念以确保你们对它熟悉
+
+You shouldn’t need to have the beginner’s tutorial open while you read this.
+当你们阅读这些的时候不必打开初学者教程
+
+Versions¶
+版本¶
+
+Python 2 versus Python 3¶
+Python 2 VS Python 3¶
+
+As I write this, the Python community is in the midst of a transition from Python 2 to Python 3.
+我写这本书的时候，Python 社区正处于 Python 2 到 Python 3 的过渡之中
+
+The official stance of the Python Software Foundation is as follows:
+Python 软件基金会的官方立场如下：
+
+As of version 0.10, Flask runs with Python 3.3.
+随着版本 0.10 发布，Flask 可以运行在 Python 3.3 上
+
+When I asked Armin Ronacher about whether new Flask apps should begin using Python 3, he said that he’s not yet recommending it to people.
+当我询问 Armin Ronacher 有关新的 Flask 应用程序能否开始使用 Python 3，他说他还没有推荐人去使用
+
+I’m not using it myself currently, and I don’t ever recommend to people things that I don’t believe in myself, so I’m very cautious about recommending Python 3.
+目前我自己没有使用 Python 3，我永远不要向人们推荐我自己都不相信的东西，因此我很谨慎地推荐使用 Python 3
+
+—Armin Ronacher, creator of Flask [2]
+—Armin Ronacher，Flask 创始人 [2]
+
+One reason for holding off on Python 3 is that many common dependencies haven’t been ported yet.
+就 Python 3 持观望态度的原因之一是许多常见的依赖库还没有被移植到 Python 3 上
+
+You don’t want to build a project around Python 3 only to realize a few months down the line that you can’t use packages X, Y and Z.
+你不想要在使用 Python 3 构建一个项目几个月后才意识到你不能使用包 X，Y 以及 Z
+
+It’s possible that eventually Flask will officially recommend Python 3 for new projects, but for now it’s all about Python 2.
+可能最终 Flask 将正式推荐用 Python 3 开发新项目，但是现在所有一切都是关于 Python 2
+
+Note
+Note
+
+The Python 3 Wall of Superpowers tracks which major Python packages have been ported to Python 3.
+Python 3 Wall of Superpowers 记录着那些已经迁移到 Python 3 的主要 Python 库
+
+Since this book is meant to provide practical advice, I think it makes sense to write with the assumption of Python 2.
+因为本书目的是提供实用的建议，我认为很有意义基于 Python 2 来编写应用
+
+Specifically, I’ll be writing the book with Python 2.7 in mind.
+特别地，我将会使用 Python 2.7 来完成本书的代码
+
+Future updates may very well change this to evolve with the Flask community, but for now 2.7 is where we stand.
+未来可能会随着 Flask 社区的演变进行更新，但是目前我们坚持使用 Python 2.7
+
+Flask version 0.10¶
+Flask 版本 0.10¶
+
+At the time of writing this, 0.10 is the latest version of Flask (0.10.1 to be exact).
+在编写这本书的时候，0.10 是 Flask 的最新版本（准确的是 0.10.1）
+
+Most of the lessons in this book aren’t going to change with minor updates to Flask, but it’s something to keep in mind nonetheless.
+本书大部分的内容是不会随着 Flask 较小的更新发生变化，但这是要记住的东西
+
+Living document¶
+动态文件¶
+
+The content of this books is going to be updated on the fly, rather than with periodic releases.
+本书的内容会动态地更新，而不是定期发布更新
+
+That is one of the benefits of putting the content out there for free, rather than putting it behind a walled garden.
+这也是把书籍免费公开的好处之一
+
+The web is a much more fluid distribution channel than print or even PDFs.
+网站是比印刷或者甚至 PDFs 更加流畅的发布途径
+
+The book’s source is hosted on GitHub and that is where “development” will be happening.
+这本书的源文件托管在 on GitHub，贡献和主意随时欢迎
+
+Conventions used in this book¶
+本书使用的约定¶
+
+Each chapter stands on its own¶
+每一章节是独立的¶
+
+Each chapter in this book is an isolated lesson.
+本书的每一章都是独立的课程
+
+Many books and tutorials are written as one long lesson.
+许多的书籍以及教程都是写成一个很长的课程
+
+Generally this means that an example program or application is created and updated throughout the book to demonstrate concepts and lessons.
+通常这就意味着一个示例程序或者应用被创建以及更新，这些示例或者应用贯穿全书为了解释概念和课程
+
+Instead, examples are included in each lesson to demonstrate the concepts, but the examples from different chapters aren’t meant to be combined into one large project.
+相反，本书每个章节都有不同的示例来解释概念，但是来自不同章节的示例并没有打算组合成一个大的项目
+
+Formatting¶
+格式化¶
+
+Footnotes will be used for citations so you don’t think I’m making things up.
+脚注将用于引用，这样你就不会认为我说假话
+
+[3]
+ [3]
+
+Italic text will be used to denote a file name.
+斜体文本 将被用于表示一个文件名
+
+Bold text will be used to denote a new or important term.
+粗体文本 将用于表示一个新的或者重要的名词
+
+Warning
+Warning
+
+Common pitfalls that could cause major problems will be shown in a warning box.
+可能会导致重大问题的常见陷阱将会以警告框的形式显示
+
+Note
+Note
+
+Supplemental information will appear in note boxes.
+补充信息将会以注解框形式出现
+
+Easter eggs¶
+彩蛋¶
+
+Six backer names from the Kickstarter campaign have been encoded and sprinkled around the book.
+来自 Kickstarter 活动中 6 位支持者的姓名被编码并且分散在书中
+
+If you find all six and email the locations to me, I’ll send you an extraordinarily mediocre prize.
+如果你发现所有 6 个姓名的话，邮件发送它们所在的位置给我，我会给你一个小小的奖励
+
+No hints.
+没有提示
+
+Summary¶
+摘要¶
+
+This book contains recommendations for using Flask.
+这本书包含了使用 Flask 的建议
+
+I’m assuming that you’ve gone through the Flask tutorial.
+我假设你们已经浏览了 Flask 官方教程
+
+I’m using Python 2.7.
+我假设你们正在使用 Python 2.7
+
+I’m using Flask 0.10.
+我假设你们正在使用 Flask 0.10
+
+I’ll do my best to keep the content of the book up-to-date.
+我会尽我所能及时地更新书的内容
+
+Each chapter in this book stands on its own.
+本书的每一章节都是独立的
+
+There are a few ways that I’ll use formatting to convey additional information about the content.
+有几种我使用来表达内容的附加信息的格式
+
+Summaries will appear as concise lists of takeaways from the chapters.
+摘要将会以列表形式出现在每一章节的结尾
+
+© Copyright 2014, Robert Picard.
+京ICP备14002119号-1   | © Copyright 2014, Robert Picard, Translated by D.D.
+

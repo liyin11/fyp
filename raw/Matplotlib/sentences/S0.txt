@@ -1,0 +1,336 @@
+Matplotlib tutorial
+Matplotlib 教程
+
+Introduction
+介绍
+
+matplotlib is probably the single most used Python package for 2D-graphics.
+Matplotlib 可能是 Python 2D-绘图领域使用最广泛的套件
+
+It provides both a very quick way to visualize data from Python and publication-quality figures in many formats.
+它能让使用者很轻松地将数据图形化，并且提供多样化的输出格式
+
+We are going to explore matplotlib in interactive mode covering most common cases.
+这里将会探索 matplotlib 的常见用法
+
+IPython and the pylab mode
+IPython 以及 pylab 模式
+
+IPython is an enhanced interactive Python shell that has lots of interesting features including named inputs and outputs, access to shell commands, improved debugging and many more.
+IPython 是 Python 的一个增强版本，它在下列方面有所增强：命名输入输出、使用系统命令（shell commands）、排错（debug）能力
+
+When we start it with the command line argument -pylab (--pylab since IPython version 0.12), it allows interactive matplotlib sessions that have Matlab/Mathematica-like functionality.
+我们在命令行终端给 IPython 加上参数 -pylab （0.12 以后的版本是 --pylab）之后，就可以像 Matlab 或者 Mathematica 那样以交互的方式绘图
+
+pyplot provides a convenient interface to the matplotlib object-oriented plotting library.
+pylab 是 matplotlib 面向对象绘图库的一个接口
+
+It is modeled closely after Matlab(TM).
+它的语法和 Matlab 十分相近
+
+Therefore, the majority of plotting commands in pyplot have Matlab(TM) analogs with similar arguments.
+也就是说，它主要的绘图命令和 Matlab 对应的命令有相似的参数
+
+Simple plot
+初级绘制
+
+In this section, we want to draw the cosine and sine functions on the same plot.
+这一节中，我们将从简到繁
+
+Starting from the default settings, we'll enrich the figure step by step to make it nicer.
+先尝试用默认配置在同一张图上绘制正弦和余弦函数图像，然后逐步美化它
+
+First step is to get the data for the sine and cosine functions: 
+第一步，是取得正弦函数和预先函数的值：
+
+X is now a numpy array with 256 values ranging from -π to +π (included).
+X 是一个 numpy 数组，包含了从 $-\pi$ 到 $+\pi$ 等间隔的 256 个值
+
+C is the cosine (256 values) and S is the sine (256 values).
+C 和 S 则分别是这 256 个值对应的余弦和正弦函数值组成的 numpy 数组
+
+You can get source for each step by clicking on the corresponding figure.
+你可以在 IPython 的交互模式下测试代码，也可以下载代码（下载链接就是这些示例图），然后执行
+
+Using defaults
+使用默认配置
+
+Matplotlib comes with a set of default settings that allow customizing all kinds of properties.
+Matplotlib 的默认配置都允许用户自定义
+
+You can control the defaults of almost every property in matplotlib: figure size and dpi, line width, color and style, axes, axis and grid properties, text and font properties and so on.
+你可以调整大多数的默认配置：图片大小和分辨率（dpi）、线宽、颜色、风格、坐标轴、坐标轴以及网格的属性、文字与字体属性等
+
+While matplotlib defaults are rather good in most cases, you may want to modify some properties for specific cases.
+不过，matplotlib 的默认配置在大多数情况下已经做得足够好，你可能只在很少的情况下才会想更改这些默认配置
+
+Instantiating defaults
+默认配置的具体内容
+
+In the script below, we've instantiated (and commented) all the figure settings that influence the appearance of the plot.
+下面的代码中，我们展现了 matplotlib 的默认配置并辅以注释说明，这部分配置包含了有关绘图样式的所有配置
+
+The settings have been explicitly set to their default values, but now you can interactively play with the values to explore their affect (see Line properties and Line styles below).
+代码中的配置与默认配置完全相同，你可以在交互模式中修改其中的值来观察效果
+
+Changing colors and line widths
+改变线条的颜色和粗细
+
+First step, we want to have the cosine in blue and the sine in red and a slightly thicker line for both of them.
+首先，我们以蓝色和红色分别表示余弦和正弦函数，而后将线条变粗一点
+
+We'll also slightly alter the figure size to make it more horizontal.
+接下来，我们在水平方向拉伸一下整个图
+
+Setting limits
+设置图片边界
+
+Current limits of the figure are a bit too tight and we want to make some space in order to clearly see all data points.
+当前的图片边界设置得不好，所以有些地方看得不是很清楚
+
+Setting ticks
+设置记号
+
+Current ticks are not ideal because they do not show the interesting values (+/-π,+/-π/2) for sine and cosine.
+我们讨论正弦和余弦函数的时候，通常希望知道函数在 $\pm\pi$ 和 $\pm\frac{\pi}{2}$ 的值
+
+We'll change them such that they show only these values.
+这样看来，当前的设置就不那么理想了
+
+Setting tick labels
+设置记号的标签
+
+Ticks are now properly placed but their label is not very explicit.
+记号现在没问题了，不过标签却不大符合期望
+
+We could guess that 3.142 is π but it would be better to make it explicit.
+我们可以把 $3.142$ 当做是 $\pi$，但毕竟不够精确
+
+When we set tick values, we can also provide a corresponding label in the second argument list.
+当我们设置记号的时候，我们可以同时设置记号的标签
+
+Note that we'll use latex to allow for nice rendering of the label.
+注意这里使用了 LaTeX
+
+Moving spines
+移动脊柱
+
+Spines are the lines connecting the axis tick marks and noting the boundaries of the data area.
+坐标轴线和上面的记号连在一起就形成了脊柱（Spines，一条线段上有一系列的凸起，是不是很像脊柱骨啊~），它记录了数据区域的范围
+
+They can be placed at arbitrary positions and until now, they were on the border of the axis.
+它们可以放在任意位置，不过至今为止，我们都把它放在图的四边
+
+We'll change that since we want to have them in the middle, since there are four of them (top/bottom/left/right), we'll discard the top and right by setting their color to none and we'll move the bottom and left ones to coordinate 0 in data space coordinates.
+实际上每幅图有四条脊柱（上下左右），为了将脊柱放在图的中间，我们必须将其中的两条（上和右）设置为无色，然后调整剩下的两条到合适的位置——数据空间的 0 点
+
+Adding a legend
+添加图例
+
+Let's add a legend in the upper left corner.
+我们在图的左上角添加一个图例
+
+This only requires adding the keyword argument label (that will be used in the legend box) to the plot commands.
+为此，我们只需要在 plot 函数里以「键 - 值」的形式增加一个参数
+
+Annotate some points
+给一些特殊点做注释
+
+We chose the 2π/3 value and we want to annotate both the sine and the cosine.
+我们希望在 $2\pi/3$ 的位置给两条函数曲线加上一个注释
+
+We'll first draw a marker on the curve as well as a straight dotted line.
+首先，我们在对应的函数图像位置上画一个点，向横轴引一条垂线，以虚线标记
+
+Then, we'll use the annotate command to display some text with an arrow.
+然后，写上标签
+
+Devil is in the details
+精益求精
+
+The tick labels are now hardly visible because of the blue and red lines.
+坐标轴上的记号标签被曲线挡住了，作为强迫症患者（雾）这是不能忍的
+
+We can make them bigger and we can also adjust their properties such that they'll be rendered on a semi-transparent white background.
+我们可以把它们放大，然后添加一个白色的半透明底色
+
+This will allow us to see both the data and the labels.
+这样可以保证标签和曲线同时可见
+
+Figures, Subplots, Axes and Ticks
+图像、子图、坐标轴和记号
+
+So far we have used implicit figure and axes creation.
+到目前为止，我们都用隐式的方法来绘制图像和坐标轴
+
+This is handy for fast plots.
+快速绘图中，这是很方便的
+
+We can have more control over the display using figure, subplot, and axes explicitly.
+我们也可以显式地控制图像、子图、坐标轴
+
+Within this figure there can be subplots.
+在图像里面有所谓「子图」
+
+While subplot positions the plots in a regular grid, axes allows free placement within the figure, both can be useful depending on your intention.
+子图的位置是由坐标网格确定的，而「坐标轴」却不受此限制，可以放在图像的任意位置
+
+We've already worked with figures and subplots without explicitly calling them.
+我们已经隐式地使用过图像和子图
+
+When we call plot, matplotlib calls gca() to get the current axes and gca in turn calls gcf() to get the current figure.
+当我们调用 plot 函数的时候，matplotlib 调用 gca() 函数以及 gcf() 函数来获取当前的坐标轴和图像
+
+If there is none it calls figure() to make one, strictly speaking, to make a subplot(111).
+如果无法获取图像，则会调用如果无法获取图像，则会调用 figure() 函数来创建一个——严格地说，是用 subplot(1,1,1) 创建一个只有一个子图的图像
+
+Figures
+图像
+
+A figure is the windows in the GUI that has "Figure #" as title.
+所谓「图像」就是 GUI 里以「Figure #」为标题的那些窗口
+
+Figures are numbered starting from 1 as opposed to the normal Python way starting from 0, this is clearly MATLAB-style.
+图像编号从 1 开始，与 MATLAB 的风格一致，而于 Python 从 0 开始编号的风格不同
+
+There are several parameters that determine what the figure looks like.
+以下参数是图像的属性
+
+The defaults can be specified in the resource file and will be used most of the time.
+这些默认值可以在源文件中指明
+
+Only the number of the figure is frequently changed.
+不过除了图像数量这个参数，其余的参数都很少修改
+
+When you work with the GUI you can close a figure by clicking on the x in the upper right corner.
+你在图形界面中可以按下右上角的 X 来关闭窗口（OS X 系统是左上角）
+
+But you can close a figure programmatically by calling close.
+Matplotlib 也提供了名为 close 的函数来关闭这个窗口
+
+As with other objects, you can set figure properties with the set_something methods.
+和其他对象一样，你可以使用 setp 或者是 set_something 这样的方法来设置图像的属性
+
+Subplots
+子图
+
+With subplot you can arrange plots in a regular grid.
+你可以用子图来将图样（plot）放在均匀的坐标网格中
+
+You need to specify the number of rows and columns and the number of the plot.
+用 subplot 函数的时候，你需要指明网格的行列数量，以及你希望将图样放在哪一个网格区域中
+
+Note that the gridspec command is a more powerful alternative.
+此外，gridspec 的功能更强大，你也可以选择它来实现这个功能
+
+Axes
+坐标轴
+
+Axes are very similar to subplots but allow placement of plots at any location in the figure.
+坐标轴和子图功能类似，不过它可以放在图像的任意位置
+
+So if we want to put a smaller plot inside a bigger one we do so with axes.
+因此，如果你希望在一副图中绘制一个小图，就可以用这个功能
+
+Ticks
+记号
+
+Well formatted ticks are an important part of publishing-ready figures.
+良好的记号是图像的重要组成部分
+
+Matplotlib provides a totally configurable system for ticks.
+Matplotlib 里的记号系统里的各个细节都是可以由用户个性化配置的
+
+There are tick locators to specify where ticks should appear and tick formatters to give ticks the appearance you want.
+你可以用 Tick Locators 来指定在那些位置放置记号，用 Tick Formatters 来调整记号的样式
+
+Major and minor ticks can be located and formatted independently from each other.
+主要和次要的记号可以以不同的方式呈现
+
+Per default minor ticks are not shown, i.e.there is only an empty list for them because it is as NullLocator (see below).
+默认情况下，每一个次要的记号都是隐藏的，也就是说，默认情况下的次要记号列表是空的——NullLocator
+
+All of these locators derive from the base class matplotlib.ticker.Locator, you can make your own locator deriving from it.
+这些 Locators 都是 matplotlib.ticker.Locator 的子类，你可以据此定义自己的 Locator
+
+Handling dates as ticks can be especially tricky, therefore, matplotlib provides special locators in matplotlib.dates.
+以日期为 ticks 特别复杂，因此 Matplotlib 提供了 matplotlib.dates 来实现这一功能
+
+Other Types of Plots
+其他类型的图
+
+Regular Plots
+普通图
+
+Scatter Plots
+散点图
+
+Bar Plots
+条形图
+
+Contour Plots
+等高线图
+
+Imshow
+灰度图（Imshow）
+
+Pie Charts
+饼状图
+
+Quiver Plots
+量场图（Quiver Plots）
+
+Grids
+网格
+
+Multi Plots
+多重网格
+
+Polar Axis
+极轴图
+
+3D Plots
+3D 图
+
+Text
+手稿
+
+Beyond this tutorial
+结束篇
+
+Matplotlib benefits from extensive documentation as well as a large community of users and developpers.
+Matplotlib 能有今天这样强大的功能和广泛的使用得益于大量的文档和社区开发者
+
+Here are some links of interest:
+这里提供一些有益的链接
+
+Tutorials
+入门教程
+
+Matplotlib documentation
+Matplotlib 文档
+
+Code documentation
+随代码分发的文档
+
+The code is fairly well documented and you can quickly access a specific command from within a python session:
+Matplotlib 的代码是自文档（Self-documented）的
+
+Each example comes with its source.
+Matplotlib 画廊 也非常有用
+
+A smaller gallery is also available here.
+哦，这里还有一个小一点的画廊
+
+Mailing lists
+邮件列表
+
+Finally, there is a user mailing list where you can ask for help and a developers mailing list that is more technical.
+你可以在用户邮件列表提问，或者在开发者邮件列表里交流技术
+
+Quick references
+快速查询
+
+Here is a set of tables that show main properties and styles.
+你可以在这里找到 Matplotlib 主要的属性表，以便按照需求个性化配置你的输出图样
+

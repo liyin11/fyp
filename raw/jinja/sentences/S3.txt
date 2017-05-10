@@ -1,0 +1,990 @@
+Navigation
+Navigation
+
+This document describes the syntax and semantics of the template engine and will be most useful as reference to those creating Jinja templates.
+这份文档描述了模板引擎中的语法和语义结构，对于创建 Jinja 模板是一份相当有用 的参考
+
+As the template engine is very flexible, the configuration from the application can be slightly different from the code presented here in terms of delimiters and behavior of undefined values.
+因为模板引擎非常灵活，应用中的配置会在分隔符和未定义值的行为方面与 这里的配置有细微差异
+
+Synopsis¶
+概要¶
+
+A Jinja template is simply a text file.
+模板仅仅是文本文件
+
+Jinja can generate any text-based format (HTML, XML, CSV, LaTeX, etc.).
+它可以生成任何基于文本的格式（HTML、XML、CSV、LaTex 等等）
+
+A Jinja template doesn’t need to have a specific extension: .html, .xml, or any other extension is just fine.
+ 它并没有特定的扩展名， .html 或 .xml 都是可以的
+
+A template contains variables and/or expressions, which get replaced with values when a template is rendered;
+模板包含 变量 或 表达式 ，这两者在模板求值的时候会被替换为值
+
+and tags, which control the logic of the template.
+模板中 还有标签，控制模板的逻辑
+
+The template syntax is heavily inspired by Django and Python.
+模板语法的大量灵感来自于 Django 和 Python 
+
+Below is a minimal template that illustrates a few basics using the default Jinja configuration.
+下面是一个最小的模板，它阐明了一些基础
+
+We will cover the details later in this document:
+我们会在文档中后面的部分解释细节:
+
+The following example shows the default configuration settings.
+这包含了默认的设定
+
+An application developer can change the syntax configuration from {% foo %} to <% foo %>, or something similar.
+应用开发者也会把语法从 {% foo %} 改成 <% foo %> 或类似的东西
+
+There are a few kinds of delimiters.
+这里有两种分隔符: {% ... %} 和 {{ ... }} 
+
+The default Jinja delimiters are configured as follows:
+前者用于执行诸如 for 循环 或赋值的语句，后者把表达式的结果打印到模板上
+
+Variables¶
+变量¶
+
+Template variables are defined by the context dictionary passed to the template.
+应用把变量传递到模板，你可能在模板中弄混
+
+You can mess around with the variables in templates provided they are passed in by the application.
+你可以使用点（ . ）来访问变量的属性，作为替代，也可以使用所谓的“下标”语 法（ [] ）
+
+Variables may have attributes or elements on them you can access too.
+下面的几行效果是一样的:
+
+You can use a dot (.) to access attributes of a variable in addition to the standard Python __getitem__ “subscript” syntax ([]).
+知晓花括号 不是 变量的一部分，而是打印语句的一部分是重要的
+
+The following lines do the same thing:
+如果变量或属性不存在，会返回一个未定义值
+
+It’s important to know that the outer double-curly braces are not part of the variable, but the print statement.
+实现
+
+If a variable or attribute does not exist, you will get back an undefined value.
+为方便起见，Jinja2 中 foo.bar 在 Python 层中做下面的事情:
+
+Implementation
+foo['bar'] 的方式相反，只在顺序上有细小差异:
+
+For the sake of convenience, foo.bar in Jinja2 does the following things on the Python layer:
+如果一个对象有同名的项和属性，这很重要
+
+For example, {{ name|striptags|title }} will remove all HTML Tags from variable name and title-case the output (title(striptags(name))).
+例如 {{ name|striptags|title }} 会移除 name 中的所有 HTML 标签并且改写 为标题样式的大小写格式
+
+Filters that accept arguments have parentheses around the arguments, just like a function call.
+下面的 内置过滤器清单 节介绍了所有的内置过滤器
+
+Beside filters, there are also so-called “tests” available.
+除了过滤器，所谓的“测试”也是可用的
+
+Tests can be used to test a variable against a common expression.
+测试可以用于对照普通表达式测试一个变量
+
+To test a variable or expression, you add is plus the name of the test after the variable.
+ 要测试一个变量或表达式，你要在变量后加上一个 is 以及测试的名称
+
+For example, to find out if a variable is defined, you can do name is defined, which will then return true or false depending on whether name is defined in the current template context.
+例如，要得出 一个值是否定义过，你可以用 name is defined ，这会根据 name 是否定义返回 true 或 false 
+
+Tests can accept arguments, too.
+测试也可以接受参数
+
+If the test only takes one argument, you can leave out the parentheses.
+如果测试只接受一个参数，你可以省去括号来分组它们
+
+For example, the following two expressions do the same thing:
+例如， 下面的两个表达式做同样的事情:
+
+The List of Builtin Tests below describes all the builtin tests.
+下面的 内置测试清单 章节介绍了所有的内置测试
+
+Comments¶
+注释¶
+
+To comment-out part of a line in a template, use the comment syntax which is by default set to {# ...
+要把模板中一行的部分注释掉，默认使用 {# ... #} 注释语法
+
+#}.
+这在调试或 添加给你自己或其它模板设计者的信息时是有用的:
+
+Whitespace Control¶
+空白控制¶
+
+In the default configuration:
+默认配置中，模板引擎不会对空白做进一步修改，所以每个空白（空格、制表符、换行符 等等）都会原封不动返回
+
+If an application configures Jinja to trim_blocks, the first newline after a template tag is removed automatically (like in PHP).
+此外，你也可以手动剥离模板中的空白
+
+The lstrip_blocks option can also be set to strip tabs and spaces from the beginning of a line to the start of a block.
+当你在块（比如一个 for 标签、一段注释或变 量表达式）的开始或结束放置一个减号（ - ），可以移除块前或块后的空白:
+
+With both trim_blocks and lstrip_blocks enabled, you can put block tags on their own lines, and the entire block line will be removed when rendered, preserving the whitespace of the contents.
+这会产出中间不带空白的所有元素
+
+For example, without the trim_blocks and lstrip_blocks options, this template:
+如果 seq 是 1 到 9 的数字的列表， 输出会是 123456789 
+
+gets rendered with blank lines inside the div:
+如果开启了 行语句 ，它们会自动去除行首的空白
+
+But with both trim_blocks and lstrip_blocks enabled, the template block lines are removed and other whitespace is preserved:
+提示
+
+You can manually disable the lstrip_blocks behavior by putting a plus sign (+) at the start of a block:
+标签和减号之间不能有空白
+
+You can also strip whitespace in templates by hand.
+有效的:
+
+This will yield all elements without whitespace between them.
+无效的:
+
+Note
+有时想要或甚至必要让 Jinja 忽略部分，不会把它作为变量或块来处理
+
+You must not add whitespace between the tag and the minus sign.
+最简单的方法是在变量分隔符中（ {{ ）使用变量表达式输出:
+
+valid:
+对于较大的段落，标记一个块为 raw 是有意义的
+
+It is sometimes desirable – even necessary – to have Jinja ignore parts it would otherwise handle as variables or blocks.
+如果应用启用了行语句，就可以把一个行标记为一个语句
+
+For example, if, with the default syntax, you want to use {{ as a raw string in a template and not start a variable, you have to use a trick.
+例如如果行语句前缀配置为 # ，下面的两个例子是等价的:
+
+The easiest way to output a literal variable delimiter ({{) is by using a variable expression:
+行语句前缀可以出现在一行的任意位置，只要它前面没有文本
+
+For bigger sections, it makes sense to mark a block raw.
+提示
+
+The line statement prefix can appear anywhere on the line as long as no text precedes it.
+从 Jinja 2.2 开始，行注释也可以使用了
+
+For better readability, statements that start a block (such as for, if, elif etc.) may end with a colon:
+例如如果配置 ## 为行注释前缀， 行中所有 ## 之后的内容（不包括换行符）会被忽略:
+
+Since Jinja 2.2, line-based comments are available as well.
+Jinja 中最强大的部分就是模板继承
+
+For example, if the line-comment prefix is configured to be ##, everything from ## to the end of the line is ignored (excluding the newline sign):
+模板继承允许你构建一个包含你站点共同元素的基 本模板“骨架”，并定义子模板可以覆盖的 块 
+
+This template, which we’ll call base.html, defines a simple HTML skeleton document that you might use for a simple two-column page.
+这个模板，我们会把它叫做 base.html ，定义了一个简单的 HTML 骨架文档，你可 能使用一个简单的两栏页面
+
+It’s the job of “child” templates to fill the empty blocks with content:
+用内容填充空的块是子模板的工作:
+
+In this example, the {% block %} tags define four blocks that child templates can fill in.
+在本例中， {% block %} 标签定义了四个字幕版可以填充的块
+
+All the block tag does is tell the template engine that a child template may override those placeholders in the template.
+所有的 block 标签 告诉模板引擎子模板可以覆盖模板中的这些部分
+
+Child Template¶
+子模板¶
+
+A child template might look like this:
+一个子模板看起来是这样:
+
+The {% extends %} tag is the key here.
+{% extend %} 标签是这里的关键
+
+It tells the template engine that this template “extends” another template.
+它告诉模板引擎这个模板“继承”另一个模板
+
+When the template system evaluates this template, it first locates the parent.
+ 当模板系统对这个模板求值时，首先定位父模板
+
+The extends tag should be the first tag in the template.
+ extends 标签应该是模板中的第一个 标签
+
+Everything before it is printed out normally and may cause confusion.
+它前面的所有东西都会按照普通情况打印出来，而且可能会导致一些困惑
+
+For details about this behavior and how to take advantage of it, see Null-Master Fallback.
+更多 该行为的细节以及如何利用它，见 Null-Master 退回 
+
+The filename of the template depends on the template loader.
+模板的文件名依赖于模板加载器
+
+For example, the FileSystemLoader allows you to access other templates by giving the filename.
+例如 FileSystemLoader 允许你用文件名访 问其它模板
+
+You can access templates in subdirectories with a slash:
+你可以使用斜线访问子目录中的模板:
+
+But this behavior can depend on the application embedding Jinja.
+这种行为也可能依赖于应用内嵌的 Jinja 
+
+Note that since the child template doesn’t define the footer block, the value from the parent template is used instead.
+注意子模板没有定义 footer 块，会 使用父模板中的值
+
+You can’t define multiple {% block %} tags with the same name in the same template.
+你不能在同一个模板中定义多个同名的 {% block %} 标签
+
+This limitation exists because a block tag works in “both” directions.
+因为块标签以两种 方向工作，所以存在这种限制
+
+That is, a block tag doesn’t just provide a placeholder to fill - it also defines the content that fills the placeholder in the parent.
+即一个块标签不仅提供一个可以填充的部分，也在父级 定义填充的内容
+
+If there were two similarly-named {% block %} tags in a template, that template’s parent wouldn’t know which one of the blocks’ content to use.
+如果同一个模板中有两个同名的 {% blok %} 标签，父模板 无法获知要使用哪一个块的内容
+
+If you want to print a block multiple times, you can, however, use the special self variable and call the block with that name:
+如果你想要多次打印一个块，无论如何你可以使用特殊的 self 变量并调用与块同名 的函数:
+
+Super Blocks¶
+Super 块¶
+
+It’s possible to render the contents of the parent block by calling super.
+可以调用 super 来渲染父级块的内容
+
+This gives back the results of the parent block:
+这会返回父级块的结果:
+
+Named Block End-Tags¶
+命名块结束标签¶
+
+Jinja2 allows you to put the name of the block after the end tag for better readability:
+Jinja2 允许你在块的结束标签中加入的名称来改善可读性:
+
+However, the name after the endblock word must match the block name.
+无论如何， endblock 后面的名称一定与块名匹配
+
+Block Nesting and Scope¶
+嵌套块和作用域¶
+
+Blocks can be nested for more complex layouts.
+嵌套块可以胜任更复杂的布局
+
+However, per default blocks may not access variables from outer scopes:
+而默认的块不允许访问块外作用域中的变量:
+
+This example would output empty  items because item is unavailable inside the block.
+这个例子会输出空的  项，因为 item 在块中是不可用的
+
+The reason for this is that if the block is replaced by a child template, a variable would appear that was not defined in the block or passed to the context.
+其原因是，如果 块被子模板替换，变量在其块中可能是未定义的或未被传递到上下文
+
+Starting with Jinja 2.2, you can explicitly specify that variables are available in a block by setting the block to “scoped” by adding the scoped modifier to a block declaration:
+从 Jinja 2.2 开始，你可以显式地指定在块中可用的变量，只需在块声明中添加 scoped 修饰，就把块设定到作用域中:
+
+When overriding a block, the scoped modifier does not have to be provided.
+当覆盖一个块时，不需要提供 scoped 修饰
+
+Template Objects¶
+模板对象¶
+
+Changed in version 2.4.
+Changed in version 2.4.
+
+If a template object was passed in the template context, you can extend from that object as well.
+当一个模板对象被传递到模板上下文，你也可以从那个对象继承
+
+Assuming the calling code passes a layout template as layout_template to the environment, this code works:
+假设调用 代码传递 layout_template 布局模板到环境，这段代码会工作:
+
+Previously, the layout_template variable had to be a string with the layout template’s filename for this to work.
+之前 layout_template 变量一定是布局模板文件名的字符串才能工作
+
+HTML Escaping¶
+HTML 转义¶
+
+When generating HTML from templates, there’s always a risk that a variable will include characters that affect the resulting HTML.
+当从模板生成 HTML 时，始终有这样的风险:变量包含影响已生成 HTML 的字符
+
+There are two approaches:
+有两种 解决方法:手动转义每个字符或默认自动转义所有的东西
+
+Jinja supports both.
+Jinja 两者都支持，使用哪个取决于应用的配置
+
+What is used depends on the application configuration.
+默认的配置未开启自动转义有这样几个 原因:
+
+Working with Manual Escaping¶
+使用手动转义¶
+
+If manual escaping is enabled, it’s your responsibility to escape variables if needed.
+如果启用了手动转义，按需转义变量就是 你的 责任
+
+What to escape?
+要转义什么
+
+If you have a variable that may include any of the following chars (>, <, &, or ") you SHOULD escape it unless the variable contains well-formed and trusted HTML.
+如果你有 一个 可能 包含 > 、 < 、 & 或 " 字符的变量，你必须转义 它，除非变量中的 HTML 有可信的良好格式
+
+Escaping works by piping the variable through the |e filter:
+转义通过用管道传递到过滤器 |e 来实现: {{ user.username|e }} 
+
+Working with Automatic Escaping¶
+使用自动转义¶
+
+When automatic escaping is enabled, everything is escaped by default except for values explicitly marked as safe.
+当启用了自动转移，默认会转移一切，除非值被显式地标记为安全的
+
+Variables and expressions can be marked as safe either in:
+可以在应用中 标记，也可以在模板中使用 |safe 过滤器标记
+
+The main problem with this approach is that Python itself doesn’t have the concept of tainted values;
+但双重转义很容易避免，只需要依赖 Jinja2 提供的工具而不使用诸如字符串模运算符 这样的 Python 内置结构
+
+If a value is not marked safe, auto-escaping will take place;
+返回模板数据（宏、 super 、 self.BLOCKNAME ）的函数，其返回值总是被标记 为安全的
+
+Jinja2 functions (macros, super, self.BLOCKNAME) always return template data that is marked as safe.
+模板中的字符串字面量在自动转义中被也被视为是不安全的
+
+A control structure refers to all those things that control the flow of a program - conditionals (i.e.
+控制结构指的是所有的那些可以控制程序流的东西 —— 条件（比如 if/elif/ekse ）、 for 循环、以及宏和块之类的东西
+
+if/elif/else), for-loops, as well as things like macros and blocks.
+控制结构在默认语法中以 {% .. %} 块的形式 出现
+
+For¶
+For¶
+
+Loop over each item in a sequence.
+遍历序列中的每项
+
+For example, to display a list of users provided in a variable called users:
+例如，要显示一个由 users` 变量提供的用户列表:
+
+As variables in templates retain their object properties, it is possible to iterate over containers like dict:
+因为模板中的变量保留它们的对象属性，可以迭代像 dict 的容器:
+
+Note, however, that Python dicts are not ordered;
+注意无论如何字典通常是无序的，所以你可能需要把它作为一个已排序的列表传入 到模板或使用 dictsort 过滤器
+
+Inside of a for-loop block, you can access some special variables:
+在一个 for 循环块中你可以访问这些特殊的变量:
+
+Within a for-loop, it’s possible to cycle among a list of strings/variables each time through the loop by using the special loop.cycle helper:
+在 for 循环中，可以使用特殊的 loop.cycle 辅助函数，伴随循环在一个字符串/变 量列表中周期取值:
+
+Since Jinja 2.1, an extra cycle helper exists that allows loop-unbound cycling.
+从 Jinja 2.1 开始，一个额外的 cycle 辅助函数允许循环限定外的周期取值
+
+For more information, have a look at the List of Global Functions.
+ 更多信息请阅读 全局函数清单 
+
+Unlike in Python, it’s not possible to break or continue in a loop.
+与 Python 中不同，模板中的循环内不能 break 或 continue 
+
+You can, however, filter the sequence during iteration, which allows you to skip items.
+但你可以在迭代 中过滤序列来跳过项目
+
+The following example skips all the users which are hidden:
+下面的例子中跳过了所有隐藏的用户:
+
+The advantage is that the special loop variable will count correctly;
+好处是特殊的 loop 可以正确地计数，从而不计入未迭代过的用户
+
+If no iteration took place because the sequence was empty or the filtering removed all the items from the sequence, you can render a default block by using else:
+如果因序列是空或者过滤移除了序列中的所有项目而没有执行循环，你可以使用 else 渲染一个用于替换的块:
+
+Note that, in Python, else blocks are executed whenever the corresponding loop did not break.
+也可以递归地使用循环
+
+Since Jinja loops cannot break anyway, a slightly different behavior of the else keyword was chosen.
+当你处理诸如站点地图之类的递归数据时很有用
+
+It is also possible to use loops recursively.
+下面的例子用递归循环实现了站点地图:
+
+For multiple branches, elif and else can be used like in Python.
+像在 Python 中一样，用 elif 和 else 来构建多个分支
+
+You can use more complex Expressions there, too:
+你也可以用更复杂的 表达式:
+
+If can also be used as an inline expression and for loop filtering.
+If 也可以被用作 内联表达式 并作为 循环过滤 
+
+Macros¶
+宏¶
+
+Macros are comparable with functions in regular programming languages.
+宏类似常规编程语言中的函数
+
+They are useful to put often used idioms into reusable functions to not repeat yourself (“DRY”).
+它们用于把常用行为作为可重用的函数，取代 手动重复的工作
+
+Here’s a small example of a macro that renders a form element:
+这里是一个宏渲染表单元素的小例子:
+
+The macro can then be called like a function in the namespace:
+在命名空间中，宏之后可以像函数一样调用:
+
+If the macro was defined in a different template, you have to import it first.
+如果宏在不同的模板中定义，你需要首先使用 import 
+
+Inside macros, you have access to three special variables:
+在宏内部，你可以访问三个特殊的变量:
+
+Macros also expose some of their internal details.
+宏也可以暴露某些内部细节
+
+The following attributes are available on a macro object:
+下面的宏对象属性是可用的:
+
+If a macro name starts with an underscore, it’s not exported and can’t be imported.
+如果一个宏的名称以下划线开始，它不是导出的且不能被导入
+
+Call¶
+调用¶
+
+In some cases it can be useful to pass a macro to another macro.
+在某些情况下，需要把一个宏传递到另一个宏
+
+For this purpose, you can use the special call block.
+为此，可以使用特殊的 call 块
+
+The following example shows a macro that takes advantage of the call functionality and how it can be used:
+ 下面的例子展示了如何让宏利用调用功能:
+
+It’s also possible to pass arguments back to the call block.
+也可以向调用块传递参数
+
+This makes it useful as a replacement for loops.
+这在为循环做替换时很有用
+
+Generally speaking, a call block works exactly like a macro without a name.
+总而言之，调用块的工作方 式几乎与宏相同，只是调用块没有名称
+
+Here’s an example of how a call block can be used with arguments:
+这里是一个带参数的调用块的例子:
+
+Filters¶
+过滤器¶
+
+Filter sections allow you to apply regular Jinja2 filters on a block of template data.
+过滤器段允许你在一块模板数据上应用常规 Jinja2 过滤器
+
+Just wrap the code in the special filter section:
+只需要把代码用 filter 节包裹起来:
+
+Assignments¶
+赋值¶
+
+Inside code blocks, you can also assign values to variables.
+在代码块中，你也可以为变量赋值
+
+Assignments at top level (outside of blocks, macros or loops) are exported from the template like top level macros and can be imported by other templates.
+在顶层的（块、宏、循环之外）赋值是可导出的，即 可以从别的模板中导入
+
+Assignments use the set tag and can have multiple targets:
+赋值使用 set 标签，并且可以为多个变量赋值:
+
+Block Assignments¶
+继承¶
+
+New in version 2.8.
+extends 标签用于从另一个模板继承
+
+The navigation variable then contains the navigation HTML source.
+块用于继承，同时作为占位符和用于替换的内容
+
+Extends¶
+包含¶
+
+The extends tag can be used to extend one template from another.
+include 语句用于包含一个模板，并在当前命名空间中返回那个文件的内容渲 染结果:
+
+See the section about Template Inheritance above.
+被包含的模板默认可以访问活动的上下文中的变量
+
+Included templates have access to the variables of the active context by default.
+你也可以提供一个模板列表，它会在包含前被检查是否存在
+
+For more details about context behavior of imports and includes, see Import Context Behavior.
+第一个存在的模板会 被包含进来
+
+From Jinja 2.2 onwards, you can mark an include with ignore missing;
+例子:
+
+New in version 2.2.
+Changed in version 2.4: 如果传递一个模板对象到模板上下文，你可以用 include 包含这个对 象
+
+Changed in version 2.4: If a template object was passed to the template context, you can include that object using include.
+Jinja2 支持在宏中放置经常使用的代码
+
+There are two ways to import templates.
+比如我们有一个渲染表单（名为 forms.html ）的助手模块:
+
+Imagine we have a helper module that renders forms (called forms.html):
+最简单灵活的方式是把整个模块导入为一个变量
+
+The easiest and most flexible way to access a template’s variables and macros is to import the whole template module into a variable.
+此外你也可以从模板中导入名称到当前的命名空间:
+
+Alternatively, you can import specific names from a template into the current namespace:
+名称以一个或更多下划线开始的宏和变量是私有的，不能被导入
+
+Macros and variables starting with one or more underscores are private and cannot be imported.
+Changed in version 2.4: 如果传递一个模板对象到模板上下文，从那个对象中导入
+
+By default, included templates are passed the current context and imported templates are not.
+默认下，每个包含的模板会被传递到当前上下文，而导入的模板不会
+
+The reason for this is that imports, unlike includes, are cached;
+这样做的原因 是导入量不会像包含量被缓存，因为导入量经常只作容纳宏的模块
+
+This behavior can be changed explicitly: by adding with context or without context to the import/include directive, the current context can be passed to the template and caching is disabled automatically.
+无论如何，这当然也可以显式地更改
+
+Here are two examples:
+这里有两个例子:
+
+Note
+提示
+
+In Jinja 2.0, the context that was passed to the included template did not include variables defined in the template.
+在 Jinja 2.0 中，被传递到被包含模板的上下文不包含模板中定义的变量
+
+As a matter of fact, this did not work:
+ 事实上，这不能工作:
+
+The included template render_box.html is not able to access box in Jinja 2.0.
+在 Jinja 2.0 中，被包含的模板 render_box.html 不能 访问 box 
+
+As of Jinja 2.1, render_box.html is able to do so.
+从 Jinja 2.1 开始， render_box.html 可以 这么做
+
+Expressions¶
+表达式¶
+
+Jinja allows basic expressions everywhere.
+Jinja 中到处都允许使用基本表达式
+
+These work very similarly to regular Python;
+这像常规的 Python 一样工作，即使你不用 Python 工作，你也会感受到其带来的便利
+
+Literals¶
+字面量¶
+
+The simplest form of expressions are literals.
+表达式最简单的形式就是字面量
+
+Literals are representations for Python objects such as strings and numbers.
+字面量表示诸如字符串和数值的 Python 对象
+
+The following literals exist:
+下面 的字面量是可用的:
+
+Everything between two brackets is a list.
+一对中括号括起来的东西是一个列表
+
+Lists are useful for storing sequential data to be iterated over.
+列表用于存储和迭代序列化的数据
+
+For example, you can easily create a list of links using lists and tuples for (and with) a for loop:
+例如 你可以容易地在 for 循环中用列表和元组创建一个链接的列表:
+
+Note
+提示
+
+The special constants true, false, and none are indeed lowercase.
+特殊常量 true 、 false 和 none 实际上是小写的
+
+Because that caused confusion in the past, (True used to expand to an undefined variable that was considered false), all three can now also be written in title case (True, False, and None).
+因为这在过去会导致 混淆，过去 True 扩展为一个被认为是 false 的未定义的变量
+
+However, for consistency, (all Jinja identifiers are lowercase) you should use the lowercase versions.
+所有的这三个 常量也可以被写成首字母大写（ True 、 False 和 None ）
+
+Math¶
+算术¶
+
+Jinja allows you to calculate with values.
+Jinja 允许你用计算值
+
+This is rarely useful in templates but exists for completeness’ sake.
+这在模板中很少用到，但是为了完整性允许其存在
+
+The following operators are supported:
+支持下面的 运算符:
+
+Comparisons¶
+比较¶
+
+Logic¶
+逻辑¶
+
+For if statements, for filtering, and if expressions, it can be useful to combine multiple expressions:
+对于 if 语句，在 for 过滤或 if 表达式中，它可以用于联合多个表达式:
+
+Note
+提示
+
+The is and in operators support negation using an infix notation, too: foo is not bar and foo not in bar instead of not foo is bar and not foo in bar.
+is 和 in 运算符同样支持使用中缀记法: foo is not bar 和 foo not in bar 而不是 not foo is bar 和 not foo in bar 
+
+All other expressions require a prefix notation: not (foo and bar).
+所有的 其它表达式需要前缀记法 not (foo and bar) 
+
+Other Operators¶
+其它运算符¶
+
+The following operators are very useful but don’t fit into any of the other two categories:
+下面的运算符非常有用，但不适用于其它的两个分类:
+
+Call a callable: {{ post.render() }}.
+同样，也可以使用内联的 if 表达式
+
+Inside of the parentheses you can use positional arguments and keyword arguments like in Python:
+这在某些情况很有用
+
+{{ post.render(user, full=true) }}.
+一般的语法是 <do something> if <something is true> else <do something else> 
+
+Get an attribute of an object.
+Get an attribute of an object. foo|attr("bar") works like foo["bar"] just that always an attribute is returned and items are not looked up.
+
+See Notes on subscriptions for more details.
+See Notes on subscriptions for more details.
+
+A filter that batches items.
+A filter that batches items. It works pretty much like slice just the other way round. It returns a list of lists with the given number of items. If you provide a second parameter this is used to fill up missing items. See this example:
+
+Capitalize a value.
+Capitalize a value. The first character will be uppercase, all others lowercase.
+
+Centers the value in a field of a given width.
+Centers the value in a field of a given width.
+
+If the value is undefined it will return the passed default value, otherwise the value of the variable:
+If the value is undefined it will return the passed default value, otherwise the value of the variable:
+
+This will output the value of my_variable if the variable was defined, otherwise 'my_variable is not defined'.
+This will output the value of my_variable if the variable was defined, otherwise 'my_variable is not defined'. If you want to use default with variables that evaluate to false you have to set the second parameter to true:
+
+Sort a dict and yield (key, value) pairs.
+Sort a dict and yield (key, value) pairs. Because python dicts are unsorted you may want to use this function to order them by either key or value:
+
+Convert the characters &, <, >, ‘, and ” in string s to HTML-safe sequences.
+Convert the characters &, <, >, ‘, and ” in string s to HTML-safe sequences. Use this if you need to display text that might contain such characters in HTML. Marks return value as markup string.
+
+Format the value like a ‘human-readable’ file size (i.e.
+Format the value like a ‘human-readable’ file size (i.e. 13 kB, 4.1 MB, 102 Bytes, etc). Per default decimal prefixes are used (Mega, Giga, etc.), if the second parameter is set to True the binary prefixes are used (Mebi, Gibi).
+
+Return the first item of a sequence.
+Return the first item of a sequence.
+
+Convert the value into a floating point number.
+Convert the value into a floating point number. If the conversion doesn’t work it will return 0.0. You can override this default using the first parameter.
+
+Enforce HTML escaping.
+Enforce HTML escaping. This will probably double escape variables.
+
+Apply python string formatting on an object:
+Apply python string formatting on an object:
+
+Group a sequence of objects by a common attribute.
+Group a sequence of objects by a common attribute.
+
+If you for example have a list of dicts or objects that represent persons with gender, first_name and last_name attributes and you want to group all users by genders you can do something like the following snippet:
+If you for example have a list of dicts or objects that represent persons with gender, first_name and last_name attributes and you want to group all users by genders you can do something like the following snippet:
+
+Additionally it’s possible to use tuple unpacking for the grouper and list:
+Additionally it’s possible to use tuple unpacking for the grouper and list:
+
+As you can see the item we’re grouping by is stored in the grouper attribute and the list contains all the objects that have this grouper in common.
+As you can see the item we’re grouping by is stored in the grouper attribute and the list contains all the objects that have this grouper in common.
+
+Changed in version 2.6: It’s now possible to use dotted notation to group by the child attribute of another attribute.
+Changed in version 2.6: It’s now possible to use dotted notation to group by the child attribute of another attribute.
+
+Return a copy of the passed string, each line indented by 4 spaces.
+Return a copy of the passed string, each line indented by 4 spaces. The first line is not indented. If you want to change the number of spaces or indent the first line too you can pass additional parameters to the filter:
+
+Convert the value into an integer.
+Convert the value into an integer. If the conversion doesn’t work it will return 0. You can override this default using the first parameter.
+
+Return a string which is the concatenation of the strings in the sequence.
+Return a string which is the concatenation of the strings in the sequence. The separator between elements is an empty string per default, you can define it with the optional parameter:
+
+It is also possible to join certain attributes of an object:
+It is also possible to join certain attributes of an object:
+
+New in version 2.6: The attribute parameter was added.
+New in version 2.6: The attribute parameter was added.
+
+Return the last item of a sequence.
+Return the last item of a sequence.
+
+Return the number of items of a sequence or mapping.
+Return the number of items of a sequence or mapping.
+
+Convert the value into a list.
+Convert the value into a list. If it was a string the returned list will be a list of characters.
+
+Convert a value to lowercase.
+Convert a value to lowercase.
+
+Applies a filter on a sequence of objects or looks up an attribute.
+Applies a filter on a sequence of objects or looks up an attribute. This is useful when dealing with lists of objects but you are really only interested in a certain value of it.
+
+The basic usage is mapping on an attribute.
+The basic usage is mapping on an attribute. Imagine you have a list of users but you are only interested in a list of usernames:
+
+Alternatively you can let it invoke a filter by passing the name of the filter and the arguments afterwards.
+Alternatively you can let it invoke a filter by passing the name of the filter and the arguments afterwards. A good example would be applying a text conversion filter on a sequence:
+
+New in version 2.7.
+New in version 2.7.
+
+Pretty print a variable.
+Pretty print a variable. Useful for debugging.
+
+With Jinja 1.2 onwards you can pass it a parameter.
+With Jinja 1.2 onwards you can pass it a parameter. If this parameter is truthy the output will be more verbose (this requires pretty)
+
+Return a random item from the sequence.
+Return a random item from the sequence.
+
+Filters a sequence of objects by applying a test to each object, and rejecting the objects with the test succeeding.
+Filters a sequence of objects by appying a test to either the object or the attribute and rejecting the ones with the test succeeding.
+
+If no test is specified, each object will be evaluated as a boolean.
+Example usage:
+
+Example usage:
+New in version 2.7.
+
+New in version 2.7.
+Filters a sequence of objects by appying a test to either the object or the attribute and rejecting the ones with the test succeeding.
+
+Filters a sequence of objects by applying a test to the specified attribute of each object, and rejecting the objects with the test succeeding.
+New in version 2.7.
+
+If no test is specified, the attribute’s value will be evaluated as a boolean.
+Return a copy of the value with all occurrences of a substring replaced with a new one. The first argument is the substring that should be replaced, the second is the replacement string. If the optional third argument count is given, only the first count occurrences are replaced:
+
+New in version 2.7.
+Reverse the object or return an iterator the iterates over it the other way round.
+
+Return a copy of the value with all occurrences of a substring replaced with a new one.
+Round the number to a given precision. The first parameter specifies the precision (default is 0), the second the rounding method:
+
+Reverse the object or return an iterator that iterates over it the other way round.
+If you don’t specify a method 'common' is used.
+
+Round the number to a given precision.
+Note that even if rounded to 0 precision, a float is returned. If you need a real integer, pipe it through int:
+
+If you don’t specify a method 'common' is used.
+Mark the value as safe which means that in an environment with automatic escaping enabled this variable will not be escaped.
+
+Note that even if rounded to 0 precision, a float is returned.
+Filters a sequence of objects by appying a test to either the object or the attribute and only selecting the ones with the test succeeding.
+
+Mark the value as safe which means that in an environment with automatic escaping enabled this variable will not be escaped.
+Example usage:
+
+Filters a sequence of objects by applying a test to each object, and only selecting the objects with the test succeeding.
+New in version 2.7.
+
+If no test is specified, each object will be evaluated as a boolean.
+Filters a sequence of objects by appying a test to either the object or the attribute and only selecting the ones with the test succeeding.
+
+Example usage:
+Example usage:
+
+New in version 2.7.
+New in version 2.7.
+
+Filters a sequence of objects by applying a test to the specified attribute of each object, and only selecting the objects with the test succeeding.
+Slice an iterator and return a list of lists containing those items. Useful if you want to create a div containing three ul tags that represent columns:
+
+If no test is specified, the attribute’s value will be evaluated as a boolean.
+If you pass it a second argument it’s used to fill missing values on the last iteration.
+
+Example usage:
+Sort an iterable. Per default it sorts ascending, if you pass it true as first argument it will reverse the sorting.
+
+New in version 2.7.
+If the iterable is made of strings the third parameter can be used to control the case sensitiveness of the comparison which is disabled by default.
+
+Slice an iterator and return a list of lists containing those items.
+It is also possible to sort by an attribute (for example to sort by the date of an object) by specifying the attribute parameter:
+
+If you pass it a second argument it’s used to fill missing values on the last iteration.
+Changed in version 2.6: The attribute parameter was added.
+
+Sort an iterable.
+Make a string unicode if it isn’t already. That way a markup string is not converted back to unicode.
+
+If the iterable is made of strings the third parameter can be used to control the case sensitiveness of the comparison which is disabled by default.
+Strip SGML/XML tags and replace adjacent whitespace by one space.
+
+It is also possible to sort by an attribute (for example to sort by the date of an object) by specifying the attribute parameter:
+Returns the sum of a sequence of numbers plus the value of parameter ‘start’ (which defaults to 0). When the sequence is empty it returns start.
+
+Changed in version 2.6: The attribute parameter was added.
+It is also possible to sum up only certain attributes:
+
+Make a string unicode if it isn’t already.
+Changed in version 2.6: The attribute parameter was added to allow suming up over attributes. Also the start parameter was moved on to the right.
+
+Strip SGML/XML tags and replace adjacent whitespace by one space.
+Return a titlecased version of the value. I.e. words will start with uppercase letters, all remaining characters are lowercase.
+
+Returns the sum of a sequence of numbers plus the value of parameter ‘start’ (which defaults to 0).
+Strip leading and trailing whitespace.
+
+It is also possible to sum up only certain attributes:
+Return a truncated copy of the string. The length is specified with the first parameter which defaults to 255. If the second parameter is true the filter will cut the text at length. Otherwise it will discard the last word. If the text was in fact truncated it will append an ellipsis sign ("..."). If you want a different ellipsis sign than "..." you can specify it using the third parameter.
+
+Changed in version 2.6: The attribute parameter was added to allow suming up over attributes.
+Convert a value to uppercase.
+
+Return a titlecased version of the value.
+Escape strings for use in URLs (uses UTF-8 encoding). It accepts both dictionaries and regular strings as well as pairwise iterables.
+
+Strip leading and trailing whitespace.
+New in version 2.7.
+
+Return a truncated copy of the string.
+Converts URLs in plain text into clickable links.
+
+Convert a value to uppercase.
+If you pass the filter an additional integer it will shorten the urls to that number. Also a third argument exists that makes the urls “nofollow”:
+
+Escape strings for use in URLs (uses UTF-8 encoding).
+Count the words in that string.
+
+New in version 2.7.
+Return a copy of the string passed to the filter wrapped after 79 characters. You can override this default using the first parameter. If you set the second parameter to false Jinja will not split words apart if they are longer than width. By default, the newlines will be the default newlines for the environment, but this can be changed using the wrapstring keyword argument.
+
+Converts URLs in plain text into clickable links.
+New in version 2.7: Added support for the wrapstring parameter.
+
+If you pass the filter an additional integer it will shorten the urls to that number.
+Create an SGML/XML attribute string based on the items in a dict. All values that are neither none nor undefined are automatically escaped:
+
+If target is specified, the target attribute will be added to the  tag:
+Results in something like this:
+
+Changed in version 2.8+: The target parameter was added.
+As you can see it automatically prepends a space in front of the item if the filter returned something unless the second parameter is false.
+
+New in version 2.7: Added support for the wrapstring parameter.
+Return whether the object is callable (i.e., some kind of function). Note that classes are callable, as are instances with a __call__() method.
+
+Create an SGML/XML attribute string based on the items in a dict.
+Return true if the variable is defined:
+
+Results in something like this:
+See the default() filter for a simple way to set undefined variables.
+
+As you can see it automatically prepends a space in front of the item if the filter returned something unless the second parameter is false.
+Check if a variable is divisible by a number.
+
+Return true if the variable is defined:
+Return true if the variable is even.
+
+See the default() filter for a simple way to set undefined variables.
+Check if it’s possible to iterate over an object.
+
+Check if a variable is divisible by a number.
+Return true if the variable is lowercased.
+
+Check if an object has the same value as another object:
+Return true if the object is a mapping (dict etc.).
+
+This appears to be a useless test as it does exactly the same as the == operator, but it can be useful when used together with the selectattr function:
+New in version 2.6.
+
+New in version 2.8.
+Return true if the variable is none.
+
+Check if the value is escaped.
+Return true if the variable is a number.
+
+Return true if the variable is even.
+Return true if the variable is odd.
+
+Check if it’s possible to iterate over an object.
+Check if an object points to the same memory address than another object:
+
+Return true if the variable is lowercased.
+Return true if the variable is a sequence. Sequences are variables that are iterable.
+
+Return true if the object is a mapping (dict etc.).
+Return true if the object is a string.
+
+New in version 2.6.
+Like defined() but the other way round.
+
+Return true if the variable is none.
+Return true if the variable is uppercased.
+
+Check if an object points to the same memory address than another object:
+默认下，下面的函数在全局作用域中可用:
+
+Return true if the variable is a sequence.
+返回一个包含整等差级数的列表
+
+Sequences are variables that are iterable.
+ range(i, j) 返回 [i, i+1, i+2, ...., j-1] 
+
+Return true if the object is a string.
+例如重复一个模板块多次来填充一个列表是有用的
+
+Like defined() but the other way round.
+在模板中生成 lorem ipsum 乱数假文
+
+Return true if the variable is uppercased.
+方便的字典字面量替代品
+
+Return a list containing an arithmetic progression of integers.
+比如如果你想要显示一个文件夹和文件列表，且文件夹在上，它们在同一个列表中且 行颜色是交替的
+
+This is useful to repeat a template block multiple times, e.g.
+下面的例子展示了如何使用周期计:
+
+Generates some lorem ipsum for the template.
+重置周期计到第一个项
+
+A convenient alternative to dict literals.
+返回当前项并跳转到下一个
+
+The cycler allows you to cycle among values similar to how loop.cycle works.
+返回当前项
+
+Unlike loop.cycle, you can use this cycler outside of loops or over multiple loops.
+.
+
+This can be very useful if you want to show a list of folders and files with the folders on top but both in the same list with alternating row colors.
+New in version 2.1.
+
+The following example shows how cycler can be used:
+一个小巧的辅助函数用于“连接”多个节
+
+A cycler has the following attributes and methods:
+New in version 2.1.
+
+Returns the current item.
+下面的几节涵盖了可能被应用启用的 Jinja2 内置的扩展
+
+new in Jinja 2.1
+如果启用来 i18n 扩展，可以把模板中的部分标记为可译的
+
+To translate a template expression — say, using template filters, or by just accessing an attribute of an object — you need to bind the expression to a name for use within the translation block:
+在翻译块中不允许使用语句，只能使用变量标签
+

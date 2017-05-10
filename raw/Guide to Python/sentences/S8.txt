@@ -1,0 +1,117 @@
+Documentation¶
+文档¶
+
+Readability is a primary focus for Python developers, in both project and code documentation.
+可读性是Python开发者需关注的重点，这包括项目和代码文档的可读性
+
+Following some simple best practices can save both you and others a lot of time.
+遵循一些 简单的最佳实践能够帮助你和其他人节省很多时间
+
+Project Documentation¶
+项目文档¶
+
+A README file at the root directory should give general information to both users and maintainers of a project.
+根目录下的 README 文件应该告诉用户和维护者关于项目的基本信息
+
+It should be raw text or written in some very easy to read markup, such as reStructuredText or Markdown.
+它应该是 原始文本，用一些非常容易阅读的标记，比如 reStructuredText 或 Markdown
+
+It should contain a few lines explaining the purpose of the project or library (without assuming the user knows anything about the project), the URL of the main source for the software, and some basic credit information.
+ 它应该包含几行内容用来解释项目或者库的目的（假设用户不用知道任何关于该项目的事）， 软件主要源的URL，以及一些基本的信用信息
+
+This file is the main entry point for readers of the code.
+此文件是代码阅读者的主要入口
+
+An INSTALL file is less necessary with Python.
+INSTALL 文件对Python来说并不必要
+
+The installation instructions are often reduced to one command, such as pip install module or python setup.py install and added to the README file.
+安装指令通常少至一条命令，比如说 pip install module 或 python setup.py install ，这被添加到 README 文件中
+
+A LICENSE file should always be present and specify the license under which the software is made available to the public.
+LICENSE 文件应该 总是 存在的，而且应该指定向公众开放的软件许可
+
+A TODO file or a TODO section in README should list the planned development for the code.
+TODO 文件或者位于 README 中的 TODO 区域应该列出代码的开发计划
+
+A CHANGELOG file or section in README should compile a short overview of the changes in the code base for the latest versions.
+CHANGELOG 文件或者位于 README 中的 CHANGELOG 区域应该呈现对 代码库的最新修改的简短概述
+
+Project Publication¶
+项目发布¶
+
+Depending on the project, your documentation might include some or all of the following components:
+根据项目，你的文档中可能包含下列部分或所有的内容：
+
+Sphinx is far and away the most popular Python documentation tool.
+Sphinx 无疑是最流行的Python文档工具
+
+Use it.
+请使用它吧
+
+It converts reStructuredText markup language into a range of output formats including HTML, LaTeX (for printable PDF versions), manual pages, and plain text.
+ 它能把 :ref:`restructuredtext-ref`标记语言转换为广泛的输出格式，包括HTML、LaTeX(可打印PDF版本)、手册页和纯文本
+
+There is also great, free hosting for your Sphinx docs: Read The Docs.
+Read The Docs 是一个 超棒的 并且 免费的 文档托管，可以托管你的 Sphinx 文档
+
+Use it.
+ 请使用它
+
+You can configure it with commit hooks to your source repository so that rebuilding your documentation will happen automatically.
+你可以为它配置提交钩子到你的源库中，这样文档的重新构建将会自动进行
+
+Note
+大多数Python文档是用 reStructuredText 编写的
+
+Sphinx is famous for its API generation, but it also works well for general project documentation.
+reStructuredText Primer 和 reStructuredText Quick Reference 应该会帮助 你熟悉它的语法
+
+In Python, docstrings describe modules, classes, and functions:
+在Python中， docstrings 用来描述模块、类和函数：
+
+In general, follow the comment section of PEP 8#comments (the “Python Style Guide”).
+一般来说，要遵循 PEP 8#comments （”Python风格指南”）的注释部分
+
+Do not use triple-quote strings to comment code.
+不要使用三引号去注释代码
+
+This is not a good practice, because line-oriented command-line tools such as grep will not be aware that the commented code is inactive.
+ 这不是好的实践，因为面向行的命令行工具， 比如说grep，不会知道注释过的代码是没有激活的
+
+It is better to add hashes at the proper indentation level for every commented line.
+对每一个注释行，使用带有 合适缩进的井号会更好
+
+Your editor probably has the ability to do this easily, and it is worth learning the comment/uncomment toggle.
+你的编辑器可能很容易做到这一点，并能切换注释/取消注释
+
+Some tools use docstrings to embed more-than-documentation behavior, such as unit test logic.
+一些工具使用文档字符串来嵌入超过文档（more-than-documentation）的行为， 比如说单元测试逻辑
+
+Those can be nice, but you won’t ever go wrong with vanilla “here’s what this does.”
+这些可能很好，但是简单地“保持文档就是文档”你永远都不会错
+
+These aren’t interchangeable.
+这些不可互换
+
+For a function or class, the leading comment block is a programmer’s note.
+对于函数或类，开头的注释区是程序员的注解
+
+The docstring describes the operation of the function or class:
+而文档字符串 描述了函数或类的 操作:
+
+Other Tools¶
+其他工具¶
+
+You might see these in the wild.
+你可能在其他场景看到过这些
+
+Use Sphinx.
+使用 Sphinx
+
+Follow @kennethreitz
+本指南目前持续不断地更新与完善
+
+Join Mailing List.
+获得新版本和未来项目的更新
+

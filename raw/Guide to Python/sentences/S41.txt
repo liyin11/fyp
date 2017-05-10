@@ -1,0 +1,90 @@
+The Guide Style Guide¶
+风格指南指引¶
+
+As with all documentation, having a consistent format helps make the document more understandable.
+所有文档都有一致的格式，以帮助更好地理解文档
+
+In order to make The Guide easier to digest, all contributions should fit within the rules of this style guide where appropriate.
+为了使指导更容易消化，所有贡献都应适应风格指南的规则
+
+The Guide is written as reStructuredText.
+本指南以 reStructuredText 形式编写
+
+Note
+尽量保持任何贡献与 本指南目的 相关
+
+Strive to keep any contributions relevant to the purpose of The Guide.
+使用下列风格作为标题
+
+Chapter title:
+页面标题：
+
+Page title:
+小节标题:
+
+Section headings:
+次小节标题:
+
+Wrap text lines at 78 characters.
+每78个字符进行文字换行
+
+Where necessary, lines may exceed 78 characters, especially if wrapping would make the source text more difficult to read.
+必要时可以超过78个字符，尤其是那种换行使得源内容更难阅读的情况
+
+Command line examples:
+命令行例子：
+
+Be sure to include the $ prefix before each line.
+确保每行前面包含了 $ 前缀
+
+Python interpreter examples:
+Python解释器例子：
+
+Python examples:
+Python 例子：
+
+Externally Linking¶
+外部链接¶
+
+Prefer labels for well known subjects (ex: proper nouns) when linking:
+链接时最好使用众所周知的主题（比如一些合适的名词）：
+
+Prefer to use descriptive labels with inline links instead of leaving bare links:
+最好使用带有内联链接的描述性标签，而不是单纯的链接:
+
+Avoid using labels such as “click here”, “this”, etc.
+避免使用诸如“点击这里”、“这个”等标签
+
+preferring descriptive labels (SEO worthy) instead.
+最好使用描述性标签（值得搜索引擎优化，SEO worthy）
+
+Linking to Sections in The Guide¶
+指向指南内部章节的链接¶
+
+To cross-reference other parts of this documentation, use the :ref: keyword and labels.
+要交叉引用本文档的其他部分，使用 :ref: 关键字和标签
+
+To make reference labels more clear and unique, always add a -ref suffix:
+要使引用标签更加清晰和独特，通常加上一个 -ref 后缀：
+
+Notes and Warnings¶
+注意和警告¶
+
+Make use of the appropriate admonitions directives when making notes.
+使用适当的 警告指示 来说明注意内容
+
+Notes:
+注意:
+
+Warnings:
+警告:
+
+TODOs¶
+要做的事¶
+
+Please mark any incomplete areas of The Guide with a todo directive.
+请用 todo 指示 来标记本指南中任何未完成的部分
+
+To avoid cluttering the Todo List, use a single todo for stub documents or large incomplete sections.
+避免使 要做的事 混乱，为未完的文档或者大量未完的小节使用单独的 todo
+

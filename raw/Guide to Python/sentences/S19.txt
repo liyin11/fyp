@@ -1,0 +1,42 @@
+Networking¶
+网络¶
+
+Twisted¶
+Twisted¶
+
+Twisted is an event-driven networking engine.
+Twisted 是一款基于事件驱动的网络引擎框架
+
+It can be used to build applications around many different networking protocols, including http servers and clients, applications using SMTP, POP3, IMAP or SSH protocols, instant messaging and much more.
+ 支持创建基于不同网络协议的应用，包括 http 服务器与客户端，SMTP 应用，POP3，IMAP 或 SSH 协议，即时通讯 等等
+
+PyZMQ¶
+PyZMQ¶
+
+PyZMQ is the Python binding for ZeroMQ, which is a high-performance asynchronous messaging library.
+PyZMQ 是 ZeroMQ 的 Python捆绑库 (binding)，ZeroMQ 是一款高效率的异步消息库，它的一个显著优点就是能 被用做消息队列且不需要消息代理
+
+One great advantage of ZeroMQ is that it can be used for message queuing without a message broker.
+基本模式包括：
+
+For a quick start, read the ZeroMQ guide.
+想要快速入门，阅读 ZeroMQ 指南.
+
+gevent¶
+gevent¶
+
+gevent is a coroutine-based Python networking library that uses greenlets to provide a high-level synchronous API on top of the libev event loop.
+gevent 是一款基于协程的Python 网络库，它使用 greenlets 提供在 libev 事件循环之上的高层次异步API
+
+Follow @kennethreitz
+本指南目前持续不断地更新与完善
+
+Join Mailing List.
+获得新版本和未来项目的更新
+
+This guide is now available for pre-order in tangible book form!
+订阅Newsletter
+
+All proceeds are being directly donated to the DjangoGirls organization.
+如果你享受这份指南,想要支持作者， 请戳Gittip
+

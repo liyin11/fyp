@@ -1,0 +1,489 @@
+4 More Control Flow Tools¶
+4. 深入 Python 流程控制¶
+
+Besides the while statement just introduced, Python knows the usual control flow statements known from other languages, with some twists.
+除了前面介绍的 while 语句，Python 还从其它语言借鉴了一些流程控制功能，并有所改变
+
+4.1 if Statements¶
+4.1. if 语句¶
+
+Perhaps the most well-known statement type is the if statement.
+也许最有名的是 if 语句
+
+For example:
+例如:
+
+There can be zero or more elif parts, and the else part is optional.
+可能会有零到多个 elif 部分，else 是可选的
+
+The keyword ‘elif‘ is short for ‘else if’, and is useful to avoid excessive indentation.
+关键字 elif 是 “else if” 的缩写，这个可以有效避免过深的缩进
+
+An if ...
+if ... elif ... elif ... 序列用于替代其它语言中的 switch 或 case 语句
+
+4.2 for Statements¶
+4.2. for 语句¶
+
+The for statement in Python differs a bit from what you may be used to in C or Pascal.
+Python 中的 for 语句和 C 或 Pascal 中的略有不同
+
+Rather than always iterating over an arithmetic progression of numbers (like in Pascal), or giving the user the ability to define both the iteration step and halting condition (as C), Python’s for statement iterates over the items of any sequence (a list or a string), in the order that they appear in the sequence.
+通常的循环可能会依据一个等差数值步进过程(如 Pascal)，或由用户来定义迭代步骤和中止条件(如 C )，Python 的 for 语句依据任意序列(链表或字符串)中的子项，按它们在序列中的顺序来进行迭代
+
+For example (no pun intended):
+例如(没有暗指):
+
+If you need to modify the sequence you are iterating over while inside the loop (for example to duplicate selected items), it is recommended that you first make a copy.
+在迭代过程中修改迭代序列不安全(只有在使用链表这样的可变序列时才会有这样的情况)
+
+Iterating over a sequence does not implicitly make a copy.
+如果你想要修改你迭代的序列(例如：复制选择项)，你可以迭代它的复本
+
+The slice notation makes this especially convenient:
+使用切割标识就可以很方便地做到这一点:
+
+4.3 The range() Function¶
+4.3. range() 函数¶
+
+If you do need to iterate over a sequence of numbers, the built-in function range() comes in handy.
+如果你需要一个数值序列，内置函数 range() 会很方便，它生成一个等差级数链表:
+
+The given end point is never part of the generated list;
+range(10) 生成了一个包含 10 个值的链表，它用链表的索引值填充了这个长度为 10 的列表，所生成的链表中不包括范围中的结束值
+
+range(10) generates a list of 10 values, the legal indices for items of a sequence of length 10.
+也可以让 range 操作从另一个数值开始，或者可以指定一个不同的步进值(甚至是负数，有时这也被称为 “步长”):
+
+To iterate over the indices of a sequence, you can combine range() and len() as follows:
+需要迭代链表索引的话，如下所示结合使用 range() 和 len():
+
+In most such cases, however, it is convenient to use the enumerate() function, see Looping Techniques.
+不过，这种场合可以方便地使用 enumerate()，请参见 循环技巧
+
+4.4 break and continue Statements, and else Clauses on Loops¶
+4.4. break 和 continue 语句, 以及循环中的 else 子句¶
+
+The break statement, like in C, breaks out of the smallest enclosing for or while loop.
+break 语句和 C 中的类似，用于跳出最近的一级 for 或 while 循环
+
+Loop statements may have an else clause;
+循环可以有一个 else 子句
+
+it is executed when the loop terminates through exhaustion of the list (with for) or when the condition becomes false (with while), but not when the loop is terminated by a break statement.
+它在循环迭代完整个列表 (对于 for) 后或执行条件为 false (对于 while) 时执行，但循环被 break 中止的情况下不会执行
+
+This is exemplified by the following loop, which searches for prime numbers:
+以下搜索素数的示例程序演示了这个子句:
+
+(Yes, this is the correct code.
+(Yes, 这是正确的代码
+
+Look closely: the else clause belongs to the for loop, not the if statement.)
+看仔细: else 语句是属于 for 循环之中, 不是 if 语句
+
+When used with a loop, the else clause has more in common with the else clause of a try statement than it does that of if statements: a try statement’s else clause runs when no exception occurs, and a loop’s else clause runs when no break occurs.
+与循环一起使用时，else 子句与 try 语句的 else 子句比与 if 语句的具有更多的共同点：try 语句的 else 子句在未出现异常时运行，循环的 else 子句在未出现 break 时运行
+
+For more on the try statement and exceptions, see Handling Exceptions.
+更多关于 try 语句和异常的内容，请参见 异常处理
+
+The continue statement, also borrowed from C, continues with the next iteration of the loop:
+continue 语句是从 C 中借鉴来的，它表示循环继续执行下一次迭代:
+
+4.5 pass Statements¶
+4.5. pass 语句¶
+
+The pass statement does nothing.
+pass 语句什么也不做
+
+It can be used when a statement is required syntactically but the program requires no action.
+它用于那些语法上必须要有什么语句，但程序什么也不做的场合，例如:
+
+This is commonly used for creating minimal classes:
+这通常用于创建最小结构的类:
+
+Another place pass can be used is as a place-holder for a function or conditional body when you are working on new code, allowing you to keep thinking at a more abstract level.
+另一方面，pass 可以在创建新代码时用来做函数或控制体的占位符
+
+The pass is silently ignored:
+可以让你在更抽象的级别上思考
+
+4.6 Defining Functions¶
+4.6. 定义函数¶
+
+We can create a function that writes the Fibonacci series to an arbitrary boundary:
+我们可以定义一个函数用来生成任意上界的菲波那契数列:
+
+The keyword def introduces a function definition.
+关键字 def 引入了一个函数 定义 
+
+It must be followed by the function name and the parenthesized list of formal parameters.
+在其后必须跟有函数名和包括形式参数的圆括号
+
+The statements that form the body of the function start at the next line, and must be indented.
+函数体语句从下一行开始，必须是缩进的
+
+The first statement of the function body can optionally be a string literal;
+函数体的第一行语句可以是可选的字符串文本，这个字符串是函数的文档字符串，或者称为 docstring 
+
+this string literal is the function’s documentation string, or docstring.
+(更多关于 docstrings 的信息请参考 文档字符串 ) 有些工具通过 docstrings 自动生成在线的或可打印的文档，或者让用户通过代码交互浏览
+
+(More about docstrings can be found in the section Documentation Strings.) There are tools which use docstrings to automatically produce online or printed documentation, or to let the user interactively browse through code;
+在你的代码中包含 docstrings 是一个好的实践，让它成为习惯吧
+
+The execution of a function introduces a new symbol table used for the local variables of the function.
+函数 调用 会为函数局部变量生成一个新的符号表
+
+More precisely, all variable assignments in a function store the value in the local symbol table;
+确切地说，所有函数中的变量赋值都是将值存储在局部符号表
+
+whereas variable references first look in the local symbol table, then in the local symbol tables of enclosing functions, then in the global symbol table, and finally in the table of built-in names.
+变量引用首先在局部符号表中查找，然后是包含函数的局部符号表，然后是全局符号表，最后是内置名字表
+
+Thus, global variables cannot be directly assigned a value within a function (unless named in a global statement), although they may be referenced.
+因此，全局变量不能在函数中直接赋值 (除非用 global 语句命名)，尽管他们可以被引用
+
+The actual parameters (arguments) to a function call are introduced in the local symbol table of the called function when it is called;
+函数引用的实际参数在函数调用时引入局部符号表，因此，实参总是 传值调用 (这里的 值 总是一个对象引用，而不是该对象的值)
+
+thus, arguments are passed using call by value (where the value is always an object reference, not the value of the object).
+[1] 一个函数被另一个函数调用时，一个新的局部符号表在调用过程中被创建
+
+A function definition introduces the function name in the current symbol table.
+一个函数定义会在当前符号表内引入函数名
+
+The value of the function name has a type that is recognized by the interpreter as a user-defined function.
+函数名指代的值(即函数体)存在一个被 Python 解释器认定为 用户自定义函数 的类型
+
+This value can be assigned to another name which can then also be used as a function.
+这个值可以赋予其他的名字(即变量名)，然后它也可以被当做函数使用
+
+This serves as a general renaming mechanism:
+这可以作为通用的重命名机制:
+
+Coming from other languages, you might object that fib is not a function but a procedure since it doesn’t return a value.
+如果你使用过其他语言，你可能会反对说：fib 不是一个函数，而是一个方法，因为它并不返回任何值
+
+In fact, even functions without a return statement do return a value, albeit a rather boring one.
+事实上，没有 return 语句的函数确实会返回一个值，虽然是一个相当令人厌烦的值(指 None )
+
+This value is called None (it’s a built-in name).
+这个值被称为 None (这是一个内建名称)
+
+Writing the value None is normally suppressed by the interpreter if it would be the only value written.
+如果 None 值是唯一被书写的值，那么在写的时候通常会被解释器忽略(即不输出任何内容)
+
+You can see it if you really want to using print:
+如果你确实想看到这个值的输出内容，请使用 print:
+
+It is simple to write a function that returns a list of the numbers of the Fibonacci series, instead of printing it:
+以下示例演示了如何从函数中返回一个包含菲波那契数列的数值链表，而不是打印它:
+
+This example, as usual, demonstrates some new Python features:
+和以前一样，这个例子演示了一些新的 Python 功能：
+
+The return statement returns with a value from a function.
+return 语句从函数中返回一个值
+
+return without an expression argument returns None.
+不带表达式的 return 返回 None 
+
+Falling off the end of a function also returns None.
+过程结束后也会返回 None 
+
+The statement result.append(a) calls a method of the list object result.
+语句 result.append(b) 称为链表对象 result 的一个 方法 (method)
+
+A method is a function that ‘belongs’ to an object and is named obj.methodname, where obj is some object (this may be an expression), and methodname is the name of a method that is defined by the object’s type.
+方法是一个“属于”某个对象的函数，它被命名为 obj.methodename，这里的 obj 是某个对象(可能是一个表达式)，methodename 是某个在该对象类型定义中的方法的命名
+
+Different types define different methods.
+不同的类型定义不同的方法
+
+Methods of different types may have the same name without causing ambiguity.
+不同类型可能有同样名字的方法，但不会混淆(当你定义自己的对象类型和方法时，可能会出现这种情况，class 的定义方法详见 类 )
+
+(It is possible to define your own object types and methods, using classes, see Classes) The method append() shown in the example is defined for list objects;
+示例中演示的 append() 方法由链表对象定义，它向链表中加入一个新元素
+
+it adds a new element at the end of the list.
+在示例中它等同于 result = result + [b] ，不过效率更高
+
+4.7 More on Defining Functions¶
+4.7. 深入 Python 函数定义¶
+
+It is also possible to define functions with a variable number of arguments.
+在 Python 中，你也可以定义包含若干参数的函数
+
+There are three forms, which can be combined.
+这里有三种可用的形式，也可以混合使用
+
+4.7.1 Default Argument Values¶
+4.7.1. 默认参数值¶
+
+The most useful form is to specify a default value for one or more arguments.
+最常用的一种形式是为一个或多个参数指定默认值
+
+This creates a function that can be called with fewer arguments than it is defined to allow.
+这会创建一个可以使用比定义时允许的参数更少的参数调用的函数，例如:
+
+This function can be called in several ways:
+这个函数可以通过几种不同的方式调用：
+
+giving only the mandatory argument: ask_ok('Do you really want to quit?')
+只给出必要的参数: ask_ok('Do you really want to quit
+
+giving one of the optional arguments: ask_ok('OK to overwrite the file?', 2)
+给出一个可选的参数: ask_ok('OK to overwrite the file
+
+or even giving all arguments: ask_ok('OK to overwrite the file?', 2, 'Come on, only yes or no!')
+或者给出所有的参数: ask_ok('OK to overwrite the file
+
+This example also introduces the in keyword.
+这个例子还介绍了 in 关键字
+
+This tests whether or not a sequence contains a certain value.
+它测定序列中是否包含某个确定的值
+
+The default values are evaluated at the point of function definition in the defining scope, so that
+默认值在函数 定义 作用域被解析，如下所示:
+
+will print 5.
+将会输出 5
+
+Important warning: The default value is evaluated only once.
+重要警告: 默认值只被赋值一次
+
+This makes a difference when the default is a mutable object such as a list, dictionary, or instances of most classes.
+这使得当默认值是可变对象时会有所不同，比如列表、字典或者大多数类的实例
+
+For example, the following function accumulates the arguments passed to it on subsequent calls:
+例如，下面的函数在后续调用过程中会累积(前面)传给它的参数:
+
+This will print
+这将会打印:
+
+If you don’t want the default to be shared between subsequent calls, you can write the function like this instead:
+如果你不想在随后的调用中共享默认值，可以像这样写函数:
+
+4.7.2 Keyword Arguments¶
+4.7.2. 关键字参数¶
+
+Functions can also be called using keyword arguments of the form kwarg=value.
+函数可以通过 关键字参数 的形式来调用，形如 keyword = value
+
+For instance, the following function:
+例如，以下的函数:
+
+accepts one required argument (voltage) and three optional arguments (state, action, and type).
+接受一个必选参数( voltage )以及三个可选参数( state, action, 和 type )
+
+This function can be called in any of the following ways:
+可以用以下的任一方法调用:
+
+but all the following calls would be invalid:
+不过以下几种调用是无效的:
+
+In a function call, keyword arguments must follow positional arguments.
+在函数调用中，关键字的参数必须跟随在位置参数的后面
+
+All the keyword arguments passed must match one of the arguments accepted by the function (e.g.
+传递的所有关键字参数必须与函数接受的某个参数相匹配（例如 actor 不是 parrot 函数的有效参数），它们的顺序并不重要
+
+actor is not a valid argument for the parrot function), and their order is not important.
+这也包括非可选参数（例如 parrot(voltage=1000) 也是有效的）
+
+This also includes non-optional arguments (e.g.
+任何参数都不可以多次赋值
+
+parrot(voltage=1000) is valid too).
+下面的示例由于这种限制将失败:
+
+When a final formal parameter of the form **name is present, it receives a dictionary (see Mapping Types — dict) containing all keyword arguments except for those corresponding to a formal parameter.
+引入一个形如 **name 的参数时，它接收一个字典(参见 Mapping Types — dict )，该字典包含了所有未出现在形式参数列表中的关键字参数
+
+This may be combined with a formal parameter of the form *name (described in the next subsection) which receives a tuple containing the positional arguments beyond the formal parameter list.
+这里可能还会组合使用一个形如 *name (下一小节详细介绍)的形式参数，它接收一个元组(下一节中会详细介绍)，包含了所有没有出现在形式参数列表中的参数值
+
+(*name must occur before **name.) For example, if we define a function like this:
+( *name 必须在 **name 之前出现)例如，我们这样定义一个函数:
+
+It could be called like this:
+它可以像这样调用:
+
+and of course it would print:
+当然它会按如下内容打印:
+
+Note that the list of keyword argument names is created by sorting the result of the keywords dictionary’s keys() method before printing its contents;
+注意在打印关键字参数之前，通过对关键字字典 keys() 方法的结果进行排序，生成了关键字参数名的列表
+
+if this is not done, the order in which the arguments are printed is undefined.
+如果不这样做，打印出来的参数的顺序是未定义的
+
+4.7.3 Arbitrary Argument Lists¶
+4.7.3. 可变参数列表¶
+
+Finally, the least frequently used option is to specify that a function can be called with an arbitrary number of arguments.
+最后，一个最不常用的选择是可以让函数调用可变个数的参数
+
+These arguments will be wrapped up in a tuple (see Tuples and Sequences).
+这些参数被包装进一个元组(参见 元组和序列 )
+
+Before the variable number of arguments, zero or more normal arguments may occur.
+在这些可变个数的参数之前，可以有零到多个普通的参数:
+
+4.7.4 Unpacking Argument Lists¶
+4.7.4. 参数列表的分拆¶
+
+The reverse situation occurs when the arguments are already in a list or tuple but need to be unpacked for a function call requiring separate positional arguments.
+另有一种相反的情况: 当你要传递的参数已经是一个列表，但要调用的函数却接受分开一个个的参数值
+
+For instance, the built-in range() function expects separate start and stop arguments.
+这时候你要把已有的列表拆开来
+
+If they are not available separately, write the function call with the *-operator to unpack the arguments out of a list or tuple:
+例如内建函数 range() 需要独立的 start ，stop 参数
+
+In the same fashion, dictionaries can deliver keyword arguments with the **-operator:
+以同样的方式，可以使用 ** 操作符分拆关键字参数为字典:
+
+4.7.5 Lambda Expressions¶
+4.7.5. Lambda 形式¶
+
+Small anonymous functions can be created with the lambda keyword.
+出于实际需要，有几种通常在函数式编程语言例如 Lisp 中出现的功能加入到了 Python 中
+
+This function returns the sum of its two arguments: lambda a, b: a+b.
+通过 lambda 关键字，可以创建短小的匿名函数
+
+Lambda functions can be used wherever function objects are required.
+这里有一个函数返回它的两个参数的和：lambda a, b: a+b
+
+They are syntactically restricted to a single expression.
+Lambda 形式可以用于任何需要的函数对象
+
+Semantically, they are just syntactic sugar for a normal function definition.
+出于语法限制，它们只能有一个单独的表达式
+
+Like nested function definitions, lambda functions can reference variables from the containing scope:
+语义上讲，它们只是普通函数定义中的一个语法技巧
+
+The above example uses a lambda expression to return a function.
+上面的示例使用 lambda 表达式返回一个函数
+
+Another use is to pass a small function as an argument:
+另一个用途是将一个小函数作为参数传递:
+
+4.7.6 Documentation Strings¶
+4.7.6. 文档字符串¶
+
+There are emerging conventions about the content and formatting of documentation strings.
+这里介绍的文档字符串的概念和格式
+
+The first line should always be a short, concise summary of the object’s purpose.
+第一行应该是关于对象用途的简介
+
+For brevity, it should not explicitly state the object’s name or type, since these are available by other means (except if the name happens to be a verb describing a function’s operation).
+简短起见，不用明确的陈述对象名或类型，因为它们可以从别的途径了解到(除非这个名字碰巧就是描述这个函数操作的动词)
+
+This line should begin with a capital letter and end with a period.
+这一行应该以大写字母开头，以句号结尾
+
+If there are more lines in the documentation string, the second line should be blank, visually separating the summary from the rest of the description.
+如果文档字符串有多行，第二行应该空出来，与接下来的详细描述明确分隔
+
+The following lines should be one or more paragraphs describing the object’s calling conventions, its side effects, etc.
+接下来的文档应该有一或多段描述对象的调用约定、边界效应等
+
+The Python parser does not strip indentation from multi-line string literals in Python, so tools that process documentation have to strip indentation if desired.
+Python 的解释器不会从多行的文档字符串中去除缩进，所以必要的时候应当自己清除缩进
+
+This is done using the following convention.
+这符合通常的习惯
+
+The first non-blank line after the first line of the string determines the amount of indentation for the entire documentation string.
+第一行之后的第一个非空行决定了整个文档的缩进格式
+
+(We can’t use the first line since it is generally adjacent to the string’s opening quotes so its indentation is not apparent in the string literal.) Whitespace “equivalent” to this indentation is then stripped from the start of all lines of the string.
+(我们不用第一行是因为它通常紧靠着起始的引号，缩进格式显示的不清楚)留白”相当于”是字符串的起始缩进
+
+Lines that are indented less should not occur, but if they occur all their leading whitespace should be stripped.
+每一行都不应该有缩进，如果有缩进的话，所有的留白都应该清除掉
+
+Equivalence of whitespace should be tested after expansion of tabs (to 8 spaces, normally).
+留白的长度应当等于扩展制表符的宽度(通常是8个空格)
+
+Here is an example of a multi-line docstring:
+以下是一个多行文档字符串的示例:
+
+4.8.
+4.8. 插曲：编码风格¶
+
+Now that you are about to write longer, more complex pieces of Python, it is a good time to talk about coding style.
+此时你已经可以写一个更长更复杂的 Python 程序，是时候讨论一下 编码风格 了
+
+Most languages can be written (or more concise, formatted) in different styles;
+大多数语言可以写 (或者更明白地说，格式化 ) 作几种不同的风格
+
+some are more readable than others.
+有些比其它的更好读
+
+Making it easy for others to read your code is always a good idea, and adopting a nice coding style helps tremendously for that.
+让你的代码对别人更易读是个好想法，养成良好的编码风格对此很有帮助
+
+For Python, PEP 8 has emerged as the style guide that most projects adhere to;
+对于 Python， PEP 8 引入了大多数项目遵循的风格指导
+
+it promotes a very readable and eye-pleasing coding style.
+它给出了一个高度可读，视觉友好的编码风格
+
+Every Python developer should read it at some point;
+每个 Python 开发者都应该读一下，大多数要点都会对你有帮助：
+
+Use 4-space indentation, and no tabs.
+使用 4 空格缩进，而非 TAB
+
+4 spaces are a good compromise between small indentation (allows greater nesting depth) and large indentation (easier to read).
+在小缩进(可以嵌套更深)和大缩进(更易读)之间，4 空格是一个很好的折中
+
+Tabs introduce confusion, and are best left out.
+TAB 引发了一些混乱，最好弃用
+
+Wrap lines so that they don’t exceed 79 characters.
+折行以确保其不会超过 79 个字符
+
+This helps users with small displays and makes it possible to have several code files side-by-side on larger displays.
+这有助于小显示器用户阅读，也可以让大显示器能并排显示几个代码文件
+
+Use blank lines to separate functions and classes, and larger blocks of code inside functions.
+使用空行分隔函数和类，以及函数中的大块代码
+
+When possible, put comments on a line of their own.
+可能的话，注释独占一行
+
+Use docstrings.
+使用文档字符串
+
+Use spaces around operators and after commas, but not directly inside bracketing constructs: a = f(1, 2) + g(3, 4).
+把空格放到操作符两边，以及逗号后面，但是括号里侧不加空格：a = f(1, 2) + g(3, 4)
+
+Name your classes and functions consistently.
+统一函数和类命名
+
+The convention is to use CamelCase for classes and lower_case_with_underscores for functions and methods.
+推荐类名用 驼峰命名，函数和方法名用 小写_和_下划线
+
+Always use self as the name for the first method argument (see A First Look at Classes for more on classes and methods).
+总是用 self 作为方法的第一个参数(关于类和方法的知识详见 初识类)
+
+Don’t use fancy encodings if your code is meant to be used in international environments.
+不要使用花哨的编码，如果你的代码的目的是要在国际化 环境
+
+Plain ASCII works best in any case.
+Python 的默认情况下，UTF-8，甚至普通的 ASCII 总是工作的最好
+
+Footnotes
+Footnotes
+

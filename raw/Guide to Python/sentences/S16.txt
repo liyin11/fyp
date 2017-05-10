@@ -1,0 +1,69 @@
+Command-line Applications¶
+命令行应用¶
+
+Command-line applications, also referred to as Console Applications, are computer programs designed to be used from a text interface, such as a shell.
+命令行应用，也被称为 控制台应用 是面向如 shell 之类文本接口的计算机程序
+
+Command-line applications usually accept various inputs as arguments, often referred to as parameters or sub-commands, as well as options, often referred to as flags or switches.
+ 命令行应用通常接收一些输入作为参数，这些参数（arguments）通常被称为参数（parameters）或子命令 ，而选项（options）则被称为flags或switches
+
+Some popular command-line applications include:
+一些流行的命令行应用包括：
+
+Clint¶
+Clint¶
+
+clint is a Python module which is filled with very useful tools for developing command-line applications.
+clint 是一个Python模块，它包含了很多 对命令行应用开发有用的工具
+
+It supports features such as;
+它支持诸如CLI着色以及缩进，简洁而强大的列打印， 基于进度条的迭代以及参数控制的特性
+
+Click¶
+Click¶
+
+click is an upcoming Python package for creating command-line interfaces in a composable way with as little code as possible.
+click 是一个即将出品的Python包，它创建了一个命令行接口， 可以尽可能的简化组合代码
+
+This “Command-line Interface Creation Kit” is highly configurable but comes with good defaults out of the box.
+命令行接口创建工具（“Command-line Interface Creation Kit”,Click） 支持很多配置但也有开箱可用的默认值设定
+
+docopt¶
+docopt¶
+
+docopt is a lightweight, highly Pythonic package that allows creating command-line interfaces easily and intuitively, by parsing POSIX-style usage instructions.
+docopt 是一个轻量级，高度Pythonic风格的包，它支持 简单而直觉地创建命令行接口，它是通过解析POSIX-style的用法指示文本实现的
+
+Plac¶
+Plac¶
+
+Plac is a simple wrapper over the Python standard library argparse, which hides most of its complexity by using a declarative interface: the argument parser is inferred rather than written down by imperatively.
+Plac Python标准库 argparse 的简单封装，它隐藏了大量声明接口的细节：参数解析器是被推断的，其优于写命令明确处理
+
+This module targets especially unsophisticated users, programmers, sys-admins, scientists and in general people writing throw-away scripts for themselves, who choose to create a command-line interface because it is quick and simple.
+ 这个模块的面向是不想太复杂的用户，程序员，系统管理员，科学家以及只是想 写个只运行一次的脚本的人们，使用这个命令行接口的理由是它可以快速实现并且简单
+
+Cliff¶
+Cliff¶
+
+Cliff is a framework for building command-line programs.
+Cliff 是一个建立命令行程序的框架
+
+It uses setuptools entry points to provide subcommands, output formatters, and other extensions.
+ 它使用setuptools入口点（entry points）来提供子命令，输出格式化，以及其他的扩展
+
+The framework is meant to be used to create multi-level commands such as subversion and git, where the main program handles some basic argument parsing and then invokes a sub-command to do the work.
+这个框架 可以用来创建多层命令程序，如subversion与git，其主程序要进行一些简单的参数解析然后调用 一个子命令干活
+
+Follow @kennethreitz
+本指南目前持续不断地更新与完善
+
+Join Mailing List.
+获得新版本和未来项目的更新
+
+This guide is now available for pre-order in tangible book form!
+订阅Newsletter
+
+All proceeds are being directly donated to the DjangoGirls organization.
+如果你享受这份指南,想要支持作者， 请戳Gittip
+

@@ -1,0 +1,111 @@
+Contribute¶
+贡献¶
+
+Python-guide is under active development, and contributors are welcome.
+Python-guide目前还在开发中，欢迎大家贡献代码
+
+If you have a feature request, suggestion, or bug report, please open a new issue on GitHub.
+如果你有feature request，修改建议，或者bug报告，请在 GitHub 上新建issue
+
+To submit patches, please send a pull request on GitHub.
+如果想要提交补丁，请直接pull request到 GitHub
+
+Once your changes get merged back in, you’ll automatically be added to the Contributors List.
+ 一旦你的修改被merge，你会被自动添加到 贡献者一览 中
+
+Style Guide¶
+风格指南¶
+
+For all contributions, please follow the The Guide Style Guide.
+请戳这里 风格指南指引.
+
+Todo List¶
+要做的事¶
+
+If you’d like to contribute, there’s plenty to do.
+如果你想为我们做些贡献，这里有我们的计划
+
+Here’s a short todo list.
+一个简短的 todo 列表
+
+Todo
+待处理
+
+Write about Blueprint
+Write about Blueprint
+
+(The original entry is located in /home/docs/checkouts/readthedocs.org/user_builds/python-guide/checkouts/latest/docs/scenarios/admin.rst, line 369.)
+(原始记录 见 /home/docs/checkouts/readthedocs.org/user_builds/pythonguidecn/checkouts/latest/docs/scenarios/admin.rst，第 303 行)
+
+Todo
+待处理
+
+Write about Numba and the autojit compiler for NumPy
+Write about Numba and the autojit compiler for NumPy
+
+(The original entry is located in /home/docs/checkouts/readthedocs.org/user_builds/python-guide/checkouts/latest/docs/scenarios/speed.rst, line 227.)
+(原始记录 见 /home/docs/checkouts/readthedocs.org/user_builds/pythonguidecn/checkouts/latest/docs/scenarios/speed.rst，第 215 行)
+
+Todo
+待处理
+
+Fill in “Freezing Your Code” stub
+完善 “冻结你的代码” 部分（stub）
+
+(The original entry is located in /home/docs/checkouts/readthedocs.org/user_builds/python-guide/checkouts/latest/docs/shipping/freezing.rst, line 37.)
+(原始记录 见 /home/docs/checkouts/readthedocs.org/user_builds/pythonguidecn/checkouts/latest/docs/shipping/freezing.rst，第 27 行)
+
+Todo
+待处理
+
+Write steps for most basic .exe
+补充更多简单的生成 .exe的步骤
+
+(The original entry is located in /home/docs/checkouts/readthedocs.org/user_builds/python-guide/checkouts/latest/docs/shipping/freezing.rst, line 73.)
+(原始记录 见 /home/docs/checkouts/readthedocs.org/user_builds/pythonguidecn/checkouts/latest/docs/shipping/freezing.rst，第 62 行)
+
+Todo
+待处理
+
+Include code examples of exemplary code from each of the projects listed.
+内嵌和解释Python代码阅读的YouTube视频：http://www.youtube.com/watch
+
+Explain why it is excellent code.
+v=Jc8M9-LoEuo 这可能要求安装插件Sphinx
+
+Use complex examples.
+https://bitbucket.org/birkenfeld/sphinx-contrib/src/a09f29fc16970f34350ca36ac7f229e00b1b1674/youtube
+
+(The original entry is located in /home/docs/checkouts/readthedocs.org/user_builds/python-guide/checkouts/latest/docs/writing/reading.rst, line 57.)
+(原始记录 见 /home/docs/checkouts/readthedocs.org/user_builds/pythonguidecn/checkouts/latest/docs/writing/reading.rst，第 36 行)
+
+Todo
+待处理
+
+Explain techniques to rapidly identify data structures, algorithms and determine what the code is doing.
+包括每个列出项目中典型代码的例子
+
+(The original entry is located in /home/docs/checkouts/readthedocs.org/user_builds/python-guide/checkouts/latest/docs/writing/reading.rst, line 59.)
+(原始记录 见 /home/docs/checkouts/readthedocs.org/user_builds/pythonguidecn/checkouts/latest/docs/writing/reading.rst，第 38 行)
+
+This opinionated guide exists to provide both novice and expert Python developers a best practice handbook to the installation, configuration, and usage of Python on a daily basis.
+待处理
+
+Receive updates on new releases and upcoming projects.
+解释快速识别数据结构，算法，并确定代码内容的技术
+
+Follow @kennethreitz
+(原始记录 见 /home/docs/checkouts/readthedocs.org/user_builds/pythonguidecn/checkouts/latest/docs/writing/reading.rst，第 40 行)
+
+This guide is now available for pre-order in tangible book form!
+获得新版本和未来项目的更新
+
+All proceeds are being directly donated to the DjangoGirls organization.
+订阅Newsletter
+
+More Kenneth Reitz projects:
+如果你享受这份指南,想要支持作者， 请戳Gittip
+
+Enter search terms or a module, class or function name.
+输入相关的术语，模块，类或者函数名称进行搜索
+

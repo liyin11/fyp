@@ -1,0 +1,72 @@
+Installing Python on Mac OS X¶
+在Mac OS X上安装Python¶
+
+The latest version of Mac OS X, El Capitan, comes with Python 2.7 out of the box.
+最新版本的Mac OX X, E1 Captian上 自带 Python 2.7
+
+You do not need to install or configure anything else to use Python.
+你不必安装和配置即可直接使用Python进行开发
+
+Having said that, I would strongly recommend that you install the tools and libraries described in the next section before you start building Python applications for real-world use.
+ 话虽如此，我还是强烈建议各位，在正式开始Python应用开发前，安装接下来教程中所介绍的工具和库
+
+In particular, you should always install Setuptools, as it makes it much easier for you to use other third-party Python libraries.
+ 特别应该安装Setuptools——它将简化安装和使用Python第三方库的流程
+
+The version of Python that ships with OS X is great for learning but it’s not good for development.
+OS X自带的Python版本更适合用于学习而不是开发
+
+The version shipped with OS X may be out of date from the official current Python release, which is considered the stable production version.
+因为版本与Python官网发布的 官方最新稳定版本 相比可能已经过时
+
+Doing it Right¶
+现在就开始吧
+
+Let’s install a real version of Python.
+跟着我一起安装合适的Python吧
+
+Before installing Python, you’ll need to install GCC.
+在正式安装之前，应先安装GCC
+
+GCC can be obtained by downloading Xcode, the smaller Command Line Tools (must have an Apple account) or the even smaller OSX-GCC-Installer package.
+GCC的获取方式包括：下载安装 XCode, 或安装小巧一些的 Command Line Tools (需要一个Apple账号) 或者更轻巧的 OSX-GCC-Installer 
+
+Note
+尽管OS X系统附带了大量UNIX工具，熟悉Linux系统的人员使用时会发现缺少一个重要的组件——合适的包管理工具， Homebrew 正好填补了这个空缺
+
+If you already have Xcode installed, do not install OSX-GCC-Installer.
+安装 Homebrew 只需打开 终端 或个人常用的终端模拟器并运行：
+
+Note
+运行这段脚本将列出它会引起的改变，并在安装开始前提示你
+
+If you perform a fresh install of Xcode, you will also need to add the commandline tools by running xcode-select --install on the terminal.
+接下来可以开始安装Python 2.7：
+
+While OS X comes with a large number of UNIX utilities, those familiar with Linux systems will notice one key component missing: a decent package manager.
+耗时大概几分钟
+
+Now, we can install Python 2.7:
+Homebrew会自动安装好Setuptools和 pip 
+
+This will take a minute or two.
+pip 是一款方便安装和管理Python 包的工具， 在 一些方面 ， 它更优于 easy_install ，故更推荐它
+
+Setuptools & Pip¶
+虚拟环境(Virtual Environment)¶
+
+Homebrew installs Setuptools and pip for you.
+虚拟环境工具(virturalenv)通过为不同项目创建专属的Python虚拟环境，以实现其依赖的库独立保存在不同的路径
+
+Setuptools enables you to download and install any compliant Python software over a network (usually the Internet) with a single command (easy_install).
+举个例子，通过这个工具可以实现依赖Django 1.3的项目与依赖Django 1.0的项目共存
+
+pip is a tool for easily installing and managing Python packages, that is recommended over easy_install.
+进一步了解与使用请参考文档 Virtual Environments 
+
+This page is a remixed version of another guide, which is available under the same license.
+本指南目前持续不断地更新与完善
+
+This opinionated guide exists to provide both novice and expert Python developers a best practice handbook to the installation, configuration, and usage of Python on a daily basis.
+获得新版本和未来项目的更新
+

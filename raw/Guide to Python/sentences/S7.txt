@@ -1,0 +1,60 @@
+Reading Great Code¶
+阅读好的代码¶
+
+One of the core tenets behind the design of Python is creating readable code.
+设计Python的核心理念是创建可读性代码
+
+The motivation behind this design is simple: The number one thing that Python programmers do is read code.
+这种设计的目的非常简单：Python编写者的首要事情是阅读好的代码
+
+One of the secrets of becoming a great Python programmer is to read, understand, and comprehend excellent code.
+成为优秀Python编写者的秘诀是去阅读，理解和领会好的代码
+
+Excellent code typically follows the guidelines outlined in Code Style, and does its best to express a clear and concise intent to the reader.
+良好的代码需要遵循 代码风格 中概述的指南,尽可能向读者表述简洁清楚
+
+Included below is a list of recommended Python projects for reading.
+以下是推荐阅读的Python项目
+
+Each one of these projects is a paragon of Python coding.
+每个项目都是Python代码的典范
+
+Todo
+待处理
+
+Include code examples of exemplary code from each of the projects listed.
+内嵌和解释Python代码阅读的YouTube视频：http://www.youtube.com/watch
+
+Explain why it is excellent code.
+v=Jc8M9-LoEuo 这可能要求安装插件Sphinx
+
+Use complex examples.
+https://bitbucket.org/birkenfeld/sphinx-contrib/src/a09f29fc16970f34350ca36ac7f229e00b1b1674/youtube
+
+Todo
+待处理
+
+Explain techniques to rapidly identify data structures, algorithms and determine what the code is doing.
+包括每个列出项目中典型代码的例子
+
+This opinionated guide exists to provide both novice and expert Python developers a best practice handbook to the installation, configuration, and usage of Python on a daily basis.
+待处理
+
+Receive updates on new releases and upcoming projects.
+解释快速识别数据结构，算法，并确定代码内容的技术
+
+Join Mailing List.
+本指南目前持续不断地更新与完善
+
+This guide is now available for pre-order in tangible book form!
+获得新版本和未来项目的更新
+
+All proceeds are being directly donated to the DjangoGirls organization.
+订阅Newsletter
+
+More Kenneth Reitz projects:
+如果你享受这份指南,想要支持作者， 请戳Gittip
+
+Enter search terms or a module, class or function name.
+输入相关的术语，模块，类或者函数名称进行搜索
+

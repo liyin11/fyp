@@ -1,0 +1,27 @@
+Navigation
+Navigation
+
+Jinja2 supports dynamic inheritance and does not distinguish between parent and child template as long as no extends tag is visited.
+通常，继承一个模板的子模板来添加基本的 HTML 骨架
+
+While this leads to the surprising behavior that everything before the first extends tag including whitespace is printed out instead of being ignored, it can be used for a neat trick.
+而把 extends 标签放在 if 标签中，当 standalone 变量值为 false 时（按照默认未定义也为 false ）继 承布局模板是可行的
+
+If you want to have different styles for each row of a table or list you can use the cycle method on the loop object:
+cycle 可接受无限数目的字符串
+
+Often you want to have a navigation bar with an active navigation item.
+布局模板之后就可以访问 active_page 
+
+This is really simple to achieve.
+此外，这意味着你可以为它定义默认 值:
+
+Table Of Contents
+Related Topics
+
+Versions
+This Page
+
+Related Topics
+Quick search
+

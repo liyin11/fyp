@@ -1,0 +1,672 @@
+Navigation
+Navigation
+
+Jinja2 supports extensions that can add extra filters, tests, globals or even extend the parser.
+Jinja2 支持扩展来添加过滤器、测试、全局变量或者甚至是处理器
+
+The main motivation of extensions is to move often used code into a reusable class like adding support for internationalization.
+扩展的主要动力是 把诸如添加国际化支持的常用代码迁移到一个可重用的类
+
+Adding Extensions¶
+添加扩展¶
+
+Extensions are added to the Jinja2 environment at creation time.
+扩展在 Jinja2 环境创建时被添加
+
+Once the environment is created additional extensions cannot be added.
+一旦环境被创建，就不能添加额外的扩展
+
+To add an extension pass a list of extension classes or import paths to the extensions parameter of the Environment constructor.
+要添加 一个扩展，传递一个扩展类或导入路径的列表到 Environment 构造函数的 environment 参数
+
+The following example creates a Jinja2 environment with the i18n extension loaded:
+下面的例子创建了一个加载了 i18n 扩展的 Jinja2 环境:
+
+i18n Extension¶
+i18n 扩展¶
+
+Import name: jinja2.ext.i18n
+Import name: jinja2.ext.i18n
+
+The i18n extension can be used in combination with gettext or babel.
+Jinja2 当前只附带一个扩展，就是 i18n 扩展
+
+If the i18n extension is enabled Jinja2 provides a trans statement that marks the wrapped string as translatable and calls gettext.
+它可以与 gettext 或 babel 联合使用
+
+After enabling, dummy _ function that forwards calls to gettext is added to the environment globals.
+在启用虚拟的 _ 函数后，之后的 gettext 调用会被添加到环境的全局变量
+
+An internationalized application then has to provide a gettext function and optionally an ngettext function into the namespace, either globally or for each rendering.
+那么 一个国际化的应用应该不仅在全局，以及在每次渲染中在命名空间中提供至少一个 gettext 或可选的 ngettext 函数
+
+Environment Methods¶
+环境方法¶
+
+After enabling the extension, the environment provides the following additional methods:
+在启用这个扩展后，环境提供下面的额外方法:
+
+Installs a translation globally for that environment.
+在该环境中全局安装翻译
+
+The translations object provided must implement at least ugettext and ungettext.
+提供的翻译对象要至少实现 uggettext 和 ungettext 
+
+The gettext.NullTranslations and gettext.GNUTranslations classes as well as Babels Translations class are supported.
+ gettext.NullTranslations 和 gettext.GNUTranslations 类和 Babel‘s 的 Translations 类也被支持
+
+Changed in version 2.5: newstyle gettext added
+Changed in version 2.5: 添加了新样式的 gettext
+
+Install dummy gettext functions.
+安装虚拟的 gettext 函数
+
+This is useful if you want to prepare the application for internationalization but don’t want to implement the full internationalization system yet.
+这在你想使应用为国际化做准备但还不想实现完整的 国际化系统时很有用
+
+Changed in version 2.5: newstyle gettext added
+Changed in version 2.5: 添加了新样式的 gettext
+
+Installs the given gettext and ngettext callables into the environment as globals.
+在环境中把给出的 gettext 和 ngettext 可调用量安装为全局变量
+
+They are supposed to behave exactly like the standard library’s gettext.ugettext() and gettext.ungettext() functions.
+它们 应该表现得几乎与标准库中的 gettext.ugettext() 和 gettext.ungettext() 函数相同
+
+If newstyle is activated, the callables are wrapped to work like newstyle callables.
+如果激活了 新样式 ，可调用量被包装为新样式的可调用量一样工作
+
+See Newstyle Gettext for more information.
+更多 信息见 新样式 Gettext 
+
+New in version 2.5.
+New in version 2.5.
+
+Uninstall the translations again.
+再次卸载翻译
+
+Extract localizable strings from the given template node or source.
+从给定的模板或源中提取本地化字符串
+
+For every string found this function yields a (lineno, function, message) tuple, where:
+对找到的每一个字符串，这个函数生产一个 (lineno, function, message ) 元组，在这里:
+
+If Babel is installed, the babel integration can be used to extract strings for babel.
+如果安装了 Babel ， Babel 集成 可以用来为 babel 抽取字符串
+
+For a web application that is available in multiple languages but gives all the users the same language (for example a multilingual forum software installed for a French community) may load the translations once and add the translation methods to the environment at environment generation time:
+对于一个对多种语言可用而对所有用户给出同一种的语言的 web 应用（例如一个法国社 区安全了一个多种语言的论坛软件）可能会一次性加载翻译并且在环境生成时把翻译方 法添加到环境上:
+
+The get_gettext_translations function would return the translator for the current configuration.
+get_get_translations 函数会返回当前配置的翻译器
+
+(For example by using gettext.find)
+（比如使用 gettext.find ）
+
+The usage of the i18n extension for template designers is covered as part of the template documentation.
+模板设计者的 i18n 扩展使用在 模板文档 中有描述
+
+Newstyle Gettext¶
+新样式 Gettext¶
+
+New in version 2.5.
+New in version 2.5.
+
+Starting with version 2.5 you can use newstyle gettext calls.
+从版本 2.5 开始你可以使用新样式的 gettext 调用
+
+These are inspired by trac’s internal gettext functions and are fully supported by the babel extraction tool.
+这些的启发源于 trac 的内部 gettext 函数并且完全被 babel 抽取工具支持
+
+They might not work as expected by other extraction tools in case you are not using Babel’s.
+如果你不使用 Babel 的抽取工具， 它可能不会像其它抽取工具预期的那样工作
+
+What’s the big difference between standard and newstyle gettext calls?
+标准 gettext 调用和新样式的 gettext 调用有什么区别
+
+In general they are less to type and less error prone.
+通常，它们要输入的东西 更少，出错率更低
+
+Also if they are used in an autoescaping environment they better support automatic escaping.
+并且如果在自动转义环境中使用它们，它们也能更好地支持自动 转义
+
+Here are some common differences between old and new calls:
+这里是一些新老样式调用的差异:
+
+standard gettext:
+标准 gettext:
+
+newstyle gettext looks like this instead:
+新样式看起来是这样:
+
+The advantages of newstyle gettext are that you have less to type and that named placeholders become mandatory.
+新样式 gettext 的优势是你需要输入的更少，并且命名占位符是强制的
+
+The latter sounds like a disadvantage but solves a lot of troubles translators are often facing when they are unable to switch the positions of two placeholder.
+后者看起 来似乎是缺陷，但解决了当翻译者不能切换两个占位符的位置时经常勉励的一大堆 麻烦
+
+With newstyle gettext, all format strings look the same.
+使用新样式的 gettext ，所有的格式化字符串看起来都一样
+
+Furthermore with newstyle gettext, string formatting is also used if no placeholders are used which makes all strings behave exactly the same.
+除此之外，在新样式 gettext 中，如果没有使用占位符，字符串格式化也会被使用， 这使得所有的字符串表现一致
+
+Last but not least are newstyle gettext calls able to properly mark strings for autoescaping which solves lots of escaping related issues many templates are experiencing over time when using autoescaping.
+最后，不仅是新样式的 gettext 调用可以妥善地为 解决了许多转义相关问题的自动转义标记字符串，许多模板也在使用自动转义时体验 了多次
+
+Expression Statement¶
+表达式语句¶
+
+Import name: jinja2.ext.do
+Import name: jinja2.ext.do
+
+The “do” aka expression-statement extension adds a simple do tag to the template engine that works like a variable expression but ignores the return value.
+“do”又叫做表达式语句扩展，向模板引擎添加了一个简单的 do 标签，其工作如同 一个变量表达式，只是忽略返回值
+
+Loop Controls¶
+循环控制¶
+
+Import name: jinja2.ext.loopcontrols
+Import name: jinja2.ext.loopcontrols
+
+This extension adds support for break and continue in loops.
+这个扩展添加了循环中的 break 和 continue 支持
+
+After enabling, Jinja2 provides those two keywords which work exactly like in Python.
+在启用它之后， Jinja2 提供的这两个关键字如同 Python 中那样工作
+
+With Statement¶
+With 语句¶
+
+Import name: jinja2.ext.with_
+Import name: jinja2.ext.with_
+
+New in version 2.3.
+New in version 2.3.
+
+This extension adds support for the with keyword.
+这个扩展添加了 with 关键字支持
+
+Using this keyword it is possible to enforce a nested scope in a template.
+使用这个关键字可以在模板中强制一块嵌套的 作用域
+
+Variables can be declared directly in the opening block of the with statement or using a standard set statement directly within.
+变量可以在 with 语句的块头中直接声明，或直接在里面使用标准的 set 语句
+
+Autoescape Extension¶
+自动转义扩展¶
+
+Import name: jinja2.ext.autoescape
+Import name: jinja2.ext.autoescape
+
+New in version 2.4.
+New in version 2.4.
+
+The autoescape extension allows you to toggle the autoescape feature from within the template.
+自动转义扩展允许你在模板内开关自动转义特性
+
+If the environment’s autoescape setting is set to False it can be activated, if it’s True it can be deactivated.
+如果环境的 autoescape 设定为 False ，它可以被激活
+
+The setting overriding is scoped.
+如果是 True 可以被关闭
+
+Writing Extensions¶
+编写扩展¶
+
+By writing extensions you can add custom tags to Jinja2.
+你可以编写扩展来向 Jinja2 中添加自定义标签
+
+This is a non-trivial task and usually not needed as the default tags and expressions cover all common use cases.
+这是一个不平凡的任务，而且通常不需 要，因为默认的标签和表达式涵盖了所有常用情况
+
+The i18n extension is a good example of why extensions are useful.
+如 i18n 扩展是一个扩展有用的好例 子，而另一个会是碎片缓存
+
+When writing extensions you have to keep in mind that you are working with the Jinja2 template compiler which does not validate the node tree you are passing to it.
+当你编写扩展时，你需要记住你在与 Jinja2 模板编译器一同工作，而它并不验证你传递 到它的节点树
+
+If the AST is malformed you will get all kinds of compiler or runtime errors that are horrible to debug.
+如果 AST 是畸形的，你会得到各种各样的编译器或运行时错误，这调试起 来极其可怕
+
+Always make sure you are using the nodes you create correctly.
+始终确保你在使用创建正确的节点
+
+The API documentation below shows which nodes exist and how to use them.
+下面的 API 文档展示了有什么节点和如 何使用它们
+
+Example Extension¶
+示例扩展¶
+
+The following example implements a cache tag for Jinja2 by using the Werkzeug caching contrib module:
+下面的例子用 Werkzeug 的缓存 contrib 模块为 Jinja2 实现了一个 cache 标签:
+
+And here is how you use it in an environment:
+而这是你在环境中使用它的方式:
+
+Inside the template it’s then possible to mark blocks as cacheable.
+之后，在模板中可以标记块为可缓存的
+
+The following example caches a sidebar for 300 seconds:
+下面的例子缓存一个边栏 300 秒:
+
+Extension API¶
+扩展 API¶
+
+Extensions always have to extend the jinja2.ext.Extension class:
+扩展总是继承 jinja2.ext.Extension 类:
+
+Extensions can be used to add extra functionality to the Jinja template system at the parser level.
+Extensions can be used to add extra functionality to the Jinja template system at the parser level. Custom extensions are bound to an environment but may not store environment specific data on self. The reason for this is that an extension can be bound to another environment (for overlays) by creating a copy and reassigning the environment attribute.
+
+As extensions are created by the environment they cannot accept any arguments for configuration.
+As extensions are created by the environment they cannot accept any arguments for configuration. One may want to work around that by using a factory function, but that is not possible as extensions are identified by their import name. The correct way to configure the extension is storing the configuration values on the environment. Because this way the environment ends up acting as central configuration storage the attributes may clash which is why extensions have to ensure that the names they choose for configuration are not too generic. prefix for example is a terrible name, fragment_cache_prefix on the other hand is a good name as includes the name of the extension (fragment cache).
+
+The identifier of the extension.
+扩展的标识符
+
+This is always the true import name of the extension class and must not be changed.
+这始终是扩展类的真实导入名，不能被修改
+
+If the extension implements custom tags this is a set of tag names the extension is listening for.
+如果扩展实现自定义标签，这是扩展监听的标签名的集合
+
+Return an attribute node for the current extension.
+Return an attribute node for the current extension. This is useful to pass constants on extensions to generated template code.
+
+Call a method of the extension.
+Call a method of the extension. This is a shortcut for attr() + jinja2.nodes.Call.
+
+It’s passed a TokenStream that can be used to filter tokens returned.
+It’s passed a TokenStream that can be used to filter tokens returned. This method has to return an iterable of Tokens, but it doesn’t have to return a TokenStream.
+
+In the ext folder of the Jinja2 source distribution there is a file called inlinegettext.py which implements a filter that utilizes this method.
+In the ext folder of the Jinja2 source distribution there is a file called inlinegettext.py which implements a filter that utilizes this method.
+
+If any of the tags matched this method is called with the parser as first argument.
+If any of the tags matched this method is called with the parser as first argument. The token the parser stream is pointing at is the name token that matched. This method has to return one or a list of multiple nodes.
+
+This method is called before the actual lexing and can be used to preprocess the source.
+This method is called before the actual lexing and can be used to preprocess the source. The filename is optional. The return value must be the preprocessed source.
+
+Parser API¶
+解析器 API¶
+
+The parser passed to Extension.parse() provides ways to parse expressions of different types.
+传递到 Extension.parse() 的解析器提供解析不同类型表达式的方式
+
+The following methods may be used by extensions:
+下 面的方法可能会在扩展中使用:
+
+This is the central parsing class Jinja2 uses.
+This is the central parsing class Jinja2 uses. It’s passed to extensions and can be used to parse expressions or statements.
+
+The filename of the template the parser processes.
+解析器处理的模板文件名
+
+This is not the load name of the template.
+这 不是 模板的加载名
+
+For the load name see name.
+加载名见 name 
+
+For templates that were not loaded form the file system this is None.
+对于不是从文件系统中加载的模板，这个值为 None 
+
+The load name of the template.
+模板的加载名
+
+The current TokenStream
+当前的 TokenStream 
+
+Convenience method that raises exc with the message, passed line number or last line number as well as the current name and filename.
+Convenience method that raises exc with the message, passed line number or last line number as well as the current name and filename.
+
+Return a new free identifier as InternalName.
+Return a new free identifier as InternalName.
+
+Parse an assignment target.
+Parse an assignment target. As Jinja2 allows assignments to tuples, this function can parse all allowed assignment targets. Per default assignments to tuples are parsed, that can be disable however by setting with_tuple to False. If only assignments to names are wanted name_only can be set to True. The extra_end_rules parameter is forwarded to the tuple parsing function.
+
+Parse an expression.
+Parse an expression. Per default all expressions are parsed, if the optional with_condexpr parameter is set to False conditional expressions are not parsed.
+
+Parse multiple statements into a list until one of the end tokens is reached.
+Parse multiple statements into a list until one of the end tokens is reached. This is used to parse the body of statements as it also parses template data if appropriate. The parser checks first if the current token is a colon and skips it if there is one. Then it checks for the block end and parses until if one of the end_tokens is reached. Per default the active token in the stream at the end of the call is the matched end token. If this is not wanted drop_needle can be set to True and the end token is removed.
+
+Works like parse_expression but if multiple expressions are delimited by a comma a Tuple node is created.
+Works like parse_expression but if multiple expressions are delimited by a comma a Tuple node is created. This method could also return a regular expression instead of a tuple if no commas where found.
+
+The default parsing mode is a full tuple.
+The default parsing mode is a full tuple. If simplified is True only names and literals are parsed. The no_condexpr parameter is forwarded to parse_expression().
+
+Because tuples do not require delimiters and may end in a bogus comma an extra hint is needed that marks the end of a tuple.
+Because tuples do not require delimiters and may end in a bogus comma an extra hint is needed that marks the end of a tuple. For example for loops support tuples between for and in. In that case the extra_end_rules is set to ['name:in'].
+
+explicit_parentheses is true if the parsing was triggered by an expression in parentheses.
+explicit_parentheses is true if the parsing was triggered by an expression in parentheses. This is used to figure out if an empty tuple is a valid expression or not.
+
+A token stream is an iterable that yields Tokens.
+A token stream is an iterable that yields Tokens. The parser however does not iterate over it but calls next() to go one token ahead. The current active token is stored as current.
+
+The current Token.
+当前的 Token 
+
+Are we at the end of the stream?
+Are we at the end of the stream
+
+Expect a given token type and return it.
+Expect a given token type and return it. This accepts the same argument as jinja2.lexer.Token.test().
+
+Look at the next token.
+Look at the next token.
+
+Go one token ahead and return the old one
+Go one token ahead and return the old one
+
+Perform the token test and return the token if it matched.
+Perform the token test and return the token if it matched. Otherwise the return value is None.
+
+Push a token back to the stream.
+Push a token back to the stream.
+
+Got n tokens ahead.
+Got n tokens ahead.
+
+Like next_if() but only returns True or False.
+Like next_if() but only returns True or False.
+
+Token class.
+Token class.
+
+The line number of the token
+token 的行号
+
+The type of the token.
+token 的类型
+
+This string is interned so you may compare it with arbitrary strings using the is operator.
+这个值是被禁锢的，所以你可以用 is 运算符同任意字符 串比较
+
+The value of the token.
+token 的值
+
+Test a token against a token expression.
+Test a token against a token expression. This can either be a token type or 'token_type:token_value'. This can only test against string values and types.
+
+Test against multiple token expressions.
+Test against multiple token expressions.
+
+There is also a utility function in the lexer module that can count newline characters in strings:
+同样，在词法分析模块中也有一个实用函数可以计算字符串中的换行符数目:
+
+The AST (Abstract Syntax Tree) is used to represent a template after parsing.
+AST（抽象语法树: Abstract Syntax Tree）用于表示解析后的模板
+
+It’s build of nodes that the compiler then converts into executable Python code objects.
+它有编译器之后 转换到可执行的 Python 代码对象的节点构建
+
+Extensions that provide custom statements can return nodes to execute custom Python code.
+提供自定义语句的扩展可以返回执行自 定义 Python 代码的节点
+
+The list below describes all nodes that are currently available.
+下面的清单展示了所有当前可用的节点
+
+The AST may change between Jinja2 versions but will stay backwards compatible.
+ AST 在 Jinja2 的各个版本中有差异，但会向 后兼容
+
+For more information have a look at the repr of jinja2.Environment.parse().
+更多信息请见 jinja2.Environment.parse() 
+
+Baseclass for all Jinja2 nodes.
+Baseclass for all Jinja2 nodes. There are a number of nodes available of different types. There are four major types:
+
+All nodes have fields and attributes.
+All nodes have fields and attributes. Fields may be other nodes, lists, or arbitrary values. Fields are passed to the constructor as regular positional arguments, attributes as keyword arguments. Each node has two attributes: lineno (the line number of the node) and environment. The environment attribute is set at the end of the parsing process for all nodes automatically.
+
+Find the first node of a given type.
+Find the first node of a given type. If no such node exists the return value is None.
+
+Find all the nodes of a given type.
+Find all the nodes of a given type. If the type is a tuple, the check is performed for any of the tuple items.
+
+Iterates over all direct child nodes of the node.
+Iterates over all direct child nodes of the node. This iterates over all fields and yields the values of they are nodes. If the value of a field is a list all the nodes in that list are returned.
+
+This method iterates over all fields that are defined and yields (key, value) tuples.
+This method iterates over all fields that are defined and yields (key, value) tuples. Per default all fields are returned, but it’s possible to limit that to some fields by providing the only parameter or to exclude some using the exclude parameter. Both should be sets or tuples of field names.
+
+Reset the context of a node and all child nodes.
+Reset the context of a node and all child nodes. Per default the parser will all generate nodes that have a ‘load’ context as it’s the most common one. This method is used in the parser to set assignment targets and other nodes to a store context.
+
+Set the environment for all nodes.
+Set the environment for all nodes.
+
+Set the line numbers of the node and children.
+Set the line numbers of the node and children.
+
+Baseclass for all expressions.
+Baseclass for all expressions.
+
+Return the value of the expression as constant or raise Impossible if this was not possible.
+Return the value of the expression as constant or raise Impossible if this was not possible.
+
+An EvalContext can be provided, if none is given a default context is created which requires the nodes to have an attached environment.
+An EvalContext can be provided, if none is given a default context is created which requires the nodes to have an attached environment.
+
+Changed in version 2.4: the eval_ctx parameter was added.
+Changed in version 2.4: the eval_ctx parameter was added.
+
+Check if it’s possible to assign something to this node.
+Check if it’s possible to assign something to this node.
+
+Baseclass for all binary expressions.
+Baseclass for all binary expressions.
+
+Add the left to the right node.
+Add the left to the right node.
+
+Short circuited AND.
+Short circuited AND.
+
+Divides the left by the right node.
+Divides the left by the right node.
+
+Divides the left by the right node and truncates conver the result into an integer by truncating.
+Divides the left by the right node and truncates conver the result into an integer by truncating.
+
+Left modulo right.
+Left modulo right.
+
+Multiplies the left with the right node.
+Multiplies the left with the right node.
+
+Short circuited OR.
+Short circuited OR.
+
+Left to the power of right.
+Left to the power of right.
+
+Subtract the right from the left node.
+Substract the right from the left node.
+
+Calls an expression.
+Calls an expression. args is a list of arguments, kwargs a list of keyword arguments (list of Keyword nodes), and dyn_args and dyn_kwargs has to be either None or a node that is used as node for dynamic positional (*args) or keyword (**kwargs) arguments.
+
+Compares an expression with some other expressions.
+Compares an expression with some other expressions. ops must be a list of Operands.
+
+Concatenates the list of expressions provided after converting them to unicode.
+Concatenates the list of expressions provided after converting them to unicode.
+
+A conditional expression (inline if expression).
+A conditional expression (inline if expression). ({{ foo if bar else baz }})
+
+Returns the current template context.
+Returns the current template context. It can be used like a Name node, with a 'load' ctx and will return the current Context object.
+
+Here an example that assigns the current template name to a variable named foo:
+Here an example that assigns the current template name to a variable named foo:
+
+Loads an attribute from the environment object.
+Loads an attribute from the environment object. This is useful for extensions that want to call a callback stored on the environment.
+
+Returns the attribute of an extension bound to the environment.
+Returns the attribute of an extension bound to the environment. The identifier is the identifier of the Extension.
+
+This node is usually constructed by calling the attr() method on an extension.
+This node is usually constructed by calling the attr() method on an extension.
+
+This node applies a filter on an expression.
+This node applies a filter on an expression. name is the name of the filter, the rest of the fields are the same as for Call.
+
+If the node of a filter is None the contents of the last buffer are filtered.
+If the node of a filter is None the contents of the last buffer are filtered. Buffers are created by macros and filter blocks.
+
+Get an attribute or item from an expression that is a ascii-only bytestring and prefer the attribute.
+Get an attribute or item from an expression that is a ascii-only bytestring and prefer the attribute.
+
+Get an attribute or item from an expression and prefer the item.
+Get an attribute or item from an expression and prefer the item.
+
+If created with an import name the import name is returned on node access.
+If created with an import name the import name is returned on node access. For example ImportedName('cgi.escape') returns the escape function from the cgi module on evaluation. Imports are optimized by the compiler so there is no need to assign them to local variables.
+
+An internal name in the compiler.
+An internal name in the compiler. You cannot create these nodes yourself but the parser provides a free_identifier() method that creates a new identifier for you. This identifier is not available from the template and is not threated specially by the compiler.
+
+Baseclass for literals.
+Baseclass for literals.
+
+All constant values.
+All constant values. The parser will return this node for simple constants such as 42 or "foo" but it can be used to store more complex values such as lists too. Only constants with a safe representation (objects where eval(repr(x)) == x is true).
+
+Any dict literal such as {1: 2, 3: 4}.
+Any dict literal such as {1: 2, 3: 4}. The items must be a list of Pair nodes.
+
+Any list literal such as [1, 2, 3]
+Any list literal such as [1, 2, 3]
+
+A constant template string.
+A constant template string.
+
+For loop unpacking and some other things like multiple arguments for subscripts.
+For loop unpacking and some other things like multiple arguments for subscripts. Like for Name ctx specifies if the tuple is used for loading the names or storing.
+
+Mark the wrapped expression as safe (wrap it as Markup).
+Mark the wrapped expression as safe (wrap it as Markup).
+
+Mark the wrapped expression as safe (wrap it as Markup) but only if autoescaping is active.
+Mark the wrapped expression as safe (wrap it as Markup) but only if autoescaping is active.
+
+New in version 2.5.
+New in version 2.5.
+
+Looks up a name or stores a value in a name.
+Looks up a name or stores a value in a name. The ctx of the node can be one of the following values:
+
+Represents a slice object.
+Represents a slice object. This must only be used as argument for Subscript.
+
+Applies a test on an expression.
+Applies a test on an expression. name is the name of the test, the rest of the fields are the same as for Call.
+
+Baseclass for all unary expressions.
+Baseclass for all unary expressions.
+
+Make the expression negative.
+Make the expression negative.
+
+Negate the expression.
+Negate the expression.
+
+Make the expression positive (noop for most expressions)
+Make the expression positive (noop for most expressions)
+
+Nodes that exist in a specific context only.
+Nodes that exist in a specific context only.
+
+A key, value pair for keyword arguments where key is a string.
+A key, value pair for keyword arguments where key is a string.
+
+Holds an operator and an expression.
+Holds an operator and an expression. The following operators are available: %, **, *, +, -, //, /, eq, gt, gteq, in, lt, lteq, ne, not, notin
+
+A key, value pair for dicts.
+A key, value pair for dicts.
+
+Base node for all statements.
+Base node for all statements.
+
+Assigns an expression to a target.
+Assigns an expression to a target.
+
+Assigns a block to a target.
+A node that represents a block.
+
+A node that represents a block.
+Break a loop.
+
+Break a loop.
+Like a macro without a name but a call instead. call is called with the unnamed macro as caller argument this node holds.
+
+Like a macro without a name but a call instead.
+Continue a loop.
+
+Continue a loop.
+Modifies the eval context. For each option that should be modified, a Keyword has to be added to the options list.
+
+Modifies the eval context.
+Example to change the autoescape setting:
+
+Example to change the autoescape setting:
+Modifies the eval context and reverts it later. Works exactly like EvalContextModifier but will only modify the EvalContext for nodes in the body.
+
+Modifies the eval context and reverts it later.
+A statement that evaluates an expression and discards the result.
+
+A statement that evaluates an expression and discards the result.
+Represents an extends statement.
+
+Represents an extends statement.
+Node for filter sections.
+
+Node for filter sections.
+The for loop. target is the target for the iteration (usually a Name or Tuple), iter the iterable. body is a list of nodes that are used as loop-body, and else_ a list of nodes for the else block. If no else node exists it has to be an empty list.
+
+The for loop.
+For filtered nodes an expression can be stored as test, otherwise None.
+
+For filtered nodes an expression can be stored as test, otherwise None.
+A node that represents the from import tag. It’s important to not pass unsafe names to the name attribute. The compiler translates the attribute lookups directly into getattr calls and does not use the subscript callback of the interface. As exported variables may not start with double underscores (which the parser asserts) this is not a problem for regular Jinja code, but if this node is used in an extension extra care must be taken.
+
+A node that represents the from import tag.
+The list of names may contain tuples if aliases are wanted.
+
+The list of names may contain tuples if aliases are wanted.
+If test is true, body is rendered, else else_.
+
+If test is true, body is rendered, else else_.
+A node that represents the import tag.
+
+A node that represents the import tag.
+A node that represents the include tag.
+
+A node that represents the include tag.
+A macro definition. name is the name of the macro, args a list of arguments and defaults a list of defaults if there are any. body is a list of nodes for the macro body.
+
+A macro definition.
+A node that holds multiple expressions which are then printed out. This is used both for the print statement and the regular template data.
+
+A node that holds multiple expressions which are then printed out.
+An artificial scope.
+
+An artificial scope.
+Node that represents a template. This must be the outermost node that is passed to the compiler.
+
+Node that represents a template.
+Raised if the node could not perform a requested action.
+
+Versions
+Related Topics
+
