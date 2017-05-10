@@ -1,0 +1,39 @@
+Navigation
+导航
+
+Python 3 Notes¶
+Python 3 Notes¶
+
+Since version 0.9, Werkzeug supports Python 3.3+ in addition to versions 2.6 and 2.7.
+这部分文档特别要求使用 Werkzeug 和 WSGI 的环境为 Python 3
+
+This part of the documentation outlines special information required to use Werkzeug and WSGI on Python 3.
+警告
+
+Warning
+Werkzeug 的 Python 3 支持目前只是实验性的
+
+The WSGI environment on Python 3 works slightly different than it does on Python 2.
+在 Python 3 有两种不同类型的 WSGI 环境:
+
+There are two different kinds of strings in the WSGI environ on Python 3:
+Werkzeug 给你提供一些函数自动解决这些问题
+
+Werkzeug provides you with functionality to deal with these automatically so that you don’t need to be aware of the inner workings.
+不推荐在 Python 3 中创造和修改 WSGI 环境除非确保能够正确解码
+
+The following functions and classes should be used to read information out of the WSGI environment:
+在 Werkzeug 中 所有高级 API 接口能正确实现编码和解码
+
+Request objects on Python 3 and PyPy require explicit closing when file uploads are involved.
+除了请求对象还有上下文管理需要关闭，但是上下文管理可以自动关闭
+
+Table Of Contents
+Related Topics
+
+Versions
+本页
+
+Related Topics
+快速搜索
+

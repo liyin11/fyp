@@ -1,0 +1,348 @@
+Navigation
+导航
+
+Werkzeug Tutorial¶
+Werkzeug 教程¶
+
+Welcome to the Werkzeug tutorial in which we will create a TinyURL clone that stores URLs in a redis instance.
+欢迎来到 Werkzeug 教程，我们将会实现一个类似 TinyURL 的网站来储存 URLS
+
+The libraries we will use for this applications are Jinja 2 for the templates, redis for the database layer and, of course, Werkzeug for the WSGI layer.
+我们 将会使用的库有模板引擎 Jinja 2，数据层支持 redis ，当然还有 WSGI 协议层 Werkzeug
+
+You can use pip to install the required libraries:
+你可以使用 pip 来安装依赖库:
+
+Also make sure to have a redis server running on your local machine.
+同时确定你的本地开启一个 redis 服务，如果你是OS X系统，你可以使用 brew 来安装 redis:
+
+If you are on Ubuntu or Debian, you can use apt-get:
+如果你是用 Ubuntu 或 Debian, 你可以使用 apt-get:
+
+Redis was developed for UNIX systems and was never really designed to work on Windows.
+Redis 专为 UNIX 系统开发，并没有考虑为 Windows 设计
+
+For development purposes, the unofficial ports however work well enough.
+但对于开发来说，非官方的版本已 经足够了，你可以从 github 得到它
+
+Introducing Shortly¶
+简短介绍¶
+
+In this tutorial, we will together create a simple URL shortener service with Werkzeug.
+在这个教程中，我们将一起用 Werkzeug 创建一个短网址服务
+
+Please keep in mind that Werkzeug is not a framework, it’s a library with utilities to create your own framework or application and as such is very flexible.
+请注意，Werkzeug 并不是 一个框架，它是一个 WSGI 工具集的库，你可以通过它来创建你自己的框架或 Web 应用
+
+The approach we use here is just one of many you can use.
+ Werkzeug 是非常灵活的，这篇教程用到的一些方法只是 Werkzeug 的一部分
+
+As data store, we will use redis here instead of a relational database to keep this simple and because that’s the kind of job that redis excels at.
+在数据层，为了保持简单，我们使用 redis 来代替关系型数据库，而且 redis 也擅 长来做这些
+
+The final result will look something like this:
+最终的结果将会看起来像这样:
+
+Step 0: A Basic WSGI Introduction¶
+Step 0: WSGI 基础介绍¶
+
+Werkzeug is a utility library for WSGI.
+Werkzeug 是一个 WSGI 工具包
+
+WSGI itself is a protocol or convention that ensures that your web application can speak with the webserver and more importantly that web applications work nicely together.
+WSGI 是一个 Web 应用和服务器通信的协议，Web 应用 可以通过 WSGI 一起工作
+
+A basic “Hello World” application in WSGI without the help of Werkzeug looks like this:
+一个基本的 “Hello World” WSGI 应用看起来是这样的:
+
+A WSGI application is something you can call and pass an environ dict and a start_response callable.
+用过 WSGI 应用可以和环境通信，他有一个可调用的 start_response 
+
+The environ contains all incoming information, the start_response function can be used to indicate the start of the response.
+环境包含了 所有进来的信息
+
+With Werkzeug you don’t have to deal directly with either as request and response objects are provided to work with them.
+ start_response 用来表明已经收到一个响应
+
+The request data takes the environ object and allows you to access the data from that environ in a nice manner.
+请求数据需要环境对象，Werkzeug 允许你以一个轻松的方式访问数据
+
+The response object is a WSGI application in itself and provides a much nicer way to create responses.
+响应对象是一个 WSGI 应用，提供了更好的方法来创建响应
+
+Here is how you would write that application with response objects:
+下面教你怎么用响应对象来写一个应用:
+
+And here an expanded version that looks at the query string in the URL (more importantly at the name parameter in the URL to substitute “World” against another word):
+这里有一个在 URL 中查询字符串的扩展版本(重点是 URL 中的 name 将会替代 World):
+
+And that’s all you need to know about WSGI.
+到此为止，你已经足够了解 WSGI 了
+
+Step 1: Creating the Folders¶
+Step 1: 创建目录¶
+
+Before we get started, let’s create the folders needed for this application:
+在开始之前，首先为应用创建一个目录:
+
+The shortly folder is not a python package, but just something where we drop our files.
+这个简洁的目录不是一个python包，他用来存放我们的项目文件
+
+Directly into this folder we will then put our main module in the following steps.
+我们的入口模块将会放在 /shortly 目录的根目录下
+
+The files inside the static folder are available to users of the application via HTTP.
+ /static 目录用来放置CSS、Javascript等静态文件，用户可以通过 HTTP协议直接访问
+
+This is the place where CSS and JavaScript files go.
+ /templates 目录用来存放 Jinja2 模板文件，接下来你为项目创 建的模板文件将要放到这个文件夹内
+
+Step 2: The Base Structure¶
+Step 2: 基本结构¶
+
+Now let’s get right into it and create a module for our application.
+现在我们正式开始为我们的项目创建模块
+
+Let’s create a file called shortly.py in the shortly folder.
+在 shortly 目录创建 shortly.py 文件
+
+At first we will need a bunch of imports.
+首先 来导入一些东西
+
+I will pull in all the imports here, even if they are not used right away, to keep it from being confusing:
+为了防止混淆，我把所有的入口放在这，即使他们不会立即使用:
+
+Then we can create the basic structure for our application and a function to create a new instance of it, optionally with a piece of WSGI middleware that exports all the files on the static folder on the web:
+接下来我们来为我们的应用创建基本的结构，并通过一个函数来创建应用实例，通过 WSGI 中间件输出 static 目录的文件:
+
+Lastly we can add a piece of code that will start a local development server with automatic code reloading and a debugger:
+最后我们添加一部分代码来开启一个本地服务器，自动加载代码并开启调试器:
+
+The basic idea here is that our Shortly class is an actual WSGI application.
+思路很简单，我们的 Shortly 是一个实际的 WSGI 应用
+
+The __call__ method directly dispatches to wsgi_app.
+ __call__ 方法直接调 用 wsgi_app 
+
+This is done so that we can wrap wsgi_app to apply middlewares like we do in the create_app function.
+这样做我们可以装饰 wsgi_app 调用中间件，就像我们在 create_app 函数中做的一样
+
+The actual wsgi_app method then creates a Request object and calls the dispatch_request method which then has to return a Response object which is then evaluated as WSGI application again.
+ wsgi_app 实际上创建了一个 Request 对象,之后通过 dispatch_request 调用 Request 对象然后给 WSGI 应用返回一个 Response 对象
+
+As you can see: turtles all the way down.
+正如你看到的：无论是创建 Shortly 类，还是还是创建 Werkzeug Request 对 象来执行 WSGI 接口
+
+Both the Shortly class we create, as well as any request object in Werkzeug implements the WSGI interface.
+最终结果只是从 dispatch_request 方法返回另一个 WSGI 应用
+
+The create_app factory function can be used to create a new instance of our application.
+create_app 可以被用于创建一个新的应用实例
+
+Not only will it pass some parameters as configuration to the application but also optionally add a WSGI middleware that exports static files.
+他不仅可以通过参数配置应用，还可 以选择性的添加中间件来输出静态文件
+
+This way we have access to the files from the static folder even when we are not configuring our server to provide them which is very helpful for development.
+通过这种方法我们甚至可以不配置服务器就能访问 静态文件，这对开发是很有帮助的
+
+Intermezzo: Running the Application¶
+插曲: 运行应用程序¶
+
+Now you should be able to execute the file with python and see a server on your local machine:
+现在你应该可以通过 python 执行这个文件了，看看你本机的服务:
+
+It also tells you that the reloader is active.
+它告诉你自动加载已经开启，他会通过各种各样的技术来判断硬盘上的文件是否改变来自动 重启
+
+Just go to the URL and you should see “Hello World!”.
+在浏览器输入这个URL，你将会看到 “Hello World!”
+
+Step 3: The Environment¶
+Step 3: 环境¶
+
+Now that we have the basic application class, we can make the constructor do something useful and provide a few helpers on there that can come in handy.
+现在我们已经有了一个应用的基本类，可以通过构造函数来实现一些功能
+
+We will need to be able to render templates and connect to redis, so let’s extend the class a bit:
+通过构造函数我 们可以渲染模板、连接redis
+
+Step 4: The Routing¶
+Step 4: 路由¶
+
+Next up is routing.
+下一步是路由
+
+Routing is the process of matching and parsing the URL to something we can use.
+我们可以通过路由来匹配和解析URL
+
+Werkzeug provides a flexible integrated routing system which we can use for that.
+Werkzeug 提供了一个灵活的集成路由
+
+The way it works is that you create a Map instance and add a bunch of Rule objects.
+ 你需要创建一个 Map 实例并添加一系列 Rule 对象
+
+Each rule has a pattern it will try to match the URL against and an “endpoint”.
+每个 rule 将会匹配 URL 并添加一个 “endpoint”
+
+The endpoint is typically a string and can be used to uniquely identify the URL.
+endpoint 通常是一个用于标记 URL 的字符串
+
+We could also use this to automatically reverse the URL, but that’s not what we will do in this tutorial.
+此外我们还可以使用它来翻转 URL，但这不是这篇教程我们要做的
+
+Just put this into the constructor:
+把下列代码放入构造函数:
+
+Here we create a URL map with three rules.
+现在我们创造了一个包含三个 URL 规则的字典
+
+/ for the root of the URL space where we will just dispatch to a function that implements the logic to create a new URL.
+第一个规则， / 是根 URL 空间，我 们可以调用一个逻辑函数来创建一个新 URL
+
+And then one that follows the short link to the target URL and another one with the same rule but a plus (+) at the end to show the link details.
+第二个规则，根据规则指向一个目标URL
+
+So how do we find our way from the endpoint to a function?
+那么 endpoint 是怎么指向一个函数的
+
+That’s up to you.
+这是需要你解决的
+
+The way we will do it in this tutorial is by calling the method on_ + endpoint on the class itself.
+本篇教程中是通过类中 on_ + endpoint 方法
+
+Here is how this works:
+具体如下:
+
+We bind the URL map to the current environment and get back a URLAdapter.
+我们将 RUL 绑定到目前的环境返回一个 URLAdapter 
+
+The adapter can be used to match the request but also to reverse URLs.
+适配器 可以用于匹配请求也可以翻转 URLS
+
+The match method will return the endpoint and a dictionary of values in the URL.
+匹配方法将会返回 endpoint 和一个 URL 值字典
+
+For instance the rule for follow_short_link has a variable part called short_id.
+这个 follow_short_link 路由实例有一个变量 short_id 
+
+When we go to http://localhost:5000/foo we will get the following values back:
+当我们在浏览器输入 http://localhost:5000/foo 我们将会得到如下的值:
+
+If it does not match anything, it will raise a NotFound exception, which is an HTTPException.
+我们没有匹配到任何东西，他将会抛出一个 NotFound 异常， 实质是一个 HTTPException 异常
+
+All HTTP exceptions are also WSGI applications by themselves which render a default error page.
+所有的 HTTP 异常将会跳 转 WSGI 应用渲染的默认错误页面
+
+So we just catch all of them down and return the error itself.
+所以我们只需要捕获并返回他们
+
+If all works well, we call the function on_ + endpoint and pass it the request as argument as well as all the URL arguments as keyword arguments and return the response object that method returns.
+如果一切顺利，我们用 request 作为参数,所有的 URL 参数做作为关键字参数调用 on_ + endpoint 函数可以返回响应对象
+
+Step 5: The First View¶
+Step 5: 第一个视图¶
+
+Let’s start with the first view: the one for new URLs:
+让我们开始第一个视图: new URLs 视图:
+
+This logic should be easy to understand.
+思想不难理解
+
+Basically we are checking that the request method is POST, in which case we validate the URL and add a new entry to the database, then redirect to the detail page.
+首先我们检查请求方法是不是 POST，然后验证得到的 URL 并插入到数据库 中，然后跳转到一个详细页面
+
+This means we need to write a function and a helper method.
+要实现这个，意味着我们需要在写一个函数和一个辅助方法 下面是 URL 验证函数:
+
+For inserting the URL, all we need is this little method on our class:
+为了向数据库插入 URL，我们只需要在类中添加以下方法:
+
+reverse-url: + the URL will store the short id.
+reverse-url: + URL 将会存放储存ID
+
+If the URL was already submitted this won’t be None and we can just return that value which will be the short ID.
+如果 URL 已经被提交过那么只需要返回存储ID 值，否则我们增加 last-url-id 键值并转化为 base36，接下来我们将存储连接和转换 连接存储到 redis
+
+Otherwise we increment the last-url-id key and convert it to base36.
+下面就是转化为 base 36 的函数:
+
+So what is missing for this view to work is the template.
+然而我们还没有视图的模板，不急，我们过一会就来写模板
+
+We will create this later, let’s first also write the other views and then do the templates in one go.
+不过在这之前，我们先来完成 另一个视图
+
+Step 6: Redirect View¶
+Step 6: 重定向视图¶
+
+The redirect view is easy.
+重定向视图很简单，它只需要从 redis 找到连接并重定向跳转到它
+
+All it has to do is to look for the link in redis and redirect to it.
+另外我们还想添加一个 计数器以便于统计连接被点击频率:
+
+In this case we will raise a NotFound exception by hand if the URL does not exist, which will bubble up to the dispatch_request function and be converted into a default 404 response.
+在这种情况下，如果 URL 不存在，我们将会抛出一个 NotFound 异常，通过 dispatch_request 函数返回一个 404 响应
+
+Step 7: Detail View¶
+Step 7: 描述视图¶
+
+The link detail view is very similar, we just render a template again.
+链接描述视图也是非常相似的，我们仅仅需要再渲染一个模板
+
+In addition to looking up the target, we also ask redis for the number of times the link was clicked and let it default to zero if such a key does not yet exist:
+除了目标 URL，我们还需要 从 redis 查询被点击次数，如果在 redis 中没有记录，我们把它设为 0:
+
+Please be aware that redis always works with strings, so you have to convert the click count to int by hand.
+要知道 redis 存的是字符串，所以你需要手动点击次数转化为 :int 
+
+Step 8: Templates¶
+Step 8: 模板¶
+
+And here are all the templates.
+这里就是全部的模板，仅仅把它们放到 templates 文件夹就可以了
+
+Just drop them into the templates folder.
+jinja2支持模板继 承，所以我们首先要创建一个 layout 模板，并用 blocks 占位
+
+Jinja2 supports template inheritance, so the first thing we will do is create a layout template with blocks that act as placeholders.
+接下来设置jinja2以便于 自动用html规则转化字符串，我们不必自己花时间来做这些
+
+We also set up Jinja2 so that it automatically escapes strings with HTML rules, so we don’t have to spend time on that ourselves.
+同时它可以也防止 XSS 攻击和 渲染错误页面
+
+layout.html:
+layout.html:
+
+new_url.html:
+new_url.html:
+
+short_link_details.html:
+short_link_details.html:
+
+Step 9: The Style¶
+Step 9: 样式¶
+
+For this to look better than ugly black and white, here a simple stylesheet that goes along:
+添加样式可以使页面比丑陋的黑色和白色看起来好一些
+
+Bonus: Refinements¶
+Bonus: 改进¶
+
+Look at the implementation in the example dictionary in the Werkzeug repository to see a version of this tutorial with some small refinements such as a custom 404 page.
+查看 Werkzeug 仓库的 example 目录可以找到这篇教程代码，那里的版本可能有一些改进， 比如一个定制的 404 页面
+
+Table Of Contents
+內容目录
+
+Versions
+Related Topics
+
+Related Topics
+本页
+
+Quick search
+快速搜索
+

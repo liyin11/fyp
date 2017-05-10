@@ -1,0 +1,120 @@
+Navigation
+导航
+
+Serving WSGI Applications¶
+在服务器运行 WSGI 应用¶
+
+There are many ways to serve a WSGI application.
+这里有一些在服务器运行 WSGI 应用的方式
+
+While you’re developing it, you usually don’t want to have a full-blown webserver like Apache up and running, but instead a simple standalone one.
+当你正在开发一个应用，你往往不想在一个成 熟服务器上部署和运行，取而代之的是一个轻量服务器
+
+Because of that Werkzeug comes with a builtin development server.
+ Werkzeug 就内置了这样一个轻量 的服务器
+
+The easiest way is creating a small start-myproject.py file that runs the application using the builtin server:
+在一个服务器上运行 start-myproject.py 最简单的方法如下示例:
+
+You can also pass it the extra_files keyword argument with a list of additional files (like configuration files) you want to observe.
+你可以添加一个 extra_files 关键字参数，一个你想要添加的文件(比如配置文件)列表
+
+Start a WSGI application.
+用 wsgiref 带可选参数 reloader 运行一个应用，通过包裹 wsgiref 来改正多线程 WSGI 的默认的错误报告，添加可选的多线程，支持 fork
+
+This function has a command-line interface too:
+这个函数也有一个命令行接口:
+
+New in version 0.5: static_files was added to simplify serving of static files as well as passthrough_errors.
+0.5 新版功能: 通过添加 static_files 简单支持静态文件和 passthrough_errors
+
+New in version 0.6: support for SSL was added.
+0.6 新版功能: 支持添加 SSL
+
+New in version 0.8: Added support for automatically loading a SSL context from certificate file and private key.
+0.8 新版功能: 添加支持从 certificate 自动加载 SSL 上下文和私钥
+
+New in version 0.9: Added command-line interface.
+0.9 新版功能: 添加命令行接口
+
+New in version 0.10: Improved the reloader and added support for changing the backend through the reloader_type parameter.
+创建一个 SSL 密钥
+
+See Reloader for more information.
+用于代替 'adhoc' 密钥将会在服务启动的时候创建一个 新的证书
+
+Checks if the application is running from within the Werkzeug reloader subprocess.
+更多信息请看 run_simple()
+
+New in version 0.10.
+0.9 新版功能.
+
+Creates an SSL key for development.
+展名为 .key 的文件被添加到密钥
+
+This should be used instead of the 'adhoc' key which generates a new cert on each server start.
+ :param host: 主机的名字
+
+It accepts a path for where it should store the key and cert and either a host or CN.
+这个用于替代 cn
+
+If a host is given it will use the CN *.host/CN=host.
+ :param cn: 使用 CN
+
+For more information see run_simple().
+Information
+
+New in version 0.9.
+开发服务器不是为了生产环境，它的出现是为了开发方便，在高负载情况下效率是很低 的
+
+The Werkzeug reloader constantly monitors modules and paths of your web application, and restarts the server if any of the observed files change.
+这允许你使用 yourapplication.local 和 api.yourapplication.local (或者其他)代 替 localhost 访问本机
+
+Since version 0.10, there are two backends the reloader supports: stat and watchdog.
+你可以从下面的地方找到 hosts 文件:
+
+If watchdog is installed and available it will automatically be used instead of the builtin stat reloader.
+你可以用你喜欢的文本编辑器打开 hosts 文件，在 localhost 后面加上:
+
+To switch between the backends you can use the reloader_type parameter of the run_simple() function.
+保存之后你应该就可以通过你添加的主机名字访问开发服务器了
+
+'stat' sets it to the default stat based polling and 'watchdog' forces it to the watchdog backend.
+你可以使用 URL Routing 系统调度”两个”主机或自己解析 request.host 
+
+This allows you to call your local computer yourapplication.local and api.yourapplication.local (or anything else) in addition to localhost.
+从 Werkzeug 0.7 版本开始，开发服务器允许在一个请求后关闭服务
+
+Save the changes and after a while you should be able to access the development server on these host names as well.
+在一些支持并配置 ipv6 的操作系统，比如 Linux, OS X 10.4 或更高 和 Windows Vista 一些浏览器有时候访问本地服务器很慢，原因有可能是本机被设置为同时支持 ipv4 和 ipv6 套接字，一些浏览器会首先尝试 ipv6 协议
+
+Starting with Werkzeug 0.7 the development server provides a way to shut down the server after a request.
+注意到解决这个问题有两种方法
+
+This currently only works with Python 2.6 and later and will only work with the development server.
+如果你不需要ipv6 支持，你可以移除 hosts file 文件中的下面一行:
+
+At the current time the integrated webserver does not support ipv6 and ipv4 at the same time and for better portability ipv4 is the default.
+从 Werkzeug 0.6.1 开始服务器将不再根据操作系统的配置来转换协议
+
+Starting with Werkzeug 0.6.1, the server will now switch between ipv4 and ipv6 based on your operating system’s configuration.
+0.6 新版功能.
+
+The easiest way to do SSL based development with Werkzeug is by using it to generate an SSL certificate and private key and storing that somewhere and to then put it there.
+在werkzeug开发过程中使用 SSL 最简单的方法就是通过 werkzeug 生成一个 SSL 证书和 私钥存起来
+
+For the certificate you need to provide the name of your server on generation or a CN.
+对于证书你需要提供生成证书的服务器名或一个 CN.
+
+Generate an SSL key and store it somewhere:
+生成一个 SSL 密钥并存放在某个地方:
+
+Now this tuple can be passed as ssl_context to the run_simple() method:
+现在这个元组会当作 ssl_context 传入 run_simple() 方法:
+
+You will have to acknowledge the certificate in your browser once then.
+‘/path/to/the/key.key’))
+
+Generating Certificates¶
+手动加载上下文¶
+

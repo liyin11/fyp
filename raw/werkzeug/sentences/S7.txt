@@ -1,0 +1,276 @@
+Navigation
+导航
+
+Test Utilities¶
+单元测试¶
+
+Quite often you want to unittest your application or just check the output from an interactive python session.
+也许你经常需要对你的的应用进行单元测试或者仅仅检查 Python session 的输出
+
+In theory that is pretty simple because you can fake a WSGI environment and call the application with a dummy start_response and iterate over the application iterator but there are argumentably better ways to interact with an application.
+理论上 讲这是很简单的，你可以伪造一个环境，通过一个假的 start_response 遍历应用，但是 这里还有一个更好的方法
+
+Diving In¶
+Diving In¶
+
+Werkzeug provides a Client object which you can pass a WSGI application (and optionally a response wrapper) which you can use to send virtual requests to the application.
+Werkzeug 提供了一个 Client 对象，可以传入一个 WSGI 应用(可选传入一个 response), 通过这个你可以向应用发出一个虚拟请求
+
+A response wrapper is a callable that takes three arguments: the application iterator, the status and finally a list of headers.
+用三个参数调用一个 response: 应用迭代器、状态和一个 headers
+
+The default response wrapper returns a tuple.
+默认 response 返回 一个元组
+
+Because response objects have the same signature, you can use them as response wrapper, ideally by subclassing them and hooking in test functionality.
+因为 response 对象有相同的签名，所以你可以像使用 response 一样使用他们 
+
+Or without a wrapper defined:
+或默认没有 response:
+
+Environment Building¶
+环境搭建¶
+
+New in version 0.5.
+0.5 新版功能.
+
+The easiest way to interactively test applications is using the EnvironBuilder.
+交互测试应用 最简单的方法是使用 EnvironBuilder 类
+
+It can create both standard WSGI environments and request objects.
+它可以创建标准 WSGI 环境和请求对象
+
+The following example creates a WSGI environment with one uploaded file and a form field:
+下面的例子创建了一个上传文件和文件表单的 WSGI 环境:
+
+The resulting environment is a regular WSGI environment that can be used for further processing:
+返回的环境是一个新的 WSGI 环境，可用于进一步的处理:
+
+The EnvironBuilder figures out the content type automatically if you pass a dict to the constructor as data.
+当你将一个字典传给构造函数数据， EnvironBuilder 会自动自动找出内容类型
+
+If you provide a string or an input stream you have to do that yourself.
+如 过你传的似乎一个字符串或者输入字符流，你不得不自己来做这些处理
+
+By default it will try to use application/x-www-form-urlencoded and only use multipart/form-data if files are uploaded:
+默认地它将会尝试使用 application/x-www-form-urlencoded ，如果文件被上传则只 使用 multipart/form-data :
+
+If a string is provided as data (or an input stream) you have to specify the content type yourself:
+如果传入一个字符串(或一个输入流)，你必须自己指定内容的类型:
+
+Testing API¶
+测试 API¶
+
+This class can be used to conveniently create a WSGI environment for testing purposes.
+这个类为了测试可以方便的创建一个 WSGI 环境
+
+It can be used to quickly create WSGI environments or request objects from arbitrary data.
+他可以从任意数据快速创建 WSGI 环境或请求对象
+
+The signature of this class is also used in some other places as of Werkzeug 0.5 (create_environ(), BaseResponse.from_values(), Client.open()).
+这个类的签名也可用于 Werkzeug 的其他地方(create_environ(), BaseResponse.from_values(), Client.open())
+
+Because of this most of the functionality is available through the constructor alone.
+因为大多数功能只可通 过构造函数实现
+
+Files and regular form data can be manipulated independently of each other with the form and files attributes, but are passed with the same argument to the constructor: data.
+文件和表格数据可以被各自的 form 和 files 属性独立处理
+
+data can be any of these values:
+data 可以是这些值:
+
+New in version 0.6: path and base_url can now be unicode strings that are encoded using the iri_to_uri() function.
+0.6 新版功能: path 和 base_url 现在是 unicode 字符串，它可以使用 iri_to_uri() 函数编码
+
+The path of the application.
+应用的地址
+
+(aka PATH_INFO)
+(又叫 PATH_INFO)
+
+The charset used to encode unicode data.
+编码 unicode 数据的字符集
+
+A Headers object with the request headers.
+一个带着请求 headers的 Headers 对象
+
+The error stream used for the wsgi.errors stream.
+用于 wsgi.errors 流的错误流
+
+The value of wsgi.multithread
+wsgi.multithread 的值
+
+The value of wsgi.multiprocess
+wsgi.multiprocess 的值
+
+The dict used as base for the newly create environ.
+新创建环境的基本字典
+
+A dict with values that are used to override the generated environ.
+用于覆盖生成环境的带值字典
+
+The optional input stream.
+可选选项输入流
+
+This and form / files is mutually exclusive.
+这个和 form / files 是相互独立的
+
+Also do not provide this stream if the request method is not POST / PUT or something comparable.
+同时如果 请求方法不是 POST / PUT 或其他类似方法，不要提供输入流
+
+The URL arguments as MultiDict.
+URL 参数是 MultiDict
+
+The base URL is a URL that is used to extract the WSGI URL scheme, host (server name + server port) and the script root (SCRIPT_NAME).
+base URL 是一个用于提取 WSGI URL ，主机(服务器名 + 服务器端口) 和根脚本 (SCRIPT_NAME) 的 URL
+
+Closes all files.
+关闭所有文件
+
+If you put real file objects into the files dict you can call this method to automatically close them all in one go.
+如果把 file 对象放入 files 字典，你可 以通过调用这个方法自动关闭他们
+
+The content length as integer.
+整数的长度，反射给 headers
+
+Reflected from and to the headers.
+如果你设置了 files 或 form 属性不要设置这个参数
+
+The content type for the request.
+请求的内容类型
+
+Reflected from and to the headers.
+反射给 headers
+
+Do not set if you set files or form for auto detection.
+如果你设置了 files 和 form 属性就不能设置内容类型
+
+Return the built environ.
+返回内置环境
+
+Returns a request with the data.
+返回一个带数据的请求
+
+If the request class is not specified request_class is used.
+如果没有指定请求类，将会是用 request_class
+
+An optional input stream.
+一个可选的输入流
+
+If you set this it will clear form and files.
+如果你设置它，将会清空 form 和 files
+
+The query string.
+查询字符串
+
+If you set this to a string args will no longer be available.
+如果你设置它， args 属性将不再可用
+
+the default request class for get_request()
+默认的请求类 get_request()
+
+alias of BaseRequest
+BaseRequest 的别名
+
+The server name (read-only, use host to set)
+服务器名 (只读， 使用 host 设置)
+
+The server port as integer (read-only, use host to set)
+整型服务器接口(只读，使用 host 设置)
+
+the server protocol to use.
+服务器使用协议
+
+defaults to HTTP/1.1
+默认为 HTTP/1.1
+
+the wsgi version to use.
+使用的 WSGI 版本
+
+defaults to (1, 0)
+默认为(1, 0)
+
+This class allows to send requests to a wrapped application.
+这个类允许你发送请求给一个包裹的应用
+
+The response wrapper can be a class or factory function that takes three arguments: app_iter, status and headers.
+响应可以是一个类或者一个有三个参数工厂函数: app_iter, status and headers
+
+The default response wrapper just returns a tuple.
+默 认的响应仅仅是一个元组
+
+Example:
+例如:
+
+The use_cookies parameter indicates whether cookies should be stored and sent for subsequent requests.
+use_cookies 参数默认是开启的，无论 cookies 是否被存储，他都会和请求一起传输
+
+This is True by default, but passing False will disable this behaviour.
+ 但是你也可以关闭 cookie
+
+If you want to request some subdomain of your application you may set allow_subdomain_redirects to True as if not no external redirects are allowed.
+如果你想要请求应用的子域名，你可以设置 allow_subdomain_redirects 为 True ， 如果为 False ,将不允许外部重定向
+
+New in version 0.5: use_cookies is new in this version.
+0.5 新版功能: use_cookies 是在这个版本添加的
+
+Older versions did not provide builtin cookie support.
+老版本不提供内置 cookie 支持
+
+Takes the same arguments as the EnvironBuilder class with some additions: You can provide a EnvironBuilder or a WSGI environment as only argument instead of the EnvironBuilder arguments and two optional keyword arguments (as_tuple, buffered) that change the type of the return value or the way the application is executed.
+和 EnvironBuilder 一样的参数还有一些补充: 你可以提供一个 EnvironBuilder 类或一个 WSGI 环境代替 EnvironBuilder 类作为参数
+
+Changed in version 0.5: If a dict is provided as file in the dict for the data parameter the content type has to be called content_type now instead of mimetype.
+在 0.5 版更改: 如果为 data 参数提供一个带文件的字典，那么内容类型必须为 content_type 而不是 mimetype
+
+This change was made for consistency with werkzeug.FileWrapper.
+这个改变是为了和 werkzeug.FileWrapper 保 持一致
+
+Additional parameters:
+Additional parameters:
+
+Shortcut methods are available for many HTTP methods:
+和 open 相似，但是方法强制执行 GET
+
+Like open but method is enforced to GET.
+和 open 相似，但是方法强制执行 POST
+
+Like open but method is enforced to PATCH.
+和 open 相似，但是方法强制执行 PUT
+
+Like open but method is enforced to POST.
+和 open 相似，但是方法强制执行 DELETE
+
+Like open but method is enforced to HEAD.
+和 open 相似，但是方法强制执行 HEAD
+
+Like open but method is enforced to PUT.
+根据传入的值创建一个 WSGI 环境
+
+Like open but method is enforced to DELETE.
+它和 EnvironBuilder 构造函数接受相同的参数
+
+Like open but method is enforced to OPTIONS.
+在 0.5 版更改: 这个函数现在是一个 EnvironBuilder 包裹，在 0.5 版本被添加
+
+Like open but method is enforced to TRACE.
+返回一个应用输出的元组形式 (app_iter, status, headers)
+
+Create a new WSGI environ dict based on the values passed.
+有时应用可以使用 start_ewsponse 返回的 write() 回调函数
+
+The first parameter should be the path of the request which defaults to ‘/’.
+这将会自动解 决边界情况
+
+The second one can either be an absolute path (in that case the host is localhost:80) or a full path to the request with scheme, netloc port and the path to the script.
+如果没有得到预期输出，你应该将 buffered 设为 True 执行 buffering
+
+This accepts the same arguments as the EnvironBuilder constructor.
+如果传入一个错误的应用，这个函数将会是未定义的
+
+Changed in version 0.5: This function is now a thin wrapper over EnvironBuilder which was added in 0.5.
+元组形式 (app_iter, status, headers)
+
+Table Of Contents
+本页
+
