@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="lib" path="C:/Users/liyin11/Downloads/jsoup-1.9.2.jar" sourcepath="C:/Users/liyin11/Downloads/jsoup-1.9.2.jar"/>
+	<classpathentry kind="lib" path="C:/Users/liyin11/Downloads/jsse-1_0_3_04-gl/jsse1.0.3_04/lib/jcert.jar"/>
+	<classpathentry kind="lib" path="C:/Users/liyin11/Downloads/jsse-1_0_3_04-gl/jsse1.0.3_04/lib/jnet.jar"/>
+	<classpathentry kind="lib" path="C:/Users/liyin11/Downloads/jsse-1_0_3_04-gl/jsse1.0.3_04/lib/jsse.jar"/>
+	<classpathentry kind="lib" path="C:/Users/liyin11/Downloads/selenium-java-3.0.1/client-combined-3.0.1-nodeps.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
